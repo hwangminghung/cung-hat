@@ -4,7 +4,9 @@
 
 **Goal:** Turn a confirmed kèo (or 1-1 match) into a real outing: compute the **fair geographic midpoint of all members**, suggest the **nearest K-style music-box venues** to that point, let everyone confirm a plan, and wrap it with the offline-safety toolkit (share-plan link + "Tôi đã tới" check-in).
 
-**Architecture:** Builds on P0–P3. Migration adds `venues` (+ seed for HCMC/HN/TN), a server-side **midpoint via `ST_GeometricMedian`** over members' (server-only) locations, and `nearest_venues_for_keo` returning sanitized venues ordered by distance to the midpoint. A second migration adds `plans` + `plan_confirmations` + `checkins` + `share_plans` with propose/confirm/checkin/share RPCs. Flutter adds a `plan` feature (venue picker + confirm state + safety toolkit).
+**Architecture:** Builds on P0–P3. Migration adds `venues` (+ seed for HCMC/HN/TN), a server-side **midpoint via `ST_GeometricMedian`** over members' (server-only) locations, and `nearest_venues_for_keo` returning sanitized venues ordered by distance to the midpoint. A second migration adds `plans` + `plan_confirmations` + `checkins` + `share_plans` with propose/confirm/checkin/share RPCs. **Google Places (New) ingestion** runs in an Edge Function that upserts real karaoke/music-box venues into the same `venues` table (`source='places'`) — the picker includes them automatically, no RPC change. Flutter adds a `plan` feature (venue picker + confirm state + safety toolkit).
+
+> **Operational pre-req (Places):** a Google Maps Platform project with **billing enabled** and **Places API (New)** turned on; the key goes in Edge env `GOOGLE_PLACES_API_KEY` (never in the client). Seed venues (Task 1) work without it; Places ingestion (Task 6) needs it.
 
 **Tech Stack:** PostGIS (`ST_GeometricMedian`, `ST_Collect`, KNN `<->`), SECURITY DEFINER RPCs, Riverpod 3, freezed, mocktail.
 
@@ -529,9 +531,97 @@ git commit -m "feat(p4): safety toolkit (share plan + I've-arrived check-in) + P
 
 ---
 
+### Task 6: Google Places (New) venue ingestion (Edge Function)
+
+**Files:**
+- Create: `supabase/migrations/0016_venue_places.sql`, `supabase/functions/ingest-places-venues/index.ts`
+
+- [ ] **Step 1: Migration — make `places_id` upsertable**
+
+Create `supabase/migrations/0016_venue_places.sql`:
+```sql
+-- Partial unique index so the ingester can upsert on places_id.
+create unique index if not exists venues_places_id_ux
+  on public.venues (places_id) where places_id is not null;
+```
+Run: `supabase db reset` (applies 0001–0016 clean).
+
+- [ ] **Step 2: Write the ingestion Edge Function (ops-only, secret-gated)**
+
+Create `supabase/functions/ingest-places-venues/index.ts`:
+```ts
+import { createClient } from "jsr:@supabase/supabase-js@2";
+
+// Ops-only: invoked manually per city. Secret-gated; NEVER exposed to the app.
+Deno.serve(async (req) => {
+  if (req.headers.get("x-ingest-secret") !== Deno.env.get("PLACES_INGEST_SECRET")) {
+    return new Response("forbidden", { status: 403 });
+  }
+  const { city, lat, lng, radius_m = 5000, style_tag = "k_style" } = await req.json();
+  const res = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": Deno.env.get("GOOGLE_PLACES_API_KEY")!,
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location",
+    },
+    body: JSON.stringify({
+      includedTypes: ["karaoke"],
+      maxResultCount: 20,
+      locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius: radius_m } },
+    }),
+  });
+  const data = await res.json();
+  const places: any[] = data.places ?? [];
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  let upserted = 0;
+  for (const p of places) {
+    const row = {
+      name: p.displayName?.text ?? "Karaoke",
+      address: p.formattedAddress ?? "",
+      city,
+      location: `SRID=4326;POINT(${p.location.longitude} ${p.location.latitude})`, // EWKT → geography
+      style_tag,
+      source: "places",
+      places_id: p.id,
+      is_active: true,
+    };
+    const { error } = await sb.from("venues").upsert(row, { onConflict: "places_id" });
+    if (!error) upserted++;
+  }
+  return new Response(JSON.stringify({ found: places.length, upserted }), {
+    headers: { "Content-Type": "application/json" },
+  });
+});
+```
+
+- [ ] **Step 3: Set secrets + serve**
+
+Set local secrets (do NOT commit real keys): add to `supabase/functions/.env` (git-ignored) `GOOGLE_PLACES_API_KEY=...`, `PLACES_INGEST_SECRET=dev-secret`. Run: `supabase functions serve ingest-places-venues --env-file supabase/functions/.env`.
+
+- [ ] **Step 4: Invoke per launch city + verify rows land**
+
+For each city centre invoke (PowerShell `Invoke-RestMethod` or curl), e.g. HCM Q1:
+```
+curl -X POST http://127.0.0.1:54321/functions/v1/ingest-places-venues \
+  -H "x-ingest-secret: dev-secret" -H "Content-Type: application/json" \
+  -d '{"city":"HCM","lat":10.776,"lng":106.700,"radius_m":6000}'
+```
+Repeat for HN (21.030,105.795) and TN (21.594,105.842).
+Expected: JSON `{found, upserted}` > 0; in Studio, `select count(*) from venues where source='places'` > 0; and `nearest_venues_for_keo` now returns Places venues mixed with seeds (no code change — it reads `venues`).
+
+- [ ] **Step 5: Commit (code only; keys stay in the git-ignored .env)**
+
+```
+git add supabase/migrations/0016_venue_places.sql supabase/functions/ingest-places-venues/index.ts
+git commit -m "feat(p4): Google Places (New) venue ingestion Edge Function (source='places')"
+```
+
+---
+
 ## Self-Review (completed by author)
 
-- **Spec coverage:** nearest music-box **between members** via server-side **geometric-median midpoint** ✓ (T1 `nearest_venues_for_keo`); seeded venues for HCM/HN/TN ✓ (T1); propose → all-members-confirm plan ✓ (T2,T4); safety toolkit (share-plan link + "Tôi đã tới") ✓ (T2,T5); privacy preserved (member coords server-only, only public venues + bands returned) ✓ (T1). 1-1 plan reuse and the no-show rating UI are deferred (spec); P4 covers the kèo plan loop.
+- **Spec coverage:** nearest music-box **between members** via server-side **geometric-median midpoint** ✓ (T1 `nearest_venues_for_keo`); seeded venues for HCM/HN/TN ✓ (T1); **Google Places (New) ingestion** into the same `venues` table (`source='places'`, picker unchanged) ✓ (T6); propose → all-members-confirm plan ✓ (T2,T4); safety toolkit (share-plan link + "Tôi đã tới") ✓ (T2,T5); privacy preserved (member coords server-only, only public venues + bands returned) ✓ (T1). 1-1 plan reuse and the no-show rating UI are deferred (spec); P4 covers the kèo plan loop.
 - **Placeholder scan:** none — every code step concrete. T4 Step 3 assembles defined providers/repo; `cunghat://plan/{token}` deep-link resolution is a P7 launch detail (the token + link generation ship here).
 - **Type consistency:** RPC names identical across SQL and Dart — `nearest_venues_for_keo`, `propose_keo_plan`, `confirm_keo_plan`, `checkin_arrived`, `create_share_link`; `VenueSuggestion` JSON keys match the `venue_suggestion` type (`style_tag`, `distance_band`); reuses P3 `in_keo`/`assert_host`/`keo_members`, P1 `dist_band`/`user_locations`; `PlanRepository` method set consistent T3↔T4↔T5.
 

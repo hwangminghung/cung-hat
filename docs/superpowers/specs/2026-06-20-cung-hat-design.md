@@ -31,7 +31,6 @@ Nguyên tắc cốt lõi: **riêng tư geo** (toạ độ thật chỉ ở serve
 - Online/remote karaoke, livestream, WebRTC, voice/pitch scoring.
 - Group-on-group swipe matching and "recruit individuals into my group" swipe decks (fast-follow).
 - Selfie/liveness biometric verification (fast-follow).
-- Google Places lookups beyond the seeded venue cache.
 - Apple/Google social sign-in (phone + email only in v1).
 
 ---
@@ -234,9 +233,9 @@ Monetization is **on in v1** (per L9). **Critical store-policy constraint:**
 
 ## 13. MVP scope
 
-**Included (v1):** onboarding (OTP + 18+ + consent), gamified taste picker (curated bài tủ), Đôi swipe deck, Kèo board + create + request-to-join + host approve + all-confirm, match celebration, 1-1 + group Realtime chat, plan-a-venue (midpoint, seeded cache), in-flow safety toolkit, geo privacy-by-bucketing, optional private photos, two-stage matching RPCs, moderation console + soft-delete/tombstone/audit, consent + export + delete, server-side rate limits, FCM push, **monetization (IAP digital goods + MoMo/ZaloPay venue commission)**, 3-city seeding.
+**Included (v1):** onboarding (OTP + 18+ + consent), gamified taste picker (curated bài tủ), Đôi swipe deck, Kèo board + create + request-to-join + host approve + all-confirm, match celebration, 1-1 + group Realtime chat, plan-a-venue (geometric-median midpoint music-box picker — seeded cache **+ Google Places (New) ingestion**), in-flow safety toolkit, geo privacy-by-bucketing, optional private photos, two-stage matching RPCs, moderation console + soft-delete/tombstone/audit, consent + export + delete, server-side rate limits, FCM push, **monetization (IAP digital goods + MoMo/ZaloPay venue commission)**, 3-city seeding.
 
-**Deferred (fast-follow):** group-on-group swipe match deck + recruit-into-group deck; selfie/liveness biometric; Google Places beyond seeded cache; Apple/Google sign-in; full no-show reputation/rating UI (scaffold `trust_score`/`no_show_count` only); availability scheduling beyond kèo time-window; events calendar.
+**Deferred (fast-follow):** group-on-group swipe match deck + recruit-into-group deck; selfie/liveness biometric; Apple/Google sign-in; full no-show reputation/rating UI (scaffold `trust_score`/`no_show_count` only); availability scheduling beyond kèo time-window; events calendar.
 
 ---
 
@@ -264,6 +263,7 @@ Monetization is **on in v1** (per L9). **Critical store-policy constraint:**
 - PDPL cross-border Transfer Impact Assessment dossier; VI Privacy Policy + ToS.
 - Pick local VN SMS provider behind the Send-SMS Auth Hook (account + budget).
 - Apple Developer + Google Play accounts; IAP product setup; MoMo/ZaloPay merchant onboarding; e-invoice/VAT.
+- **Google Maps Platform billing + Places API (New) key** (Edge env `GOOGLE_PLACES_API_KEY`) for venue ingestion in the 3 cities (now in v1, P4 Task 6).
 - Per-city seeding plan (kèo + venues + founding cohort) for HN / HCM / Thái Nguyên.
 - Confirm final app name/brand (working name "Cùng Hát").
 
