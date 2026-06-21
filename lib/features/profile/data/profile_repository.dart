@@ -1,0 +1,26 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../domain/profile.dart';
+
+class ProfileRepository {
+  ProfileRepository(this._client);
+  final SupabaseClient _client;
+
+  Future<Profile?> getMyProfile() async {
+    final res = await _client.rpc('get_my_profile');
+    if (res == null) return null;
+    final map = res is List ? (res.isEmpty ? null : res.first) : res;
+    return map == null ? null : Profile.fromJson(Map<String, dynamic>.from(map as Map));
+  }
+
+  Future<Profile> upsertMyProfile(Profile p) async {
+    final res = await _client.rpc('upsert_my_profile', params: {
+      'p_display_name': p.displayName,
+      'p_full_name': p.fullName,
+      'p_dob': p.dob,
+      'p_bio': p.bio,
+      'p_language': p.language,
+    });
+    final map = res is List ? res.first : res;
+    return Profile.fromJson(Map<String, dynamic>.from(map as Map));
+  }
+}
