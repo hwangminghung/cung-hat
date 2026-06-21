@@ -1,17 +1,16 @@
-# cung_hat
+# Cùng Hát
 
-A new Flutter project.
+Flutter + Supabase music-meetup app (Vietnam): match strangers by music taste to sing karaoke together (1-1 swipe + group "Kèo"). Spec & plans: `docs/superpowers/`.
 
-## Getting Started
+## Dev loop (Windows, this machine)
+1. `supabase start` (Docker must be running)
+2. Copy `env/dev.example.json` → `env/dev.json`, paste the anon key from `supabase status`
+3. `& "C:\Users\Public\flutter\bin\flutter.bat" run -d chrome --dart-define-from-file=env/dev.json`
 
-This project is a starting point for a Flutter application.
+Codegen after model/ARB changes:
+`flutter gen-l10n && dart run build_runner build --delete-conflicting-outputs`
 
-A few resources to get you started if this is your first Flutter project:
+Tests: `flutter test`. Static analysis: `flutter analyze`.
+Backend reset: `supabase db reset`. DB (pgTAP) tests: `supabase test db`.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+> Windows note: the home path has spaces, so invoke Flutter via the no-space junction `C:\Users\Public\flutter\bin\flutter.bat` for `run`/`build`/`test`.
