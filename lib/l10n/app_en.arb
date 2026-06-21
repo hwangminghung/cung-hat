@@ -1,1 +1,1 @@
-{ "@@locale": "en", "appTitle": "Cùng Hát", "tabDoi": "Đôi", "tabKeo": "Kèo", "comingSoon": "Coming soon" }
+{ "@@locale": "en", "appTitle": "Cùng Hát", "tabDoi": "Đôi", "tabKeo": "Kèo", "comingSoon": "Coming soon", "authTitle": "Sign in", "phoneLabel": "Phone number", "sendOtp": "Send OTP", "otpTitle": "Enter OTP", "otpLabel": "6-digit code", "verify": "Confirm" }

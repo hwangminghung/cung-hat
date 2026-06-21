@@ -19,4 +19,22 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get comingSoon => 'Sắp có';
+
+  @override
+  String get authTitle => 'Đăng nhập';
+
+  @override
+  String get phoneLabel => 'Số điện thoại';
+
+  @override
+  String get sendOtp => 'Gửi mã OTP';
+
+  @override
+  String get otpTitle => 'Nhập mã OTP';
+
+  @override
+  String get otpLabel => 'Mã 6 số';
+
+  @override
+  String get verify => 'Xác nhận';
 }

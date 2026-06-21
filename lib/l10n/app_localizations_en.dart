@@ -19,4 +19,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoon => 'Coming soon';
+
+  @override
+  String get authTitle => 'Sign in';
+
+  @override
+  String get phoneLabel => 'Phone number';
+
+  @override
+  String get sendOtp => 'Send OTP';
+
+  @override
+  String get otpTitle => 'Enter OTP';
+
+  @override
+  String get otpLabel => '6-digit code';
+
+  @override
+  String get verify => 'Confirm';
 }

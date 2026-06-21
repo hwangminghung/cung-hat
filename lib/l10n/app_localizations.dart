@@ -121,6 +121,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get comingSoon;
+
+  /// No description provided for @authTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authTitle;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get phoneLabel;
+
+  /// No description provided for @sendOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send OTP'**
+  String get sendOtp;
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter OTP'**
+  String get otpTitle;
+
+  /// No description provided for @otpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get otpLabel;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get verify;
 }
 
 class _AppLocalizationsDelegate

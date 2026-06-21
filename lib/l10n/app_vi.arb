@@ -1,1 +1,1 @@
-{ "@@locale": "vi", "appTitle": "Cùng Hát", "tabDoi": "Đôi", "tabKeo": "Kèo", "comingSoon": "Sắp có" }
+{ "@@locale": "vi", "appTitle": "Cùng Hát", "tabDoi": "Đôi", "tabKeo": "Kèo", "comingSoon": "Sắp có", "authTitle": "Đăng nhập", "phoneLabel": "Số điện thoại", "sendOtp": "Gửi mã OTP", "otpTitle": "Nhập mã OTP", "otpLabel": "Mã 6 số", "verify": "Xác nhận" }

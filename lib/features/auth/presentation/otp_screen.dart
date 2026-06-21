@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
@@ -13,9 +14,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final state = ref.watch(authControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Nhập mã OTP')),
+      appBar: AppBar(title: Text(l10n?.otpTitle ?? 'Nhập mã OTP')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -26,7 +28,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             TextField(
               controller: _ctrl,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Mã 6 số'),
+              decoration: InputDecoration(labelText: l10n?.otpLabel ?? 'Mã 6 số'),
             ),
             const SizedBox(height: 16),
             FilledButton(
@@ -34,7 +36,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               onPressed: state.phase == AuthPhase.verifying
                   ? null
                   : () => ref.read(authControllerProvider.notifier).verifyOtp(_ctrl.text),
-              child: const Text('Xác nhận'),
+              child: Text(l10n?.verify ?? 'Xác nhận'),
             ),
             if (state.phase == AuthPhase.error)
               Padding(
