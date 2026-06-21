@@ -1,5 +1,6 @@
 /build/
 .dart_tool/
 env/*.json
+!env/dev.example.json
 *.log
 .DS_Store
