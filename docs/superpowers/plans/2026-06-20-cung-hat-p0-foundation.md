@@ -224,6 +224,9 @@ create table public.profiles (
   age_verified boolean not null default false,
   bio          text check (char_length(bio) <= 500),
   language     text not null default 'vi',
+  last_active     timestamptz not null default now(),  -- bumped on activity (P1 update_my_location); drives "active_today"
+  soft_deleted_at timestamptz,                          -- PDPL soft-delete (P5) + moderation (P5)
+  tombstone       boolean not null default false,       -- retention purge marker (P7)
   created_at   timestamptz not null default now(),
   updated_at   timestamptz not null default now()
 );

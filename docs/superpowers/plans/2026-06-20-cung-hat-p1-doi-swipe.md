@@ -50,6 +50,7 @@ begin
     p_area)
   on conflict (user_id) do update
     set location = excluded.location, area_label = excluded.area_label, updated_at = now();
+  update public.profiles set last_active = now() where id = auth.uid();  -- drives "active_today" in discovery
 end; $$;
 revoke execute on function public.update_my_location(double precision,double precision,text) from public, anon;
 grant execute on function public.update_my_location(double precision,double precision,text) to authenticated;
@@ -184,6 +185,17 @@ git commit -m "feat(p1): 0006 blocks/reports + atomic rate limiter + block/repor
 
 Create `supabase/migrations/0007_discovery.sql`:
 ```sql
+-- swipes table created HERE (0007) so get_discovery_candidates below can reference it.
+create table public.swipes (
+  swiper_id uuid references auth.users(id) on delete cascade,
+  target_type text not null check (target_type in ('user','keo')),
+  target_id text not null,
+  direction text not null check (direction in ('like','pass','super','save')),
+  created_at timestamptz not null default now(),
+  primary key (swiper_id, target_type, target_id)
+);
+alter table public.swipes enable row level security; -- writes via RPC only
+
 create table public.ranking_weights (key text primary key, weight numeric not null);
 alter table public.ranking_weights enable row level security; -- no client policy
 insert into public.ranking_weights(key, weight) values
@@ -276,7 +288,7 @@ git commit -m "feat(p1): 0007 get_discovery_candidates two-stage scorer (buckete
 
 ---
 
-### Task 4: Migration 0008 — swipes + matches + race-safe record_swipe
+### Task 4: Migration 0008 — matches + race-safe record_swipe (swipes table is in 0007)
 
 **Files:**
 - Create: `supabase/migrations/0008_swipes_matches.sql`
@@ -285,16 +297,7 @@ git commit -m "feat(p1): 0007 get_discovery_candidates two-stage scorer (buckete
 
 Create `supabase/migrations/0008_swipes_matches.sql`:
 ```sql
-create table public.swipes (
-  swiper_id uuid references auth.users(id) on delete cascade,
-  target_type text not null check (target_type in ('user','keo')),
-  target_id text not null,
-  direction text not null check (direction in ('like','pass','super','save')),
-  created_at timestamptz not null default now(),
-  primary key (swiper_id, target_type, target_id)
-);
-alter table public.swipes enable row level security; -- writes via RPC only
-
+-- NOTE: public.swipes is created in 0007 (so get_discovery_candidates can reference it).
 create table public.matches (
   id uuid primary key default gen_random_uuid(),
   user_a uuid not null references auth.users(id) on delete cascade,
