@@ -14,3 +14,10 @@ Tests: `flutter test`. Static analysis: `flutter analyze`.
 Backend reset: `supabase db reset`. DB (pgTAP) tests: `supabase test db`.
 
 > Windows note: the home path has spaces, so invoke Flutter via the no-space junction `C:\Users\Public\flutter\bin\flutter.bat` for `run`/`build`/`test`.
+
+## Local phone OTP (auth)
+Local config enables a **dummy Twilio provider** (dummy creds) so phone OTP is accepted; test_otp numbers never reach Twilio. Before `supabase start`, set any dummy token:
+```
+$env:SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN = "localdummytoken"
+```
+Test login: phone `+84 900 000 001`, OTP `123456`. (Prod uses a real VN SMS provider via the `[auth.hook.send_sms]` Edge function, not Twilio.)

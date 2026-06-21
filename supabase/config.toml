@@ -291,10 +291,13 @@ uri = "http://host.docker.internal:54321/functions/v1/send-sms"
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
 
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+# LOCAL DEV: enabled with dummy creds only to flip GOTRUE_EXTERNAL_PHONE_ENABLED on so
+# phone auth is accepted; test_otp numbers (above) never actually reach Twilio. PROD:
+# replace with the real VN SMS provider via [auth.hook.send_sms]. Token via env only.
 [auth.sms.twilio]
-enabled = false
-account_sid = ""
-message_service_sid = ""
+enabled = true
+account_sid = "AC00000000000000000000000000000000"
+message_service_sid = "MG00000000000000000000000000000000"
 # DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
 auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
 
