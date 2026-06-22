@@ -2,7 +2,8 @@ create table public.blocks (
   blocker_id uuid references auth.users(id) on delete cascade,
   blocked_id uuid references auth.users(id) on delete cascade,
   created_at timestamptz not null default now(),
-  primary key (blocker_id, blocked_id)
+  primary key (blocker_id, blocked_id),
+  check (blocker_id <> blocked_id)
 );
 alter table public.blocks enable row level security;
 create policy blocks_self on public.blocks for all using (auth.uid()=blocker_id) with check (auth.uid()=blocker_id);
@@ -34,7 +35,11 @@ alter table public.rate_limits enable row level security;
 
 create or replace function app_private.enforce_rate_limit(p_bucket text, p_limit int, p_window interval)
 returns void language plpgsql security definer set search_path='' as $$
-declare w timestamptz := date_trunc('minute', now());
+-- Tumbling window: snap now() down to the start of the current p_window-sized
+-- bucket (epoch-aligned). interval '1 day' -> per-UTC-day, interval '1 minute'
+-- -> per-minute, etc. The PK (user_id, bucket, window_start) dedupes per window.
+declare w timestamptz := to_timestamp(
+  floor(extract(epoch from now()) / extract(epoch from p_window)) * extract(epoch from p_window));
 declare c int;
 begin
   insert into public.rate_limits (user_id, bucket, window_start, count)
