@@ -18,6 +18,7 @@ class OnboardingController extends AsyncNotifier<void> {
     required List<String> genreIds,
     required List<String> artistIds,
     required List<String> songIds,
+    String language = 'vi',
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -27,7 +28,7 @@ class OnboardingController extends AsyncNotifier<void> {
           '${dob.month.toString().padLeft(2, '0')}-'
           '${dob.day.toString().padLeft(2, '0')}';
       await ref.read(profileRepositoryProvider).upsertMyProfile(
-            Profile(id: '', displayName: displayName, fullName: fullName, dob: iso, bio: bio, language: 'vi'),
+            Profile(id: '', displayName: displayName, fullName: fullName, dob: iso, bio: bio, language: language),
           );
       final onb = ref.read(onboardingRepositoryProvider);
       for (final e in consents.entries) {

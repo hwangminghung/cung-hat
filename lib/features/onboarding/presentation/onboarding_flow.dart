@@ -50,6 +50,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           genreIds: _genreSel.toList(),
           artistIds: _artistSel.toList(),
           songIds: _songSel.toList(),
+          language: Localizations.localeOf(context).languageCode,
         );
   }
 
