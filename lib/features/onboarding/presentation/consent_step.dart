@@ -8,6 +8,7 @@ const requiredConsents = {'matching', 'cross_border'};
 /// Returns the required purposes that are NOT granted in [values].
 List<String> missingRequiredConsents(Map<String, bool> values) =>
     [for (final p in requiredConsents) if (values[p] != true) p];
+
 const consentLabelsVi = {
   'location': 'Dùng vị trí để gợi ý người/kèo gần bạn',
   'photos': 'Lưu & hiển thị ảnh hồ sơ (tùy chọn)',

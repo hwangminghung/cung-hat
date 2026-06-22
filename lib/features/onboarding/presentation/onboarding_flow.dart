@@ -8,6 +8,9 @@ import 'consent_step.dart';
 import 'dob_step.dart';
 import 'taste_step.dart';
 
+/// Index of the consent step in the [Stepper] (DOB=0, consent=1).
+const _consentStepIndex = 1;
+
 class OnboardingFlow extends ConsumerStatefulWidget {
   const OnboardingFlow({super.key});
   @override
@@ -43,7 +46,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     }
     final missing = missingRequiredConsents(_consents);
     if (missing.isNotEmpty) {
-      setState(() => _step = 1); // jump back to the consent step (DOB=0, consent=1)
+      setState(() => _step = _consentStepIndex); // jump back to the consent step (DOB=0, consent=1)
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(l10n?.onbConsentRequired ??
             'Vui lòng đồng ý các quyền bắt buộc để tiếp tục.'),
