@@ -65,6 +65,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         const SizedBox(height: 8),
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
+          // TODO(T8): localize error message
           error: (err, _) => Text('$err'),
           data: (items) => TasteChips<T>(
             items: items,
@@ -88,6 +89,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
     ref.listen(onboardingControllerProvider, (prev, next) {
       if (next is AsyncError) {
+        // TODO(T8): localize error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${next.error}')),
         );
