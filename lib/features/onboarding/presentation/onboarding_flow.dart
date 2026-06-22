@@ -41,6 +41,15 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       );
       return;
     }
+    final missing = missingRequiredConsents(_consents);
+    if (missing.isNotEmpty) {
+      setState(() => _step = 1); // jump back to the consent step (DOB=0, consent=1)
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(l10n?.onbConsentRequired ??
+            'Vui lòng đồng ý các quyền bắt buộc để tiếp tục.'),
+      ));
+      return;
+    }
     ref.read(onboardingControllerProvider.notifier).submit(
           displayName: _nameCtrl.text,
           fullName: _nameCtrl.text,

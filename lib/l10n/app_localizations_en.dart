@@ -64,4 +64,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onbFinish => 'Finish';
+
+  @override
+  String get onbConsentRequired =>
+      'Please agree to the required permissions to continue.';
 }

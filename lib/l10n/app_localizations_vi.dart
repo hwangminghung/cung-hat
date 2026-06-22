@@ -64,4 +64,8 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get onbFinish => 'Hoàn tất';
+
+  @override
+  String get onbConsentRequired =>
+      'Vui lòng đồng ý các quyền bắt buộc để tiếp tục.';
 }

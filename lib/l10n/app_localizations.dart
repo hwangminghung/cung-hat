@@ -211,6 +211,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finish'**
   String get onbFinish;
+
+  /// No description provided for @onbConsentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please agree to the required permissions to continue.'**
+  String get onbConsentRequired;
 }
 
 class _AppLocalizationsDelegate
