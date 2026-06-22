@@ -81,8 +81,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         const SizedBox(height: 8),
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) =>
-              Text(l10n?.onbLoadError ?? 'Không tải được dữ liệu.'),
+          error: (err, _) {
+            debugPrint('onboarding: reference load error: $err');
+            return Text(l10n?.onbLoadError ?? 'Không tải được dữ liệu.');
+          },
           data: (items) => TasteChips<T>(
             items: items,
             labelOf: labelOf,
@@ -106,6 +108,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
     ref.listen(onboardingControllerProvider, (prev, next) {
       if (next is AsyncError) {
+        debugPrint('onboarding: submit error: ${next.error}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
