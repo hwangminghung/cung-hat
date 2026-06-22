@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/onboarding_controller.dart';
 import '../application/reference_providers.dart';
 import '../domain/music_ref.dart';
@@ -33,9 +34,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   }
 
   void _onFinish() {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     if (_dob == null || !isAdult(_dob!)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bạn phải đủ 18 tuổi.')),
+        SnackBar(content: Text(l10n?.onbUnder18 ?? 'Bạn phải đủ 18 tuổi.')),
       );
       return;
     }
@@ -84,6 +86,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final controllerState = ref.watch(onboardingControllerProvider);
     final loading = controllerState.isLoading;
 
@@ -132,7 +135,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Hoàn tất'),
+                        : Text(l10n?.onbFinish ?? 'Hoàn tất'),
                   ),
                 const SizedBox(width: 8),
                 if (_step > 0)
@@ -154,7 +157,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             ),
           ),
           Step(
-            title: const Text('Quyền riêng tư'),
+            title: Text(l10n?.onbConsentTitle ?? 'Quyền riêng tư'),
             isActive: _step >= 1,
             content: ConsentStep(
               values: _consents,
@@ -169,13 +172,15 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                 TextField(
                   key: const Key('onb_name'),
                   controller: _nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Tên hiển thị'),
+                  decoration: InputDecoration(
+                      labelText: l10n?.onbNameLabel ?? 'Tên hiển thị'),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   key: const Key('onb_bio'),
                   controller: _bioCtrl,
-                  decoration: const InputDecoration(labelText: 'Giới thiệu'),
+                  decoration: InputDecoration(
+                      labelText: l10n?.onbBioLabel ?? 'Giới thiệu'),
                 ),
               ],
             ),
@@ -187,21 +192,21 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _tasteSection<Genre>(
-                  label: 'Thể loại',
+                  label: l10n?.onbTasteGenres ?? 'Thể loại',
                   async: genres,
                   labelOf: (g) => g.nameVi,
                   idOf: (g) => g.id,
                   selected: _genreSel,
                 ),
                 _tasteSection<Artist>(
-                  label: 'Nghệ sĩ',
+                  label: l10n?.onbTasteArtists ?? 'Nghệ sĩ',
                   async: artists,
                   labelOf: (a) => a.name,
                   idOf: (a) => a.id,
                   selected: _artistSel,
                 ),
                 _tasteSection<Song>(
-                  label: 'Bài tủ',
+                  label: l10n?.onbBaitu ?? 'Bài tủ',
                   async: songs,
                   labelOf: (s) => s.title,
                   idOf: (s) => s.id,

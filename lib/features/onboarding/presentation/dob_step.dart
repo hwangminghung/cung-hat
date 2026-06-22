@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 
 bool isAdult(DateTime dob, {DateTime? now}) {
   final n = now ?? DateTime.now();
@@ -13,11 +14,12 @@ class DobStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final ok = dob != null && isAdult(dob!);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('Bạn sinh ngày nào? (phải đủ 18 tuổi)'),
+        Text(l10n?.onbDobTitle ?? 'Bạn sinh ngày nào? (phải đủ 18 tuổi)'),
         const SizedBox(height: 12),
         FilledButton.tonal(
           key: const Key('pick_dob_btn'),
@@ -34,10 +36,10 @@ class DobStep extends StatelessWidget {
               : '${dob!.day}/${dob!.month}/${dob!.year}'),
         ),
         if (dob != null && !ok)
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text('Bạn phải đủ 18 tuổi để dùng ứng dụng.',
-                style: TextStyle(color: Colors.red)),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(l10n?.onbUnder18 ?? 'Bạn phải đủ 18 tuổi để dùng ứng dụng.',
+                style: const TextStyle(color: Colors.red)),
           ),
       ],
     );

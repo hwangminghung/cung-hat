@@ -37,4 +37,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verify => 'Confirm';
+
+  @override
+  String get onbDobTitle => 'When were you born? (must be 18+)';
+
+  @override
+  String get onbUnder18 => 'You must be 18 or older to use the app.';
+
+  @override
+  String get onbConsentTitle => 'Privacy';
+
+  @override
+  String get onbNameLabel => 'Display name';
+
+  @override
+  String get onbBioLabel => 'Bio';
+
+  @override
+  String get onbTasteGenres => 'Genres';
+
+  @override
+  String get onbTasteArtists => 'Artists';
+
+  @override
+  String get onbBaitu => 'Signature songs';
+
+  @override
+  String get onbFinish => 'Finish';
 }

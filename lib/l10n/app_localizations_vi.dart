@@ -37,4 +37,31 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get verify => 'Xác nhận';
+
+  @override
+  String get onbDobTitle => 'Bạn sinh ngày nào? (phải đủ 18 tuổi)';
+
+  @override
+  String get onbUnder18 => 'Bạn phải đủ 18 tuổi để dùng ứng dụng.';
+
+  @override
+  String get onbConsentTitle => 'Quyền riêng tư';
+
+  @override
+  String get onbNameLabel => 'Tên hiển thị';
+
+  @override
+  String get onbBioLabel => 'Giới thiệu';
+
+  @override
+  String get onbTasteGenres => 'Thể loại';
+
+  @override
+  String get onbTasteArtists => 'Nghệ sĩ';
+
+  @override
+  String get onbBaitu => 'Bài tủ';
+
+  @override
+  String get onbFinish => 'Hoàn tất';
 }

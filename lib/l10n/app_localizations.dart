@@ -157,6 +157,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get verify;
+
+  /// No description provided for @onbDobTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When were you born? (must be 18+)'**
+  String get onbDobTitle;
+
+  /// No description provided for @onbUnder18.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be 18 or older to use the app.'**
+  String get onbUnder18;
+
+  /// No description provided for @onbConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get onbConsentTitle;
+
+  /// No description provided for @onbNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get onbNameLabel;
+
+  /// No description provided for @onbBioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get onbBioLabel;
+
+  /// No description provided for @onbTasteGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get onbTasteGenres;
+
+  /// No description provided for @onbTasteArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Artists'**
+  String get onbTasteArtists;
+
+  /// No description provided for @onbBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature songs'**
+  String get onbBaitu;
+
+  /// No description provided for @onbFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get onbFinish;
 }
 
 class _AppLocalizationsDelegate
