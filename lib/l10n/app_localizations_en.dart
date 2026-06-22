@@ -68,4 +68,45 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onbConsentRequired =>
       'Please agree to the required permissions to continue.';
+
+  @override
+  String get onbSetupTitle => 'Set up your profile';
+
+  @override
+  String get onbStepDob => 'Date of birth';
+
+  @override
+  String get onbStepProfile => 'Profile';
+
+  @override
+  String get onbStepTaste => 'Music taste';
+
+  @override
+  String get onbContinue => 'Continue';
+
+  @override
+  String get onbBack => 'Back';
+
+  @override
+  String get onbLoadError => 'Couldn\'t load data.';
+
+  @override
+  String get onbSubmitError => 'Something went wrong. Please try again.';
+
+  @override
+  String get consentLocation =>
+      'Use location to suggest people/outings near you';
+
+  @override
+  String get consentPhotos => 'Store & show profile photos (optional)';
+
+  @override
+  String get consentMatching => 'Use music taste to match people';
+
+  @override
+  String get consentMarketing => 'Receive promotional notifications';
+
+  @override
+  String get consentCrossBorder =>
+      'Data stored in Singapore (cross-border transfer)';
 }

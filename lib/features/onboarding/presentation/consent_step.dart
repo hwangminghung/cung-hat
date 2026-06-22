@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 
 const consentPurposes = ['location', 'photos', 'matching', 'marketing', 'cross_border'];
 
@@ -24,13 +25,26 @@ class ConsentStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    String labelFor(String p) {
+      final localized = switch (p) {
+        'location' => l10n?.consentLocation,
+        'photos' => l10n?.consentPhotos,
+        'matching' => l10n?.consentMatching,
+        'marketing' => l10n?.consentMarketing,
+        'cross_border' => l10n?.consentCrossBorder,
+        _ => null,
+      };
+      return localized ?? consentLabelsVi[p] ?? p;
+    }
+
     return ListView(
       shrinkWrap: true,
       children: [
         for (final p in values.keys)
           SwitchListTile(
             key: Key('consent_$p'),
-            title: Text(consentLabelsVi[p] ?? p),
+            title: Text(labelFor(p)),
             value: values[p] ?? false,
             onChanged: (v) => onChanged(p, v),
           ),

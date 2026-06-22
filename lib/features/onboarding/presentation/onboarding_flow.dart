@@ -73,6 +73,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     required String Function(T) idOf,
     required Set<String> selected,
   }) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -80,8 +81,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         const SizedBox(height: 8),
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          // TODO(T8): localize error message
-          error: (err, _) => Text('$err'),
+          error: (err, _) =>
+              Text(l10n?.onbLoadError ?? 'Không tải được dữ liệu.'),
           data: (items) => TasteChips<T>(
             items: items,
             labelOf: labelOf,
@@ -105,9 +106,11 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
     ref.listen(onboardingControllerProvider, (prev, next) {
       if (next is AsyncError) {
-        // TODO(T8): localize error message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${next.error}')),
+          SnackBar(
+            content: Text(
+                l10n?.onbSubmitError ?? 'Có lỗi xảy ra, vui lòng thử lại.'),
+          ),
         );
       }
     });
@@ -117,7 +120,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     final songs = ref.watch(songsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Thiết lập hồ sơ')),
+      appBar: AppBar(
+          title: Text(l10n?.onbSetupTitle ?? 'Thiết lập hồ sơ')),
       body: Stepper(
         type: StepperType.vertical,
         currentStep: _step,
@@ -136,7 +140,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                 if (!isLast)
                   FilledButton(
                     onPressed: details.onStepContinue,
-                    child: const Text('Tiếp tục'),
+                    child: Text(l10n?.onbContinue ?? 'Tiếp tục'),
                   ),
                 if (isLast)
                   FilledButton(
@@ -154,7 +158,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                 if (_step > 0)
                   TextButton(
                     onPressed: details.onStepCancel,
-                    child: const Text('Quay lại'),
+                    child: Text(l10n?.onbBack ?? 'Quay lại'),
                   ),
               ],
             ),
@@ -162,7 +166,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         },
         steps: [
           Step(
-            title: const Text('Ngày sinh'),
+            title: Text(l10n?.onbStepDob ?? 'Ngày sinh'),
             isActive: _step >= 0,
             content: DobStep(
               dob: _dob,
@@ -178,7 +182,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             ),
           ),
           Step(
-            title: const Text('Hồ sơ'),
+            title: Text(l10n?.onbStepProfile ?? 'Hồ sơ'),
             isActive: _step >= 2,
             content: Column(
               children: [
@@ -199,7 +203,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             ),
           ),
           Step(
-            title: const Text('Gu nhạc'),
+            title: Text(l10n?.onbStepTaste ?? 'Gu nhạc'),
             isActive: _step >= 3,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
