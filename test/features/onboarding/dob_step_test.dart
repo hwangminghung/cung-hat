@@ -11,4 +11,7 @@ void main() {
   test('isAdult false exactly one day before 18th birthday', () {
     expect(isAdult(DateTime(2008, 6, 21), now: DateTime(2026, 6, 20)), isFalse);
   });
+  test('isAdult true exactly on 18th birthday', () {
+    expect(isAdult(DateTime(2008, 6, 20), now: DateTime(2026, 6, 20)), isTrue);
+  });
 }

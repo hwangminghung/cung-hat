@@ -20,6 +20,7 @@ class DobStep extends StatelessWidget {
         const Text('Bạn sinh ngày nào? (phải đủ 18 tuổi)'),
         const SizedBox(height: 12),
         FilledButton.tonal(
+          key: const Key('pick_dob_btn'),
           onPressed: () async {
             final picked = await showDatePicker(
               context: context,
