@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 /// Reusable multi-select chip grid for genres / artists / songs (bài tủ).
-class TasteChips extends StatefulWidget {
+///
+/// Controlled widget: the parent owns [selected] and must rebuild (e.g. via its
+/// own setState) inside [onToggle] so the chips reflect the new selection.
+class TasteChips<T> extends StatelessWidget {
   const TasteChips({
     super.key,
     required this.items,
@@ -10,30 +13,24 @@ class TasteChips extends StatefulWidget {
     required this.selected,
     required this.onToggle,
   });
-  final List<Object> items;
-  final String Function(Object) labelOf;
-  final String Function(Object) idOf;
+  final List<T> items;
+  final String Function(T) labelOf;
+  final String Function(T) idOf;
   final Set<String> selected;
   final void Function(String id) onToggle;
 
   @override
-  State<TasteChips> createState() => _TasteChipsState();
-}
-
-class _TasteChipsState extends State<TasteChips> {
-  @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8, runSpacing: 8,
+      spacing: 8,
+      runSpacing: 8,
       children: [
-        for (final item in widget.items)
+        for (final item in items)
           FilterChip(
-            label: Text(widget.labelOf(item)),
-            selected: widget.selected.contains(widget.idOf(item)),
-            onSelected: (_) {
-              widget.onToggle(widget.idOf(item));
-              setState(() {});
-            },
+            key: Key('chip_${idOf(item)}'),
+            label: Text(labelOf(item)),
+            selected: selected.contains(idOf(item)),
+            onSelected: (_) => onToggle(idOf(item)),
           ),
       ],
     );
