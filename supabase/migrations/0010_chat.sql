@@ -24,7 +24,7 @@ create policy messages_select_participant on public.messages for select
   using (thread_type='match' and app_private.in_match(thread_id));
 
 create table public.message_reads (
-  thread_type text not null,
+  thread_type text not null check (thread_type in ('match','keo')),
   thread_id uuid not null,
   user_id uuid not null references auth.users(id) on delete cascade,
   last_read_at timestamptz not null default now(),
@@ -38,13 +38,17 @@ create policy message_reads_self on public.message_reads for all
 create or replace function app_private.broadcast_message()
 returns trigger language plpgsql security definer set search_path='' as $$
 begin
-  perform realtime.send(
-    jsonb_build_object('id', new.id, 'thread_id', new.thread_id,
-      'sender_id', new.sender_id, 'body', new.body, 'created_at', new.created_at),
-    'new_message',
-    new.thread_type || ':' || new.thread_id::text,
-    true   -- private channel
-  );
+  begin
+    perform realtime.send(
+      jsonb_build_object('id', new.id, 'thread_id', new.thread_id,
+        'sender_id', new.sender_id, 'body', new.body, 'created_at', new.created_at),
+      'new_message',
+      new.thread_type || ':' || new.thread_id::text,
+      true   -- private channel
+    );
+  exception when others then
+    null; -- broadcast is best-effort; the message is already durably inserted
+  end;
   return new;
 end; $$;
 create trigger messages_broadcast after insert on public.messages
