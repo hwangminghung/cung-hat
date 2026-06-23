@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/application/auth_providers.dart';
 import '../features/auth/presentation/phone_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
+import '../features/onboarding/presentation/onboarding_flow.dart';
 import '../features/profile/application/profile_providers.dart';
 import 'home_shell.dart';
 
@@ -35,7 +36,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (_, _) => const HomeShell()),
       GoRoute(path: '/auth', builder: (_, _) => const PhoneScreen()),
       GoRoute(path: '/otp', builder: (_, _) => const OtpScreen()),
-      GoRoute(path: '/onboarding', builder: (_, _) => const _OnboardingPlaceholder()),
+      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingFlow()),
     ],
   );
 });
@@ -46,12 +47,4 @@ class GoRouterRefreshStream extends ChangeNotifier {
     ref.listen(authStateProvider, (_, _) => notifyListeners());
     ref.listen(myProfileProvider, (_, _) => notifyListeners());
   }
-}
-
-/// Replaced by the real onboarding flow in P0.3.
-class _OnboardingPlaceholder extends StatelessWidget {
-  const _OnboardingPlaceholder();
-  @override
-  Widget build(BuildContext context) =>
-      const Center(child: Text('Onboarding — P0.3', textDirection: TextDirection.ltr));
 }

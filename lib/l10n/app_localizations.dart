@@ -157,6 +157,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get verify;
+
+  /// No description provided for @onbDobTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When were you born? (must be 18+)'**
+  String get onbDobTitle;
+
+  /// No description provided for @onbUnder18.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be 18 or older to use the app.'**
+  String get onbUnder18;
+
+  /// No description provided for @onbConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get onbConsentTitle;
+
+  /// No description provided for @onbNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get onbNameLabel;
+
+  /// No description provided for @onbBioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get onbBioLabel;
+
+  /// No description provided for @onbTasteGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get onbTasteGenres;
+
+  /// No description provided for @onbTasteArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Artists'**
+  String get onbTasteArtists;
+
+  /// No description provided for @onbBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature songs'**
+  String get onbBaitu;
+
+  /// No description provided for @onbFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get onbFinish;
+
+  /// No description provided for @onbConsentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please agree to the required permissions to continue.'**
+  String get onbConsentRequired;
+
+  /// No description provided for @onbSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your profile'**
+  String get onbSetupTitle;
+
+  /// No description provided for @onbStepDob.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get onbStepDob;
+
+  /// No description provided for @onbStepProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get onbStepProfile;
+
+  /// No description provided for @onbStepTaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Music taste'**
+  String get onbStepTaste;
+
+  /// No description provided for @onbContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onbContinue;
+
+  /// No description provided for @onbBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onbBack;
+
+  /// No description provided for @onbLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load data.'**
+  String get onbLoadError;
+
+  /// No description provided for @onbSubmitError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get onbSubmitError;
+
+  /// No description provided for @consentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use location to suggest people/outings near you'**
+  String get consentLocation;
+
+  /// No description provided for @consentPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Store & show profile photos (optional)'**
+  String get consentPhotos;
+
+  /// No description provided for @consentMatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Use music taste to match people'**
+  String get consentMatching;
+
+  /// No description provided for @consentMarketing.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive promotional notifications'**
+  String get consentMarketing;
+
+  /// No description provided for @consentCrossBorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Data stored in Singapore (cross-border transfer)'**
+  String get consentCrossBorder;
 }
 
 class _AppLocalizationsDelegate
