@@ -51,6 +51,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                   }
                   return true;
                 },
+                onEnd: () {
+                  if (mounted) ref.invalidate(candidatesProvider);
+                },
               ),
             );
           },
@@ -62,11 +65,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// Records the swipe and, for like/super, shows the match celebration on a
   /// mutual match. Called (not awaited) from the synchronous onSwipe callback.
   void _handleSwipe(Candidate candidate, String dir) {
-    final future = ref.read(discoveryRepositoryProvider).recordSwipe(candidate.id, dir);
-    if (dir == 'like' || dir == 'super') {
-      future.then((isMatch) {
-        if (!isMatch) return;
-        if (!mounted) return;
+    ref.read(discoveryRepositoryProvider).recordSwipe(candidate.id, dir).then((isMatch) {
+      if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => MatchCelebration(
@@ -77,7 +77,13 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
             ),
           ),
         );
-      });
-    }
+      }
+    }).catchError((Object e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không lưu được lượt vuốt. Thử lại sau.')),
+        );
+      }
+    });
   }
 }

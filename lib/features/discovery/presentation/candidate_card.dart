@@ -9,6 +9,7 @@ class CandidateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = candidate.displayName ?? '';
     final monogram = name.isEmpty ? '?' : name.characters.first.toUpperCase();
+    final title = candidate.age == null ? name : '$name, ${candidate.age}';
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -27,11 +28,14 @@ class CandidateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  Text('$name, ${candidate.age ?? ''}',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Expanded(
+                    child: Text(title,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge),
+                  ),
                   if (candidate.verified) const Icon(Icons.verified, size: 18),
                 ]),
-                Text('Cách ${candidate.distanceBand} km · cùng ${candidate.sharedBaitu.length} bài tủ'),
+                Text('Cách ${candidate.distanceBand ?? '?'} km · cùng ${candidate.sharedBaitu.length} bài tủ'),
               ],
             ),
           ),
