@@ -26,4 +26,13 @@ void main() {
     verify(() => client.rpc('record_swipe',
         params: {'p_target': 'u2', 'p_direction': 'like'})).called(1);
   });
+
+  test('updateMyLocation sends p_lat/p_lng/p_area (area defaults null)', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('update_my_location', params: any(named: 'params')))
+        .thenAnswer((_) => rpcOk(null));
+    await DiscoveryRepository(client).updateMyLocation(10.77, 106.70);
+    verify(() => client.rpc('update_my_location',
+        params: {'p_lat': 10.77, 'p_lng': 106.70, 'p_area': null})).called(1);
+  });
 }
