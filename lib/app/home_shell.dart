@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../features/discovery/presentation/doi_deck_screen.dart';
+
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
   @override
@@ -14,7 +16,9 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: Text('${_labels[_index]} — sắp có')),
+      body: _index == 0
+          ? const DoiDeckScreen()
+          : Center(child: Text('${_labels[_index]} — sắp có')),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
