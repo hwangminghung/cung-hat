@@ -108,4 +108,20 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get consentCrossBorder =>
       'Dữ liệu lưu tại Singapore (chuyển xuyên biên giới)';
+
+  @override
+  String get chatPromoteKeo => 'Lập kèo';
+
+  @override
+  String get sendThisTitle => 'Gửi tin này?';
+
+  @override
+  String get sendThisBody =>
+      'Tin này có thể chứa thông tin tài chính/liên hệ. Vẫn gửi?';
+
+  @override
+  String get cancel => 'Hủy';
+
+  @override
+  String get send => 'Gửi';
 }

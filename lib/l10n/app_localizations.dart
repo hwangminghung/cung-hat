@@ -295,6 +295,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data stored in Singapore (cross-border transfer)'**
   String get consentCrossBorder;
+
+  /// No description provided for @chatPromoteKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up an outing'**
+  String get chatPromoteKeo;
+
+  /// No description provided for @sendThisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this message?'**
+  String get sendThisTitle;
+
+  /// No description provided for @sendThisBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This looks like it may share financial or contact info. Send anyway?'**
+  String get sendThisBody;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:cung_hat/l10n/app_localizations.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/utils/message_safety.dart';
 import '../application/chat_providers.dart';
@@ -78,22 +79,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Future<void> _doSend(String text) async {
     if (messageLooksUnsafe(text)) {
+      final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Gửi tin này?'),
-          content: const Text(
-            'Tin nhắn này có vẻ liên quan đến tiền bạc hoặc thông tin nhạy cảm. '
-            'Hãy cẩn thận với lừa đảo. Vẫn muốn gửi?',
+          title: Text(l10n?.sendThisTitle ?? 'Gửi tin này?'),
+          content: Text(
+            l10n?.sendThisBody ??
+                'Tin nhắn này có vẻ liên quan đến tiền bạc hoặc thông tin nhạy cảm. '
+                    'Hãy cẩn thận với lừa đảo. Vẫn muốn gửi?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Hủy'),
+              child: Text(l10n?.cancel ?? 'Hủy'),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Gửi'),
+              child: Text(l10n?.send ?? 'Gửi'),
             ),
           ],
         ),
@@ -109,6 +112,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final myUid = _myUid;
 
     // Append new live messages as they arrive (dedupe by id).
@@ -141,7 +145,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.otherName)),
+      appBar: AppBar(
+        title: Text(widget.otherName),
+        actions: [
+          TextButton(
+            // TODO(P3): navigate to /keo/create
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Sắp có')),
+            ),
+            child: Text(l10n?.chatPromoteKeo ?? 'Lập kèo'),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(

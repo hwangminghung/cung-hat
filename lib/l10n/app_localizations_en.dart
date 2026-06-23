@@ -109,4 +109,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get consentCrossBorder =>
       'Data stored in Singapore (cross-border transfer)';
+
+  @override
+  String get chatPromoteKeo => 'Set up an outing';
+
+  @override
+  String get sendThisTitle => 'Send this message?';
+
+  @override
+  String get sendThisBody =>
+      'This looks like it may share financial or contact info. Send anyway?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get send => 'Send';
 }
