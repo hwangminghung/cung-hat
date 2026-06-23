@@ -19,9 +19,16 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _controller = TextEditingController();
+  final _scrollController = ScrollController();
 
   /// Live messages appended from the realtime stream; merged after history.
   final List<Message> _live = <Message>[];
+
+  /// Guards against double-send on rapid taps.
+  bool _sending = false;
+
+  /// Ensures we only auto-scroll once when the initial history loads.
+  bool _initialScrollDone = false;
 
   @override
   void initState() {
@@ -35,7 +42,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
   }
 
   String? get _myUid {
@@ -51,7 +67,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+    if (_sending) return;
+    setState(() => _sending = true);
+    try {
+      await _doSend(text);
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
 
+  Future<void> _doSend(String text) async {
     if (messageLooksUnsafe(text)) {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -79,20 +104,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     await ref.read(chatRepositoryProvider).sendMessage(widget.matchId, text);
     if (!mounted) return;
     _controller.clear();
+    _scrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
+    final myUid = _myUid;
+
     // Append new live messages as they arrive (dedupe by id).
     ref.listen(liveMessagesProvider(widget.matchId), (prev, next) {
       next.whenData((m) {
         if (_live.any((e) => e.id == m.id)) return;
         setState(() => _live.add(m));
+        _scrollToBottom();
+        // Clear the unread badge while actively reading; skip our own echoes.
+        if (m.senderId != myUid) {
+          ref.read(chatRepositoryProvider).markRead(widget.matchId).catchError((_) {});
+        }
       });
     });
 
     final historyAsync = ref.watch(messageHistoryProvider(widget.matchId));
     final history = historyAsync.value ?? const <Message>[];
+
+    // Scroll to newest once, after the initial history resolves.
+    if (!_initialScrollDone && historyAsync.hasValue) {
+      _initialScrollDone = true;
+      _scrollToBottom();
+    }
 
     // Combine history + live, deduping by id (history wins).
     final seen = <String>{};
@@ -101,14 +140,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (seen.add(m.id)) messages.add(m);
     }
 
-    final myUid = _myUid;
-
     return Scaffold(
       appBar: AppBar(title: Text(widget.otherName)),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.all(12),
               itemCount: messages.length,
               itemBuilder: (context, i) {
@@ -153,7 +191,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   IconButton(
                     key: const Key('send_btn'),
                     icon: const Icon(Icons.send),
-                    onPressed: _send,
+                    onPressed: _sending ? null : _send,
                   ),
                 ],
               ),
