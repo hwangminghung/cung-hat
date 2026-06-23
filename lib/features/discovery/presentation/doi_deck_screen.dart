@@ -15,6 +15,15 @@ class DoiDeckScreen extends ConsumerStatefulWidget {
 }
 
 class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final ok = await ref.read(locationServiceProvider).captureAndPush();
+      if (ok && mounted) ref.invalidate(candidatesProvider);
+    });
+  }
+
   /// Maps a card swipe direction to a swipe action recorded server-side.
   /// Returns null for directions we ignore (e.g. bottom).
   String? _directionToSwipe(CardSwiperDirection direction) {
