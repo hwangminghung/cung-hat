@@ -40,12 +40,13 @@ class ChatRepository {
     final ch = _client.channel('match:$threadId',
         opts: const RealtimeChannelConfig(private: true));
     final controller = StreamController<Message>();
-    ch.onBroadcast(
-      event: 'new_message',
-      callback: (payload) {
+    ch.onBroadcast(event: 'new_message', callback: (payload) {
+      try {
         controller.add(messageFromBroadcast(Map<String, dynamic>.from(payload)));
-      },
-    ).subscribe();
+      } catch (e, st) {
+        controller.addError(e, st);
+      }
+    }).subscribe();
     controller.onCancel = () => _client.removeChannel(ch);
     return controller.stream;
   }

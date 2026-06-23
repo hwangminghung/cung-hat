@@ -10,7 +10,5 @@ final messageHistoryProvider = FutureProvider.family<List<Message>, String>(
     (ref, threadId) => ref.watch(chatRepositoryProvider).history(threadId));
 
 final liveMessagesProvider = StreamProvider.family<Message, String>((ref, threadId) {
-  final sub = ref.watch(chatRepositoryProvider).subscribe(threadId);
-  ref.keepAlive(); // do not auto-pause an open chat
-  return sub;
+  return ref.watch(chatRepositoryProvider).subscribe(threadId);
 });
