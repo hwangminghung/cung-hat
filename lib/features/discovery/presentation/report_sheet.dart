@@ -49,6 +49,7 @@ class ReportSheet extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     try {
       await ref.read(discoveryRepositoryProvider).blockUser(targetId);
+      ref.invalidate(candidatesProvider);
       nav.pop();
       messenger.showSnackBar(const SnackBar(content: Text('Đã chặn.')));
     } catch (_) {
