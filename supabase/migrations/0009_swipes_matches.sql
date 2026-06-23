@@ -19,6 +19,11 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare a uuid; b uuid; reciprocal boolean; matched boolean := false;
 begin
   perform app_private.enforce_rate_limit('swipe', 200, interval '1 day');
+  -- Serialize the two reciprocal swipers on their canonical pair key so a concurrent
+  -- opposite swipe is committed-visible before the reciprocity check (prevents lost matches).
+  perform pg_advisory_xact_lock(
+    hashtextextended(
+      least(auth.uid(), p_target)::text || ':' || greatest(auth.uid(), p_target)::text, 0));
   insert into public.swipes(swiper_id, target_type, target_id, direction)
   values (auth.uid(), 'user', p_target::text, p_direction)
   on conflict (swiper_id, target_type, target_id) do nothing;
