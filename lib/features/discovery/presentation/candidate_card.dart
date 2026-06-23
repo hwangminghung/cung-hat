@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../domain/candidate.dart';
+import 'report_sheet.dart';
 
 class CandidateCard extends StatelessWidget {
   const CandidateCard({super.key, required this.candidate});
@@ -34,6 +35,13 @@ class CandidateCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge),
                   ),
                   if (candidate.verified) const Icon(Icons.verified, size: 18),
+                  IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () => showModalBottomSheet(
+                      context: context,
+                      builder: (_) => ReportSheet(targetId: candidate.id),
+                    ),
+                  ),
                 ]),
                 Text('Cách ${candidate.distanceBand ?? '?'} km · cùng ${candidate.sharedBaitu.length} bài tủ'),
               ],

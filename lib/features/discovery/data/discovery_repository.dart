@@ -23,4 +23,12 @@ class DiscoveryRepository {
     await _client.rpc('update_my_location',
         params: {'p_lat': lat, 'p_lng': lng, 'p_area': area});
   }
+
+  Future<void> reportUser(String targetId, String reason) async {
+    await _client.rpc('report_user', params: {'p_target': targetId, 'p_reason': reason});
+  }
+
+  Future<void> blockUser(String targetId) async {
+    await _client.rpc('block_user', params: {'p_blocked': targetId});
+  }
 }
