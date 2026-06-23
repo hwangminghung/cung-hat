@@ -2,6 +2,13 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/message.dart';
 
+/// Converts a Supabase broadcast frame ({type,event,payload}) to a [Message].
+/// The DB trigger's jsonb is nested under the frame's `payload` key.
+Message messageFromBroadcast(Map<String, dynamic> frame) {
+  final data = Map<String, dynamic>.from(frame['payload'] as Map);
+  return Message.fromJson(data);
+}
+
 class ChatRepository {
   ChatRepository(this._client);
   final SupabaseClient _client;
@@ -36,7 +43,7 @@ class ChatRepository {
     ch.onBroadcast(
       event: 'new_message',
       callback: (payload) {
-        controller.add(Message.fromJson(Map<String, dynamic>.from(payload)));
+        controller.add(messageFromBroadcast(Map<String, dynamic>.from(payload)));
       },
     ).subscribe();
     controller.onCancel = () => _client.removeChannel(ch);

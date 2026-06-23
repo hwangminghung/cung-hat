@@ -13,4 +13,20 @@ void main() {
     verify(() => client.rpc('send_message',
         params: {'p_thread': 't1', 'p_body': 'hello'})).called(1);
   });
+
+  test('messageFromBroadcast unwraps the frame payload envelope', () {
+    final frame = <String, dynamic>{
+      'type': 'broadcast',
+      'event': 'new_message',
+      'payload': {
+        'id': 'm1', 'thread_id': 't1', 'sender_id': 'u2',
+        'body': 'xin chào', 'created_at': '2026-06-23T10:00:00Z',
+      },
+    };
+    final msg = messageFromBroadcast(frame);
+    expect(msg.id, 'm1');
+    expect(msg.threadId, 't1');
+    expect(msg.senderId, 'u2');
+    expect(msg.body, 'xin chào');
+  });
 }
