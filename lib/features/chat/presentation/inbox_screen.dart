@@ -29,9 +29,12 @@ class InboxScreen extends ConsumerWidget {
               leading: CircleAvatar(child: Text(monogram)),
               title: Text(m.otherName),
               trailing: m.unread > 0 ? _UnreadBadge(count: m.unread) : null,
-              onTap: () => context.go(
-                '/chat/${m.matchId}?name=${Uri.encodeComponent(m.otherName)}',
-              ),
+              onTap: () async {
+                await context.push(
+                  '/chat/${m.matchId}?name=${Uri.encodeComponent(m.otherName)}',
+                );
+                if (context.mounted) ref.invalidate(inboxProvider);
+              },
             );
           },
         );
