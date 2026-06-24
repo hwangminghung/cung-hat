@@ -35,7 +35,7 @@ declare r public.reports;
 begin
   if not app_private.is_admin() then raise exception 'not_admin' using errcode='check_violation'; end if;
   select * into r from public.reports where id = p_report;
-  if not found then raise exception 'no_report'; end if;
+  if not found then raise exception 'no_report' using errcode='no_data_found'; end if;
 
   if p_action in ('hide','remove') then
     if r.target_type = 'message' then
@@ -45,8 +45,9 @@ begin
     elsif r.target_type = 'keo' then
       update public.keo set soft_deleted_at = now(), status='cancelled' where id = r.target_id::uuid;
     elsif r.target_type = 'profile' then
-      update public.profiles set soft_deleted_at = now() where id = r.target_id::uuid;
-      update public.profiles set report_risk = report_risk + 1 where id = r.target_id::uuid;
+      update public.profiles set soft_deleted_at = now(), report_risk = report_risk + 1 where id = r.target_id::uuid;
+    else
+      raise exception 'unhandled_target_type' using errcode='check_violation';
     end if;
     update public.reports set status='actioned' where id = p_report;
   elsif p_action = 'dismiss' then
