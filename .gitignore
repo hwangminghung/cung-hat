@@ -7,3 +7,6 @@ env/*.json
 
 # Flutter pub-generated
 .flutter-plugins-dependencies
+
+# Supabase Edge Function secrets (never commit real keys)
+supabase/functions/.env
