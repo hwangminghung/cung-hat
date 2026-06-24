@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../features/admin/presentation/moderation_screen.dart';
 import '../features/auth/application/auth_providers.dart';
 import '../features/auth/presentation/phone_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
@@ -42,6 +43,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/auth', builder: (_, _) => const PhoneScreen()),
       GoRoute(path: '/otp', builder: (_, _) => const OtpScreen()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingFlow()),
+      GoRoute(path: '/admin', builder: (_, _) => const ModerationScreen()),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
       GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
       GoRoute(
