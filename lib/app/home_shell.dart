@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../features/chat/presentation/inbox_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
+import '../features/keo/presentation/keo_board_screen.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -19,6 +20,7 @@ class _HomeShellState extends State<HomeShell> {
     return Scaffold(
       body: switch (_index) {
         0 => const DoiDeckScreen(),
+        1 => const KeoBoardScreen(),
         2 => const InboxScreen(),
         _ => Center(child: Text('${_labels[_index]} — sắp có')),
       },
