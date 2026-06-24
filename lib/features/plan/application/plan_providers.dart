@@ -8,3 +8,6 @@ final planRepositoryProvider =
 
 final nearestVenuesProvider = FutureProvider.family<List<VenueSuggestion>, String>(
     (ref, keoId) => ref.watch(planRepositoryProvider).nearestVenues(keoId));
+
+final currentPlanProvider = FutureProvider.family<Plan?, String>(
+    (ref, keoId) => ref.watch(planRepositoryProvider).currentPlan(keoId));

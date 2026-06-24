@@ -168,6 +168,24 @@ class KeoDetailScreen extends ConsumerWidget {
               onPressed: () => context.push('/keo/chat/$keoId'),
             ),
           ),
+        if (isHost)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: OutlinedButton(
+              key: const Key('host_pick_venue_btn'),
+              child: const Text('Chốt quán'),
+              onPressed: () => context.push('/keo/plan/$keoId?host=1'),
+            ),
+          )
+        else if (isApproved)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: OutlinedButton(
+              key: const Key('view_plan_btn'),
+              child: const Text('Xem kế hoạch'),
+              onPressed: () => context.push('/keo/plan/$keoId'),
+            ),
+          ),
         if (isApproved && !isHost)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),

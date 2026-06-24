@@ -9,6 +9,7 @@ import '../features/keo/presentation/keo_chat_screen.dart';
 import '../features/keo/presentation/keo_detail_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
 import '../features/onboarding/presentation/onboarding_flow.dart';
+import '../features/plan/presentation/plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
 import 'home_shell.dart';
 
@@ -43,6 +44,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingFlow()),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
       GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
+      GoRoute(
+        path: '/keo/plan/:id',
+        builder: (_, s) => PlanScreen(
+          keoId: s.pathParameters['id']!,
+          isHost: s.uri.queryParameters['host'] == '1',
+        ),
+      ),
       GoRoute(
         path: '/keo/:id',
         builder: (_, s) => KeoDetailScreen(
