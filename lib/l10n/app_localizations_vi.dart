@@ -124,4 +124,23 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get send => 'Gửi';
+
+  @override
+  String get privacyTitle => 'Chính sách bảo mật';
+
+  @override
+  String get tosTitle => 'Điều khoản sử dụng';
+
+  @override
+  String get settingsTitle => 'Cài đặt';
+
+  @override
+  String get exportData => 'Tải dữ liệu của tôi';
+
+  @override
+  String get deleteAccount => 'Xoá tài khoản';
+
+  @override
+  String get deleteConfirm =>
+      'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xoá.';
 }

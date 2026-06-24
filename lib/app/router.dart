@@ -1,16 +1,19 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../features/admin/presentation/moderation_screen.dart';
 import '../features/auth/application/auth_providers.dart';
 import '../features/auth/presentation/phone_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/keo/presentation/create_keo_screen.dart';
 import '../features/keo/presentation/keo_chat_screen.dart';
 import '../features/keo/presentation/keo_detail_screen.dart';
+import '../features/legal/presentation/legal_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
 import '../features/onboarding/presentation/onboarding_flow.dart';
 import '../features/plan/presentation/plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import 'home_shell.dart';
 
 /// Pure redirect decision — unit-tested in isolation.
@@ -42,6 +45,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/auth', builder: (_, _) => const PhoneScreen()),
       GoRoute(path: '/otp', builder: (_, _) => const OtpScreen()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingFlow()),
+      GoRoute(path: '/admin', builder: (_, _) => const ModerationScreen()),
+      GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+      GoRoute(path: '/legal/privacy', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/privacy_vi.md', title: 'Chính sách bảo mật')),
+      GoRoute(path: '/legal/tos', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/tos_vi.md', title: 'Điều khoản sử dụng')),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
       GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
       GoRoute(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../features/chat/presentation/inbox_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
@@ -22,6 +23,15 @@ class _HomeShellState extends State<HomeShell> {
         0 => const DoiDeckScreen(),
         1 => const KeoBoardScreen(),
         2 => const InboxScreen(),
+        3 => ListView(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Cài đặt'),
+              onTap: () => context.push('/settings'),
+            ),
+          ],
+        ),
         _ => Center(child: Text('${_labels[_index]} — sắp có')),
       },
       bottomNavigationBar: NavigationBar(
