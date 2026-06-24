@@ -63,6 +63,7 @@ class KeoDetailScreen extends ConsumerWidget {
       children: [
         for (final m in roster)
           ListTile(
+            key: ValueKey(m.userId),
             leading: CircleAvatar(
               child: Text(
                 (m.displayName != null && m.displayName!.isNotEmpty)
@@ -90,19 +91,31 @@ class KeoDetailScreen extends ConsumerWidget {
                       TextButton(
                         child: const Text('Duyệt'),
                         onPressed: () async {
-                          await ref
-                              .read(keoRepositoryProvider)
-                              .approve(keoId, m.userId);
-                          ref.invalidate(keoRosterProvider(keoId));
+                          try {
+                            await ref
+                                .read(keoRepositoryProvider)
+                                .approve(keoId, m.userId);
+                            ref.invalidate(keoRosterProvider(keoId));
+                          } catch (_) {
+                            if (context.mounted) {
+                              _snack(context, 'Không duyệt được');
+                            }
+                          }
                         },
                       ),
                       TextButton(
                         child: const Text('Từ chối'),
                         onPressed: () async {
-                          await ref
-                              .read(keoRepositoryProvider)
-                              .decline(keoId, m.userId);
-                          ref.invalidate(keoRosterProvider(keoId));
+                          try {
+                            await ref
+                                .read(keoRepositoryProvider)
+                                .decline(keoId, m.userId);
+                            ref.invalidate(keoRosterProvider(keoId));
+                          } catch (_) {
+                            if (context.mounted) {
+                              _snack(context, 'Không từ chối được');
+                            }
+                          }
                         },
                       ),
                     ],
@@ -135,8 +148,14 @@ class KeoDetailScreen extends ConsumerWidget {
               key: const Key('confirm_keo_btn'),
               child: const Text('Đồng ý tham gia'),
               onPressed: () async {
-                await ref.read(keoRepositoryProvider).confirm(keoId);
-                ref.invalidate(keoRosterProvider(keoId));
+                try {
+                  await ref.read(keoRepositoryProvider).confirm(keoId);
+                  ref.invalidate(keoRosterProvider(keoId));
+                } catch (_) {
+                  if (context.mounted) {
+                    _snack(context, 'Không xác nhận được');
+                  }
+                }
               },
             ),
           ),
@@ -155,8 +174,14 @@ class KeoDetailScreen extends ConsumerWidget {
             child: TextButton(
               child: const Text('Rời kèo'),
               onPressed: () async {
-                await ref.read(keoRepositoryProvider).leave(keoId);
-                ref.invalidate(keoRosterProvider(keoId));
+                try {
+                  await ref.read(keoRepositoryProvider).leave(keoId);
+                  ref.invalidate(keoRosterProvider(keoId));
+                } catch (_) {
+                  if (context.mounted) {
+                    _snack(context, 'Không rời kèo được');
+                  }
+                }
               },
             ),
           ),
