@@ -19,7 +19,8 @@ create table public.keo (
   status text not null default 'open'
     check (status in ('open','full','planning','confirmed','done','cancelled')),
   created_at timestamptz not null default now(),
-  soft_deleted_at timestamptz
+  soft_deleted_at timestamptz,
+  check (time_window_end > time_window_start)
 );
 create index keo_geo_gix on public.keo using gist (area_geo);
 alter table public.keo enable row level security;
