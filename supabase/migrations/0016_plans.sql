@@ -47,6 +47,9 @@ returns uuid language plpgsql security definer set search_path='' as $$
 declare pid uuid;
 begin
   perform app_private.assert_host(p_keo);
+  if (select status from public.keo where id=p_keo) <> 'planning' then
+    raise exception 'keo_not_planning' using errcode='check_violation';
+  end if;
   insert into public.plans(keo_id, venue_id, scheduled_at) values (p_keo, p_venue, p_when)
   returning id into pid;
   return pid;
@@ -59,10 +62,13 @@ declare kid uuid; approved_n int; confirmed_n int;
 begin
   select keo_id into kid from public.plans where id=p_plan;
   if not app_private.in_keo(kid) then raise exception 'not_in_keo' using errcode='check_violation'; end if;
+  perform pg_advisory_xact_lock(hashtextextended(kid::text, 0));
   insert into public.plan_confirmations(plan_id, user_id) values (p_plan, auth.uid())
   on conflict do nothing;
   select count(*) filter (where m.join_status='approved'),
-         (select count(*) from public.plan_confirmations c where c.plan_id=p_plan)
+         count(*) filter (where m.join_status='approved'
+           and exists (select 1 from public.plan_confirmations c
+                       where c.plan_id=p_plan and c.user_id=m.user_id))
     into approved_n, confirmed_n
   from public.keo_members m where m.keo_id=kid;
   if approved_n >= 2 and confirmed_n >= approved_n then
