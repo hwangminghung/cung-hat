@@ -8,6 +8,7 @@ import '../features/chat/presentation/chat_screen.dart';
 import '../features/keo/presentation/create_keo_screen.dart';
 import '../features/keo/presentation/keo_chat_screen.dart';
 import '../features/keo/presentation/keo_detail_screen.dart';
+import '../features/legal/presentation/legal_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
 import '../features/onboarding/presentation/onboarding_flow.dart';
 import '../features/plan/presentation/plan_screen.dart';
@@ -46,6 +47,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingFlow()),
       GoRoute(path: '/admin', builder: (_, _) => const ModerationScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+      GoRoute(path: '/legal/privacy', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/privacy_vi.md', title: 'Chính sách bảo mật')),
+      GoRoute(path: '/legal/tos', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/tos_vi.md', title: 'Điều khoản sử dụng')),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
       GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
       GoRoute(

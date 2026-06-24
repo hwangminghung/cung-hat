@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 
 const consentPurposes = ['location', 'photos', 'matching', 'marketing', 'cross_border'];
@@ -48,6 +49,22 @@ class ConsentStep extends StatelessWidget {
             value: values[p] ?? false,
             onChanged: (v) => onChanged(p, v),
           ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Wrap(
+            spacing: 8,
+            children: [
+              TextButton(
+                onPressed: () => context.push('/legal/privacy'),
+                child: const Text('Chính sách bảo mật'),
+              ),
+              TextButton(
+                onPressed: () => context.push('/legal/tos'),
+                child: const Text('Điều khoản'),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

@@ -125,4 +125,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get send => 'Send';
+
+  @override
+  String get privacyTitle => 'Privacy Policy';
+
+  @override
+  String get tosTitle => 'Terms of Service';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get exportData => 'Download my data';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteConfirm =>
+      'This action cannot be undone. Your account and data will be deleted.';
 }
