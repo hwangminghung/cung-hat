@@ -52,6 +52,8 @@ begin
     update public.reports set status='actioned' where id = p_report;
   elsif p_action = 'dismiss' then
     update public.reports set status='dismissed' where id = p_report;
+  else
+    raise exception 'bad_action' using errcode='check_violation';
   end if;
 
   insert into public.moderation_audit(actor, action, target_type, target_id, reason)
