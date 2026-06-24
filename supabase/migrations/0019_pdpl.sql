@@ -22,6 +22,12 @@ begin
   update public.keo set status='cancelled', soft_deleted_at=now() where host_id = auth.uid() and status <> 'done';
   update public.keo_members set join_status='left' where user_id = auth.uid();
   update public.matches set status='unmatched', unmatched_at=now() where user_a=auth.uid() or user_b=auth.uid();
+  -- Hide the departing user's messages immediately (bodies otherwise stay visible until P7 hard-delete).
+  update public.messages set hidden = true where sender_id = auth.uid();
+  -- Cancel any non-done plans for keos this user hosts.
+  update public.plans set status = 'cancelled'
+    where status <> 'done'
+      and keo_id in (select id from public.keo where host_id = auth.uid());
 end; $$;
 
 revoke execute on function public.export_my_data() from public, anon;
