@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../features/chat/presentation/inbox_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
 
 class HomeShell extends StatefulWidget {
@@ -16,9 +17,11 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _index == 0
-          ? const DoiDeckScreen()
-          : Center(child: Text('${_labels[_index]} — sắp có')),
+      body: switch (_index) {
+        0 => const DoiDeckScreen(),
+        2 => const InboxScreen(),
+        _ => Center(child: Text('${_labels[_index]} — sắp có')),
+      },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
