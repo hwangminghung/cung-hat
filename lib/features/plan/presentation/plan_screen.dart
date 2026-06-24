@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/plan_providers.dart';
 import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
+import 'safety_toolkit.dart';
 
 class PlanScreen extends ConsumerWidget {
   const PlanScreen({super.key, required this.keoId, required this.isHost});
@@ -109,8 +110,7 @@ class PlanScreen extends ConsumerWidget {
                 },
               )
             else
-              // TODO(P4-T5): render SafetyToolkit(planId: plan.id) here
-              const SizedBox.shrink(),
+              SafetyToolkit(planId: plan.id),
           ],
         ),
       ),
