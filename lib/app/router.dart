@@ -12,6 +12,7 @@ import '../features/auth/presentation/otp_screen.dart';
 import '../features/onboarding/presentation/onboarding_flow.dart';
 import '../features/plan/presentation/plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import 'home_shell.dart';
 
 /// Pure redirect decision — unit-tested in isolation.
@@ -44,6 +45,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/otp', builder: (_, _) => const OtpScreen()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingFlow()),
       GoRoute(path: '/admin', builder: (_, _) => const ModerationScreen()),
+      GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
       GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
       GoRoute(
