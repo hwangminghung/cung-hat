@@ -12,3 +12,10 @@ final messageHistoryProvider = FutureProvider.family<List<Message>, String>(
 final liveMessagesProvider = StreamProvider.family<Message, String>((ref, threadId) {
   return ref.watch(chatRepositoryProvider).subscribe(threadId);
 });
+
+final keoMessageHistoryProvider = FutureProvider.family<List<Message>, String>(
+    (ref, keoId) => ref.watch(chatRepositoryProvider).keoHistory(keoId));
+
+final keoLiveMessagesProvider = StreamProvider.family<Message, String>((ref, keoId) {
+  return ref.watch(chatRepositoryProvider).subscribeKeo(keoId);
+});
