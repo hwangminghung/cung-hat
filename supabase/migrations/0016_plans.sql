@@ -65,8 +65,8 @@ begin
   perform pg_advisory_xact_lock(hashtextextended(kid::text, 0));
   insert into public.plan_confirmations(plan_id, user_id) values (p_plan, auth.uid())
   on conflict do nothing;
-  select count(*) filter (where m.join_status='approved'),
-         count(*) filter (where m.join_status='approved'
+  select count(*) filter (where m.join_status='approved' and m.confirmed),
+         count(*) filter (where m.join_status='approved' and m.confirmed
            and exists (select 1 from public.plan_confirmations c
                        where c.plan_id=p_plan and c.user_id=m.user_id))
     into approved_n, confirmed_n

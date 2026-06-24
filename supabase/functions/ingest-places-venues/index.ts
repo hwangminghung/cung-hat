@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   let upserted = 0;
   for (const p of places) {
+    if (!p.id) continue;
     const row = {
       name: p.displayName?.text ?? "Karaoke",
       address: p.formattedAddress ?? "",
