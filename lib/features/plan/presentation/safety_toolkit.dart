@@ -17,11 +17,21 @@ class SafetyToolkit extends ConsumerWidget {
             icon: const Icon(Icons.ios_share),
             label: const Text('Chia sẻ cho bạn bè'),
             onPressed: () async {
-              final token =
-                  await ref.read(planRepositoryProvider).createShareLink(planId);
-              await SharePlus.instance.share(
-                ShareParams(text: 'Mình đi hát, đây là kế hoạch: cunghat://plan/$token'),
-              );
+              try {
+                final token = await ref
+                    .read(planRepositoryProvider)
+                    .createShareLink(planId);
+                await SharePlus.instance.share(
+                  ShareParams(
+                      text: 'Mình đi hát, đây là kế hoạch: cunghat://plan/$token'),
+                );
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Không tạo được link chia sẻ')),
+                  );
+                }
+              }
             },
           ),
         ),
