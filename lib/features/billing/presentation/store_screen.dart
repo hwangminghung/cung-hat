@@ -1,0 +1,55 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../application/iap_controller.dart';
+
+/// One purchasable upgrade row. Rendered statically — no provider read at build.
+class _Upgrade {
+  const _Upgrade(this.feature, this.title, this.description);
+  final String feature;
+  final String title;
+  final String description;
+}
+
+const _upgrades = <_Upgrade>[
+  _Upgrade('boost', 'Đẩy kèo lên top', 'Đẩy kèo của bạn lên đầu bảng 24 giờ'),
+  _Upgrade('see_likes', 'Xem ai đã thích bạn', 'Mở khoá danh sách người đã thích bạn'),
+  _Upgrade('premium_filters', 'Bộ lọc nâng cao', 'Lọc theo gu nhạc, độ tuổi, khu vực'),
+];
+
+class StoreScreen extends ConsumerWidget {
+  const StoreScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Nâng cấp')),
+      body: ListView(
+        padding: const EdgeInsets.all(12),
+        children: [
+          for (final u in _upgrades)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(u.title, style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 6),
+                    Text(u.description),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton(
+                        onPressed: () => ref.read(iapControllerProvider).buy(u.feature),
+                        child: const Text('Mua'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

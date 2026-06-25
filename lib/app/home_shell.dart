@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/billing/application/billing_providers.dart';
 import '../features/chat/presentation/inbox_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/keo/presentation/keo_board_screen.dart';
@@ -25,6 +27,16 @@ class _HomeShellState extends State<HomeShell> {
         2 => const InboxScreen(),
         3 => ListView(
           children: [
+            Consumer(
+              builder: (context, ref, _) => ListTile(
+                leading: const Icon(Icons.favorite),
+                title: const Text('Ai đã thích bạn'),
+                onTap: () {
+                  final unlocked = ref.read(hasEntitlementProvider('see_likes'));
+                  context.push(unlocked ? '/likes' : '/store');
+                },
+              ),
+            ),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Cài đặt'),

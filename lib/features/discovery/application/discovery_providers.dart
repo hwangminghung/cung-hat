@@ -10,3 +10,5 @@ final locationServiceProvider =
     Provider((ref) => LocationService(ref.watch(discoveryRepositoryProvider)));
 final candidatesProvider = FutureProvider<List<Candidate>>(
     (ref) => ref.watch(discoveryRepositoryProvider).getCandidates());
+final whoLikedMeProvider = FutureProvider<List<Candidate>>(
+    (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe());
