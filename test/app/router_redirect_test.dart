@@ -14,4 +14,7 @@ void main() {
   test('signed-in with profile elsewhere is not redirected', () {
     expect(authRedirect(signedIn: true, hasProfile: true, location: '/'), isNull);
   });
+  test('unauthenticated can view a shared plan', () {
+    expect(authRedirect(signedIn: false, hasProfile: false, location: '/plan/shared/tok'), isNull);
+  });
 }

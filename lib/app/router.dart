@@ -14,6 +14,7 @@ import '../features/legal/presentation/legal_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
 import '../features/onboarding/presentation/onboarding_flow.dart';
 import '../features/plan/presentation/plan_screen.dart';
+import '../features/plan/presentation/shared_plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import 'home_shell.dart';
@@ -25,7 +26,8 @@ String? authRedirect({
   required String location,
 }) {
   final authArea = location == '/auth' || location == '/otp';
-  if (!signedIn) return authArea ? null : '/auth';
+  final publicArea = authArea || location.startsWith('/plan/shared');
+  if (!signedIn) return publicArea ? null : '/auth';
   if (!hasProfile) return location == '/onboarding' ? null : '/onboarding';
   if (authArea) return '/';
   return null;
@@ -53,6 +55,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/likes', builder: (_, _) => const LikesScreen()),
       GoRoute(path: '/legal/privacy', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/privacy_vi.md', title: 'Chính sách bảo mật')),
       GoRoute(path: '/legal/tos', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/tos_vi.md', title: 'Điều khoản sử dụng')),
+      GoRoute(path: '/plan/shared/:token', builder: (_, s) => SharedPlanScreen(token: s.pathParameters['token']!)),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
       GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
       GoRoute(
