@@ -11,3 +11,6 @@ final nearestVenuesProvider = FutureProvider.family<List<VenueSuggestion>, Strin
 
 final currentPlanProvider = FutureProvider.family<Plan?, String>(
     (ref, keoId) => ref.watch(planRepositoryProvider).currentPlan(keoId));
+
+final resolveShareProvider = FutureProvider.family<Map<String, dynamic>, String>(
+    (ref, token) => ref.watch(planRepositoryProvider).resolveShare(token));

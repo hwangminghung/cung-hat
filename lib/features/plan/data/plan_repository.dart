@@ -60,6 +60,11 @@ class PlanRepository {
     return tok as String;
   }
 
+  Future<Map<String, dynamic>> resolveShare(String token) async {
+    final res = await _client.rpc('resolve_share_plan', params: {'p_token': token});
+    return Map<String, dynamic>.from(res as Map);
+  }
+
   Future<String> startVenuePayment({
     required String planId, required String venueId,
     required int amountMinor, required String gateway,
