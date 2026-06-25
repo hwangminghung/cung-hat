@@ -143,4 +143,25 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get deleteConfirm =>
       'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xoá.';
+
+  @override
+  String get storeTitle => 'Nâng cấp';
+
+  @override
+  String get boostTitle => 'Đẩy kèo lên top';
+
+  @override
+  String get seeLikesTitle => 'Xem ai đã thích bạn';
+
+  @override
+  String get filtersTitle => 'Bộ lọc nâng cao';
+
+  @override
+  String get buy => 'Mua';
+
+  @override
+  String get bookVenue => 'Đặt phòng & giữ chỗ';
+
+  @override
+  String get entitlementNeeded => 'Cần nâng cấp để dùng tính năng này';
 }

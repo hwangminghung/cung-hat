@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/iap_controller.dart';
 
 /// One purchasable upgrade row. Rendered statically — no provider read at build.
@@ -21,8 +22,9 @@ class StoreScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Scaffold(
-      appBar: AppBar(title: const Text('Nâng cấp')),
+      appBar: AppBar(title: Text(l10n?.storeTitle ?? 'Nâng cấp')),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
@@ -33,7 +35,8 @@ class StoreScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(u.title, style: Theme.of(context).textTheme.titleMedium),
+                    Text(_titleFor(l10n, u),
+                        style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 6),
                     Text(u.description),
                     const SizedBox(height: 12),
@@ -41,7 +44,7 @@ class StoreScreen extends ConsumerWidget {
                       alignment: Alignment.centerRight,
                       child: FilledButton(
                         onPressed: () => ref.read(iapControllerProvider).buy(u.feature),
-                        child: const Text('Mua'),
+                        child: Text(l10n?.buy ?? 'Mua'),
                       ),
                     ),
                   ],
@@ -51,5 +54,18 @@ class StoreScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _titleFor(AppLocalizations? l10n, _Upgrade u) {
+    switch (u.feature) {
+      case 'boost':
+        return l10n?.boostTitle ?? 'Đẩy kèo lên top';
+      case 'see_likes':
+        return l10n?.seeLikesTitle ?? 'Xem ai đã thích bạn';
+      case 'premium_filters':
+        return l10n?.filtersTitle ?? 'Bộ lọc nâng cao';
+      default:
+        return u.title;
+    }
   }
 }

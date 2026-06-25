@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/plan_providers.dart';
 
 class BookingButton extends ConsumerWidget {
@@ -17,9 +18,10 @@ class BookingButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return FilledButton.tonalIcon(
       icon: const Icon(Icons.event_seat),
-      label: const Text('Đặt phòng & giữ chỗ'),
+      label: Text(l10n?.bookVenue ?? 'Đặt phòng & giữ chỗ'),
       onPressed: () async {
         try {
           final url = await ref.read(planRepositoryProvider).startVenuePayment(
