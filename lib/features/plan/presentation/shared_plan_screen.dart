@@ -16,6 +16,9 @@ class SharedPlanScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const Center(child: Text('Không tìm thấy kế hoạch')),
         data: (data) {
+          if (data['venue_name'] == null) {
+            return const Center(child: Text('Không tìm thấy kế hoạch'));
+          }
           if (data['expired'] == true) {
             return const Center(child: Text('Link đã hết hạn'));
           }
