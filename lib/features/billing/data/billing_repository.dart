@@ -9,10 +9,13 @@ class BillingRepository {
     required String platform, required String storeProductId,
     required String storeTxnId, required String receipt,
   }) async {
-    await _client.functions.invoke('validate-iap', body: {
+    final res = await _client.functions.invoke('validate-iap', body: {
       'platform': platform, 'store_product_id': storeProductId,
       'store_txn_id': storeTxnId, 'receipt': receipt,
     });
+    if (res.status >= 400) {
+      throw Exception('validate-iap failed (${res.status}): ${res.data}');
+    }
   }
 
   Future<List<Map<String, dynamic>>> myEntitlements() async {

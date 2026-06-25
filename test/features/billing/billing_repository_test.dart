@@ -21,6 +21,19 @@ void main() {
     })).called(1);
   });
 
+  test('deliverPurchase throws when validate-iap returns >=400', () async {
+    final client = MockSupabaseClient();
+    final fns = _MockFunctions();
+    when(() => client.functions).thenReturn(fns);
+    when(() => fns.invoke('validate-iap', body: any(named: 'body')))
+        .thenAnswer((_) async => FunctionResponse(data: {'error': 'invalid_receipt'}, status: 400));
+    expect(
+      () => BillingRepository(client).deliverPurchase(
+          platform: 'ios', storeProductId: 'x', storeTxnId: 't2', receipt: 'bad'),
+      throwsA(isA<Exception>()),
+    );
+  });
+
   test('myEntitlements calls get_my_entitlements', () async {
     final client = MockSupabaseClient();
     when(() => client.rpc('get_my_entitlements')).thenAnswer((_) => rpcOk([
