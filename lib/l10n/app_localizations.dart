@@ -361,6 +361,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This action cannot be undone. Your account and data will be deleted.'**
   String get deleteConfirm;
+
+  /// No description provided for @storeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrades'**
+  String get storeTitle;
+
+  /// No description provided for @boostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost your outing'**
+  String get boostTitle;
+
+  /// No description provided for @seeLikesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See who liked you'**
+  String get seeLikesTitle;
+
+  /// No description provided for @filtersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium filters'**
+  String get filtersTitle;
+
+  /// No description provided for @buy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get buy;
+
+  /// No description provided for @bookVenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Book the venue'**
+  String get bookVenue;
+
+  /// No description provided for @entitlementNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to use this feature'**
+  String get entitlementNeeded;
 }
 
 class _AppLocalizationsDelegate

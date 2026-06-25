@@ -59,4 +59,17 @@ class PlanRepository {
     final tok = await _client.rpc('create_share_link', params: {'p_plan': planId});
     return tok as String;
   }
+
+  Future<String> startVenuePayment({
+    required String planId, required String venueId,
+    required int amountMinor, required String gateway,
+  }) async {
+    final res = await _client.functions.invoke('create-venue-payment', body: {
+      'plan_id': planId, 'venue_id': venueId, 'amount_minor': amountMinor, 'gateway': gateway,
+    });
+    if (res.status >= 400) {
+      throw Exception('create-venue-payment failed (${res.status}): ${res.data}');
+    }
+    return (res.data as Map)['pay_url'] as String;
+  }
 }

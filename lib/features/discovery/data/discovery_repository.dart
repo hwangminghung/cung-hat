@@ -12,6 +12,15 @@ class DiscoveryRepository {
         .toList();
   }
 
+  /// Users who have liked the current user. Server raises `entitlement_required`
+  /// (surfaced as an error) when the caller lacks the `see_likes` entitlement.
+  Future<List<Candidate>> whoLikedMe() async {
+    final rows = await _client.rpc('who_liked_me');
+    return (rows as List)
+        .map((e) => Candidate.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
   /// Returns true if a mutual match was created.
   Future<bool> recordSwipe(String targetId, String direction) async {
     final res = await _client.rpc('record_swipe',

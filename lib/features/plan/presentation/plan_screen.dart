@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/plan_providers.dart';
 import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
+import 'booking_button.dart';
 import 'safety_toolkit.dart';
 
 class PlanScreen extends ConsumerWidget {
@@ -109,8 +110,11 @@ class PlanScreen extends ConsumerWidget {
                   }
                 },
               )
-            else
+            else ...[
+              BookingButton(planId: plan.id, venueId: plan.venueId),
+              const SizedBox(height: 12),
               SafetyToolkit(planId: plan.id),
+            ],
           ],
         ),
       ),

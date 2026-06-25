@@ -144,4 +144,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteConfirm =>
       'This action cannot be undone. Your account and data will be deleted.';
+
+  @override
+  String get storeTitle => 'Upgrades';
+
+  @override
+  String get boostTitle => 'Boost your outing';
+
+  @override
+  String get seeLikesTitle => 'See who liked you';
+
+  @override
+  String get filtersTitle => 'Premium filters';
+
+  @override
+  String get buy => 'Buy';
+
+  @override
+  String get bookVenue => 'Book the venue';
+
+  @override
+  String get entitlementNeeded => 'Upgrade to use this feature';
 }
