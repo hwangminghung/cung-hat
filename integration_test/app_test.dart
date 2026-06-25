@@ -7,10 +7,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cung_hat/app/app.dart';
 import 'package:cung_hat/core/providers/supabase_providers.dart';
 
-// Local Supabase dev stack. Hardcoding local dev creds in an integration test
-// is intentional and fine (these are not secrets — they only target 127.0.0.1).
-const _localUrl = 'http://127.0.0.1:54321';
-const _localAnonKey = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
+// Local Supabase dev stack. Overridable via --dart-define so the SAME test runs
+// on a host target (desktop/web-driver → 127.0.0.1) AND on an Android emulator
+// (host is reachable as 10.0.2.2 → pass --dart-define=SUPABASE_URL=http://10.0.2.2:54321).
+// These are local dev creds, not secrets.
+const _localUrl = String.fromEnvironment(
+  'SUPABASE_URL',
+  defaultValue: 'http://127.0.0.1:54321',
+);
+const _localAnonKey = String.fromEnvironment(
+  'SUPABASE_ANON_KEY',
+  defaultValue: 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH',
+);
 
 // Configured test credentials in local GoTrue (see supabase/config.toml).
 const _testPhoneRaw = '900000001'; // UI shows a "+84 " prefix.
