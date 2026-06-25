@@ -45,6 +45,7 @@ dependencies:
   geolocator: ^14.0.3
   flutter_card_swiper: ^7.2.0
   share_plus: ^13.1.0
+  in_app_purchase: ^3.3.0
 
 dev_dependencies:
   flutter_test:
