@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../application/keo_providers.dart';
 import 'keo_card.dart';
 
@@ -12,32 +15,35 @@ class KeoBoardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keosAsync = ref.watch(openKeosProvider);
     return Scaffold(
+      appBar: AppBar(title: const Text('Kèo quanh bạn')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/keo/create'),
         icon: const Icon(Icons.add),
         label: const Text('Tạo kèo'),
       ),
       body: keosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) =>
-            const Center(child: Text('Không tải được danh sách kèo')),
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.primary)),
+        error: (err, _) => const EmptyState(
+          icon: Icons.wifi_off,
+          title: 'Không tải được danh sách kèo',
+          subtitle: 'Kiểm tra kết nối rồi thử lại.',
+        ),
         data: (keos) {
           if (keos.isEmpty) {
-            return const Center(child: Text('Chưa có kèo nào quanh đây'));
+            return EmptyState(
+              icon: Icons.groups,
+              title: 'Chưa có kèo quanh đây',
+              subtitle: 'Hãy là người đầu tiên rủ mọi người đi hát.',
+              actionLabel: 'Tạo kèo đầu tiên',
+              onAction: () => context.push('/keo/create'),
+            );
           }
           return ListView.builder(
+            padding: const EdgeInsets.only(bottom: 96, top: AppSpacing.sm),
             itemCount: keos.length + 1,
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.auto_awesome),
-                    title: const Text('Ghép nhóm cho tôi'),
-                    subtitle: const Text('Tự động gợi ý kèo phù hợp (sắp có)'),
-                    onTap: () => ref.invalidate(openKeosProvider),
-                  ),
-                );
-              }
+              if (index == 0) return _matchBanner(context, ref);
               final k = keos[index - 1];
               return KeoCard(
                 keo: k,
@@ -50,4 +56,37 @@ class KeoBoardScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _matchBanner(BuildContext context, WidgetRef ref) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+        child: Material(
+          color: AppColors.primaryTint,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            onTap: () => ref.invalidate(openKeosProvider),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Ghép nhóm cho tôi',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        Text('Tự động gợi ý kèo phù hợp (sắp có)',
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 }
