@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
+import '../../../shared/widgets/otp_input.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   const OtpScreen({super.key});
@@ -23,14 +24,18 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Mã đã gửi tới ${state.phone ?? ''}'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _ctrl,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n?.otpLabel ?? 'Mã 6 số'),
+            Text('Mã đã gửi tới ${state.phone ?? ''}',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            OtpInput(
+              onChanged: (v) => _ctrl.text = v,
+              onCompleted: (v) {
+                _ctrl.text = v;
+                ref.read(authControllerProvider.notifier).verifyOtp(v);
+              },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             FilledButton(
               key: const Key('verify_otp_btn'),
               onPressed: state.phase == AuthPhase.verifying
