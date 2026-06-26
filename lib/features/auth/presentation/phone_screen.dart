@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 
@@ -22,6 +23,14 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final state = ref.watch(authControllerProvider);
+    // Once the OTP request succeeds, move to the code-entry screen. The router
+    // only reacts to Supabase auth/profile state, so this hop must be explicit.
+    ref.listen(authControllerProvider, (prev, next) {
+      if (prev?.phase != AuthPhase.codeSent &&
+          next.phase == AuthPhase.codeSent) {
+        context.go('/otp');
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: Text(l10n?.authTitle ?? 'Đăng nhập')),
       body: Padding(
