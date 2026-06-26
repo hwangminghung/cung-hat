@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- DEBUG-ONLY: allow plain-HTTP (cleartext) so a test build can reach the
+         local Supabase dev stack over the LAN (http://<host-ip>:54321). Merged
+         ONLY into debug builds — the release/production app stays cleartext-blocked. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>

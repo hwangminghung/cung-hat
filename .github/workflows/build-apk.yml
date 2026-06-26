@@ -1,0 +1,54 @@
+name: Build APK
+
+# Builds a DEBUG apk in the cloud (Linux runner) to dodge the local Windows
+# AF_UNIX/Winsock loopback defect. The debug build merges the cleartext debug
+# manifest so the installed app can reach the local Supabase dev stack over LAN.
+on:
+  workflow_dispatch:
+    inputs:
+      supabase_url:
+        description: 'SUPABASE_URL (local dev stack over LAN)'
+        default: 'http://192.168.1.31:54321'
+      supabase_anon_key:
+        description: 'SUPABASE_ANON_KEY (publishable key)'
+        default: 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH'
+  push:
+    branches: [ master ]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ github.event.inputs.supabase_url || 'http://192.168.1.31:54321' }}
+      SUPABASE_ANON_KEY: ${{ github.event.inputs.supabase_anon_key || 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.1
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - run: flutter gen-l10n
+
+      - name: Build debug APK
+        run: >
+          flutter build apk --debug
+          --dart-define=SUPABASE_URL=$SUPABASE_URL
+          --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
