@@ -16,7 +16,13 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
   static const _labels = ['Đôi', 'Kèo', 'Chat', 'Hồ sơ'];
-  static const _icons = [Icons.favorite, Icons.groups, Icons.chat_bubble, Icons.person];
+  static const _icons = [
+    Icons.favorite_border, Icons.groups_outlined,
+    Icons.chat_bubble_outline, Icons.person_outline,
+  ];
+  static const _iconsSel = [
+    Icons.favorite, Icons.groups, Icons.chat_bubble, Icons.person,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +57,11 @@ class _HomeShellState extends State<HomeShell> {
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: [
           for (var i = 0; i < _labels.length; i++)
-            NavigationDestination(icon: Icon(_icons[i]), label: _labels[i]),
+            NavigationDestination(
+              icon: Icon(_icons[i]),
+              selectedIcon: Icon(_iconsSel[i]),
+              label: _labels[i],
+            ),
         ],
       ),
     );
