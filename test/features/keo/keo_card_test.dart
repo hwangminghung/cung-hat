@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/keo/presentation/keo_card.dart';
 
 void main() {
-  testWidgets('keo card shows title, slots, distance band', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: KeoCard(
-      keo: Keo(id: 'k1', title: 'Hát tối T7', distanceBand: '1-3',
-        sizeTarget: 4, slotsFilled: 2, hostName: 'Mai'),
-    ))));
-    expect(find.text('Hát tối T7'), findsOneWidget);
-    expect(find.textContaining('2/4'), findsOneWidget);
-    expect(find.textContaining('1-3'), findsOneWidget);
+  testWidgets('KeoCard renders title, meta and genres', (tester) async {
+    const keo = Keo(
+      id: '1', title: 'Hát K-Pop cuối tuần', distanceBand: '<1',
+      sizeTarget: 4, slotsFilled: 1, genres: ['K-Pop'], hostName: 'Minh',
+    );
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.light(),
+      home: const Scaffold(body: KeoCard(keo: keo)),
+    ));
+    expect(find.text('Hát K-Pop cuối tuần'), findsOneWidget);
+    expect(find.text('1/4 người'), findsOneWidget);
+    expect(find.text('K-Pop'), findsOneWidget);
   });
 }
