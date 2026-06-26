@@ -11,6 +11,12 @@ void main() {
   test('signed-in with profile on /auth goes home', () {
     expect(authRedirect(signedIn: true, hasProfile: true, location: '/auth'), '/');
   });
+  test('signed-in with profile on /otp goes home', () {
+    expect(authRedirect(signedIn: true, hasProfile: true, location: '/otp'), '/');
+  });
+  test('signed-in with profile leaves /onboarding for home', () {
+    expect(authRedirect(signedIn: true, hasProfile: true, location: '/onboarding'), '/');
+  });
   test('signed-in with profile elsewhere is not redirected', () {
     expect(authRedirect(signedIn: true, hasProfile: true, location: '/'), isNull);
   });

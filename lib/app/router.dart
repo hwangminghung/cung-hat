@@ -29,7 +29,9 @@ String? authRedirect({
   final publicArea = authArea || location.startsWith('/plan/shared');
   if (!signedIn) return publicArea ? null : '/auth';
   if (!hasProfile) return location == '/onboarding' ? null : '/onboarding';
-  if (authArea) return '/';
+  // Profile exists: a user sitting on an auth/onboarding screen (e.g. right
+  // after completing onboarding) must be sent home — otherwise they get stuck.
+  if (authArea || location == '/onboarding') return '/';
   return null;
 }
 
