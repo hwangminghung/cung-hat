@@ -54,7 +54,7 @@ class _OtpInputState extends State<OtpInput> {
               final filled = i < _controller.text.length;
               return Container(
                 width: 46,
-                height: 56,
+                height: AppSpacing.inputHeight,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: AppColors.surface,

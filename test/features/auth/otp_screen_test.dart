@@ -26,12 +26,13 @@ void main() {
       container: container,
       child: const MaterialApp(home: OtpScreen()),
     ));
-    // The 6-box OtpInput auto-submits on completion, then the user also taps
-    // the verify button — both paths must call verifyOtp with the entered code.
+    // The 6-box OtpInput auto-submits on completion; tapping the verify button
+    // afterwards must NOT fire a second verify for the same code (guarded by
+    // _submitted) — verifyOtp runs exactly once with the entered code.
     await tester.enterText(find.byType(TextField), '123456');
     await tester.pump();
     await tester.tap(find.byKey(const Key('verify_otp_btn')));
     await tester.pump();
-    verify(() => repo.verifyOtp('+84900000001', '123456')).called(2);
+    verify(() => repo.verifyOtp('+84900000001', '123456')).called(1);
   });
 }

@@ -16,6 +16,7 @@ void main() {
     ));
     expect(find.text('Hát K-Pop cuối tuần'), findsOneWidget);
     expect(find.text('1/4 người'), findsOneWidget);
+    expect(find.text('cách <1 km'), findsOneWidget);
     expect(find.text('K-Pop'), findsOneWidget);
   });
 }
