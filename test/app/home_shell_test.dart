@@ -41,6 +41,6 @@ void main() {
     // Tab 1 now hosts KeoBoardScreen. With an empty openKeos override it shows
     // the empty-state text and the always-present "Tạo kèo" FAB.
     expect(find.text('Tạo kèo'), findsOneWidget);
-    expect(find.text('Chưa có kèo nào quanh đây'), findsOneWidget);
+    expect(find.text('Chưa có kèo quanh đây'), findsOneWidget);
   });
 }
