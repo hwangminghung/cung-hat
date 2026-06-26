@@ -95,13 +95,13 @@ abstract final class AppTheme {
           side: const BorderSide(color: AppColors.border),
         ),
       ),
-      chipTheme: ChipThemeData(
+      chipTheme: const ChipThemeData(
         backgroundColor: AppColors.surface,
         selectedColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.border),
-        labelStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500),
-        secondaryLabelStyle: const TextStyle(color: AppColors.onPrimary, fontWeight: FontWeight.w500),
-        shape: const StadiumBorder(),
+        side: BorderSide(color: AppColors.border),
+        labelStyle: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500),
+        secondaryLabelStyle: TextStyle(color: AppColors.onPrimary, fontWeight: FontWeight.w500),
+        shape: StadiumBorder(),
       ),
       navigationBarTheme: NavigationBarThemeData(
         height: AppSpacing.navHeight,
