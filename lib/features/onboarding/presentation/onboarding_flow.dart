@@ -4,6 +4,7 @@ import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/onboarding_controller.dart';
 import '../application/reference_providers.dart';
 import '../domain/music_ref.dart';
+import '../../../shared/widgets/section_header.dart';
 import 'consent_step.dart';
 import 'dob_step.dart';
 import 'taste_step.dart';
@@ -77,7 +78,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        SectionHeader(label),
         const SizedBox(height: 8),
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -124,7 +125,19 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
     return Scaffold(
       appBar: AppBar(
-          title: Text(l10n?.onbSetupTitle ?? 'Thiết lập hồ sơ')),
+        title: Text(l10n?.onbSetupTitle ?? 'Thiết lập hồ sơ'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(28),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Bước ${_step + 1}/4',
+                  style: Theme.of(context).textTheme.bodySmall),
+            ),
+          ),
+        ),
+      ),
       body: Stepper(
         type: StepperType.vertical,
         currentStep: _step,
