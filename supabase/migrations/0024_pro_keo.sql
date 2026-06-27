@@ -70,6 +70,7 @@ returns void language plpgsql security definer set search_path='' as $$
 declare filled int; target int; st text; mode text; active_n int; new_status text;
 begin
   perform app_private.enforce_rate_limit('join_keo', 50, interval '1 day');
+  perform pg_advisory_xact_lock(hashtextextended(p_keo::text, 0));
   select status, group_size_target, join_mode into st, target, mode from public.keo where id = p_keo;
   if st <> 'open' then raise exception 'keo_not_open' using errcode='check_violation'; end if;
   if exists (select 1 from public.keo where id=p_keo and host_id=auth.uid()) then

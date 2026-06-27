@@ -2,22 +2,27 @@
 -- Proves migration 0024: Pro superset, create_keo Pro-gate, free 1-active-keo cap,
 -- open-mode auto-approve.
 begin;
-select plan(6);
+select plan(10);
 
 set local role postgres;
--- Three users: pro host, free user A, free user B.
+-- Users: pro host, free A, free B, free C (approval-mode test), see_likes-only user (superset no-leak).
 insert into auth.users (id) values
   ('00000000-0000-0000-0000-0000000000a1'),
   ('00000000-0000-0000-0000-0000000000b1'),
-  ('00000000-0000-0000-0000-0000000000b2')
+  ('00000000-0000-0000-0000-0000000000b2'),
+  ('00000000-0000-0000-0000-0000000000b3'),
+  ('00000000-0000-0000-0000-0000000000c1')
   on conflict (id) do nothing;
 insert into public.profiles (id, display_name, dob) values
   ('00000000-0000-0000-0000-0000000000a1','Pro Host','1990-01-01'),
   ('00000000-0000-0000-0000-0000000000b1','Free A','1990-01-01'),
-  ('00000000-0000-0000-0000-0000000000b2','Free B','1990-01-01')
+  ('00000000-0000-0000-0000-0000000000b2','Free B','1990-01-01'),
+  ('00000000-0000-0000-0000-0000000000b3','Free C','1990-01-01'),
+  ('00000000-0000-0000-0000-0000000000c1','SeeLikes Only','1990-01-01')
   on conflict (id) do nothing;
 insert into public.entitlements (user_id, feature, source) values
-  ('00000000-0000-0000-0000-0000000000a1','pro','promo')
+  ('00000000-0000-0000-0000-0000000000a1','pro','promo'),
+  ('00000000-0000-0000-0000-0000000000c1','see_likes','promo')
   on conflict do nothing;
 
 -- Case 1: has_entitlement superset — pro user has see_likes without owning it.
@@ -73,6 +78,38 @@ set local role authenticated;
 select throws_ok(
   $$ select public.request_join_keo((select keo from _t2)) $$,
   '23514', null, 'free user capped at 1 active keo');
+
+-- Case 6: approval-mode join -> join_status='requested' (NOT auto-approved).
+-- Pro host creates an 'approval' keo; fresh free C requests -> stays 'requested'.
+set local role postgres;
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000a1"}';
+set local role authenticated;
+create temp table _ta (keo uuid);
+insert into _ta select public.create_keo('Approval KEO',21.0,105.8,'HN',now()+interval '1 day',now()+interval '1 day 2 hours',5,null,null,array[]::text[],'approval');
+set local role postgres;
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000b3"}';
+set local role authenticated;
+select public.request_join_keo((select keo from _ta));
+set local role postgres;
+select is(
+  (select join_status from public.keo_members m, _ta t where m.keo_id=t.keo and m.user_id='00000000-0000-0000-0000-0000000000b3'),
+  'requested', 'approval-mode join stays requested');
+
+-- Case 7: re-join after leaving — a member who left an active keo is no longer counted
+-- by the free cap, so B (capped in Case 5) can leave Open KEO then join _t2's keo -> lives_ok.
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000b2"}';
+set local role authenticated;
+select public.leave_keo((select keo from _t));
+select lives_ok(
+  $$ select public.request_join_keo((select keo from _t2)) $$,
+  'free user can join after leaving prior keo (cap frees up)');
+
+-- Case 8 & 9: superset no-leak — see_likes-only user is NOT pro and cannot reach 'boost'.
+-- app_private.* called as owner with the JWT claim set.
+set local role postgres;
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000c1"}';
+select ok(not app_private.has_entitlement('boost'), 'see_likes-only user lacks boost (no superset leak)');
+select ok(not app_private.is_pro(), 'see_likes-only user is not pro');
 
 select * from finish();
 rollback;
