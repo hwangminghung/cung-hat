@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import '../../../core/theme/app_colors.dart';
 import '../application/auth_controller.dart';
 import '../../../shared/widgets/app_logo.dart';
 
@@ -56,15 +57,18 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                 key: const Key('send_otp_btn'),
                 onPressed: state.phase == AuthPhase.sending
                     ? null
-                    : () => ref.read(authControllerProvider.notifier)
-                        .sendOtp(_normalize(_ctrl.text)),
+                    : () => ref
+                          .read(authControllerProvider.notifier)
+                          .sendOtp(_normalize(_ctrl.text)),
                 child: Text(l10n?.sendOtp ?? 'Gửi mã OTP'),
               ),
               if (state.phase == AuthPhase.error)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
-                  child: Text(state.error ?? 'Lỗi',
-                      style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    state.error ?? 'Lỗi',
+                    style: const TextStyle(color: AppColors.error),
+                  ),
                 ),
             ],
           ),

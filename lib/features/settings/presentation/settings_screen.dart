@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../onboarding/presentation/consent_step.dart';
 import '../application/settings_providers.dart';
@@ -53,8 +54,11 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           const _SectionHeader('Tài khoản'),
           ListTile(
-            leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text('Xoá tài khoản', style: TextStyle(color: Colors.red)),
+            leading: const Icon(Icons.delete_forever, color: AppColors.error),
+            title: const Text(
+              'Xoá tài khoản',
+              style: TextStyle(color: AppColors.error),
+            ),
             onTap: () => _deleteAccount(context, ref),
           ),
           const Divider(),
@@ -81,7 +85,9 @@ class SettingsScreen extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không thể tải dữ liệu. Vui lòng thử lại.')),
+        const SnackBar(
+          content: Text('Không thể tải dữ liệu. Vui lòng thử lại.'),
+        ),
       );
     }
   }
@@ -92,10 +98,17 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Xoá tài khoản?'),
         content: const Text(
-            'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xoá.'),
+          'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xoá.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Hủy')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Xoá')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Xoá'),
+          ),
         ],
       ),
     );
@@ -118,9 +131,9 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

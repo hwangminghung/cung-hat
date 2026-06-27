@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import '../../../core/theme/app_colors.dart';
 
 bool isAdult(DateTime dob, {DateTime? now}) {
   final n = now ?? DateTime.now();
@@ -32,14 +33,19 @@ class DobStep extends StatelessWidget {
             );
             if (picked != null) onPick(picked);
           },
-          child: Text(dob == null ? 'Chọn ngày sinh'
-              : '${dob!.day}/${dob!.month}/${dob!.year}'),
+          child: Text(
+            dob == null
+                ? 'Chọn ngày sinh'
+                : '${dob!.day}/${dob!.month}/${dob!.year}',
+          ),
         ),
         if (dob != null && !ok)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text(l10n?.onbUnder18 ?? 'Bạn phải đủ 18 tuổi để dùng ứng dụng.',
-                style: const TextStyle(color: Colors.red)),
+            child: Text(
+              l10n?.onbUnder18 ?? 'Bạn phải đủ 18 tuổi để dùng ứng dụng.',
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
       ],
     );

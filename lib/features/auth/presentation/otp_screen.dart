@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import '../../../core/theme/app_colors.dart';
 import '../application/auth_controller.dart';
 import '../../../shared/widgets/otp_input.dart';
 
@@ -36,9 +37,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Mã đã gửi tới ${state.phone ?? ''}',
-                style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.center),
+            Text(
+              'Mã đã gửi tới ${state.phone ?? ''}',
+              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             OtpInput(
               onChanged: (v) {
@@ -63,7 +66,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             if (state.phase == AuthPhase.error)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: Text(state.error ?? 'Lỗi', style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  state.error ?? 'Lỗi',
+                  style: const TextStyle(color: AppColors.error),
+                ),
               ),
           ],
         ),
