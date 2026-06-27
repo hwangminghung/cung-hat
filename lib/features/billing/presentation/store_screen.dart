@@ -12,6 +12,7 @@ class _Upgrade {
 }
 
 const _upgrades = <_Upgrade>[
+  _Upgrade('pro', 'Nâng cấp Pro', 'Tạo kèo, tham gia không giới hạn, mở mọi tính năng trả phí'),
   _Upgrade('boost', 'Đẩy kèo lên top', 'Đẩy kèo của bạn lên đầu bảng 24 giờ'),
   _Upgrade('see_likes', 'Xem ai đã thích bạn', 'Mở khoá danh sách người đã thích bạn'),
   _Upgrade('premium_filters', 'Bộ lọc nâng cao', 'Lọc theo gu nhạc, độ tuổi, khu vực'),
@@ -64,6 +65,8 @@ class StoreScreen extends ConsumerWidget {
         return l10n?.seeLikesTitle ?? 'Xem ai đã thích bạn';
       case 'premium_filters':
         return l10n?.filtersTitle ?? 'Bộ lọc nâng cao';
+      case 'pro':
+        return 'Nâng cấp Pro';
       default:
         return u.title;
     }
