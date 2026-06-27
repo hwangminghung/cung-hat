@@ -31,6 +31,7 @@ class KeoRepository {
     String? intent,
     String? vibe,
     List<String> genres = const [],
+    String joinMode = 'approval',
   }) async {
     final id = await _client.rpc('create_keo', params: {
       'p_title': title,
@@ -43,6 +44,7 @@ class KeoRepository {
       'p_intent': intent,
       'p_vibe': vibe,
       'p_genres': genres,
+      'p_join_mode': joinMode,
     });
     return id as String;
   }
