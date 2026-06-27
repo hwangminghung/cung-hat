@@ -15,11 +15,15 @@ class KeoBoardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final keosAsync = ref.watch(openKeosProvider);
+    // Watch (not read) so entitlements start loading when the board renders —
+    // otherwise a Pro user tapping before the async load resolves would briefly
+    // see the upgrade sheet (isPro defaults to false while loading).
+    final isPro = ref.watch(isProProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Kèo quanh bạn')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          if (ref.read(isProProvider)) {
+          if (isPro) {
             context.push('/keo/create');
           } else {
             _showProSheet(context);
