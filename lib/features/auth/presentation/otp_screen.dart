@@ -48,14 +48,17 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               onCompleted: _submit, // primary path: auto-submit on completion
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              key: const Key('verify_otp_btn'),
-              // Manual fallback. The _submitted guard prevents a duplicate
-              // verify when the user both completes the code and taps this.
-              onPressed: state.phase == AuthPhase.verifying
-                  ? null
-                  : () => _submit(_ctrl.text),
-              child: Text(l10n?.verify ?? 'Xác nhận'),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                key: const Key('verify_otp_btn'),
+                // Manual fallback. The _submitted guard prevents a duplicate
+                // verify when the user both completes the code and taps this.
+                onPressed: state.phase == AuthPhase.verifying
+                    ? null
+                    : () => _submit(_ctrl.text),
+                child: Text(l10n?.verify ?? 'Xác nhận'),
+              ),
             ),
             if (state.phase == AuthPhase.error)
               Padding(
