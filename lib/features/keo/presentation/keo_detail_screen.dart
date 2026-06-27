@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/keo_providers.dart';
+import '../data/keo_errors.dart';
 import '../domain/keo_member.dart';
 
 class KeoDetailScreen extends ConsumerWidget {
@@ -133,9 +134,29 @@ class KeoDetailScreen extends ConsumerWidget {
                 try {
                   await ref.read(keoRepositoryProvider).requestJoin(keoId);
                   ref.invalidate(keoRosterProvider(keoId));
-                } catch (_) {
-                  if (context.mounted) {
-                    _snack(context, 'Không xin vào kèo được, thử lại');
+                } catch (e) {
+                  if (!context.mounted) return;
+                  if (keoErrorCode(e) == 'free_join_limit') {
+                    showDialog<void>(
+                      context: context,
+                      builder: (d) => AlertDialog(
+                        content: Text(keoErrorMessage(e)),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(d),
+                              child: const Text('Để sau')),
+                          FilledButton(
+                            onPressed: () {
+                              Navigator.pop(d);
+                              context.push('/store');
+                            },
+                            child: const Text('Nâng cấp Pro'),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    _snack(context, keoErrorMessage(e));
                   }
                 }
               },
