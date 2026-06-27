@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../billing/application/billing_providers.dart';
 import '../application/keo_providers.dart';
 import 'keo_card.dart';
 
@@ -17,7 +18,13 @@ class KeoBoardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Kèo quanh bạn')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/keo/create'),
+        onPressed: () {
+          if (ref.read(isProProvider)) {
+            context.push('/keo/create');
+          } else {
+            _showProSheet(context);
+          }
+        },
         icon: const Icon(Icons.add),
         label: const Text('Tạo kèo'),
       ),
@@ -56,6 +63,38 @@ class KeoBoardScreen extends ConsumerWidget {
             },
           );
         },
+      ),
+    );
+  }
+
+  void _showProSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetCtx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Tạo kèo là tính năng Pro',
+                style: Theme.of(sheetCtx).textTheme.titleMedium,
+                textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            const Text('Nâng cấp Pro để tự tạo kèo và tham gia không giới hạn.',
+                textAlign: TextAlign.center),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(sheetCtx);
+                context.push('/store');
+              },
+              child: const Text('Nâng cấp Pro'),
+            ),
+            TextButton(
+                onPressed: () => Navigator.pop(sheetCtx),
+                child: const Text('Để sau')),
+          ],
+        ),
       ),
     );
   }
