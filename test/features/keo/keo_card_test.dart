@@ -18,5 +18,19 @@ void main() {
     expect(find.text('1/4 người'), findsOneWidget);
     expect(find.text('cách <1 km'), findsOneWidget);
     expect(find.text('K-Pop'), findsOneWidget);
+    // default joinMode is 'approval'
+    expect(find.text('Cần duyệt'), findsOneWidget);
+  });
+
+  testWidgets('KeoCard shows the open join-mode chip', (tester) async {
+    const keo = Keo(
+      id: '2', title: 'Hát mở', sizeTarget: 4, slotsFilled: 1,
+      joinMode: 'open',
+    );
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.light(),
+      home: const Scaffold(body: KeoCard(keo: keo)),
+    ));
+    expect(find.text('Mở · vào là tham gia'), findsOneWidget);
   });
 }

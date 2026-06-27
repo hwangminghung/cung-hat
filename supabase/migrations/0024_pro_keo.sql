@@ -101,3 +101,39 @@ begin
     update public.keo set status='full' where id=p_keo;
   end if;
 end; $$;
+
+-- 6) Expose join_mode on the board card so the UI can show a "Mở / Cần duyệt" chip.
+-- list_open_keos returns setof keo_card, so drop the function before altering the type.
+drop function if exists public.list_open_keos(int,int);
+drop type if exists public.keo_card;
+create type public.keo_card as (
+  id uuid, title text, area_label text, distance_band text,
+  time_window_start timestamptz, time_window_end timestamptz,
+  size_target int, slots_filled int, genres text[], host_name text, status text,
+  join_mode text
+);
+create or replace function public.list_open_keos(p_limit int default 30, p_radius_km int default 50)
+returns setof public.keo_card language sql security definer set search_path='' as $$
+  with me as (select location as loc from public.user_locations where user_id = auth.uid())
+  select k.id, k.title, k.area_label,
+         app_private.dist_band(public.ST_Distance(k.area_geo, me.loc)) as distance_band,
+         k.time_window_start, k.time_window_end, k.group_size_target,
+         (select count(*)::int from public.keo_members m
+            where m.keo_id = k.id and m.join_status = 'approved') as slots_filled,
+         k.genres,
+         (select display_name from public.profiles p where p.id = k.host_id) as host_name,
+         k.status,
+         k.join_mode
+  from public.keo k cross join me
+  where k.status = 'open'
+    and k.soft_deleted_at is null
+    and k.time_window_end > now()
+    and public.ST_DWithin(k.area_geo, me.loc, p_radius_km * 1000)
+    and not exists (select 1 from public.blocks b
+                    where (b.blocker_id = auth.uid() and b.blocked_id = k.host_id)
+                       or (b.blocker_id = k.host_id and b.blocked_id = auth.uid()))
+  order by k.time_window_start asc
+  limit greatest(p_limit, 1);
+$$;
+revoke execute on function public.list_open_keos(int,int) from public, anon;
+grant execute on function public.list_open_keos(int,int) to authenticated;

@@ -20,6 +20,7 @@ _Keo _$KeoFromJson(Map<String, dynamic> json) => _Keo(
       const [],
   hostName: json['host_name'] as String?,
   status: json['status'] as String? ?? 'open',
+  joinMode: json['join_mode'] as String? ?? 'approval',
 );
 
 Map<String, dynamic> _$KeoToJson(_Keo instance) => <String, dynamic>{
@@ -34,4 +35,5 @@ Map<String, dynamic> _$KeoToJson(_Keo instance) => <String, dynamic>{
   'genres': instance.genres,
   'host_name': instance.hostName,
   'status': instance.status,
+  'join_mode': instance.joinMode,
 };

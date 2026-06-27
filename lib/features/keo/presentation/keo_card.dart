@@ -25,6 +25,8 @@ class KeoCard extends StatelessWidget {
             children: [
               Text(keo.title, style: text.titleMedium),
               const SizedBox(height: AppSpacing.sm),
+              Align(alignment: Alignment.centerLeft, child: _modeChip()),
+              const SizedBox(height: AppSpacing.sm),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -61,6 +63,34 @@ class KeoCard extends StatelessWidget {
       Text(label, style: Theme.of(context).textTheme.bodySmall),
     ],
   );
+
+  Widget _modeChip() {
+    final open = keo.joinMode == 'open';
+    final label = open ? 'Mở · vào là tham gia' : 'Cần duyệt';
+    final fg = open ? AppColors.primaryDark : AppColors.textSecondary;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: open ? AppColors.primaryTint : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        border: open ? null : Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(open ? Icons.lock_open_outlined : Icons.verified_user_outlined,
+              size: 13, color: fg),
+          const SizedBox(width: AppSpacing.xs),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w500, color: fg)),
+        ],
+      ),
+    );
+  }
 
   Widget _genreChip(String g) => Container(
     padding: const EdgeInsets.symmetric(
