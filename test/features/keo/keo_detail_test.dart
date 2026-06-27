@@ -30,4 +30,26 @@ void main() {
     await tester.pump();
     verify(() => repo.requestJoin('k1')).called(1);
   });
+
+  testWidgets('free_join_limit error shows the upgrade dialog', (tester) async {
+    final repo = _MockRepo();
+    when(() => repo.roster('k1')).thenAnswer((_) async => const []);
+    when(() => repo.requestJoin('k1')).thenThrow(
+        'PostgrestException(message: free_join_limit, code: 23514)');
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        keoRepositoryProvider.overrideWithValue(repo),
+        myProfileProvider.overrideWith((ref) => Future<Profile?>.value(null)),
+      ],
+      child: const MaterialApp(home: KeoDetailScreen(keoId: 'k1', title: 'Hát tối T7')),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('request_join_btn')));
+    await tester.pumpAndSettle();
+    expect(
+        find.text(
+            'Bạn đang tham gia 1 kèo. Rời kèo cũ hoặc nâng cấp Pro để tham gia thêm.'),
+        findsOneWidget);
+    expect(find.text('Nâng cấp Pro'), findsOneWidget);
+  });
 }
