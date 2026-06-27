@@ -8,19 +8,46 @@ abstract final class AppTypography {
     final t = GoogleFonts.beVietnamProTextTheme(base);
     return t.copyWith(
       headlineMedium: t.headlineMedium?.copyWith(
-          fontSize: 26, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        fontSize: 26,
+        fontWeight: FontWeight.w600,
+        height: 1.15,
+        color: AppColors.textPrimary,
+      ),
       titleLarge: t.titleLarge?.copyWith(
-          fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        height: 1.25,
+        color: AppColors.textPrimary,
+      ),
       titleMedium: t.titleMedium?.copyWith(
-          fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        height: 1.35,
+        color: AppColors.textPrimary,
+      ),
       bodyLarge: t.bodyLarge?.copyWith(
-          fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        height: 1.45,
+        color: AppColors.textPrimary,
+      ),
       bodyMedium: t.bodyMedium?.copyWith(
-          fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        height: 1.45,
+        color: AppColors.textPrimary,
+      ),
       bodySmall: t.bodySmall?.copyWith(
-          fontSize: 13, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        height: 1.4,
+        color: AppColors.textSecondary,
+      ),
       labelLarge: t.labelLarge?.copyWith(
-          fontSize: 15, fontWeight: FontWeight.w600),
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        height: 1.2,
+      ),
     );
   }
 }
