@@ -18,6 +18,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
   DateTime? _start;
   DateTime? _end;
   int _size = 4;
+  String _joinMode = 'approval';
   final Set<String> _genreIds = {};
   bool _submitting = false;
 
@@ -88,6 +89,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
             end: _end!,
             size: _size,
             genres: _genreIds.toList(),
+            joinMode: _joinMode,
           );
       if (!mounted) return;
       context.go('/keo/$id');
@@ -192,6 +194,19 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => const Text('Không tải được thể loại'),
+          ),
+          const SizedBox(height: 16),
+          const Text('Chế độ tham gia'),
+          const SizedBox(height: 8),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(value: 'approval', label: Text('Cần duyệt'), icon: Icon(Icons.verified_user_outlined)),
+              ButtonSegment(value: 'open', label: Text('Mở'), icon: Icon(Icons.lock_open_outlined)),
+            ],
+            selected: {_joinMode},
+            onSelectionChanged: _submitting
+                ? null
+                : (s) => setState(() => _joinMode = s.first),
           ),
           const SizedBox(height: 24),
           FilledButton(
