@@ -22,12 +22,13 @@ class KeoBoardScreen extends ConsumerWidget {
         label: const Text('Tạo kèo'),
       ),
       body: keosAsync.when(
-        loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.primary)),
-        error: (err, _) => const EmptyState(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => EmptyState(
           icon: Icons.wifi_off,
           title: 'Không tải được danh sách kèo',
           subtitle: 'Kiểm tra kết nối rồi thử lại.',
+          actionLabel: 'Thử lại',
+          onAction: () => ref.invalidate(openKeosProvider),
         ),
         data: (keos) {
           if (keos.isEmpty) {
@@ -41,14 +42,16 @@ class KeoBoardScreen extends ConsumerWidget {
           }
           return ListView.builder(
             padding: const EdgeInsets.only(bottom: 96, top: AppSpacing.sm),
-            itemCount: keos.length + 1,
+            itemCount: keos.length + 2,
             itemBuilder: (context, index) {
-              if (index == 0) return _matchBanner(context, ref);
-              final k = keos[index - 1];
+              if (index == 0) return _boardHeader(context);
+              if (index == 1) return _matchBanner(context, ref);
+              final k = keos[index - 2];
               return KeoCard(
                 keo: k,
                 onTap: () => context.push(
-                    '/keo/${k.id}?title=${Uri.encodeComponent(k.title)}'),
+                  '/keo/${k.id}?title=${Uri.encodeComponent(k.title)}',
+                ),
               );
             },
           );
@@ -57,36 +60,67 @@ class KeoBoardScreen extends ConsumerWidget {
     );
   }
 
+  Widget _boardHeader(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(
+      AppSpacing.lg,
+      AppSpacing.md,
+      AppSpacing.lg,
+      AppSpacing.xs,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Tìm nhóm đi hát',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Cùng ghép một kèo hợp gu và gặp nhau ngoài đời.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    ),
+  );
+
   Widget _matchBanner(BuildContext context, WidgetRef ref) => Padding(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
-        child: Material(
-          color: AppColors.primaryTint,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            onTap: () => ref.invalidate(openKeosProvider),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Row(
-                children: [
-                  const Icon(Icons.auto_awesome, color: AppColors.primary),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Ghép nhóm cho tôi',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        Text('Tự động gợi ý kèo phù hợp (sắp có)',
-                            style: Theme.of(context).textTheme.bodySmall),
-                      ],
+    padding: const EdgeInsets.fromLTRB(
+      AppSpacing.lg,
+      AppSpacing.sm,
+      AppSpacing.lg,
+      AppSpacing.sm,
+    ),
+    child: Material(
+      color: AppColors.primaryTint,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        onTap: () => ref.invalidate(openKeosProvider),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppColors.primary),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ghép nhóm cho tôi',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                  ),
-                ],
+                    Text(
+                      'Tự động gợi ý kèo phù hợp (sắp có)',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
