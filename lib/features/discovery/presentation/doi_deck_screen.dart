@@ -6,6 +6,7 @@ import '../application/discovery_providers.dart';
 import '../domain/candidate.dart';
 import 'candidate_card.dart';
 import 'match_celebration.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 class DoiDeckScreen extends ConsumerStatefulWidget {
   const DoiDeckScreen({super.key});
@@ -40,10 +41,20 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       body: SafeArea(
         child: candidatesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text('Không tải được. $err')),
+          error: (err, _) => EmptyState(
+            icon: Icons.wifi_off,
+            title: 'Không tải được gợi ý',
+            subtitle: 'Kiểm tra kết nối rồi thử lại.',
+            actionLabel: 'Thử lại',
+            onAction: () => ref.invalidate(candidatesProvider),
+          ),
           data: (candidates) {
             if (candidates.isEmpty) {
-              return const Center(child: Text('Hết người quanh đây 👀'));
+              return const EmptyState(
+                icon: Icons.music_note_outlined,
+                title: 'Chưa có bạn hát quanh đây',
+                subtitle: 'Mở lại sau một chút để xem gợi ý mới.',
+              );
             }
             return Padding(
               padding: const EdgeInsets.all(16),
@@ -74,25 +85,31 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// Records the swipe and, for like/super, shows the match celebration on a
   /// mutual match. Called (not awaited) from the synchronous onSwipe callback.
   void _handleSwipe(Candidate candidate, String dir) {
-    ref.read(discoveryRepositoryProvider).recordSwipe(candidate.id, dir).then((isMatch) {
-      if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => MatchCelebration(
-              otherName: candidate.displayName ?? '',
-              sharedBaitu: candidate.sharedBaitu,
-              // TODO(P2): open chat thread
-              onChat: () => Navigator.of(context).pop(),
-            ),
-          ),
-        );
-      }
-    }).catchError((Object e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không lưu được lượt vuốt. Thử lại sau.')),
-        );
-      }
-    });
+    ref
+        .read(discoveryRepositoryProvider)
+        .recordSwipe(candidate.id, dir)
+        .then((isMatch) {
+          if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => MatchCelebration(
+                  otherName: candidate.displayName ?? '',
+                  sharedBaitu: candidate.sharedBaitu,
+                  // TODO(P2): open chat thread
+                  onChat: () => Navigator.of(context).pop(),
+                ),
+              ),
+            );
+          }
+        })
+        .catchError((Object e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Không lưu được lượt vuốt. Thử lại sau.'),
+              ),
+            );
+          }
+        });
   }
 }

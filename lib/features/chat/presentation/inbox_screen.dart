@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/empty_state.dart';
 import '../application/inbox_providers.dart';
 
 /// Matches inbox hosted on the Chat tab: list of active matches with unread
@@ -14,17 +15,28 @@ class InboxScreen extends ConsumerWidget {
     final async = ref.watch(inboxProvider);
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, _) => EmptyState(
+        icon: Icons.wifi_off,
+        title: 'Không tải được cuộc trò chuyện',
+        subtitle: 'Kiểm tra kết nối rồi thử lại.',
+        actionLabel: 'Thử lại',
+        onAction: () => ref.invalidate(inboxProvider),
+      ),
       data: (matches) {
         if (matches.isEmpty) {
-          return const Center(child: Text('Chưa có cuộc trò chuyện nào'));
+          return const EmptyState(
+            icon: Icons.chat_bubble_outline,
+            title: 'Chưa có cuộc trò chuyện nào',
+            subtitle: 'Khi bạn có bạn hát mới, tin nhắn sẽ ở đây.',
+          );
         }
         return ListView.builder(
           itemCount: matches.length,
           itemBuilder: (context, i) {
             final m = matches[i];
-            final monogram =
-                m.otherName.isEmpty ? '?' : m.otherName.characters.first;
+            final monogram = m.otherName.isEmpty
+                ? '?'
+                : m.otherName.characters.first;
             return ListTile(
               leading: CircleAvatar(child: Text(monogram)),
               title: Text(m.otherName),

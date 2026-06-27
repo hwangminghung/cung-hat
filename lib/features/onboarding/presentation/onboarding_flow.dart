@@ -4,6 +4,8 @@ import 'package:cung_hat/l10n/app_localizations.dart';
 import '../application/onboarding_controller.dart';
 import '../application/reference_providers.dart';
 import '../domain/music_ref.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/section_header.dart';
 import 'consent_step.dart';
 import 'dob_step.dart';
@@ -20,7 +22,9 @@ class OnboardingFlow extends ConsumerStatefulWidget {
 
 class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   DateTime? _dob;
-  late final Map<String, bool> _consents = {for (final p in consentPurposes) p: false};
+  late final Map<String, bool> _consents = {
+    for (final p in consentPurposes) p: false,
+  };
   final _nameCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
   final Set<String> _genreSel = {};
@@ -47,14 +51,22 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     }
     final missing = missingRequiredConsents(_consents);
     if (missing.isNotEmpty) {
-      setState(() => _step = _consentStepIndex); // jump back to the consent step (DOB=0, consent=1)
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(l10n?.onbConsentRequired ??
-            'Vui lòng đồng ý các quyền bắt buộc để tiếp tục.'),
-      ));
+      setState(
+        () => _step = _consentStepIndex,
+      ); // jump back to the consent step (DOB=0, consent=1)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.onbConsentRequired ??
+                'Vui lòng đồng ý các quyền bắt buộc để tiếp tục.',
+          ),
+        ),
+      );
       return;
     }
-    ref.read(onboardingControllerProvider.notifier).submit(
+    ref
+        .read(onboardingControllerProvider.notifier)
+        .submit(
           displayName: _nameCtrl.text,
           fullName: _nameCtrl.text,
           dob: _dob!,
@@ -84,7 +96,11 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) {
             debugPrint('onboarding: reference load error: $err');
-            return Text(l10n?.onbLoadError ?? 'Không tải được dữ liệu.');
+            return EmptyState(
+              icon: Icons.wifi_off,
+              title: l10n?.onbLoadError ?? 'Không tải được dữ liệu.',
+              subtitle: 'Thử lại sau ít phút.',
+            );
           },
           data: (items) => TasteChips<T>(
             items: items,
@@ -92,7 +108,9 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             idOf: idOf,
             selected: selected,
             onToggle: (id) => setState(
-              () => selected.contains(id) ? selected.remove(id) : selected.add(id),
+              () => selected.contains(id)
+                  ? selected.remove(id)
+                  : selected.add(id),
             ),
           ),
         ),
@@ -113,7 +131,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                l10n?.onbSubmitError ?? 'Có lỗi xảy ra, vui lòng thử lại.'),
+              l10n?.onbSubmitError ?? 'Có lỗi xảy ra, vui lòng thử lại.',
+            ),
           ),
         );
       }
@@ -132,8 +151,12 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             padding: const EdgeInsets.only(left: 16, bottom: 8),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('Bước ${_step + 1}/4',
-                  style: Theme.of(context).textTheme.bodySmall),
+              child: Text(
+                'Bước ${_step + 1}/4',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.primary),
+              ),
             ),
           ),
         ),
@@ -206,14 +229,16 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                   key: const Key('onb_name'),
                   controller: _nameCtrl,
                   decoration: InputDecoration(
-                      labelText: l10n?.onbNameLabel ?? 'Tên hiển thị'),
+                    labelText: l10n?.onbNameLabel ?? 'Tên hiển thị',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   key: const Key('onb_bio'),
                   controller: _bioCtrl,
                   decoration: InputDecoration(
-                      labelText: l10n?.onbBioLabel ?? 'Giới thiệu'),
+                    labelText: l10n?.onbBioLabel ?? 'Giới thiệu',
+                  ),
                 ),
               ],
             ),
