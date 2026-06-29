@@ -116,6 +116,27 @@ begin
             else 0.25
           end
         + case when extract(hour from k.time_window_start at time zone 'Asia/Bangkok') between 18 and 22 then 1.0 else 0 end
+        + case
+            when k.group_size_target - (
+              select count(*)::int
+              from public.keo_members km
+              where km.keo_id = k.id
+                and km.join_status = 'approved'
+            ) >= 3 then 1.0
+            when k.group_size_target - (
+              select count(*)::int
+              from public.keo_members km
+              where km.keo_id = k.id
+                and km.join_status = 'approved'
+            ) >= 2 then 0.6
+            when k.group_size_target - (
+              select count(*)::int
+              from public.keo_members km
+              where km.keo_id = k.id
+                and km.join_status = 'approved'
+            ) >= 1 then 0.25
+            else 0
+          end
         + case when hp.last_active > now() - interval '1 day' then 0.5 else 0 end
         - coalesce(hp.report_risk, 0) * 2.0
       ) as score
@@ -254,7 +275,7 @@ begin
     raise exception 'invalid_time_window' using errcode='check_violation';
   end if;
 
-  if p_size < 2 or p_size > 5 then
+  if p_size is null or p_size < 2 or p_size > 5 then
     raise exception 'invalid_group_size' using errcode='check_violation';
   end if;
 

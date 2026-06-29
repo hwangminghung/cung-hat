@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(13);
 
 select ok(
   exists(select 1 from pg_type where typname = 'keo_match_suggestion'),
@@ -54,7 +54,10 @@ insert into auth.users (id) values
   ('00000000-0000-0000-0000-00000000aa01'),
   ('00000000-0000-0000-0000-00000000aa02'),
   ('00000000-0000-0000-0000-00000000aa03'),
-  ('00000000-0000-0000-0000-00000000aa04')
+  ('00000000-0000-0000-0000-00000000aa04'),
+  ('00000000-0000-0000-0000-00000000aa05'),
+  ('00000000-0000-0000-0000-00000000aa06'),
+  ('00000000-0000-0000-0000-00000000aa07')
 on conflict (id) do nothing;
 
 insert into public.profiles (id, display_name, dob, age_verified, verified_badge, report_risk) values
@@ -90,21 +93,45 @@ on conflict do nothing;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000aa02"}';
 set local role authenticated;
 
-create temp table _auto_keo (id uuid);
-insert into _auto_keo
+create temp table _tight_auto_keo (id uuid);
+create temp table _roomy_auto_keo (id uuid);
+
+insert into _tight_auto_keo
 select public.create_keo(
-  'V-Pop toi nay',
+  'Nearly full V-Pop toi nay',
   10.778,
   106.702,
   'Q1',
-  now() + interval '1 day',
-  now() + interval '1 day 3 hours',
-  4,
+  (date_trunc('day', timezone('Asia/Bangkok', now())) + interval '1 day 20 hours') at time zone 'Asia/Bangkok',
+  (date_trunc('day', timezone('Asia/Bangkok', now())) + interval '1 day 23 hours') at time zone 'Asia/Bangkok',
+  5,
   null,
   null,
   array['vpop'],
   'open'
 );
+
+insert into _roomy_auto_keo
+select public.create_keo(
+  'Roomy V-Pop toi nay',
+  10.778,
+  106.702,
+  'Q1',
+  (date_trunc('day', timezone('Asia/Bangkok', now())) + interval '1 day 21 hours') at time zone 'Asia/Bangkok',
+  (date_trunc('day', timezone('Asia/Bangkok', now())) + interval '2 days') at time zone 'Asia/Bangkok',
+  5,
+  null,
+  null,
+  array['vpop'],
+  'open'
+);
+
+set local role postgres;
+
+insert into public.keo_members(keo_id, user_id, role, join_status, confirmed) values
+  ((select id from _tight_auto_keo), '00000000-0000-0000-0000-00000000aa05', 'member', 'approved', false),
+  ((select id from _tight_auto_keo), '00000000-0000-0000-0000-00000000aa06', 'member', 'approved', false),
+  ((select id from _tight_auto_keo), '00000000-0000-0000-0000-00000000aa07', 'member', 'approved', false);
 
 set local role postgres;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000aa01"}';
@@ -121,6 +148,12 @@ select ok(
      from public.suggest_keo_match(1)
     limit 1),
   'music-fit reason is returned'
+);
+
+select is(
+  (select title from public.suggest_keo_match(1) limit 1),
+  'Roomy V-Pop toi nay',
+  'roomier open keo ranks ahead via capacity score bonus'
 );
 
 set local role postgres;
@@ -181,6 +214,20 @@ select throws_ok(
 set local role postgres;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000aa01"}';
 set local role authenticated;
+
+select throws_ok(
+  $$ select public.create_auto_matched_keo(
+    'Keo goi y toi nay',
+    now() + interval '1 day',
+    now() + interval '1 day 3 hours',
+    null::int,
+    array['vpop'],
+    'open'
+  ) $$,
+  '23514',
+  'invalid_group_size',
+  'null group size is rejected by auto-matched keo RPC'
+);
 
 create temp table _created_auto_keo (id uuid);
 insert into _created_auto_keo
