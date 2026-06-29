@@ -20,6 +20,8 @@ void main() {
       hostName: 'Mai',
       joinMode: 'open',
       reasonLabels: ['shared_genres', 'near_you'],
+      timeWindowStart: '2026-06-30T12:00:00Z',
+      timeWindowEnd: '2026-06-30T15:00:00Z',
     );
 
     await tester.pumpWidget(
@@ -36,6 +38,7 @@ void main() {
 
     expect(find.text('Keo hop voi ban'), findsOneWidget);
     expect(find.text('V-Pop toi nay'), findsOneWidget);
+    expect(find.text('2026-06-30 12:00 - 15:00 UTC'), findsOneWidget);
     expect(find.text('Hop gu nhac'), findsOneWidget);
     expect(find.text('Gan ban'), findsOneWidget);
 
@@ -76,6 +79,7 @@ void main() {
     expect(created, isFalse);
     expect(find.text('Tao keo moi tu goi y nay?'), findsOneWidget);
     expect(find.text('Keo goi y toi nay'), findsOneWidget);
+    expect(find.text('2026-06-30 12:00 - 15:00 UTC'), findsOneWidget);
     expect(find.text('Gio dep'), findsOneWidget);
     expect(find.text('Vao nhanh'), findsOneWidget);
 

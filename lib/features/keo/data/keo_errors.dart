@@ -12,6 +12,8 @@ const _messages = <String, String>{
       'Can bat vi tri de ghep keo. Hay bat Location roi thu lai.',
   'age_not_verified': 'Can xac minh tuoi truoc khi ghep keo.',
   'no_matchable_keo': 'Chua tim duoc keo phu hop, thu lai sau.',
+  'invalid_time_window': 'Gio hen khong hop le. Hay chon khung gio khac.',
+  'invalid_group_size': 'So nguoi trong keo khong hop le.',
 };
 
 String? keoErrorCode(Object error) {

@@ -177,8 +177,10 @@ class _SuggestionMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final timeWindow = _formatTimeWindow(suggestion);
     final details = <String>[
       '${suggestion.slotsFilled}/${suggestion.sizeTarget} nguoi',
+      ?timeWindow,
       if (suggestion.distanceBand != null) '${suggestion.distanceBand} km',
       if (suggestion.hostName != null) suggestion.hostName!,
     ];
@@ -192,6 +194,41 @@ class _SuggestionMeta extends StatelessWidget {
       ],
     );
   }
+
+  String? _formatTimeWindow(KeoMatchSuggestion suggestion) {
+    final isExisting = suggestion.suggestionType == 'existing_keo';
+    final start = isExisting
+        ? suggestion.timeWindowStart
+        : suggestion.proposedStart;
+    final end = isExisting ? suggestion.timeWindowEnd : suggestion.proposedEnd;
+    if (start == null || end == null) return null;
+
+    try {
+      final startUtc = DateTime.parse(start).toUtc();
+      final endUtc = DateTime.parse(end).toUtc();
+      final sameDate =
+          startUtc.year == endUtc.year &&
+          startUtc.month == endUtc.month &&
+          startUtc.day == endUtc.day;
+      final endText = sameDate ? _time(endUtc) : _dateTime(endUtc);
+      return '${_dateTime(startUtc)} - $endText UTC';
+    } on FormatException {
+      return '$start - $end';
+    }
+  }
+
+  String _dateTime(DateTime value) {
+    return '${_fourDigits(value.year)}-${_twoDigits(value.month)}-${_twoDigits(value.day)} '
+        '${_twoDigits(value.hour)}:${_twoDigits(value.minute)}';
+  }
+
+  String _time(DateTime value) {
+    return '${_twoDigits(value.hour)}:${_twoDigits(value.minute)}';
+  }
+
+  String _fourDigits(int value) => value.toString().padLeft(4, '0');
+
+  String _twoDigits(int value) => value.toString().padLeft(2, '0');
 }
 
 class _ReasonChip extends StatelessWidget {
