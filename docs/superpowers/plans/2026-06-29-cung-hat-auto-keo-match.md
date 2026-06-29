@@ -38,7 +38,7 @@ Create `supabase/tests/auto_keo_match_test.sql`:
 
 ```sql
 begin;
-select plan(9);
+select plan(11);
 
 select ok(
   exists(select 1 from pg_type where typname = 'keo_match_suggestion'),
@@ -550,7 +550,7 @@ Run:
 supabase test db
 ```
 
-Expected: PASS with 9 assertions.
+Expected: PASS with 11 assertions.
 
 - [ ] **Step 5: Commit**
 
