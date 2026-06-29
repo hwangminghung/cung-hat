@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../data/keo_repository.dart';
 import '../domain/keo.dart';
+import '../domain/keo_match_suggestion.dart';
 import '../domain/keo_member.dart';
 
 final keoRepositoryProvider =
@@ -9,6 +10,11 @@ final keoRepositoryProvider =
 
 final openKeosProvider = FutureProvider<List<Keo>>(
     (ref) => ref.watch(keoRepositoryProvider).listOpenKeos());
+
+final keoMatchSuggestionsProvider =
+    FutureProvider.autoDispose<List<KeoMatchSuggestion>>(
+  (ref) => ref.watch(keoRepositoryProvider).suggestMatch(),
+);
 
 final keoRosterProvider = FutureProvider.family<List<KeoMember>, String>(
     (ref, keoId) => ref.watch(keoRepositoryProvider).roster(keoId));

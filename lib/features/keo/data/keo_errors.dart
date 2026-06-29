@@ -7,6 +7,11 @@ const _messages = <String, String>{
   'keo_full': 'Kèo đã đầy.',
   'already_declined': 'Bạn đã bị từ chối ở kèo này.',
   'keo_not_open': 'Kèo không còn mở.',
+  'blocked': 'Khong the vao keo nay vi cai dat an toan.',
+  'location_required':
+      'Can bat vi tri de ghep keo. Hay bat Location roi thu lai.',
+  'age_not_verified': 'Can xac minh tuoi truoc khi ghep keo.',
+  'no_matchable_keo': 'Chua tim duoc keo phu hop, thu lai sau.',
 };
 
 String? keoErrorCode(Object error) {
