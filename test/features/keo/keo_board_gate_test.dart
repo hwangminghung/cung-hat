@@ -251,7 +251,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('GhÃ©p nhÃ³m cho tÃ´i'));
+    await tester.tap(find.text('Ghép nhóm cho tôi'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('keo_match_create_btn')));
