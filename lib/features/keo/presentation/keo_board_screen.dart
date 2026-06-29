@@ -6,8 +6,12 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../billing/application/billing_providers.dart';
+import '../../discovery/application/discovery_providers.dart';
 import '../application/keo_providers.dart';
+import '../data/keo_errors.dart';
+import '../domain/keo_match_suggestion.dart';
 import 'keo_card.dart';
+import 'keo_match_sheet.dart';
 
 class KeoBoardScreen extends ConsumerWidget {
   const KeoBoardScreen({super.key});
@@ -15,9 +19,7 @@ class KeoBoardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final keosAsync = ref.watch(openKeosProvider);
-    // Watch (not read) so entitlements start loading when the board renders —
-    // otherwise a Pro user tapping before the async load resolves would briefly
-    // see the upgrade sheet (isPro defaults to false while loading).
+    // Watch (not read) so entitlements start loading when the board renders.
     final isPro = ref.watch(isProProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Kèo quanh bạn')),
@@ -43,12 +45,19 @@ class KeoBoardScreen extends ConsumerWidget {
         ),
         data: (keos) {
           if (keos.isEmpty) {
-            return EmptyState(
-              icon: Icons.groups,
-              title: 'Chưa có kèo quanh đây',
-              subtitle: 'Hãy là người đầu tiên rủ mọi người đi hát.',
-              actionLabel: 'Tạo kèo đầu tiên',
-              onAction: () => context.push('/keo/create'),
+            return ListView(
+              padding: const EdgeInsets.only(bottom: 96, top: AppSpacing.sm),
+              children: [
+                _boardHeader(context),
+                _matchBanner(context, ref),
+                EmptyState(
+                  icon: Icons.groups,
+                  title: 'Chưa có kèo quanh đây',
+                  subtitle: 'Hãy là người đầu tiên rủ mọi người đi hát.',
+                  actionLabel: 'Tạo kèo đầu tiên',
+                  onAction: () => context.push('/keo/create'),
+                ),
+              ],
             );
           }
           return ListView.builder(
@@ -80,12 +89,16 @@ class KeoBoardScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Tạo kèo là tính năng Pro',
-                style: Theme.of(sheetCtx).textTheme.titleMedium,
-                textAlign: TextAlign.center),
+            Text(
+              'Tạo kèo là tính năng Pro',
+              style: Theme.of(sheetCtx).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
-            const Text('Nâng cấp Pro để tự tạo kèo và tham gia không giới hạn.',
-                textAlign: TextAlign.center),
+            const Text(
+              'Nâng cấp Pro để tự tạo kèo và tham gia không giới hạn.',
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: () {
@@ -95,8 +108,9 @@ class KeoBoardScreen extends ConsumerWidget {
               child: const Text('Nâng cấp Pro'),
             ),
             TextButton(
-                onPressed: () => Navigator.pop(sheetCtx),
-                child: const Text('Để sau')),
+              onPressed: () => Navigator.pop(sheetCtx),
+              child: const Text('Để sau'),
+            ),
           ],
         ),
       ),
@@ -138,7 +152,7 @@ class KeoBoardScreen extends ConsumerWidget {
       borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        onTap: () => ref.invalidate(openKeosProvider),
+        onTap: () => _runAutoMatch(context, ref),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
@@ -154,7 +168,7 @@ class KeoBoardScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(
-                      'Tự động gợi ý kèo phù hợp (sắp có)',
+                      'Tu dong goi y keo hop gu, gan ban',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -166,4 +180,99 @@ class KeoBoardScreen extends ConsumerWidget {
       ),
     ),
   );
+
+  Future<void> _runAutoMatch(BuildContext context, WidgetRef ref) async {
+    var loadingOpen = true;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await ref.read(locationServiceProvider).captureAndPush();
+      final suggestions = await ref.read(keoRepositoryProvider).suggestMatch();
+
+      if (!context.mounted) return;
+      if (loadingOpen) {
+        Navigator.of(context, rootNavigator: true).pop();
+        loadingOpen = false;
+      }
+
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) => KeoMatchSheet(
+          suggestions: suggestions,
+          onJoin: (suggestion) =>
+              _joinSuggestion(context, sheetContext, ref, suggestion),
+          onCreate: (suggestion) =>
+              _createSuggestion(context, sheetContext, ref, suggestion),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      if (loadingOpen) {
+        Navigator.of(context, rootNavigator: true).pop();
+        loadingOpen = false;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(keoErrorMessage(e))));
+    }
+  }
+
+  Future<void> _joinSuggestion(
+    BuildContext boardContext,
+    BuildContext sheetContext,
+    WidgetRef ref,
+    KeoMatchSuggestion suggestion,
+  ) async {
+    final keoId = suggestion.keoId;
+    if (keoId == null) return;
+
+    await ref.read(keoRepositoryProvider).requestJoin(keoId);
+    ref.invalidate(openKeosProvider);
+    if (sheetContext.mounted) {
+      Navigator.of(sheetContext).pop();
+    }
+    if (boardContext.mounted) {
+      boardContext.push(
+        '/keo/$keoId?title=${Uri.encodeComponent(suggestion.title)}',
+      );
+    }
+  }
+
+  Future<void> _createSuggestion(
+    BuildContext boardContext,
+    BuildContext sheetContext,
+    WidgetRef ref,
+    KeoMatchSuggestion suggestion,
+  ) async {
+    final start = DateTime.tryParse(suggestion.proposedStart ?? '');
+    final end = DateTime.tryParse(suggestion.proposedEnd ?? '');
+    if (start == null || end == null) {
+      throw 'no_matchable_keo';
+    }
+
+    final id = await ref
+        .read(keoRepositoryProvider)
+        .createAutoMatchedKeo(
+          title: suggestion.title,
+          start: start,
+          end: end,
+          size: suggestion.sizeTarget,
+          genres: suggestion.genres,
+          joinMode: suggestion.joinMode,
+        );
+    ref.invalidate(openKeosProvider);
+    if (sheetContext.mounted) {
+      Navigator.of(sheetContext).pop();
+    }
+    if (boardContext.mounted) {
+      boardContext.push(
+        '/keo/$id?title=${Uri.encodeComponent(suggestion.title)}',
+      );
+    }
+  }
 }
