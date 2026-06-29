@@ -182,42 +182,64 @@ class KeoBoardScreen extends ConsumerWidget {
   );
 
   Future<void> _runAutoMatch(BuildContext context, WidgetRef ref) async {
-    var loadingOpen = true;
-    showDialog<void>(
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
+    final loadingRoute = DialogRoute<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const PopScope(
+        canPop: false,
+        child: Center(child: CircularProgressIndicator()),
+      ),
     );
+    rootNavigator.push(loadingRoute);
+
+    void dismissLoading() {
+      if (rootNavigator.mounted && loadingRoute.isActive) {
+        rootNavigator.removeRoute(loadingRoute);
+      }
+    }
 
     try {
       await ref.read(locationServiceProvider).captureAndPush();
       final suggestions = await ref.read(keoRepositoryProvider).suggestMatch();
 
+      dismissLoading();
       if (!context.mounted) return;
-      if (loadingOpen) {
-        Navigator.of(context, rootNavigator: true).pop();
-        loadingOpen = false;
-      }
 
       await showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
         builder: (sheetContext) => KeoMatchSheet(
           suggestions: suggestions,
-          onJoin: (suggestion) =>
-              _joinSuggestion(context, sheetContext, ref, suggestion),
-          onCreate: (suggestion) =>
-              _createSuggestion(context, sheetContext, ref, suggestion),
+          onJoin: (suggestion) => _runSheetAction(
+            context,
+            () => _joinSuggestion(context, sheetContext, ref, suggestion),
+          ),
+          onCreate: (suggestion) => _runSheetAction(
+            context,
+            () => _createSuggestion(context, sheetContext, ref, suggestion),
+          ),
         ),
       );
     } catch (e) {
+      dismissLoading();
       if (!context.mounted) return;
-      if (loadingOpen) {
-        Navigator.of(context, rootNavigator: true).pop();
-        loadingOpen = false;
-      }
       ScaffoldMessenger.of(
         context,
+      ).showSnackBar(SnackBar(content: Text(keoErrorMessage(e))));
+    }
+  }
+
+  Future<void> _runSheetAction(
+    BuildContext boardContext,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+    } catch (e) {
+      if (!boardContext.mounted) return;
+      ScaffoldMessenger.of(
+        boardContext,
       ).showSnackBar(SnackBar(content: Text(keoErrorMessage(e))));
     }
   }

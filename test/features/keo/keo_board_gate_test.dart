@@ -184,6 +184,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.joinCalls, 1);
+    expect(find.text('match-1'), findsOneWidget);
   });
 
   testWidgets('banner shows proposal suggestion and creates on confirmation', (
@@ -222,5 +223,44 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.createCalls, 1);
+    expect(find.text('created-keo'), findsOneWidget);
+  });
+
+  testWidgets('proposal create errors show a snackbar', (tester) async {
+    final repo = _FakeKeoRepository(
+      openKeos: [_openKeo()],
+      suggestions: const [
+        KeoMatchSuggestion(
+          suggestionType: 'new_keo_proposal',
+          title: 'V-Pop toi nay',
+          proposedStart: 'not-a-date',
+          proposedEnd: '2026-06-30T15:00:00Z',
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: _boardRouter(),
+        ),
+        entitlements: const <String>{'pro'},
+        repo: repo,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('GhÃ©p nhÃ³m cho tÃ´i'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('keo_match_create_btn')));
+    await tester.pump();
+
+    expect(
+      find.text('Chua tim duoc keo phu hop, thu lai sau.'),
+      findsOneWidget,
+    );
+    expect(repo.createCalls, 0);
   });
 }
