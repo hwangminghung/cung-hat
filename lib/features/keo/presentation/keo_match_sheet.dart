@@ -54,99 +54,104 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
     final title = isExisting ? 'Keo hop voi ban' : 'Tao keo moi tu goi y nay?';
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Dong',
-                  onPressed: _submitting
-                      ? null
-                      : () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              suggestion.title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            _SuggestionMeta(suggestion: suggestion),
-            if (suggestion.reasonLabels.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  for (final reason in suggestion.reasonLabels)
-                    _ReasonChip(label: _reasonLabel(reason)),
-                ],
-              ),
-            ],
-            const SizedBox(height: AppSpacing.xl),
-            if (isExisting)
-              SizedBox(
-                width: double.infinity,
-                height: AppSpacing.buttonHeight,
-                child: FilledButton(
-                  key: const Key('keo_match_join_btn'),
-                  onPressed: _submitting
-                      ? null
-                      : () => _submit(widget.onJoin, suggestion),
-                  child: _PrimaryButtonChild(
-                    submitting: _submitting,
-                    label: 'Tham gia',
-                  ),
-                ),
-              )
-            else
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      key: const Key('keo_match_later_btn'),
-                      onPressed: _submitting
-                          ? null
-                          : () => Navigator.of(context).maybePop(),
-                      child: const Text('De sau'),
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: SizedBox(
-                      height: AppSpacing.buttonHeight,
-                      child: FilledButton(
-                        key: const Key('keo_match_create_btn'),
-                        onPressed: _submitting
-                            ? null
-                            : () => _submit(widget.onCreate, suggestion),
-                        child: _PrimaryButtonChild(
-                          submitting: _submitting,
-                          label: 'Tao keo',
-                        ),
-                      ),
-                    ),
+                  IconButton(
+                    tooltip: 'Dong',
+                    onPressed: _submitting
+                        ? null
+                        : () => Navigator.of(context).maybePop(),
+                    icon: const Icon(Icons.close),
                   ),
                 ],
               ),
-          ],
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                suggestion.title,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _SuggestionMeta(suggestion: suggestion),
+              if (suggestion.reasonLabels.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    for (final reason in suggestion.reasonLabels)
+                      _ReasonChip(label: _reasonLabel(reason)),
+                  ],
+                ),
+              ],
+              const SizedBox(height: AppSpacing.xl),
+              if (isExisting)
+                SizedBox(
+                  width: double.infinity,
+                  height: AppSpacing.buttonHeight,
+                  child: FilledButton(
+                    key: const Key('keo_match_join_btn'),
+                    onPressed: _submitting
+                        ? null
+                        : () => _submit(widget.onJoin, suggestion),
+                    child: _PrimaryButtonChild(
+                      submitting: _submitting,
+                      label: 'Tham gia',
+                    ),
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: AppSpacing.buttonHeight,
+                        child: OutlinedButton(
+                          key: const Key('keo_match_later_btn'),
+                          onPressed: _submitting
+                              ? null
+                              : () => Navigator.of(context).maybePop(),
+                          child: const Text('De sau'),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: SizedBox(
+                        height: AppSpacing.buttonHeight,
+                        child: FilledButton(
+                          key: const Key('keo_match_create_btn'),
+                          onPressed: _submitting
+                              ? null
+                              : () => _submit(widget.onCreate, suggestion),
+                          child: _PrimaryButtonChild(
+                            submitting: _submitting,
+                            label: 'Tao keo',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
