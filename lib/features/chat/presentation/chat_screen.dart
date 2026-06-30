@@ -179,7 +179,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           : Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Text(m.body),
+                    child: Text(m.body ?? ''),
                   ),
                 );
               },

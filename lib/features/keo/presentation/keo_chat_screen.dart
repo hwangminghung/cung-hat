@@ -184,7 +184,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
                           : Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Text(m.body),
+                    child: Text(m.body ?? ''),
                   ),
                 );
               },
