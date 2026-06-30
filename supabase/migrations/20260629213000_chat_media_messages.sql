@@ -185,6 +185,8 @@ create or replace function public.send_media_message(p_attachment uuid)
 returns uuid language plpgsql security definer set search_path='' as $$
 declare
   a public.message_attachments;
+  o storage.objects;
+  object_mime text;
   mid uuid := gen_random_uuid();
 begin
   select * into a from public.message_attachments where id = p_attachment for update;
@@ -195,9 +197,27 @@ begin
     raise exception 'not_in_thread' using errcode='check_violation';
   end if;
   perform app_private.validate_chat_media(a.media_type, a.mime_type, a.size_bytes, a.duration_ms);
-  if not exists(select 1 from storage.objects o where o.bucket_id = a.bucket_id and o.name = a.object_path) then
+
+  select * into o
+  from storage.objects so
+  where so.bucket_id = a.bucket_id and so.name = a.object_path;
+  if not found then
     raise exception 'storage_object_missing' using errcode='check_violation';
   end if;
+  if not (
+    coalesce(o.owner = auth.uid(), false)
+    or coalesce(o.owner_id = auth.uid()::text, false)
+  ) then
+    raise exception 'storage_object_mismatch' using errcode='check_violation';
+  end if;
+  if o.metadata ? 'size' and (o.metadata->>'size')::bigint <> a.size_bytes then
+    raise exception 'storage_object_mismatch' using errcode='check_violation';
+  end if;
+  object_mime := coalesce(o.metadata->>'mimetype', o.metadata->>'mime_type');
+  if object_mime is not null and object_mime <> a.mime_type then
+    raise exception 'storage_object_mismatch' using errcode='check_violation';
+  end if;
+
   perform app_private.enforce_rate_limit('message', 60, interval '1 minute');
   perform app_private.enforce_rate_limit('media_message', 20, interval '1 day');
 

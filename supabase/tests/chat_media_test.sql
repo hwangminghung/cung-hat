@@ -1,5 +1,5 @@
 begin;
-select plan(28);
+select plan(32);
 
 set local role postgres;
 create temp table _chat_media (
@@ -231,6 +231,75 @@ select throws_ok(
     (select attachment_id from _chat_media where k='other_pending')
   ) $$,
   '23514', null, 'sender cannot attach another user pending attachment');
+
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000ca01"}';
+select lives_ok(
+  $$ with upload as (
+    select * from public.create_message_attachment(
+      'match',
+      '00000000-0000-0000-0000-00000000cb01'::uuid,
+      'image',
+      'image/jpeg',
+      1024,
+      100,
+      100,
+      null
+    )
+  )
+  insert into _chat_media(k, attachment_id, bucket_id, object_path, owner_id)
+  select 'wrong_owner', id, bucket_id, object_path, '00000000-0000-0000-0000-00000000ca01'::uuid
+  from upload $$,
+  'member can create pending attachment for storage owner mismatch check');
+
+set local role postgres;
+insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+select bucket_id, object_path,
+       '00000000-0000-0000-0000-00000000ca03'::uuid,
+       '00000000-0000-0000-0000-00000000ca03',
+       jsonb_build_object('size', 1024, 'mimetype', 'image/jpeg')
+from _chat_media
+where k='wrong_owner';
+
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000ca01"}';
+set local role authenticated;
+select throws_ok(
+  $$ select public.send_media_message(
+    (select attachment_id from _chat_media where k='wrong_owner')
+  ) $$,
+  '23514', null, 'send rejects storage object owner mismatch');
+
+select lives_ok(
+  $$ with upload as (
+    select * from public.create_message_attachment(
+      'match',
+      '00000000-0000-0000-0000-00000000cb01'::uuid,
+      'image',
+      'image/jpeg',
+      1024,
+      100,
+      100,
+      null
+    )
+  )
+  insert into _chat_media(k, attachment_id, bucket_id, object_path, owner_id)
+  select 'wrong_metadata', id, bucket_id, object_path, '00000000-0000-0000-0000-00000000ca01'::uuid
+  from upload $$,
+  'member can create pending attachment for storage metadata mismatch check');
+
+set local role postgres;
+insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+select bucket_id, object_path, owner_id, owner_id::text,
+       jsonb_build_object('size', 2048, 'mimetype', 'image/png')
+from _chat_media
+where k='wrong_metadata';
+
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000ca01"}';
+set local role authenticated;
+select throws_ok(
+  $$ select public.send_media_message(
+    (select attachment_id from _chat_media where k='wrong_metadata')
+  ) $$,
+  '23514', null, 'send rejects storage object metadata mismatch');
 
 select lives_ok(
   $$ with sent as (
