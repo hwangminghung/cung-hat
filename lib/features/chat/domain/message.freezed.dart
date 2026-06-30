@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Message {
 
- String get id;@JsonKey(name: 'thread_id') String get threadId;@JsonKey(name: 'sender_id') String get senderId; String get body;@JsonKey(name: 'created_at') String get createdAt;
+ String get id;@JsonKey(name: 'thread_id') String get threadId;@JsonKey(name: 'sender_id') String get senderId; String? get body; String get kind; bool get hidden; MessageAttachment? get attachment;@JsonKey(name: 'created_at') String get createdAt;
 /// Create a copy of Message
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $MessageCopyWith<Message> get copyWith => _$MessageCopyWithImpl<Message>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Message&&(identical(other.id, id) || other.id == id)&&(identical(other.threadId, threadId) || other.threadId == threadId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Message&&(identical(other.id, id) || other.id == id)&&(identical(other.threadId, threadId) || other.threadId == threadId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.body, body) || other.body == body)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.attachment, attachment) || other.attachment == attachment)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,threadId,senderId,body,createdAt);
+int get hashCode => Object.hash(runtimeType,id,threadId,senderId,body,kind,hidden,attachment,createdAt);
 
 @override
 String toString() {
-  return 'Message(id: $id, threadId: $threadId, senderId: $senderId, body: $body, createdAt: $createdAt)';
+  return 'Message(id: $id, threadId: $threadId, senderId: $senderId, body: $body, kind: $kind, hidden: $hidden, attachment: $attachment, createdAt: $createdAt)';
 }
 
 
@@ -48,11 +48,11 @@ abstract mixin class $MessageCopyWith<$Res>  {
   factory $MessageCopyWith(Message value, $Res Function(Message) _then) = _$MessageCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'thread_id') String threadId,@JsonKey(name: 'sender_id') String senderId, String body,@JsonKey(name: 'created_at') String createdAt
+ String id,@JsonKey(name: 'thread_id') String threadId,@JsonKey(name: 'sender_id') String senderId, String? body, String kind, bool hidden, MessageAttachment? attachment,@JsonKey(name: 'created_at') String createdAt
 });
 
 
-
+$MessageAttachmentCopyWith<$Res>? get attachment;
 
 }
 /// @nodoc
@@ -65,17 +65,32 @@ class _$MessageCopyWithImpl<$Res>
 
 /// Create a copy of Message
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? threadId = null,Object? senderId = null,Object? body = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? threadId = null,Object? senderId = null,Object? body = freezed,Object? kind = null,Object? hidden = null,Object? attachment = freezed,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,threadId: null == threadId ? _self.threadId : threadId // ignore: cast_nullable_to_non_nullable
 as String,senderId: null == senderId ? _self.senderId : senderId // ignore: cast_nullable_to_non_nullable
-as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,body: freezed == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
+as String?,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
+as bool,attachment: freezed == attachment ? _self.attachment : attachment // ignore: cast_nullable_to_non_nullable
+as MessageAttachment?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
+/// Create a copy of Message
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MessageAttachmentCopyWith<$Res>? get attachment {
+    if (_self.attachment == null) {
+    return null;
+  }
 
+  return $MessageAttachmentCopyWith<$Res>(_self.attachment!, (value) {
+    return _then(_self.copyWith(attachment: value));
+  });
+}
 }
 
 
@@ -157,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'thread_id')  String threadId, @JsonKey(name: 'sender_id')  String senderId,  String body, @JsonKey(name: 'created_at')  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'thread_id')  String threadId, @JsonKey(name: 'sender_id')  String senderId,  String? body,  String kind,  bool hidden,  MessageAttachment? attachment, @JsonKey(name: 'created_at')  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Message() when $default != null:
-return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.createdAt);case _:
+return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.kind,_that.hidden,_that.attachment,_that.createdAt);case _:
   return orElse();
 
 }
@@ -178,10 +193,10 @@ return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.createdA
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'thread_id')  String threadId, @JsonKey(name: 'sender_id')  String senderId,  String body, @JsonKey(name: 'created_at')  String createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'thread_id')  String threadId, @JsonKey(name: 'sender_id')  String senderId,  String? body,  String kind,  bool hidden,  MessageAttachment? attachment, @JsonKey(name: 'created_at')  String createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _Message():
-return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.createdAt);case _:
+return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.kind,_that.hidden,_that.attachment,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +213,10 @@ return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.createdA
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'thread_id')  String threadId, @JsonKey(name: 'sender_id')  String senderId,  String body, @JsonKey(name: 'created_at')  String createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'thread_id')  String threadId, @JsonKey(name: 'sender_id')  String senderId,  String? body,  String kind,  bool hidden,  MessageAttachment? attachment, @JsonKey(name: 'created_at')  String createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Message() when $default != null:
-return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.createdAt);case _:
+return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.kind,_that.hidden,_that.attachment,_that.createdAt);case _:
   return null;
 
 }
@@ -213,13 +228,16 @@ return $default(_that.id,_that.threadId,_that.senderId,_that.body,_that.createdA
 @JsonSerializable()
 
 class _Message implements Message {
-  const _Message({required this.id, @JsonKey(name: 'thread_id') required this.threadId, @JsonKey(name: 'sender_id') required this.senderId, required this.body, @JsonKey(name: 'created_at') required this.createdAt});
+  const _Message({required this.id, @JsonKey(name: 'thread_id') required this.threadId, @JsonKey(name: 'sender_id') required this.senderId, this.body, this.kind = 'text', this.hidden = false, this.attachment, @JsonKey(name: 'created_at') required this.createdAt});
   factory _Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
 
 @override final  String id;
 @override@JsonKey(name: 'thread_id') final  String threadId;
 @override@JsonKey(name: 'sender_id') final  String senderId;
-@override final  String body;
+@override final  String? body;
+@override@JsonKey() final  String kind;
+@override@JsonKey() final  bool hidden;
+@override final  MessageAttachment? attachment;
 @override@JsonKey(name: 'created_at') final  String createdAt;
 
 /// Create a copy of Message
@@ -235,16 +253,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Message&&(identical(other.id, id) || other.id == id)&&(identical(other.threadId, threadId) || other.threadId == threadId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Message&&(identical(other.id, id) || other.id == id)&&(identical(other.threadId, threadId) || other.threadId == threadId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.body, body) || other.body == body)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.attachment, attachment) || other.attachment == attachment)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,threadId,senderId,body,createdAt);
+int get hashCode => Object.hash(runtimeType,id,threadId,senderId,body,kind,hidden,attachment,createdAt);
 
 @override
 String toString() {
-  return 'Message(id: $id, threadId: $threadId, senderId: $senderId, body: $body, createdAt: $createdAt)';
+  return 'Message(id: $id, threadId: $threadId, senderId: $senderId, body: $body, kind: $kind, hidden: $hidden, attachment: $attachment, createdAt: $createdAt)';
 }
 
 
@@ -255,11 +273,11 @@ abstract mixin class _$MessageCopyWith<$Res> implements $MessageCopyWith<$Res> {
   factory _$MessageCopyWith(_Message value, $Res Function(_Message) _then) = __$MessageCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'thread_id') String threadId,@JsonKey(name: 'sender_id') String senderId, String body,@JsonKey(name: 'created_at') String createdAt
+ String id,@JsonKey(name: 'thread_id') String threadId,@JsonKey(name: 'sender_id') String senderId, String? body, String kind, bool hidden, MessageAttachment? attachment,@JsonKey(name: 'created_at') String createdAt
 });
 
 
-
+@override $MessageAttachmentCopyWith<$Res>? get attachment;
 
 }
 /// @nodoc
@@ -272,18 +290,33 @@ class __$MessageCopyWithImpl<$Res>
 
 /// Create a copy of Message
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? threadId = null,Object? senderId = null,Object? body = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? threadId = null,Object? senderId = null,Object? body = freezed,Object? kind = null,Object? hidden = null,Object? attachment = freezed,Object? createdAt = null,}) {
   return _then(_Message(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,threadId: null == threadId ? _self.threadId : threadId // ignore: cast_nullable_to_non_nullable
 as String,senderId: null == senderId ? _self.senderId : senderId // ignore: cast_nullable_to_non_nullable
-as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,body: freezed == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
+as String?,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
+as bool,attachment: freezed == attachment ? _self.attachment : attachment // ignore: cast_nullable_to_non_nullable
+as MessageAttachment?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
 
+/// Create a copy of Message
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MessageAttachmentCopyWith<$Res>? get attachment {
+    if (_self.attachment == null) {
+    return null;
+  }
 
+  return $MessageAttachmentCopyWith<$Res>(_self.attachment!, (value) {
+    return _then(_self.copyWith(attachment: value));
+  });
+}
 }
 
 // dart format on
