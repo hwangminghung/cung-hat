@@ -4,6 +4,8 @@
 	<dict>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Để gợi ý người và kèo gần bạn.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Cho phep Cung Hat chon anh va video de gui trong tin nhan.</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
