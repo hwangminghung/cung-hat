@@ -22,6 +22,9 @@ class _FakeUpload {
 }
 
 class _FakeUploader implements ChatMediaUploader {
+  _FakeUploader({this.onUpload});
+
+  final void Function()? onUpload;
   final uploaded = <_FakeUpload>[];
 
   @override
@@ -40,6 +43,7 @@ class _FakeUploader implements ChatMediaUploader {
     required File file,
     required String mimeType,
   }) async {
+    onUpload?.call();
     uploaded.add(
       _FakeUpload(
         bucketId: bucketId,
@@ -92,24 +96,29 @@ void main() {
   test(
     'sendMatchMedia creates pending attachment, uploads, then sends media message',
     () async {
+      final events = <String>[];
       final client = MockSupabaseClient();
-      final uploader = _FakeUploader();
+      final uploader = _FakeUploader(onUpload: () => events.add('upload'));
       final file = File('test/fixtures/chat-image.jpg');
       when(
         () => client.rpc(
           'create_message_attachment',
           params: any(named: 'params'),
         ),
-      ).thenAnswer(
-        (_) => rpcOk({
+      ).thenAnswer((_) {
+        events.add('create');
+        return rpcOk({
           'id': 'a1',
           'bucket_id': 'chat-media',
           'object_path': 'matches/t1/a1.jpg',
-        }),
-      );
+        });
+      });
       when(
         () => client.rpc('send_media_message', params: any(named: 'params')),
-      ).thenAnswer((_) => rpcOk('m-media'));
+      ).thenAnswer((_) {
+        events.add('send');
+        return rpcOk('m-media');
+      });
 
       final id = await ChatRepository(client, uploader: uploader)
           .sendMatchMedia(
@@ -148,6 +157,7 @@ void main() {
       verify(
         () => client.rpc('send_media_message', params: {'p_attachment': 'a1'}),
       ).called(1);
+      expect(events, ['create', 'upload', 'send']);
     },
   );
 
