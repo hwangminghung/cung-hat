@@ -1,7 +1,7 @@
 import 'package:cung_hat/features/chat/domain/message_attachment.dart';
 import 'package:flutter/material.dart';
 
-class MediaMessageView extends StatelessWidget {
+class MediaMessageView extends StatefulWidget {
   const MediaMessageView({
     super.key,
     required this.attachment,
@@ -16,40 +16,70 @@ class MediaMessageView extends StatelessWidget {
   static const double height = 160;
 
   @override
+  State<MediaMessageView> createState() => _MediaMessageViewState();
+}
+
+class _MediaMessageViewState extends State<MediaMessageView> {
+  late Future<String> _mediaUrlFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _mediaUrlFuture = _resolveMediaUrl();
+  }
+
+  @override
+  void didUpdateWidget(MediaMessageView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.attachment.bucketId != widget.attachment.bucketId ||
+        oldWidget.attachment.objectPath != widget.attachment.objectPath) {
+      _mediaUrlFuture = _resolveMediaUrl();
+    }
+  }
+
+  Future<String> _resolveMediaUrl() {
+    return widget.resolveMediaUrl(
+      widget.attachment.bucketId,
+      widget.attachment.objectPath,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-      future: resolveMediaUrl(attachment.bucketId, attachment.objectPath),
+      future: _mediaUrlFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const SizedBox(
             key: Key('media_loading_bubble'),
-            width: width,
-            height: height,
+            width: MediaMessageView.width,
+            height: MediaMessageView.height,
             child: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
           return const SizedBox(
-            width: width,
-            height: height,
+            width: MediaMessageView.width,
+            height: MediaMessageView.height,
             child: Center(child: Text('Khong tai duoc tep')),
           );
         }
 
-        if (attachment.mediaType == 'image') {
+        if (widget.attachment.mediaType == 'image') {
           return ClipRRect(
             key: const Key('image_media_bubble'),
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
               snapshot.data!,
-              width: width,
-              height: height,
+              width: MediaMessageView.width,
+              height: MediaMessageView.height,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return const SizedBox(
-                  width: width,
-                  height: height,
+                  width: MediaMessageView.width,
+                  height: MediaMessageView.height,
                   child: Center(child: Text('Khong tai duoc tep')),
                 );
               },
@@ -57,11 +87,11 @@ class MediaMessageView extends StatelessWidget {
           );
         }
 
-        if (attachment.mediaType == 'video') {
+        if (widget.attachment.mediaType == 'video') {
           return Container(
             key: const Key('video_media_bubble'),
-            width: width,
-            height: height,
+            width: MediaMessageView.width,
+            height: MediaMessageView.height,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
@@ -75,8 +105,8 @@ class MediaMessageView extends StatelessWidget {
         }
 
         return const SizedBox(
-          width: width,
-          height: height,
+          width: MediaMessageView.width,
+          height: MediaMessageView.height,
           child: Center(child: Text('Khong tai duoc tep')),
         );
       },

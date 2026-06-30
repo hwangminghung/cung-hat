@@ -1,6 +1,7 @@
 import 'package:cung_hat/features/chat/domain/message.dart';
 import 'package:cung_hat/features/chat/domain/message_attachment.dart';
 import 'package:cung_hat/features/chat/presentation/widgets/chat_message_bubble.dart';
+import 'package:cung_hat/features/chat/presentation/widgets/media_message_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,6 +52,75 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('video_media_bubble')), findsOneWidget);
+  });
+
+  testWidgets('caches resolved media URL across parent rebuilds', (
+    tester,
+  ) async {
+    var resolveCount = 0;
+    final attachment = _attachment(mediaType: 'image');
+
+    Future<String> resolveMediaUrl(String bucketId, String objectPath) async {
+      resolveCount++;
+      return 'https://example.com/$objectPath';
+    }
+
+    await tester.pumpWidget(
+      _wrap(
+        MediaMessageView(
+          attachment: attachment,
+          resolveMediaUrl: resolveMediaUrl,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.pumpWidget(
+      _wrap(
+        MediaMessageView(
+          attachment: attachment,
+          resolveMediaUrl: resolveMediaUrl,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(resolveCount, 1);
+  });
+
+  testWidgets('re-resolves media URL when object path changes', (tester) async {
+    var resolveCount = 0;
+    final attachment = _attachment(mediaType: 'image');
+
+    Future<String> resolveMediaUrl(String bucketId, String objectPath) async {
+      resolveCount++;
+      return 'https://example.com/$objectPath';
+    }
+
+    await tester.pumpWidget(
+      _wrap(
+        MediaMessageView(
+          attachment: attachment,
+          resolveMediaUrl: resolveMediaUrl,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.pumpWidget(
+      _wrap(
+        MediaMessageView(
+          attachment: _attachment(
+            mediaType: 'image',
+            objectPath: 'threads/t1/m1/changed',
+          ),
+          resolveMediaUrl: resolveMediaUrl,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(resolveCount, 2);
   });
 
   testWidgets('long press delete only fires for mine messages', (tester) async {
@@ -124,13 +194,16 @@ Message _message({
   );
 }
 
-MessageAttachment _attachment({required String mediaType}) {
+MessageAttachment _attachment({
+  required String mediaType,
+  String objectPath = 'threads/t1/m1/media',
+}) {
   return MessageAttachment(
     id: 'a1',
     messageId: 'm1',
     mediaType: mediaType,
     bucketId: 'chat-media',
-    objectPath: 'threads/t1/m1/media',
+    objectPath: objectPath,
     mimeType: '$mediaType/test',
     sizeBytes: 123,
     status: 'ready',
