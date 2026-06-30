@@ -1,26 +1,85 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:cung_hat/features/chat/data/chat_media_uploader.dart';
 import 'package:cung_hat/features/chat/data/chat_repository.dart';
+import 'package:cung_hat/features/chat/domain/pending_chat_media.dart';
 import '../../support/supabase_mocks.dart';
 
-void main() {
-  test('sendMessage calls send_message RPC with thread + body and returns id', () async {
-    final client = MockSupabaseClient();
-    when(() => client.rpc('send_message', params: any(named: 'params')))
-        .thenAnswer((_) => rpcOk('m1'));
-    final id = await ChatRepository(client).sendMessage('t1', 'hello');
-    expect(id, 'm1');
-    verify(() => client.rpc('send_message',
-        params: {'p_thread': 't1', 'p_body': 'hello'})).called(1);
+class _FakeUpload {
+  const _FakeUpload({
+    required this.bucketId,
+    required this.objectPath,
+    required this.file,
+    required this.mimeType,
   });
+
+  final String bucketId;
+  final String objectPath;
+  final File file;
+  final String mimeType;
+}
+
+class _FakeUploader implements ChatMediaUploader {
+  final uploaded = <_FakeUpload>[];
+
+  @override
+  Future<String> signedUrl({
+    required String bucketId,
+    required String objectPath,
+    int expiresInSeconds = 600,
+  }) async {
+    return 'signed:$bucketId/$objectPath';
+  }
+
+  @override
+  Future<void> upload({
+    required String bucketId,
+    required String objectPath,
+    required File file,
+    required String mimeType,
+  }) async {
+    uploaded.add(
+      _FakeUpload(
+        bucketId: bucketId,
+        objectPath: objectPath,
+        file: file,
+        mimeType: mimeType,
+      ),
+    );
+  }
+}
+
+void main() {
+  test(
+    'sendMessage calls send_message RPC with thread + body and returns id',
+    () async {
+      final client = MockSupabaseClient();
+      when(
+        () => client.rpc('send_message', params: any(named: 'params')),
+      ).thenAnswer((_) => rpcOk('m1'));
+      final id = await ChatRepository(client).sendMessage('t1', 'hello');
+      expect(id, 'm1');
+      verify(
+        () => client.rpc(
+          'send_message',
+          params: {'p_thread': 't1', 'p_body': 'hello'},
+        ),
+      ).called(1);
+    },
+  );
 
   test('messageFromBroadcast unwraps the frame payload envelope', () {
     final frame = <String, dynamic>{
       'type': 'broadcast',
       'event': 'new_message',
       'payload': {
-        'id': 'm1', 'thread_id': 't1', 'sender_id': 'u2',
-        'body': 'xin chào', 'created_at': '2026-06-23T10:00:00Z',
+        'id': 'm1',
+        'thread_id': 't1',
+        'sender_id': 'u2',
+        'body': 'xin chào',
+        'created_at': '2026-06-23T10:00:00Z',
       },
     };
     final msg = messageFromBroadcast(frame);
@@ -28,5 +87,79 @@ void main() {
     expect(msg.threadId, 't1');
     expect(msg.senderId, 'u2');
     expect(msg.body, 'xin chào');
+  });
+
+  test(
+    'sendMatchMedia creates pending attachment, uploads, then sends media message',
+    () async {
+      final client = MockSupabaseClient();
+      final uploader = _FakeUploader();
+      final file = File('test/fixtures/chat-image.jpg');
+      when(
+        () => client.rpc(
+          'create_message_attachment',
+          params: any(named: 'params'),
+        ),
+      ).thenAnswer(
+        (_) => rpcOk({
+          'id': 'a1',
+          'bucket_id': 'chat-media',
+          'object_path': 'matches/t1/a1.jpg',
+        }),
+      );
+      when(
+        () => client.rpc('send_media_message', params: any(named: 'params')),
+      ).thenAnswer((_) => rpcOk('m-media'));
+
+      final id = await ChatRepository(client, uploader: uploader)
+          .sendMatchMedia(
+            't1',
+            PendingChatMedia(
+              file: file,
+              mediaType: 'image',
+              mimeType: 'image/jpeg',
+              sizeBytes: 100,
+              width: 10,
+              height: 10,
+            ),
+          );
+
+      expect(id, 'm-media');
+      verify(
+        () => client.rpc(
+          'create_message_attachment',
+          params: {
+            'p_thread_type': 'match',
+            'p_thread': 't1',
+            'p_media_type': 'image',
+            'p_mime_type': 'image/jpeg',
+            'p_size_bytes': 100,
+            'p_width': 10,
+            'p_height': 10,
+            'p_duration_ms': null,
+          },
+        ),
+      ).called(1);
+      expect(uploader.uploaded, hasLength(1));
+      expect(uploader.uploaded.single.bucketId, 'chat-media');
+      expect(uploader.uploaded.single.objectPath, 'matches/t1/a1.jpg');
+      expect(uploader.uploaded.single.file, file);
+      expect(uploader.uploaded.single.mimeType, 'image/jpeg');
+      verify(
+        () => client.rpc('send_media_message', params: {'p_attachment': 'a1'}),
+      ).called(1);
+    },
+  );
+
+  test('signedMediaUrl delegates to uploader', () async {
+    final client = MockSupabaseClient();
+    final uploader = _FakeUploader();
+
+    final url = await ChatRepository(
+      client,
+      uploader: uploader,
+    ).signedMediaUrl('chat-media', 'matches/t1/a1.jpg');
+
+    expect(url, 'signed:chat-media/matches/t1/a1.jpg');
   });
 }
