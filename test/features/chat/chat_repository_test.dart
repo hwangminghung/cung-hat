@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -22,9 +23,10 @@ class _FakeUpload {
 }
 
 class _FakeUploader implements ChatMediaUploader {
-  _FakeUploader({this.onUpload});
+  _FakeUploader({this.onUpload, this.onUploadFuture});
 
   final void Function()? onUpload;
+  final Future<void> Function()? onUploadFuture;
   final uploaded = <_FakeUpload>[];
 
   @override
@@ -52,6 +54,10 @@ class _FakeUploader implements ChatMediaUploader {
         mimeType: mimeType,
       ),
     );
+    final uploadFuture = onUploadFuture;
+    if (uploadFuture != null) {
+      await uploadFuture();
+    }
   }
 }
 
@@ -97,8 +103,12 @@ void main() {
     'sendMatchMedia creates pending attachment, uploads, then sends media message',
     () async {
       final events = <String>[];
+      final uploadCompleter = Completer<void>();
       final client = MockSupabaseClient();
-      final uploader = _FakeUploader(onUpload: () => events.add('upload'));
+      final uploader = _FakeUploader(
+        onUpload: () => events.add('upload'),
+        onUploadFuture: () => uploadCompleter.future,
+      );
       final file = File('test/fixtures/chat-image.jpg');
       when(
         () => client.rpc(
@@ -120,7 +130,7 @@ void main() {
         return rpcOk('m-media');
       });
 
-      final id = await ChatRepository(client, uploader: uploader)
+      final sendFuture = ChatRepository(client, uploader: uploader)
           .sendMatchMedia(
             't1',
             PendingChatMedia(
@@ -132,6 +142,16 @@ void main() {
               height: 10,
             ),
           );
+
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events, ['create', 'upload']);
+      verifyNever(
+        () => client.rpc('send_media_message', params: any(named: 'params')),
+      );
+
+      uploadCompleter.complete();
+      final id = await sendFuture;
 
       expect(id, 'm-media');
       verify(
@@ -158,6 +178,54 @@ void main() {
         () => client.rpc('send_media_message', params: {'p_attachment': 'a1'}),
       ).called(1);
       expect(events, ['create', 'upload', 'send']);
+    },
+  );
+
+  test(
+    'sendMatchMedia does not send media message when upload fails',
+    () async {
+      final events = <String>[];
+      final client = MockSupabaseClient();
+      final uploader = _FakeUploader(
+        onUpload: () => events.add('upload'),
+        onUploadFuture: () async => throw StateError('upload failed'),
+      );
+      when(
+        () => client.rpc(
+          'create_message_attachment',
+          params: any(named: 'params'),
+        ),
+      ).thenAnswer((_) {
+        events.add('create');
+        return rpcOk({
+          'id': 'a1',
+          'bucket_id': 'chat-media',
+          'object_path': 'matches/t1/a1.jpg',
+        });
+      });
+      when(
+        () => client.rpc('send_media_message', params: any(named: 'params')),
+      ).thenAnswer((_) {
+        events.add('send');
+        return rpcOk('m-media');
+      });
+
+      final sendFuture = ChatRepository(client, uploader: uploader)
+          .sendMatchMedia(
+            't1',
+            PendingChatMedia(
+              file: File('test/fixtures/chat-image.jpg'),
+              mediaType: 'image',
+              mimeType: 'image/jpeg',
+              sizeBytes: 100,
+            ),
+          );
+
+      await expectLater(sendFuture, throwsA(isA<StateError>()));
+      expect(events, ['create', 'upload']);
+      verifyNever(
+        () => client.rpc('send_media_message', params: any(named: 'params')),
+      );
     },
   );
 
