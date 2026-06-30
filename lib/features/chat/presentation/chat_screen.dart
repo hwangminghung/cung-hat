@@ -92,7 +92,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ],
         ),
       );
-      if (confirmed != true) return;
+      if (confirmed != true) throw const ChatSendCancelled();
     }
 
     await ref.read(chatRepositoryProvider).sendMessage(widget.matchId, text);
@@ -109,6 +109,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Khong xoa duoc tin nhan.')));
     }
+  }
+
+  void _showMatchMediaSendError() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Khong gui duoc tep.')));
   }
 
   @override
@@ -188,10 +194,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ChatComposer(
             onSendText: _doSend,
             onSendMedia: (media) async {
-              await ref
-                  .read(chatRepositoryProvider)
-                  .sendMatchMedia(widget.matchId, media);
-              _scrollToBottom();
+              try {
+                await ref
+                    .read(chatRepositoryProvider)
+                    .sendMatchMedia(widget.matchId, media);
+                _scrollToBottom();
+              } catch (_) {
+                if (!mounted) return;
+                _showMatchMediaSendError();
+              }
             },
           ),
         ],

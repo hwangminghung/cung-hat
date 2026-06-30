@@ -92,7 +92,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
           ],
         ),
       );
-      if (confirmed != true) return;
+      if (confirmed != true) throw const ChatSendCancelled();
     }
 
     // An approved-but-unconfirmed user can reach this screen, but the server

@@ -22,7 +22,9 @@ void main() {
     expect(chatMediaTypeForMime('application/octet-stream'), isNull);
   });
 
-  testWidgets('sends trimmed text and clears the field on success', (tester) async {
+  testWidgets('sends trimmed text and clears the field on success', (
+    tester,
+  ) async {
     final sentMessages = <String>[];
 
     await tester.pumpWidget(
@@ -43,6 +45,29 @@ void main() {
     expect(sentMessages, ['di hat nhe']);
     final textField = tester.widget<TextField>(find.byType(TextField));
     expect(textField.controller?.text, isEmpty);
+  });
+
+  testWidgets('preserves text when send is intentionally cancelled', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatComposer(
+            onSendText: (_) async => throw const ChatSendCancelled(),
+            onSendMedia: (PendingChatMedia media) async {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '  canh bao tien  ');
+    await tester.tap(find.byKey(const Key('send_btn')));
+    await tester.pump();
+
+    final textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.controller?.text, '  canh bao tien  ');
+    expect(textField.enabled, isTrue);
   });
 
   testWidgets('ignores empty text sends', (tester) async {
@@ -66,7 +91,9 @@ void main() {
     expect(sendCount, 0);
   });
 
-  testWidgets('disables text sending when composer is disabled', (tester) async {
+  testWidgets('disables text sending when composer is disabled', (
+    tester,
+  ) async {
     var sendCount = 0;
 
     await tester.pumpWidget(

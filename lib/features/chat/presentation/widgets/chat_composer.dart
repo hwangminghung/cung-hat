@@ -14,6 +14,10 @@ String? chatMediaTypeForMime(String? mimeType) {
   };
 }
 
+class ChatSendCancelled implements Exception {
+  const ChatSendCancelled();
+}
+
 class ChatComposer extends StatefulWidget {
   const ChatComposer({
     super.key,
@@ -55,6 +59,8 @@ class _ChatComposerState extends State<ChatComposer> {
       await widget.onSendText(text);
       if (!mounted) return;
       _controller.clear();
+    } on ChatSendCancelled {
+      // Preserve the draft when a caller intentionally cancels the send.
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -100,9 +106,9 @@ class _ChatComposerState extends State<ChatComposer> {
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
