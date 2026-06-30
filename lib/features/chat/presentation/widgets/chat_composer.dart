@@ -6,6 +6,14 @@ import 'package:mime/mime.dart';
 
 import '../../domain/pending_chat_media.dart';
 
+String? chatMediaTypeForMime(String? mimeType) {
+  return switch (mimeType) {
+    'image/jpeg' || 'image/png' || 'image/webp' => 'image',
+    'video/mp4' || 'video/quicktime' => 'video',
+    _ => null,
+  };
+}
+
 class ChatComposer extends StatefulWidget {
   const ChatComposer({
     super.key,
@@ -65,15 +73,15 @@ class _ChatComposerState extends State<ChatComposer> {
       final mimeType = picked.mimeType ?? lookupMimeType(picked.path);
       if (!mounted) return;
 
-      final isImage = mimeType?.startsWith('image/') ?? false;
-      final isVideo = mimeType?.startsWith('video/') ?? false;
-      if (!isImage && !isVideo) {
+      final mediaType = chatMediaTypeForMime(mimeType);
+      if (mimeType == null || mediaType == null) {
         _showSnack('Dinh dang tep chua duoc ho tro.');
         return;
       }
 
+      final isImage = mediaType == 'image';
       if ((isImage && length > _maxImageBytes) ||
-          (isVideo && length > _maxVideoBytes)) {
+          (!isImage && length > _maxVideoBytes)) {
         _showSnack('Tep qua lon de gui.');
         return;
       }
@@ -81,8 +89,8 @@ class _ChatComposerState extends State<ChatComposer> {
       await widget.onSendMedia(
         PendingChatMedia(
           file: file,
-          mediaType: isImage ? 'image' : 'video',
-          mimeType: mimeType!,
+          mediaType: mediaType,
+          mimeType: mimeType,
           sizeBytes: length,
         ),
       );
@@ -114,7 +122,7 @@ class _ChatComposerState extends State<ChatComposer> {
             Expanded(
               child: TextField(
                 controller: _controller,
-                enabled: widget.enabled,
+                enabled: _canSend,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendText(),
                 decoration: const InputDecoration(

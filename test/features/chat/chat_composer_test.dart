@@ -1,9 +1,27 @@
+import 'dart:async';
+
 import 'package:cung_hat/features/chat/domain/pending_chat_media.dart';
 import 'package:cung_hat/features/chat/presentation/widgets/chat_composer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('maps only backend-supported media MIME types', () {
+    expect(chatMediaTypeForMime('image/jpeg'), 'image');
+    expect(chatMediaTypeForMime('image/png'), 'image');
+    expect(chatMediaTypeForMime('image/webp'), 'image');
+    expect(chatMediaTypeForMime('video/mp4'), 'video');
+    expect(chatMediaTypeForMime('video/quicktime'), 'video');
+  });
+
+  test('rejects unsupported media MIME types', () {
+    expect(chatMediaTypeForMime(null), isNull);
+    expect(chatMediaTypeForMime('image/gif'), isNull);
+    expect(chatMediaTypeForMime('image/heic'), isNull);
+    expect(chatMediaTypeForMime('video/webm'), isNull);
+    expect(chatMediaTypeForMime('application/octet-stream'), isNull);
+  });
+
   testWidgets('sends trimmed text and clears the field on success', (tester) async {
     final sentMessages = <String>[];
 
@@ -68,6 +86,34 @@ void main() {
     await tester.pump();
 
     expect(sendCount, 0);
+  });
+
+  testWidgets('disables text field while sending', (tester) async {
+    final sendCompleter = Completer<void>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatComposer(
+            onSendText: (_) => sendCompleter.future,
+            onSendMedia: (PendingChatMedia media) async {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'hello');
+    await tester.tap(find.byKey(const Key('send_btn')));
+    await tester.pump();
+
+    var textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.enabled, isFalse);
+
+    sendCompleter.complete();
+    await tester.pump();
+
+    textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.enabled, isTrue);
   });
 
   testWidgets('shows attach and send controls', (tester) async {
