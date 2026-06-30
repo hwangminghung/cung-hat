@@ -216,7 +216,7 @@ rollback;
 Run:
 
 ```powershell
-supabase test db --file supabase/tests/chat_media_test.sql
+supabase test db supabase/tests/chat_media_test.sql
 ```
 
 Expected: FAIL because `message_attachment_upload`, `messages.kind`, and `message_attachments` do not exist yet.
@@ -560,7 +560,7 @@ update public.message_attachments
 Run:
 
 ```powershell
-supabase test db --file supabase/tests/chat_media_test.sql
+supabase test db supabase/tests/chat_media_test.sql
 ```
 
 Expected: PASS with 12 assertions.
@@ -570,9 +570,9 @@ Expected: PASS with 12 assertions.
 Run:
 
 ```powershell
-supabase test db --file supabase/tests/chat_test.sql
-supabase test db --file supabase/tests/keo_chat_test.sql
-supabase test db --file supabase/tests/moderation_test.sql
+supabase test db supabase/tests/chat_test.sql
+supabase test db supabase/tests/keo_chat_test.sql
+supabase test db supabase/tests/moderation_test.sql
 ```
 
 Expected: all PASS.
@@ -1864,10 +1864,10 @@ Expected: all tests pass.
 - [ ] **Step 4: Run focused Supabase tests**
 
 ```powershell
-supabase test db --file supabase/tests/chat_test.sql
-supabase test db --file supabase/tests/keo_chat_test.sql
-supabase test db --file supabase/tests/chat_media_test.sql
-supabase test db --file supabase/tests/moderation_test.sql
+supabase test db supabase/tests/chat_test.sql
+supabase test db supabase/tests/keo_chat_test.sql
+supabase test db supabase/tests/chat_media_test.sql
+supabase test db supabase/tests/moderation_test.sql
 ```
 
 Expected: all tests pass.
