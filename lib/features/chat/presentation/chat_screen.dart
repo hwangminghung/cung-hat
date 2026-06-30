@@ -6,6 +6,8 @@ import '../../../core/providers/supabase_providers.dart';
 import '../../../core/utils/message_safety.dart';
 import '../application/chat_providers.dart';
 import '../domain/message.dart';
+import 'widgets/chat_composer.dart';
+import 'widgets/chat_message_bubble.dart';
 
 /// 1-1 chat thread: history + realtime bubbles, composer with outbound safety.
 class ChatScreen extends ConsumerStatefulWidget {
@@ -19,14 +21,10 @@ class ChatScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
-  final _controller = TextEditingController();
   final _scrollController = ScrollController();
 
   /// Live messages appended from the realtime stream; merged after history.
   final List<Message> _live = <Message>[];
-
-  /// Guards against double-send on rapid taps.
-  bool _sending = false;
 
   /// Ensures we only auto-scroll once when the initial history loads.
   bool _initialScrollDone = false;
@@ -36,13 +34,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // markRead returns void; a failure here must not crash the screen.
-      ref.read(chatRepositoryProvider).markRead(widget.matchId).catchError((_) {});
+      ref
+          .read(chatRepositoryProvider)
+          .markRead(widget.matchId)
+          .catchError((_) {});
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -65,21 +65,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  Future<void> _send() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    if (_sending) return;
-    setState(() => _sending = true);
-    try {
-      await _doSend(text);
-    } finally {
-      if (mounted) setState(() => _sending = false);
-    }
-  }
-
   Future<void> _doSend(String text) async {
     if (messageLooksUnsafe(text)) {
-      final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+      final l10n = Localizations.of<AppLocalizations>(
+        context,
+        AppLocalizations,
+      );
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -106,8 +97,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     await ref.read(chatRepositoryProvider).sendMessage(widget.matchId, text);
     if (!mounted) return;
-    _controller.clear();
     _scrollToBottom();
+  }
+
+  Future<void> _deleteMessage(String messageId) async {
+    try {
+      await ref.read(chatRepositoryProvider).deleteMessage(messageId);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Khong xoa duoc tin nhan.')));
+    }
   }
 
   @override
@@ -123,7 +124,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         _scrollToBottom();
         // Clear the unread badge while actively reading; skip our own echoes.
         if (m.senderId != myUid) {
-          ref.read(chatRepositoryProvider).markRead(widget.matchId).catchError((_) {});
+          ref
+              .read(chatRepositoryProvider)
+              .markRead(widget.matchId)
+              .catchError((_) {});
         }
       });
     });
@@ -150,9 +154,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         actions: [
           TextButton(
             // TODO(P3): navigate to /keo/create
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Sắp có')),
-            ),
+            onPressed: () => ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Sắp có'))),
             child: Text(l10n?.chatPromoteKeo ?? 'Lập kèo'),
           ),
         ],
@@ -167,50 +171,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               itemBuilder: (context, i) {
                 final m = messages[i];
                 final mine = m.senderId == myUid;
-                return Align(
-                  alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    constraints: const BoxConstraints(maxWidth: 280),
-                    decoration: BoxDecoration(
-                      color: mine
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(m.body ?? ''),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: ChatMessageBubble(
+                    message: m,
+                    mine: mine,
+                    resolveMediaUrl: (bucketId, objectPath) => ref
+                        .read(chatRepositoryProvider)
+                        .signedMediaUrl(bucketId, objectPath),
+                    onDelete: mine ? () => _deleteMessage(m.id) : null,
                   ),
                 );
               },
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 8, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _send(),
-                      decoration: const InputDecoration(
-                        hintText: 'Nhắn gì đó…',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    key: const Key('send_btn'),
-                    icon: const Icon(Icons.send),
-                    onPressed: _sending ? null : _send,
-                  ),
-                ],
-              ),
-            ),
+          ChatComposer(
+            onSendText: _doSend,
+            onSendMedia: (media) async {
+              await ref
+                  .read(chatRepositoryProvider)
+                  .sendMatchMedia(widget.matchId, media);
+              _scrollToBottom();
+            },
           ),
         ],
       ),
