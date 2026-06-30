@@ -204,17 +204,20 @@ begin
   if not found then
     raise exception 'storage_object_missing' using errcode='check_violation';
   end if;
+  if (o.owner is null and o.owner_id is null)
+    or (o.owner is not null and o.owner <> auth.uid())
+    or (o.owner_id is not null and o.owner_id <> auth.uid()::text) then
+    raise exception 'storage_object_mismatch' using errcode='check_violation';
+  end if;
   if not (
-    coalesce(o.owner = auth.uid(), false)
-    or coalesce(o.owner_id = auth.uid()::text, false)
+    o.metadata ? 'size'
+    and (o.metadata->>'size') ~ '^[0-9]+$'
+    and (o.metadata->>'size')::bigint = a.size_bytes
   ) then
     raise exception 'storage_object_mismatch' using errcode='check_violation';
   end if;
-  if o.metadata ? 'size' and (o.metadata->>'size')::bigint <> a.size_bytes then
-    raise exception 'storage_object_mismatch' using errcode='check_violation';
-  end if;
   object_mime := coalesce(o.metadata->>'mimetype', o.metadata->>'mime_type');
-  if object_mime is not null and object_mime <> a.mime_type then
+  if object_mime is null or object_mime <> a.mime_type then
     raise exception 'storage_object_mismatch' using errcode='check_violation';
   end if;
 

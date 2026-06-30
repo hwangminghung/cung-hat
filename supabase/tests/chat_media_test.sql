@@ -1,5 +1,5 @@
 begin;
-select plan(32);
+select plan(35);
 
 set local role postgres;
 create temp table _chat_media (
@@ -193,8 +193,9 @@ select ok(
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000ca01"}';
 set local role authenticated;
 select lives_ok(
-  $$ insert into storage.objects (bucket_id, name, owner, metadata)
-  select bucket_id, object_path, owner_id, jsonb_build_object('size', 1024, 'mimetype', 'image/jpeg')
+  $$ insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+  select bucket_id, object_path, owner_id, owner_id::text,
+         jsonb_build_object('size', 1024, 'mimetype', 'image/jpeg')
   from _chat_media
   where k='match_img' $$,
   'storage insert policy permits pending owner upload');
@@ -267,6 +268,98 @@ select throws_ok(
     (select attachment_id from _chat_media where k='wrong_owner')
   ) $$,
   '23514', null, 'send rejects storage object owner mismatch');
+
+with upload as (
+  select * from public.create_message_attachment(
+    'match',
+    '00000000-0000-0000-0000-00000000cb01'::uuid,
+    'image',
+    'image/jpeg',
+    1024,
+    100,
+    100,
+    null
+  )
+)
+insert into _chat_media(k, attachment_id, bucket_id, object_path, owner_id)
+select 'missing_metadata', id, bucket_id, object_path, '00000000-0000-0000-0000-00000000ca01'::uuid
+from upload;
+
+set local role postgres;
+insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+select bucket_id, object_path, owner_id, owner_id::text, '{}'::jsonb
+from _chat_media
+where k='missing_metadata';
+
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000ca01"}';
+set local role authenticated;
+select throws_ok(
+  $$ select public.send_media_message(
+    (select attachment_id from _chat_media where k='missing_metadata')
+  ) $$,
+  '23514', null, 'send rejects storage object missing trusted metadata');
+
+with upload as (
+  select * from public.create_message_attachment(
+    'match',
+    '00000000-0000-0000-0000-00000000cb01'::uuid,
+    'image',
+    'image/jpeg',
+    1024,
+    100,
+    100,
+    null
+  )
+)
+insert into _chat_media(k, attachment_id, bucket_id, object_path, owner_id)
+select 'owner_id_wrong', id, bucket_id, object_path, '00000000-0000-0000-0000-00000000ca01'::uuid
+from upload;
+
+set local role postgres;
+insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+select bucket_id, object_path, owner_id, '00000000-0000-0000-0000-00000000ca03',
+       jsonb_build_object('size', 1024, 'mimetype', 'image/jpeg')
+from _chat_media
+where k='owner_id_wrong';
+
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000ca01"}';
+set local role authenticated;
+select throws_ok(
+  $$ select public.send_media_message(
+    (select attachment_id from _chat_media where k='owner_id_wrong')
+  ) $$,
+  '23514', null, 'send rejects storage owner_id mismatch even when owner matches');
+
+with upload as (
+  select * from public.create_message_attachment(
+    'match',
+    '00000000-0000-0000-0000-00000000cb01'::uuid,
+    'image',
+    'image/jpeg',
+    1024,
+    100,
+    100,
+    null
+  )
+)
+insert into _chat_media(k, attachment_id, bucket_id, object_path, owner_id)
+select 'owner_wrong', id, bucket_id, object_path, '00000000-0000-0000-0000-00000000ca01'::uuid
+from upload;
+
+set local role postgres;
+insert into storage.objects (bucket_id, name, owner, owner_id, metadata)
+select bucket_id, object_path, '00000000-0000-0000-0000-00000000ca03'::uuid, owner_id::text,
+       jsonb_build_object('size', 1024, 'mimetype', 'image/jpeg')
+from _chat_media
+where k='owner_wrong';
+
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000ca01"}';
+set local role authenticated;
+select throws_ok(
+  $$ select public.send_media_message(
+    (select attachment_id from _chat_media where k='owner_wrong')
+  ) $$,
+  '23514', null, 'send rejects storage owner mismatch even when owner_id matches');
 
 select lives_ok(
   $$ with upload as (
