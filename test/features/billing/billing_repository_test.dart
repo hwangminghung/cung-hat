@@ -42,4 +42,39 @@ void main() {
     final e = await BillingRepository(client).myEntitlements();
     expect(e.single['feature'], 'see_likes');
   });
+
+  test('storeProducts calls get_store_products and maps rows', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('get_store_products', params: {'p_platform': 'ios'}))
+        .thenAnswer((_) => rpcOk([
+              {
+                'sku': 'pro_monthly_ios',
+                'type': 'pro',
+                'platform': 'ios',
+                'store_product_id': 'com.cunghat.pro.monthly',
+                'price_minor': 79000,
+                'billing_period': 'monthly',
+                'entitlement_days': 31,
+                'boost_credits': 0,
+                'badge': null,
+                'sort_order': 10,
+              },
+            ]));
+
+    final products = await BillingRepository(client).storeProducts('ios');
+
+    expect(products.single.sku, 'pro_monthly_ios');
+    expect(products.single.priceMinor, 79000);
+  });
+
+  test('boostCreditSummary calls get_my_boost_credits', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('get_my_boost_credits')).thenAnswer(
+      (_) => rpcOk({'available_count': 2, 'next_expiring_at': null}),
+    );
+
+    final summary = await BillingRepository(client).boostCreditSummary();
+
+    expect(summary.availableCount, 2);
+  });
 }
