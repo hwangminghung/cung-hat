@@ -23,7 +23,12 @@ class KeoCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(keo.title, style: text.titleMedium),
+              Row(
+                children: [
+                  Expanded(child: Text(keo.title, style: text.titleMedium)),
+                  if (keo.isBoosted) _boostedChip(),
+                ],
+              ),
               const SizedBox(height: AppSpacing.sm),
               Align(alignment: Alignment.centerLeft, child: _modeChip()),
               const SizedBox(height: AppSpacing.sm),
@@ -81,16 +86,50 @@ class KeoCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(open ? Icons.lock_open_outlined : Icons.verified_user_outlined,
-              size: 13, color: fg),
+          Icon(
+            open ? Icons.lock_open_outlined : Icons.verified_user_outlined,
+            size: 13,
+            color: fg,
+          ),
           const SizedBox(width: AppSpacing.xs),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w500, color: fg)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: fg,
+            ),
+          ),
         ],
       ),
     );
   }
+
+  Widget _boostedChip() => Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.xs,
+    ),
+    decoration: BoxDecoration(
+      color: AppColors.primaryTint,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+    ),
+    child: const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.trending_up, size: 13, color: AppColors.primaryDark),
+        SizedBox(width: AppSpacing.xs),
+        Text(
+          'Noi bat',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryDark,
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _genreChip(String g) => Container(
     padding: const EdgeInsets.symmetric(

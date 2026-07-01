@@ -14,6 +14,10 @@ const _messages = <String, String>{
   'no_matchable_keo': 'Chua tim duoc keo phu hop, thu lai sau.',
   'invalid_time_window': 'Gio hen khong hop le. Hay chon khung gio khac.',
   'invalid_group_size': 'So nguoi trong keo khong hop le.',
+  'not_keo_host': 'Chi chu keo moi day duoc keo nay.',
+  'keo_not_boostable': 'Keo nay khong the day luc nay.',
+  'boost_already_active': 'Keo nay dang duoc day.',
+  'no_boost_credit': 'Ban chua co luot day keo.',
 };
 
 String? keoErrorCode(Object error) {
