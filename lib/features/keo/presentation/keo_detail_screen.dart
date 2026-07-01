@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/keo_providers.dart';
 import '../data/keo_errors.dart';
+import '../domain/keo.dart';
 import '../domain/keo_member.dart';
 
 class KeoDetailScreen extends ConsumerWidget {
@@ -15,15 +16,15 @@ class KeoDetailScreen extends ConsumerWidget {
   String _statusText(String status) {
     switch (status) {
       case 'approved':
-        return 'Đã duyệt';
+        return 'Da duyet';
       case 'requested':
-        return 'Chờ duyệt';
+        return 'Cho duyet';
       case 'confirmed':
-        return 'Đã xác nhận';
+        return 'Da xac nhan';
       case 'left':
-        return 'Đã rời';
+        return 'Da roi';
       case 'declined':
-        return 'Bị từ chối';
+        return 'Bi tu choi';
       default:
         return status;
     }
@@ -35,19 +36,84 @@ class KeoDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final detailAsync = ref.watch(keoDetailProvider(keoId));
     final rosterAsync = ref.watch(keoRosterProvider(keoId));
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: rosterAsync.when(
-        data: (roster) => _buildBody(context, ref, roster),
+      body: detailAsync.when(
+        data: (keo) => rosterAsync.when(
+          data: (roster) => _buildBody(context, ref, keo, roster),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => const Center(child: Text('Khong tai duoc keo')),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => const Center(child: Text('Không tải được kèo')),
+        error: (e, _) => const Center(child: Text('Khong tai duoc keo')),
+      ),
+    );
+  }
+
+  void _confirmBoost(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Day keo nay?'),
+        content: const Text(
+          'Dung 1 luot day de dua keo len dau bang trong 24 gio.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('De sau'),
+          ),
+          FilledButton(
+            key: const Key('confirm_boost_keo_btn'),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                await ref.read(keoRepositoryProvider).applyBoost(keoId);
+                ref.invalidate(keoDetailProvider(keoId));
+                ref.invalidate(openKeosProvider);
+                if (context.mounted) _snack(context, 'Da day keo');
+              } catch (e) {
+                if (!context.mounted) return;
+                if (keoErrorCode(e) == 'no_boost_credit') {
+                  showDialog<void>(
+                    context: context,
+                    builder: (buyContext) => AlertDialog(
+                      content: Text(keoErrorMessage(e)),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(buyContext),
+                          child: const Text('De sau'),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.pop(buyContext);
+                            context.push('/store');
+                          },
+                          child: const Text('Mua luot day'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  _snack(context, keoErrorMessage(e));
+                }
+              }
+            },
+            child: const Text('Day keo'),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildBody(
-      BuildContext context, WidgetRef ref, List<KeoMember> roster) {
+    BuildContext context,
+    WidgetRef ref,
+    Keo keo,
+    List<KeoMember> roster,
+  ) {
     final uid = ref.watch(myProfileProvider).value?.id;
     KeoMember? myRow;
     for (final m in roster) {
@@ -75,7 +141,7 @@ class KeoDetailScreen extends ConsumerWidget {
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Flexible(child: Text(m.displayName ?? 'Ẩn danh')),
+                Flexible(child: Text(m.displayName ?? 'An danh')),
                 if (m.verified) ...[
                   const SizedBox(width: 4),
                   const Icon(Icons.verified, size: 16, color: Colors.blue),
@@ -83,14 +149,14 @@ class KeoDetailScreen extends ConsumerWidget {
               ],
             ),
             subtitle: Text(
-              m.role == 'host' ? 'Chủ kèo' : _statusText(m.joinStatus),
+              m.role == 'host' ? 'Chu keo' : _statusText(m.joinStatus),
             ),
             trailing: (isHost && m.joinStatus == 'requested')
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextButton(
-                        child: const Text('Duyệt'),
+                        child: const Text('Duyet'),
                         onPressed: () async {
                           try {
                             await ref
@@ -99,13 +165,13 @@ class KeoDetailScreen extends ConsumerWidget {
                             ref.invalidate(keoRosterProvider(keoId));
                           } catch (_) {
                             if (context.mounted) {
-                              _snack(context, 'Không duyệt được');
+                              _snack(context, 'Khong duyet duoc');
                             }
                           }
                         },
                       ),
                       TextButton(
-                        child: const Text('Từ chối'),
+                        child: const Text('Tu choi'),
                         onPressed: () async {
                           try {
                             await ref
@@ -114,7 +180,7 @@ class KeoDetailScreen extends ConsumerWidget {
                             ref.invalidate(keoRosterProvider(keoId));
                           } catch (_) {
                             if (context.mounted) {
-                              _snack(context, 'Không từ chối được');
+                              _snack(context, 'Khong tu choi duoc');
                             }
                           }
                         },
@@ -129,7 +195,7 @@ class KeoDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: FilledButton(
               key: const Key('request_join_btn'),
-              child: const Text('Xin vào kèo'),
+              child: const Text('Xin vao keo'),
               onPressed: () async {
                 try {
                   await ref.read(keoRepositoryProvider).requestJoin(keoId);
@@ -143,14 +209,15 @@ class KeoDetailScreen extends ConsumerWidget {
                         content: Text(keoErrorMessage(e)),
                         actions: [
                           TextButton(
-                              onPressed: () => Navigator.pop(d),
-                              child: const Text('Để sau')),
+                            onPressed: () => Navigator.pop(d),
+                            child: const Text('De sau'),
+                          ),
                           FilledButton(
                             onPressed: () {
                               Navigator.pop(d);
                               context.push('/store');
                             },
-                            child: const Text('Nâng cấp Pro'),
+                            child: const Text('Nang cap Pro'),
                           ),
                         ],
                       ),
@@ -167,14 +234,14 @@ class KeoDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: FilledButton(
               key: const Key('confirm_keo_btn'),
-              child: const Text('Đồng ý tham gia'),
+              child: const Text('Dong y tham gia'),
               onPressed: () async {
                 try {
                   await ref.read(keoRepositoryProvider).confirm(keoId);
                   ref.invalidate(keoRosterProvider(keoId));
                 } catch (_) {
                   if (context.mounted) {
-                    _snack(context, 'Không xác nhận được');
+                    _snack(context, 'Khong xac nhan duoc');
                   }
                 }
               },
@@ -185,7 +252,7 @@ class KeoDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: OutlinedButton(
               key: const Key('open_keo_chat_btn'),
-              child: const Text('Mở chat nhóm'),
+              child: const Text('Mo chat nhom'),
               onPressed: () => context.push('/keo/chat/$keoId'),
             ),
           ),
@@ -194,16 +261,35 @@ class KeoDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: OutlinedButton(
               key: const Key('host_pick_venue_btn'),
-              child: const Text('Chốt quán'),
+              child: const Text('Chot quan'),
               onPressed: () => context.push('/keo/plan/$keoId?host=1'),
             ),
-          )
-        else if (isApproved)
+          ),
+        if (isHost && keo.isBoosted)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ListTile(
+              leading: Icon(Icons.trending_up),
+              title: Text('Keo dang duoc day'),
+              subtitle: Text('Keo cua ban dang o nhom noi bat.'),
+            ),
+          ),
+        if (isHost && !keo.isBoosted && keo.status == 'open')
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: FilledButton.icon(
+              key: const Key('boost_keo_btn'),
+              icon: const Icon(Icons.trending_up),
+              label: const Text('Day keo'),
+              onPressed: () => _confirmBoost(context, ref),
+            ),
+          ),
+        if (!isHost && isApproved)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: OutlinedButton(
               key: const Key('view_plan_btn'),
-              child: const Text('Xem kế hoạch'),
+              child: const Text('Xem ke hoach'),
               onPressed: () => context.push('/keo/plan/$keoId'),
             ),
           ),
@@ -211,14 +297,14 @@ class KeoDetailScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextButton(
-              child: const Text('Rời kèo'),
+              child: const Text('Roi keo'),
               onPressed: () async {
                 try {
                   await ref.read(keoRepositoryProvider).leave(keoId);
                   ref.invalidate(keoRosterProvider(keoId));
                 } catch (_) {
                   if (context.mounted) {
-                    _snack(context, 'Không rời kèo được');
+                    _snack(context, 'Khong roi keo duoc');
                   }
                 }
               },
