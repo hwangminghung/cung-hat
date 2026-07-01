@@ -16,7 +16,7 @@ class StoreScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n?.storeTitle ?? 'Nang cap')),
       body: productsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (error, stackTrace) => Center(
           child: FilledButton(
             onPressed: () => ref.invalidate(storeProductsProvider),
             child: const Text('Thu lai'),
