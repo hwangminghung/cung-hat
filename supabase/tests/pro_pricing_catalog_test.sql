@@ -1,6 +1,6 @@
 -- Run with: supabase test db
 begin;
-select plan(8);
+select plan(9);
 
 set local role postgres;
 
@@ -11,6 +11,13 @@ select has_function('public', 'get_store_products', array['text']::name[], 'get_
 
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000aa01"}';
 set local role authenticated;
+
+select throws_ok(
+  $$ select * from public.products limit 1 $$,
+  '42501',
+  null,
+  'authenticated cannot read products directly'
+);
 
 select ok(
   exists (

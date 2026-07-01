@@ -76,6 +76,7 @@ on conflict (sku) do update set
   min_paid_pro_users = excluded.min_paid_pro_users,
   max_paid_pro_users = excluded.max_paid_pro_users;
 
+drop function if exists public.get_store_products(text);
 drop type if exists public.store_product;
 create type public.store_product as (
   sku text,
@@ -138,4 +139,4 @@ $$;
 revoke execute on function public.get_store_products(text) from public, anon;
 grant execute on function public.get_store_products(text) to authenticated;
 
-grant select on public.products to authenticated;
+revoke select on public.products from anon, authenticated;
