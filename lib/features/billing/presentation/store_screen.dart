@@ -1,22 +1,9 @@
+import 'package:cung_hat/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cung_hat/l10n/app_localizations.dart';
+import '../application/billing_providers.dart';
 import '../application/iap_controller.dart';
-
-/// One purchasable upgrade row. Rendered statically — no provider read at build.
-class _Upgrade {
-  const _Upgrade(this.feature, this.title, this.description);
-  final String feature;
-  final String title;
-  final String description;
-}
-
-const _upgrades = <_Upgrade>[
-  _Upgrade('pro', 'Nâng cấp Pro', 'Tạo kèo, tham gia không giới hạn, mở mọi tính năng trả phí'),
-  _Upgrade('boost', 'Đẩy kèo lên top', 'Đẩy kèo của bạn lên đầu bảng 24 giờ'),
-  _Upgrade('see_likes', 'Xem ai đã thích bạn', 'Mở khoá danh sách người đã thích bạn'),
-  _Upgrade('premium_filters', 'Bộ lọc nâng cao', 'Lọc theo gu nhạc, độ tuổi, khu vực'),
-];
+import '../domain/store_product.dart';
 
 class StoreScreen extends ConsumerWidget {
   const StoreScreen({super.key});
@@ -24,51 +11,152 @@ class StoreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final productsAsync = ref.watch(storeProductsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n?.storeTitle ?? 'Nâng cấp')),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: [
-          for (final u in _upgrades)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(_titleFor(l10n, u),
-                        style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 6),
-                    Text(u.description),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: FilledButton(
-                        onPressed: () => ref.read(iapControllerProvider).buy(u.feature),
-                        child: Text(l10n?.buy ?? 'Mua'),
-                      ),
-                    ),
-                  ],
+      appBar: AppBar(title: Text(l10n?.storeTitle ?? 'Nang cap')),
+      body: productsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => Center(
+          child: FilledButton(
+            onPressed: () => ref.invalidate(storeProductsProvider),
+            child: const Text('Thu lai'),
+          ),
+        ),
+        data: (products) {
+          final pro = products.where((p) => p.isPro).toList();
+          final boosts = products.where((p) => p.isBoost).toList();
+          return ListView(
+            padding: const EdgeInsets.all(12),
+            children: [
+              if (pro.isNotEmpty) ...[
+                Text('Pro', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                for (final product in pro) _ProductCard(product: product),
+                const SizedBox(height: 20),
+              ],
+              if (boosts.isNotEmpty) ...[
+                Text('Day keo', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                for (final product in boosts) _ProductCard(product: product),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ProductCard extends ConsumerWidget {
+  const _ProductCard({required this.product});
+
+  final StoreProduct product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _title(product),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
+                if (product.badge != null) _Badge(label: _badge(product.badge!)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(_description(product)),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: () =>
+                    ref.read(iapControllerProvider).buyProduct(product),
+                child: Text(_price(product)),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  String _titleFor(AppLocalizations? l10n, _Upgrade u) {
-    switch (u.feature) {
-      case 'boost':
-        return l10n?.boostTitle ?? 'Đẩy kèo lên top';
-      case 'see_likes':
-        return l10n?.seeLikesTitle ?? 'Xem ai đã thích bạn';
-      case 'premium_filters':
-        return l10n?.filtersTitle ?? 'Bộ lọc nâng cao';
-      case 'pro':
-        return 'Nâng cấp Pro';
-      default:
-        return u.title;
+  String _title(StoreProduct product) {
+    if (product.isBoost) {
+      return product.boostCredits > 1
+          ? '${product.boostCredits} luot day'
+          : 'Day keo 24h';
     }
+    switch (product.billingPeriod) {
+      case 'monthly':
+        return 'Pro hang thang';
+      case 'yearly':
+        return 'Pro hang nam';
+      case 'lifetime':
+        return 'Pro tron doi';
+      default:
+        return 'Pro';
+    }
+  }
+
+  String _description(StoreProduct product) {
+    if (product.isBoost) {
+      return 'Day mot keo dang mo len dau bang trong 24 gio.';
+    }
+    if (product.billingPeriod == 'lifetime') {
+      return 'Uu dai launch co the bien mat khi du so paid Pro users.';
+    }
+    return 'Tao keo, tham gia nhieu keo, bo loc nang cao, xem ai thich ban va 1 luot day moi thang.';
+  }
+
+  String _price(StoreProduct product) {
+    switch (product.billingPeriod) {
+      case 'monthly':
+        return '${product.priceLabel} / thang';
+      case 'yearly':
+        return '${product.priceLabel} / nam';
+      case 'lifetime':
+        return '${product.priceLabel} tron doi';
+      default:
+        return product.priceLabel;
+    }
+  }
+
+  String _badge(String badge) {
+    switch (badge) {
+      case 'best_value':
+        return 'Loi nhat';
+      case 'launch':
+        return 'Launch';
+      case 'ending_soon':
+        return 'Sap ket thuc';
+      default:
+        return badge;
+    }
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+    );
   }
 }
