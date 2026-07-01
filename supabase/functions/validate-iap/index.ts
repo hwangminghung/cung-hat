@@ -17,24 +17,29 @@ Deno.serve(async (req) => {
   if (!valid) return new Response(JSON.stringify({ error: "invalid_receipt" }), { status: 400 });
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const { data: product } = await admin.from("products")
-    .select("id,type").eq("store_product_id", store_product_id).eq("platform", platform).maybeSingle();
+  const { data: product, error: productError } = await admin.from("products")
+    .select("id,type,sku")
+    .eq("store_product_id", store_product_id)
+    .eq("platform", platform)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (productError) {
+    return new Response(JSON.stringify({ error: productError.message }), { status: 500 });
+  }
   if (!product) return new Response(JSON.stringify({ error: "unknown_product" }), { status: 400 });
 
-  await admin.from("purchases").upsert({
-    user_id: user.id, product_id: product.id, platform,
-    store_txn_id, receipt_ref: "stored", state: "validated",
-  }, { onConflict: "platform,store_txn_id" });
+  const { data: delivery, error: deliveryError } = await admin.rpc("record_validated_purchase", {
+    p_user_id: user.id,
+    p_product_id: product.id,
+    p_platform: platform,
+    p_store_txn_id: store_txn_id,
+    p_receipt_ref: "stored",
+  });
+  if (deliveryError) {
+    return new Response(JSON.stringify({ error: deliveryError.message }), { status: 400 });
+  }
 
-  // boost = 24h window; see_likes/premium_filters = permanent.
-  const activeUntil = product.type === "boost"
-    ? new Date(Date.now() + 24 * 3600 * 1000).toISOString() : null;
-  await admin.from("entitlements").upsert({
-    user_id: user.id, feature: product.type,
-    source: platform === "ios" ? "ios_iap" : "play_billing", active_until: activeUntil,
-  }, { onConflict: "user_id,feature" });
-
-  return new Response(JSON.stringify({ ok: true, feature: product.type }), {
+  return new Response(JSON.stringify({ ok: true, feature: product.type, sku: product.sku, delivery }), {
     headers: { "Content-Type": "application/json" },
   });
 });

@@ -53,11 +53,13 @@ set search_path=''
 as $$
 declare
   v_product public.products%rowtype;
+  v_purchase public.purchases%rowtype;
   v_purchase_id uuid;
-  v_created boolean := false;
-  v_existing_until timestamptz;
   v_new_until timestamptz;
+  v_paid_pro_users int;
 begin
+  perform pg_advisory_xact_lock(hashtextextended(p_platform || ':' || p_store_txn_id, 0));
+
   select * into v_product
   from public.products
   where id = p_product_id
@@ -68,39 +70,65 @@ begin
     raise exception 'unknown_product' using errcode='check_violation';
   end if;
 
-  select id into v_purchase_id
+  select * into v_purchase
   from public.purchases
   where platform = p_platform
-    and store_txn_id = p_store_txn_id;
+    and store_txn_id = p_store_txn_id
+  for update;
+
+  if found then
+    if v_purchase.user_id <> p_user_id
+       or v_purchase.product_id <> p_product_id
+       or v_purchase.platform <> p_platform then
+      raise exception 'purchase_mismatch' using errcode='check_violation';
+    end if;
+
+    return jsonb_build_object(
+      'ok', true,
+      'feature', v_product.type,
+      'purchase_id', v_purchase.id,
+      'created', false
+    );
+  end if;
+
+  v_paid_pro_users := app_private.paid_pro_user_count();
+  if v_paid_pro_users < v_product.min_paid_pro_users
+     or (v_product.max_paid_pro_users is not null and v_paid_pro_users > v_product.max_paid_pro_users) then
+    raise exception 'product_unavailable' using errcode='check_violation';
+  end if;
+
+  insert into public.purchases(user_id, product_id, platform, store_txn_id, receipt_ref, state)
+  values (p_user_id, p_product_id, p_platform, p_store_txn_id, p_receipt_ref, 'validated')
+  on conflict (platform, store_txn_id) do nothing
+  returning id into v_purchase_id;
 
   if v_purchase_id is null then
-    insert into public.purchases(user_id, product_id, platform, store_txn_id, receipt_ref, state)
-    values (p_user_id, p_product_id, p_platform, p_store_txn_id, p_receipt_ref, 'validated')
-    returning id into v_purchase_id;
-    v_created := true;
-  else
-    update public.purchases
-    set user_id = p_user_id,
-        product_id = p_product_id,
-        receipt_ref = p_receipt_ref,
-        state = 'validated'
-    where id = v_purchase_id;
+    select * into v_purchase
+    from public.purchases
+    where platform = p_platform
+      and store_txn_id = p_store_txn_id
+    for update;
+
+    if not found
+       or v_purchase.user_id <> p_user_id
+       or v_purchase.product_id <> p_product_id
+       or v_purchase.platform <> p_platform then
+      raise exception 'purchase_mismatch' using errcode='check_violation';
+    end if;
+
+    return jsonb_build_object(
+      'ok', true,
+      'feature', v_product.type,
+      'purchase_id', v_purchase.id,
+      'created', false
+    );
   end if;
 
   if v_product.type = 'pro' then
-    select active_until into v_existing_until
-    from public.entitlements
-    where user_id = p_user_id and feature = 'pro';
-
-    if v_existing_until is null and exists (
-      select 1 from public.entitlements where user_id = p_user_id and feature = 'pro'
-    ) then
-      v_new_until := null;
-    elsif v_product.billing_period = 'lifetime' then
+    if v_product.billing_period = 'lifetime' then
       v_new_until := null;
     else
-      v_new_until := greatest(coalesce(v_existing_until, now()), now())
-        + make_interval(days => coalesce(v_product.entitlement_days, 31));
+      v_new_until := now() + make_interval(days => coalesce(v_product.entitlement_days, 31));
     end if;
 
     insert into public.entitlements(user_id, feature, source, active_until)
@@ -112,8 +140,12 @@ begin
     )
     on conflict (user_id, feature) do update set
       source = excluded.source,
-      active_until = excluded.active_until;
-  elsif v_product.type = 'boost' and v_created then
+      active_until = case
+        when public.entitlements.active_until is null or excluded.active_until is null then null
+        else greatest(public.entitlements.active_until, now())
+          + make_interval(days => coalesce(v_product.entitlement_days, 31))
+      end;
+  elsif v_product.type = 'boost' then
     insert into public.keo_boost_credits(user_id, purchase_id, source, status)
     select p_user_id, v_purchase_id, 'purchase', 'available'
     from generate_series(1, v_product.boost_credits);
@@ -123,7 +155,7 @@ begin
     'ok', true,
     'feature', v_product.type,
     'purchase_id', v_purchase_id,
-    'created', v_created
+    'created', true
   );
 end;
 $$;
