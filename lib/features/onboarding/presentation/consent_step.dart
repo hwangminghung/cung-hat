@@ -57,8 +57,11 @@ class ConsentStep extends StatelessWidget {
       return 'Tùy chọn, có thể đổi sau trong Cài đặt';
     }
 
-    return ListView(
-      shrinkWrap: true,
+    // Plain Column: this widget lives inside the Stepper's own scrollable.
+    // A nested vertical ListView here becomes the "primary" scroll view and
+    // swallows every drag over the tiles, so the page can't be scrolled and
+    // the continue button below stays unreachable on small screens.
+    return Column(
       children: [
         for (final purpose in values.keys)
           CheckboxListTile(

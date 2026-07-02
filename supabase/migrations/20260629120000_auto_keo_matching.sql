@@ -208,7 +208,7 @@ begin
   select
     'new_keo_proposal'::text,
     null::uuid,
-    'Keo goi y toi nay'::text,
+    'Kèo gợi ý tối nay'::text,
     caller_area,
     null::text,
     null::timestamptz,
@@ -281,7 +281,7 @@ begin
 
   clean_title := nullif(trim(p_title), '');
   if clean_title is null then
-    clean_title := 'Keo goi y toi nay';
+    clean_title := 'Kèo gợi ý tối nay';
   end if;
 
   perform app_private.enforce_rate_limit('create_keo', 10, interval '1 day');

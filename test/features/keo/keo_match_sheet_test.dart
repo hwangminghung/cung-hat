@@ -54,7 +54,9 @@ void main() {
     var created = false;
     const suggestion = KeoMatchSuggestion(
       suggestionType: 'new_keo_proposal',
-      title: 'Keo goi y toi nay',
+      // The DB fallback title ships with proper diacritics (see
+      // 20260629120000_auto_keo_matching.sql) — no display-side rewriting.
+      title: 'Kèo gợi ý tối nay',
       sizeTarget: 4,
       slotsFilled: 1,
       genres: ['vpop'],

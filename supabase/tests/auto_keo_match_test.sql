@@ -171,7 +171,7 @@ select is(
 
 set local role postgres;
 select is(
-  (select count(*)::int from public.keo where title = 'Keo goi y toi nay'),
+  (select count(*)::int from public.keo where title = 'Kèo gợi ý tối nay'),
   0,
   'proposal fallback does not insert a keo row'
 );
@@ -181,7 +181,7 @@ set local role authenticated;
 
 select throws_ok(
   $$ select public.create_auto_matched_keo(
-    'Keo goi y toi nay',
+    'Kèo gợi ý tối nay',
     now() + interval '1 day',
     now() + interval '1 day 3 hours',
     4,
@@ -199,7 +199,7 @@ set local role authenticated;
 
 select throws_ok(
   $$ select public.create_auto_matched_keo(
-    'Keo goi y toi nay',
+    'Kèo gợi ý tối nay',
     now() + interval '1 day',
     now() + interval '1 day 3 hours',
     4,
@@ -217,7 +217,7 @@ set local role authenticated;
 
 select throws_ok(
   $$ select public.create_auto_matched_keo(
-    'Keo goi y toi nay',
+    'Kèo gợi ý tối nay',
     now() + interval '1 day',
     now() + interval '1 day 3 hours',
     null::int,
@@ -232,7 +232,7 @@ select throws_ok(
 create temp table _created_auto_keo (id uuid);
 insert into _created_auto_keo
 select public.create_auto_matched_keo(
-  'Keo goi y toi nay',
+  'Kèo gợi ý tối nay',
   now() + interval '2 days',
   now() + interval '2 days 3 hours',
   4,

@@ -238,12 +238,9 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
     );
   }
 
-  String _displayTitle(String raw) {
-    return switch (raw.trim().toLowerCase()) {
-      'keo goi y toi nay' => 'Kèo gợi ý tối nay',
-      _ => raw,
-    };
-  }
+  // Titles come from the DB with proper diacritics ('Kèo gợi ý tối nay');
+  // no display-side rewriting needed.
+  String _displayTitle(String raw) => raw;
 
   String _reasonLabel(String reason) {
     return switch (reason) {
