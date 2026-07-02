@@ -7,19 +7,19 @@ const _messages = <String, String>{
   'keo_full': 'Kèo đã đầy.',
   'already_declined': 'Bạn đã bị từ chối ở kèo này.',
   'keo_not_open': 'Kèo không còn mở.',
-  'blocked': 'Khong the vao keo nay vi cai dat an toan.',
+  'blocked': 'Không thể vào kèo này vì cài đặt an toàn.',
   'location_required':
-      'Can bat vi tri de ghep keo. Hay bat Location roi thu lai.',
-  'age_not_verified': 'Can xac minh tuoi truoc khi ghep keo.',
-  'no_matchable_keo': 'Chua tim duoc keo phu hop, thu lai sau.',
-  'invalid_time_window': 'Gio hen khong hop le. Hay chon khung gio khac.',
-  'invalid_group_size': 'So nguoi trong keo khong hop le.',
+      'Cần bật vị trí để ghép kèo. Hãy bật Location rồi thử lại.',
+  'age_not_verified': 'Cần xác minh tuổi trước khi ghép kèo.',
+  'no_matchable_keo': 'Chưa tìm được kèo phù hợp, thử lại sau.',
+  'invalid_time_window': 'Giờ hẹn không hợp lệ. Hãy chọn khung giờ khác.',
+  'invalid_group_size': 'Số người trong kèo không hợp lệ.',
 };
 
 String? keoErrorCode(Object error) {
-  final s = error.toString();
+  final text = error.toString();
   for (final code in _messages.keys) {
-    if (s.contains(code)) return code;
+    if (text.contains(code)) return code;
   }
   return null;
 }

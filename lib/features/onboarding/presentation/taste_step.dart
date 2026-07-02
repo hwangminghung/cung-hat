@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Reusable multi-select chip grid for genres / artists / songs (bài tủ).
 ///
@@ -21,6 +22,15 @@ class TasteChips<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return const EmptyState(
+        key: Key('taste_empty'),
+        icon: Icons.library_music_outlined,
+        title: 'Chưa có dữ liệu gu nhạc',
+        subtitle: 'Kiểm tra dữ liệu mẫu hoặc thử tải lại sau ít phút.',
+      );
+    }
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,

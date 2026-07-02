@@ -36,11 +36,11 @@ void main() {
       ),
     );
 
-    expect(find.text('Keo hop voi ban'), findsOneWidget);
+    expect(find.text('Kèo hợp với bạn'), findsOneWidget);
     expect(find.text('V-Pop toi nay'), findsOneWidget);
     expect(find.text('2026-06-30 12:00 - 15:00 UTC'), findsOneWidget);
-    expect(find.text('Hop gu nhac'), findsOneWidget);
-    expect(find.text('Gan ban'), findsOneWidget);
+    expect(find.text('Hợp gu nhạc'), findsOneWidget);
+    expect(find.text('Gần bạn'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('keo_match_join_btn')));
     await tester.pumpAndSettle();
@@ -77,11 +77,11 @@ void main() {
     );
 
     expect(created, isFalse);
-    expect(find.text('Tao keo moi tu goi y nay?'), findsOneWidget);
-    expect(find.text('Keo goi y toi nay'), findsOneWidget);
+    expect(find.text('Đã tìm thấy nhóm phù hợp'), findsOneWidget);
+    expect(find.text('Kèo gợi ý tối nay'), findsOneWidget);
     expect(find.text('2026-06-30 12:00 - 15:00 UTC'), findsOneWidget);
-    expect(find.text('Gio dep'), findsOneWidget);
-    expect(find.text('Vao nhanh'), findsOneWidget);
+    expect(find.text('Giờ đẹp'), findsOneWidget);
+    expect(find.text('Vào nhanh'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('keo_match_create_btn')));
     await tester.pumpAndSettle();
@@ -103,7 +103,7 @@ void main() {
     );
 
     expect(
-      find.text('Chua tim duoc keo phu hop. Thu lai sau.'),
+      find.text('Chưa tìm được kèo phù hợp. Thử lại sau.'),
       findsOneWidget,
     );
   });

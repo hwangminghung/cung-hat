@@ -178,7 +178,7 @@ void main() {
     await tester.tap(find.text('Ghép nhóm cho tôi'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Keo hop voi ban'), findsOneWidget);
+    expect(find.text('Kèo hợp với bạn'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('keo_match_join_btn')));
     await tester.pumpAndSettle();
@@ -258,7 +258,7 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('Chua tim duoc keo phu hop, thu lai sau.'),
+      find.text('Chưa tìm được kèo phù hợp, thử lại sau.'),
       findsOneWidget,
     );
     expect(repo.createCalls, 0);

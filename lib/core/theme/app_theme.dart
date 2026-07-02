@@ -10,8 +10,12 @@ abstract final class AppTheme {
       onPrimary: AppColors.onPrimary,
       primaryContainer: AppColors.primaryTint,
       onPrimaryContainer: AppColors.primaryDark,
-      secondary: AppColors.warning,
-      tertiary: AppColors.success,
+      secondary: AppColors.secondary,
+      onSecondary: AppColors.onPrimary,
+      secondaryContainer: AppColors.secondaryTint,
+      onSecondaryContainer: AppColors.secondaryDark,
+      tertiary: AppColors.tertiary,
+      tertiaryContainer: AppColors.tertiaryTint,
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
       outline: AppColors.border,
@@ -144,14 +148,18 @@ abstract final class AppTheme {
         enabledBorder: border(AppColors.border, 1),
         border: border(AppColors.border, 1),
         focusedBorder: border(AppColors.primary, 1.5),
-        labelStyle: const TextStyle(color: AppColors.textSecondary),
-        floatingLabelStyle: const TextStyle(color: AppColors.primary),
-        hintStyle: const TextStyle(color: AppColors.textHint),
+        labelStyle: textTheme.bodyMedium?.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        floatingLabelStyle: textTheme.labelLarge?.copyWith(
+          color: AppColors.primaryDark,
+        ),
+        hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textHint),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
-        elevation: 1,
-        shadowColor: AppColors.primaryDark.withValues(alpha: 0.06),
+        elevation: 0,
+        shadowColor: AppColors.shadow.withValues(alpha: 0.10),
         surfaceTintColor: Colors.transparent,
         margin: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
@@ -184,9 +192,9 @@ abstract final class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w800,
             color: states.contains(WidgetState.selected)
-                ? AppColors.primary
+                ? AppColors.primaryDark
                 : AppColors.textHint,
           ),
         ),
@@ -203,7 +211,7 @@ abstract final class AppTheme {
         backgroundColor: AppColors.textPrimary,
         contentTextStyle: const TextStyle(color: Colors.white),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(

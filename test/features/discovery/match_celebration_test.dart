@@ -4,10 +4,17 @@ import 'package:cung_hat/features/discovery/presentation/match_celebration.dart'
 
 void main() {
   testWidgets('shows the match headline and the CTA', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: MatchCelebration(
-      otherName: 'Linh', sharedBaitu: const ['s2'], onChat: () {},
-    )));
-    expect(find.text('Chung gu! 🎤'), findsOneWidget);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MatchCelebration(
+          otherName: 'Linh',
+          sharedBaitu: const ['s2'],
+          onChat: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('Chung gu!'), findsOneWidget);
     expect(find.text('Rủ đi hát'), findsOneWidget);
   });
 }

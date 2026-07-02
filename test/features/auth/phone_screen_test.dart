@@ -27,6 +27,8 @@ void main() {
       overrides: [authRepositoryProvider.overrideWithValue(repo)],
       child: MaterialApp.router(routerConfig: router),
     ));
+    expect(find.text('Kết bạn qua những bài hát'), findsOneWidget);
+    expect(find.text('Tiếp tục'), findsOneWidget);
     await tester.enterText(find.byType(TextField), '900000001');
     await tester.tap(find.byKey(const Key('send_otp_btn')));
     await tester.pump();

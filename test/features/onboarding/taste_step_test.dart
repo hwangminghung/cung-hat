@@ -47,4 +47,22 @@ void main() {
     await tester.pump();
     expect(selected.contains('vpop'), isFalse);
   });
+
+  testWidgets('empty taste lists show a visible empty state', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TasteChips<Genre>(
+            items: const [],
+            labelOf: (g) => g.nameVi,
+            idOf: (g) => g.id,
+            selected: const {},
+            onToggle: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('taste_empty')), findsOneWidget);
+  });
 }

@@ -77,19 +77,19 @@ void main() {
   test('keoErrorMessage maps auto-match errors', () {
     expect(
       keoErrorMessage('PostgrestException(message: location_required)'),
-      'Can bat vi tri de ghep keo. Hay bat Location roi thu lai.',
+      'Cần bật vị trí để ghép kèo. Hãy bật Location rồi thử lại.',
     );
     expect(
       keoErrorMessage('PostgrestException(message: age_not_verified)'),
-      'Can xac minh tuoi truoc khi ghep keo.',
+      'Cần xác minh tuổi trước khi ghép kèo.',
     );
     expect(
       keoErrorMessage('PostgrestException(message: invalid_time_window)'),
-      'Gio hen khong hop le. Hay chon khung gio khac.',
+      'Giờ hẹn không hợp lệ. Hãy chọn khung giờ khác.',
     );
     expect(
       keoErrorMessage('PostgrestException(message: invalid_group_size)'),
-      'So nguoi trong keo khong hop le.',
+      'Số người trong kèo không hợp lệ.',
     );
   });
 }
