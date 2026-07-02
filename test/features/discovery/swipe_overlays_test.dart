@@ -20,14 +20,14 @@ void main() {
       (tester) async {
     await pump(tester, 0.6, 0);
     expect(opacityOf(tester, const Key('overlay_like')), closeTo(0.6, 0.01));
-    expect(opacityOf(tester, const Key('overlay_nope')), 0);
+    expect(find.byKey(const Key('overlay_nope')), findsNothing);
     expect(find.text('THÍCH'), findsOneWidget);
   });
 
   testWidgets('kéo trái hiện BỎ QUA', (tester) async {
     await pump(tester, -0.8, 0);
     expect(opacityOf(tester, const Key('overlay_nope')), closeTo(0.8, 0.01));
-    expect(opacityOf(tester, const Key('overlay_like')), 0);
+    expect(find.byKey(const Key('overlay_like')), findsNothing);
   });
 
   testWidgets('kéo lên hiện SIÊU THÍCH, bị triệt khi kéo ngang mạnh',
@@ -41,5 +41,20 @@ void main() {
   testWidgets('progress ngoài [-1,1] bị clamp', (tester) async {
     await pump(tester, 1.4, 0);
     expect(opacityOf(tester, const Key('overlay_like')), 1.0);
+  });
+
+  testWidgets('card được bọc RepaintBoundary, stamp ẩn không được build',
+      (tester) async {
+    await pump(tester, 0, 0);
+    expect(
+      find.descendant(
+        of: find.byType(SwipeOverlays),
+        matching: find.byType(RepaintBoundary),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('overlay_like')), findsNothing);
+    expect(find.byKey(const Key('overlay_nope')), findsNothing);
+    expect(find.byKey(const Key('overlay_super')), findsNothing);
   });
 }
