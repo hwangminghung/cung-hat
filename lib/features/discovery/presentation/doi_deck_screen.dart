@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/skeleton.dart';
 import '../application/discovery_providers.dart';
 import '../domain/candidate.dart';
 import 'candidate_card.dart';
 import 'match_celebration.dart';
-import '../../../shared/widgets/empty_state.dart';
 
 class DoiDeckScreen extends ConsumerStatefulWidget {
   const DoiDeckScreen({super.key});
@@ -25,8 +28,6 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     });
   }
 
-  /// Maps a card swipe direction to a swipe action recorded server-side.
-  /// Returns null for directions we ignore (e.g. bottom).
   String? _directionToSwipe(CardSwiperDirection direction) {
     if (direction == CardSwiperDirection.right) return 'like';
     if (direction == CardSwiperDirection.top) return 'super';
@@ -40,9 +41,16 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     return Scaffold(
       body: SafeArea(
         child: candidatesAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Skeleton(
+              width: double.infinity,
+              height: double.infinity,
+              radius: 28,
+            ),
+          ),
           error: (err, _) => EmptyState(
-            icon: Icons.wifi_off,
+            icon: Icons.wifi_off_rounded,
             title: 'Không tải được gợi ý',
             subtitle: 'Kiểm tra kết nối rồi thử lại.',
             actionLabel: 'Thử lại',
@@ -50,31 +58,80 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           ),
           data: (candidates) {
             if (candidates.isEmpty) {
-              return const EmptyState(
-                icon: Icons.music_note_outlined,
+              return EmptyState(
+                icon: Icons.music_note_rounded,
                 title: 'Chưa có bạn hát quanh đây',
                 subtitle: 'Mở lại sau một chút để xem gợi ý mới.',
+                actionLabel: 'Làm mới gợi ý',
+                onAction: () => ref.invalidate(candidatesProvider),
               );
             }
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: CardSwiper(
-                cardsCount: candidates.length,
-                isLoop: false,
-                numberOfCardsDisplayed: candidates.length.clamp(1, 2),
-                cardBuilder: (context, index, h, v) =>
-                    CandidateCard(candidate: candidates[index]),
-                onSwipe: (previousIndex, currentIndex, direction) {
-                  final dir = _directionToSwipe(direction);
-                  if (dir != null) {
-                    _handleSwipe(candidates[previousIndex], dir);
-                  }
-                  return true;
-                },
-                onEnd: () {
-                  if (mounted) ref.invalidate(candidatesProvider);
-                },
-              ),
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Đôi hát',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              'Gợi ý hợp gu nhạc và khoảng cách an toàn.',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton.filledTonal(
+                        tooltip: 'Làm mới',
+                        onPressed: () => ref.invalidate(candidatesProvider),
+                        icon: const Icon(Icons.refresh_rounded),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      AppSpacing.xl,
+                    ),
+                    child: CardSwiper(
+                      cardsCount: candidates.length,
+                      isLoop: false,
+                      numberOfCardsDisplayed: candidates.length.clamp(1, 2),
+                      cardBuilder: (context, index, h, v) =>
+                          CandidateCard(candidate: candidates[index]),
+                      onSwipe: (previousIndex, currentIndex, direction) {
+                        final dir = _directionToSwipe(direction);
+                        if (dir != null) {
+                          _handleSwipe(candidates[previousIndex], dir);
+                        }
+                        return true;
+                      },
+                      onEnd: () {
+                        if (mounted) ref.invalidate(candidatesProvider);
+                      },
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -82,8 +139,6 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     );
   }
 
-  /// Records the swipe and, for like/super, shows the match celebration on a
-  /// mutual match. Called (not awaited) from the synchronous onSwipe callback.
   void _handleSwipe(Candidate candidate, String dir) {
     ref
         .read(discoveryRepositoryProvider)
@@ -95,7 +150,6 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                 builder: (_) => MatchCelebration(
                   otherName: candidate.displayName ?? '',
                   sharedBaitu: candidate.sharedBaitu,
-                  // TODO(P2): open chat thread
                   onChat: () => Navigator.of(context).pop(),
                 ),
               ),

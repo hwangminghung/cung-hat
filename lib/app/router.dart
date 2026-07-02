@@ -20,14 +20,20 @@ import '../features/settings/presentation/settings_screen.dart';
 import 'home_shell.dart';
 
 /// Pure redirect decision — unit-tested in isolation.
+///
+/// [hasProfile] is tri-state: `null` means the profile fetch hasn't resolved
+/// yet — hold the current location and wait for the next router refresh
+/// instead of guessing (guessing /onboarding causes a visible flash for
+/// users who do have a profile).
 String? authRedirect({
   required bool signedIn,
-  required bool hasProfile,
+  required bool? hasProfile,
   required String location,
 }) {
   final authArea = location == '/auth' || location == '/otp';
   final publicArea = authArea || location.startsWith('/plan/shared');
   if (!signedIn) return publicArea ? null : '/auth';
+  if (hasProfile == null) return null;
   if (!hasProfile) return location == '/onboarding' ? null : '/onboarding';
   // Profile exists: a user sitting on an auth/onboarding screen (e.g. right
   // after completing onboarding) must be sent home — otherwise they get stuck.
@@ -40,8 +46,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: GoRouterRefreshStream(ref),
     redirect: (context, state) {
-      final signedIn = ref.read(isSignedInProvider);
-      final hasProfile = ref.read(myProfileProvider).value != null;
+      // Read the session straight from Supabase: it is set BEFORE the auth
+      // event fires, while derived providers may still hold a stale value
+      // when this runs synchronously inside the refresh notification.
+      final signedIn =
+          ref.read(authRepositoryProvider).currentSession != null;
+      final profile = ref.read(myProfileProvider);
+      final bool? hasProfile = profile.hasValue
+          ? profile.value != null
+          : (profile.hasError ? false : null);
       return authRedirect(
         signedIn: signedIn, hasProfile: hasProfile, location: state.uri.path,
       );
@@ -88,7 +101,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 /// Bridges Riverpod auth/profile changes to go_router refresh.
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Ref ref) {
-    ref.listen(authStateProvider, (_, _) => notifyListeners());
+    ref.listen(authStateProvider, (prev, next) {
+      // The cached profile belongs to the previous session (or to "signed
+      // out"). Refetch it on sign-in/sign-out so the redirect doesn't sit
+      // on a stale value waiting for Riverpod's retry backoff.
+      final wasSignedIn = prev?.value?.session != null;
+      final nowSignedIn = next.value?.session != null;
+      if (wasSignedIn != nowSignedIn) ref.invalidate(myProfileProvider);
+      notifyListeners();
+    });
     ref.listen(myProfileProvider, (_, _) => notifyListeners());
   }
 }

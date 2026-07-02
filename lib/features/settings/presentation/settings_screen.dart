@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/supabase_providers.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../onboarding/presentation/consent_step.dart';
 import '../application/settings_providers.dart';
 
@@ -21,57 +22,85 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Cài đặt')),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.xxxl,
+        ),
         children: [
-          const _SectionHeader('Quyền riêng tư'),
-          if (consentsAsync.isLoading)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else
-            for (final p in consentPurposes)
-              SwitchListTile(
-                key: Key('consent_$p'),
-                title: Text(consentLabelsVi[p] ?? p),
-                value: consents[p] ?? false,
-                onChanged: (v) async {
-                  final repo = ref.read(settingsRepositoryProvider);
-                  if (v) {
-                    await repo.grantConsent(p);
-                  } else {
-                    await repo.withdrawConsent(p);
-                  }
-                  ref.invalidate(myConsentsProvider);
-                },
-              ),
-          const Divider(),
-          const _SectionHeader('Dữ liệu của tôi'),
-          ListTile(
-            leading: const Icon(Icons.download),
-            title: const Text('Tải dữ liệu của tôi'),
-            onTap: () => _exportData(context, ref),
+          _Section(
+            title: 'Quyền riêng tư',
+            child: consentsAsync.isLoading
+                ? const Padding(
+                    padding: EdgeInsets.all(AppSpacing.lg),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : Column(
+                    children: [
+                      for (final purpose in consentPurposes)
+                        SwitchListTile(
+                          key: Key('consent_$purpose'),
+                          title: Text(consentLabelsVi[purpose] ?? purpose),
+                          value: consents[purpose] ?? false,
+                          onChanged: (value) async {
+                            final repo = ref.read(settingsRepositoryProvider);
+                            if (value) {
+                              await repo.grantConsent(purpose);
+                            } else {
+                              await repo.withdrawConsent(purpose);
+                            }
+                            ref.invalidate(myConsentsProvider);
+                          },
+                        ),
+                    ],
+                  ),
           ),
-          const Divider(),
-          const _SectionHeader('Tài khoản'),
-          ListTile(
-            leading: const Icon(Icons.delete_forever, color: AppColors.error),
-            title: const Text(
-              'Xoá tài khoản',
-              style: TextStyle(color: AppColors.error),
+          const SizedBox(height: AppSpacing.md),
+          _Section(
+            title: 'Dữ liệu của tôi',
+            child: _SettingsTile(
+              icon: Icons.download_rounded,
+              title: 'Tải dữ liệu của tôi',
+              onTap: () => _exportData(context, ref),
             ),
-            onTap: () => _deleteAccount(context, ref),
           ),
-          const Divider(),
-          const _SectionHeader('Pháp lý'),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip),
-            title: const Text('Chính sách bảo mật'),
-            onTap: () => context.push('/legal/privacy'),
+          const SizedBox(height: AppSpacing.md),
+          _Section(
+            title: 'Tài khoản',
+            child: Column(
+              children: [
+                _SettingsTile(
+                  icon: Icons.logout_rounded,
+                  title: 'Đăng xuất',
+                  onTap: () => _signOut(ref),
+                ),
+                _SettingsTile(
+                  icon: Icons.delete_forever_rounded,
+                  title: 'Xóa tài khoản',
+                  danger: true,
+                  onTap: () => _deleteAccount(context, ref),
+                ),
+              ],
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.description),
-            title: const Text('Điều khoản'),
-            onTap: () => context.push('/legal/tos'),
+          const SizedBox(height: AppSpacing.md),
+          _Section(
+            title: 'Pháp lý',
+            child: Column(
+              children: [
+                _SettingsTile(
+                  icon: Icons.privacy_tip_rounded,
+                  title: 'Chính sách bảo mật',
+                  onTap: () => context.push('/legal/privacy'),
+                ),
+                _SettingsTile(
+                  icon: Icons.description_rounded,
+                  title: 'Điều khoản',
+                  onTap: () => context.push('/legal/tos'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -92,22 +121,27 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _signOut(WidgetRef ref) async {
+    // Router redirects to /auth on the resulting auth-state change.
+    await ref.read(supabaseClientProvider).auth.signOut();
+  }
+
   Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xoá tài khoản?'),
+        title: const Text('Xóa tài khoản?'),
         content: const Text(
-          'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xoá.',
+          'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xóa.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Hủy'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Xoá'),
+            child: const Text('Xóa'),
           ),
         ],
       ),
@@ -120,21 +154,76 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(this.title);
+class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.child});
+
   final String title;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            child: Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: AppColors.primaryDark),
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.danger = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool danger;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = danger ? AppColors.error : AppColors.primaryDark;
+    return ListTile(
+      leading: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: danger ? AppColors.errorTint : AppColors.primaryTint,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, color: color),
+      ),
+      title: Text(
+        title,
+        style: danger ? const TextStyle(color: AppColors.error) : null,
+      ),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: onTap,
     );
   }
 }
