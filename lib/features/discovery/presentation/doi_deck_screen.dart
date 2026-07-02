@@ -10,6 +10,7 @@ import '../application/discovery_providers.dart';
 import '../domain/candidate.dart';
 import 'candidate_card.dart';
 import 'match_celebration.dart';
+import 'swipe_overlays.dart';
 
 class DoiDeckScreen extends ConsumerStatefulWidget {
   const DoiDeckScreen({super.key});
@@ -116,8 +117,13 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       cardsCount: candidates.length,
                       isLoop: false,
                       numberOfCardsDisplayed: candidates.length.clamp(1, 2),
-                      cardBuilder: (context, index, h, v) =>
-                          CandidateCard(candidate: candidates[index]),
+                      maxAngle: 25,
+                      threshold: 60,
+                      cardBuilder: (context, index, h, v) => SwipeOverlays(
+                        hProgress: h / 100,
+                        vProgress: v / 100,
+                        child: CandidateCard(candidate: candidates[index]),
+                      ),
                       onSwipe: (previousIndex, currentIndex, direction) {
                         final dir = _directionToSwipe(direction);
                         if (dir != null) {
