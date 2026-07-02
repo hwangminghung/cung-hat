@@ -110,6 +110,20 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <!-- DEV STUB: passkeys_web plugin crashes at registration without the Corbado
+       Passkeys Web SDK (bundle.js). This app authenticates via phone OTP and never
+       calls passkeys, so a no-op stub keeps web builds bootable. If passkeys are
+       ever used on web, replace with the real SDK:
+       https://github.com/corbado/flutter-passkeys/releases -->
+  <script>
+    window.PasskeyAuthenticator = window.PasskeyAuthenticator || {
+      init: function () {},
+      canAuthenticate: function () { return Promise.resolve(false); },
+      register: function () { return Promise.reject(new Error('passkeys stubbed (dev)')); },
+      authenticate: function () { return Promise.reject(new Error('passkeys stubbed (dev)')); },
+      cancelCurrentAuthenticatorOperation: function () {},
+    };
+  </script>
   <script src="flutter_bootstrap.js" async=""></script>
 
 
