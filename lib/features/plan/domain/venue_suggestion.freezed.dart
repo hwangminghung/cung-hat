@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VenueSuggestion {
 
- String get id; String get name; String get address;@JsonKey(name: 'style_tag') String get styleTag; List<String> get photos;@JsonKey(name: 'distance_band') String? get distanceBand;
+ String get id; String get name; String get address;@JsonKey(name: 'style_tag') String get styleTag; List<String> get photos;@JsonKey(name: 'distance_band') String? get distanceBand; double? get lat; double? get lng;
 /// Create a copy of VenueSuggestion
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $VenueSuggestionCopyWith<VenueSuggestion> get copyWith => _$VenueSuggestionCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenueSuggestion&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address)&&(identical(other.styleTag, styleTag) || other.styleTag == styleTag)&&const DeepCollectionEquality().equals(other.photos, photos)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenueSuggestion&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address)&&(identical(other.styleTag, styleTag) || other.styleTag == styleTag)&&const DeepCollectionEquality().equals(other.photos, photos)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand)&&(identical(other.lat, lat) || other.lat == lat)&&(identical(other.lng, lng) || other.lng == lng));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,address,styleTag,const DeepCollectionEquality().hash(photos),distanceBand);
+int get hashCode => Object.hash(runtimeType,id,name,address,styleTag,const DeepCollectionEquality().hash(photos),distanceBand,lat,lng);
 
 @override
 String toString() {
-  return 'VenueSuggestion(id: $id, name: $name, address: $address, styleTag: $styleTag, photos: $photos, distanceBand: $distanceBand)';
+  return 'VenueSuggestion(id: $id, name: $name, address: $address, styleTag: $styleTag, photos: $photos, distanceBand: $distanceBand, lat: $lat, lng: $lng)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $VenueSuggestionCopyWith<$Res>  {
   factory $VenueSuggestionCopyWith(VenueSuggestion value, $Res Function(VenueSuggestion) _then) = _$VenueSuggestionCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String address,@JsonKey(name: 'style_tag') String styleTag, List<String> photos,@JsonKey(name: 'distance_band') String? distanceBand
+ String id, String name, String address,@JsonKey(name: 'style_tag') String styleTag, List<String> photos,@JsonKey(name: 'distance_band') String? distanceBand, double? lat, double? lng
 });
 
 
@@ -65,7 +65,7 @@ class _$VenueSuggestionCopyWithImpl<$Res>
 
 /// Create a copy of VenueSuggestion
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? address = null,Object? styleTag = null,Object? photos = null,Object? distanceBand = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? address = null,Object? styleTag = null,Object? photos = null,Object? distanceBand = freezed,Object? lat = freezed,Object? lng = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,9 @@ as String,address: null == address ? _self.address : address // ignore: cast_nul
 as String,styleTag: null == styleTag ? _self.styleTag : styleTag // ignore: cast_nullable_to_non_nullable
 as String,photos: null == photos ? _self.photos : photos // ignore: cast_nullable_to_non_nullable
 as List<String>,distanceBand: freezed == distanceBand ? _self.distanceBand : distanceBand // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,lat: freezed == lat ? _self.lat : lat // ignore: cast_nullable_to_non_nullable
+as double?,lng: freezed == lng ? _self.lng : lng // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -158,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String address, @JsonKey(name: 'style_tag')  String styleTag,  List<String> photos, @JsonKey(name: 'distance_band')  String? distanceBand)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String address, @JsonKey(name: 'style_tag')  String styleTag,  List<String> photos, @JsonKey(name: 'distance_band')  String? distanceBand,  double? lat,  double? lng)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VenueSuggestion() when $default != null:
-return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_that.distanceBand);case _:
+return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_that.distanceBand,_that.lat,_that.lng);case _:
   return orElse();
 
 }
@@ -179,10 +181,10 @@ return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String address, @JsonKey(name: 'style_tag')  String styleTag,  List<String> photos, @JsonKey(name: 'distance_band')  String? distanceBand)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String address, @JsonKey(name: 'style_tag')  String styleTag,  List<String> photos, @JsonKey(name: 'distance_band')  String? distanceBand,  double? lat,  double? lng)  $default,) {final _that = this;
 switch (_that) {
 case _VenueSuggestion():
-return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_that.distanceBand);case _:
+return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_that.distanceBand,_that.lat,_that.lng);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +201,10 @@ return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String address, @JsonKey(name: 'style_tag')  String styleTag,  List<String> photos, @JsonKey(name: 'distance_band')  String? distanceBand)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String address, @JsonKey(name: 'style_tag')  String styleTag,  List<String> photos, @JsonKey(name: 'distance_band')  String? distanceBand,  double? lat,  double? lng)?  $default,) {final _that = this;
 switch (_that) {
 case _VenueSuggestion() when $default != null:
-return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_that.distanceBand);case _:
+return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_that.distanceBand,_that.lat,_that.lng);case _:
   return null;
 
 }
@@ -214,7 +216,7 @@ return $default(_that.id,_that.name,_that.address,_that.styleTag,_that.photos,_t
 @JsonSerializable()
 
 class _VenueSuggestion implements VenueSuggestion {
-  const _VenueSuggestion({required this.id, required this.name, required this.address, @JsonKey(name: 'style_tag') this.styleTag = 'k_style', final  List<String> photos = const [], @JsonKey(name: 'distance_band') this.distanceBand}): _photos = photos;
+  const _VenueSuggestion({required this.id, required this.name, required this.address, @JsonKey(name: 'style_tag') this.styleTag = 'k_style', final  List<String> photos = const [], @JsonKey(name: 'distance_band') this.distanceBand, this.lat, this.lng}): _photos = photos;
   factory _VenueSuggestion.fromJson(Map<String, dynamic> json) => _$VenueSuggestionFromJson(json);
 
 @override final  String id;
@@ -229,6 +231,8 @@ class _VenueSuggestion implements VenueSuggestion {
 }
 
 @override@JsonKey(name: 'distance_band') final  String? distanceBand;
+@override final  double? lat;
+@override final  double? lng;
 
 /// Create a copy of VenueSuggestion
 /// with the given fields replaced by the non-null parameter values.
@@ -243,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenueSuggestion&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address)&&(identical(other.styleTag, styleTag) || other.styleTag == styleTag)&&const DeepCollectionEquality().equals(other._photos, _photos)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenueSuggestion&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.address, address) || other.address == address)&&(identical(other.styleTag, styleTag) || other.styleTag == styleTag)&&const DeepCollectionEquality().equals(other._photos, _photos)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand)&&(identical(other.lat, lat) || other.lat == lat)&&(identical(other.lng, lng) || other.lng == lng));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,address,styleTag,const DeepCollectionEquality().hash(_photos),distanceBand);
+int get hashCode => Object.hash(runtimeType,id,name,address,styleTag,const DeepCollectionEquality().hash(_photos),distanceBand,lat,lng);
 
 @override
 String toString() {
-  return 'VenueSuggestion(id: $id, name: $name, address: $address, styleTag: $styleTag, photos: $photos, distanceBand: $distanceBand)';
+  return 'VenueSuggestion(id: $id, name: $name, address: $address, styleTag: $styleTag, photos: $photos, distanceBand: $distanceBand, lat: $lat, lng: $lng)';
 }
 
 
@@ -263,7 +267,7 @@ abstract mixin class _$VenueSuggestionCopyWith<$Res> implements $VenueSuggestion
   factory _$VenueSuggestionCopyWith(_VenueSuggestion value, $Res Function(_VenueSuggestion) _then) = __$VenueSuggestionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String address,@JsonKey(name: 'style_tag') String styleTag, List<String> photos,@JsonKey(name: 'distance_band') String? distanceBand
+ String id, String name, String address,@JsonKey(name: 'style_tag') String styleTag, List<String> photos,@JsonKey(name: 'distance_band') String? distanceBand, double? lat, double? lng
 });
 
 
@@ -280,7 +284,7 @@ class __$VenueSuggestionCopyWithImpl<$Res>
 
 /// Create a copy of VenueSuggestion
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? address = null,Object? styleTag = null,Object? photos = null,Object? distanceBand = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? address = null,Object? styleTag = null,Object? photos = null,Object? distanceBand = freezed,Object? lat = freezed,Object? lng = freezed,}) {
   return _then(_VenueSuggestion(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -288,7 +292,9 @@ as String,address: null == address ? _self.address : address // ignore: cast_nul
 as String,styleTag: null == styleTag ? _self.styleTag : styleTag // ignore: cast_nullable_to_non_nullable
 as String,photos: null == photos ? _self._photos : photos // ignore: cast_nullable_to_non_nullable
 as List<String>,distanceBand: freezed == distanceBand ? _self.distanceBand : distanceBand // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,lat: freezed == lat ? _self.lat : lat // ignore: cast_nullable_to_non_nullable
+as double?,lng: freezed == lng ? _self.lng : lng // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 

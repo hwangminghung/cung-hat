@@ -3,14 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/plan_providers.dart';
 import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
+import '../../../shared/widgets/empty_state.dart';
 import 'booking_button.dart';
+import 'plan_time_picker_sheet.dart';
 import 'safety_toolkit.dart';
+import 'venue_map_surface.dart';
 
 class PlanScreen extends ConsumerWidget {
-  const PlanScreen({super.key, required this.keoId, required this.isHost});
+  const PlanScreen({
+    super.key,
+    required this.keoId,
+    required this.isHost,
+    this.useNativeMap = true,
+    this.debugNow,
+  });
 
   final String keoId;
   final bool isHost;
+  final bool useNativeMap;
+  final DateTime? debugNow;
 
   void _snack(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -44,6 +55,23 @@ class PlanScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Kế hoạch')),
       body: ListView(
         children: [
+          venuesAsync.when(
+            data: (list) => VenueMapSurface(
+              venues: list,
+              useNativeMap: useNativeMap,
+              onVenueSelected: isHost
+                  ? (venue) => _pickVenue(context, ref, venue)
+                  : (_) {},
+            ),
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16),
+              child: SizedBox(
+                height: 220,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+            error: (e, _) => const SizedBox.shrink(),
+          ),
           // Current plan section
           planAsync.when(
             data: (plan) => plan == null
@@ -60,11 +88,24 @@ class PlanScreen extends ConsumerWidget {
           ),
           // Venue suggestions section
           venuesAsync.when(
-            data: (list) => Column(
-              children: [
-                for (final v in list) _buildVenueCard(context, ref, v),
-              ],
-            ),
+            data: (list) {
+              if (list.isEmpty) {
+                return EmptyState(
+                  key: const Key('venues_empty_state'),
+                  icon: Icons.place_outlined,
+                  title: 'Chưa có quán gợi ý',
+                  subtitle:
+                      'Khi có dữ liệu quán từ Places hoặc seed, bản đồ sẽ hiển thị marker để chọn điểm hẹn.',
+                  actionLabel: 'Tải lại',
+                  onAction: () => ref.invalidate(nearestVenuesProvider(keoId)),
+                );
+              }
+              return Column(
+                children: [
+                  for (final v in list) _buildVenueCard(context, ref, v),
+                ],
+              );
+            },
             loading: () => const Padding(
               padding: EdgeInsets.all(16),
               child: Center(child: CircularProgressIndicator()),
@@ -79,8 +120,12 @@ class PlanScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPlanCard(BuildContext context, WidgetRef ref, Plan plan,
-      List<VenueSuggestion> venues) {
+  Widget _buildPlanCard(
+    BuildContext context,
+    WidgetRef ref,
+    Plan plan,
+    List<VenueSuggestion> venues,
+  ) {
     final name = _venueName(venues, plan.venueId);
     return Card(
       margin: const EdgeInsets.all(12),
@@ -89,7 +134,10 @@ class PlanScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(
+              name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             const SizedBox(height: 4),
             Text('Thời gian: ${plan.scheduledAt}'),
             const SizedBox(height: 4),
@@ -121,7 +169,11 @@ class PlanScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildVenueCard(BuildContext context, WidgetRef ref, VenueSuggestion v) {
+  Widget _buildVenueCard(
+    BuildContext context,
+    WidgetRef ref,
+    VenueSuggestion v,
+  ) {
     final band = v.distanceBand ?? '?';
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -130,7 +182,10 @@ class PlanScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(v.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              v.name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 4),
             Text(v.address),
             const SizedBox(height: 4),
@@ -138,6 +193,7 @@ class PlanScreen extends ConsumerWidget {
             if (isHost) ...[
               const SizedBox(height: 8),
               TextButton(
+                key: Key('pick_venue_${v.id}'),
                 child: const Text('Chọn quán này'),
                 onPressed: () => _pickVenue(context, ref, v),
               ),
@@ -149,22 +205,19 @@ class PlanScreen extends ConsumerWidget {
   }
 
   Future<void> _pickVenue(
-      BuildContext context, WidgetRef ref, VenueSuggestion v) async {
-    final now = DateTime.now();
-    final date = await showDatePicker(
+    BuildContext context,
+    WidgetRef ref,
+    VenueSuggestion v,
+  ) async {
+    final when = await showModalBottomSheet<DateTime>(
       context: context,
-      initialDate: now,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
+      isScrollControlled: true,
+      builder: (_) => PlanTimePickerSheet(
+        venueName: v.name,
+        now: debugNow ?? DateTime.now(),
+      ),
     );
-    if (date == null) return;
-    if (!context.mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (time == null) return;
-    final when = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    if (when == null) return;
     try {
       await ref.read(planRepositoryProvider).proposePlan(keoId, v.id, when);
       ref.invalidate(currentPlanProvider(keoId));
