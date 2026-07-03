@@ -139,6 +139,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       AppSpacing.xl,
                     ),
                     child: CardSwiper(
+                      // Key theo list instance: sau khi vuốt hết deck, CardSwiper
+                      // cũ giữ index đã cạn nên list mới fetch về không hiển thị —
+                      // đổi key ép dựng swiper mới cho mỗi lần fetch.
+                      key: ObjectKey(candidates),
                       controller: _controller,
                       cardsCount: candidates.length,
                       isLoop: false,
