@@ -8,7 +8,9 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare a uuid; b uuid; reciprocal boolean; matched boolean := false;
 begin
   perform app_private.enforce_rate_limit('swipe', 200, interval '1 day');
-  -- Quota kieu dating-app (server-authoritative, Pro qua app_private.is_pro()):
+  -- Quota kieu dating-app (server-authoritative, Pro qua app_private.is_pro()).
+  -- Quota is deliberately consumed BEFORE the on-conflict-do-nothing insert (fail-closed;
+  -- moving it after the insert would open a concurrent-check TOCTOU window).
   if p_direction = 'like' and not app_private.is_pro() then
     begin
       perform app_private.enforce_rate_limit('daily_like', 30, interval '1 day');
@@ -68,6 +70,11 @@ begin
   if last_target is null then
     return false;
   end if;
+  -- Mirror record_swipe's canonical-pair advisory lock: serializes against a concurrent
+  -- reciprocal swipe so a match can't be created between the check below and the delete.
+  perform pg_advisory_xact_lock(
+    hashtextextended(
+      least(auth.uid(), last_target::uuid)::text || ':' || greatest(auth.uid(), last_target::uuid)::text, 0));
   if exists (
     select 1 from public.matches m
     where m.status = 'active'

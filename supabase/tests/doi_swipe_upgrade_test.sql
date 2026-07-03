@@ -7,7 +7,7 @@
 -- We seed rows already AT the day's cap so the next enforce_rate_limit call in record_swipe
 -- pushes count over the limit and raises check_violation (23514).
 begin;
-select plan(7);
+select plan(8);
 
 set local role postgres;
 
@@ -86,6 +86,14 @@ select is(
   (select count(*)::int from public.swipes where swiper_id = '00000000-0000-0000-0000-0000000000f2'),
   0,
   'pro user has zero swipes after undo');
+
+-- Case 8: after undo, the pro user can re-swipe the SAME target -- the unique
+-- (swiper_id, target_type, target_id) slot was freed by the delete.
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000f2","role":"authenticated"}';
+set local role authenticated;
+select lives_ok(
+  $$ select public.record_swipe('00000000-0000-0000-0000-0000000000f3','like') $$,
+  'pro user can re-swipe the same target after undo');
 
 select * from finish();
 rollback;
