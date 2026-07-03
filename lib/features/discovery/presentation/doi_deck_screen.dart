@@ -6,9 +6,11 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../billing/application/billing_providers.dart';
 import '../application/discovery_providers.dart';
 import '../domain/candidate.dart';
 import 'candidate_card.dart';
+import 'deck_action_bar.dart';
 import 'match_celebration.dart';
 import 'swipe_overlays.dart';
 
@@ -20,6 +22,8 @@ class DoiDeckScreen extends ConsumerStatefulWidget {
 }
 
 class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
+  final CardSwiperController _controller = CardSwiperController();
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +31,12 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       final ok = await ref.read(locationServiceProvider).captureAndPush();
       if (ok && mounted) ref.invalidate(candidatesProvider);
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   String? _directionToSwipe(CardSwiperDirection direction) {
@@ -114,6 +124,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       AppSpacing.xl,
                     ),
                     child: CardSwiper(
+                      controller: _controller,
                       cardsCount: candidates.length,
                       isLoop: false,
                       numberOfCardsDisplayed: candidates.length.clamp(1, 2),
@@ -135,6 +146,22 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                         if (mounted) ref.invalidate(candidatesProvider);
                       },
                     ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    0,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                  ),
+                  child: DeckActionBar(
+                    rewindEnabled: ref.watch(isProProvider),
+                    onRewind: () {}, // Task 5 sẽ thay bằng _handleRewind
+                    onPass: () => _controller.swipe(CardSwiperDirection.left),
+                    onSuperLike: () =>
+                        _controller.swipe(CardSwiperDirection.top),
+                    onLike: () => _controller.swipe(CardSwiperDirection.right),
                   ),
                 ),
               ],
