@@ -32,6 +32,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// Ứng viên vừa vuốt gần nhất, set ở mỗi swipe để rewind có thể khôi phục.
   Candidate? _lastSwiped;
 
+  /// Chặn double-tap rewind khi RPC undo đang bay — gọi lần 2 sẽ xoá nhầm
+  /// lượt vuốt CŨ HƠN phía server trong khi deck chỉ khôi phục được 1 card.
+  bool _rewindInFlight = false;
+
   @override
   void initState() {
     super.initState();
@@ -152,6 +156,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                         return true;
                       },
                       onEnd: () {
+                        // Refetch dựng CardSwiper mới với history rỗng —
+                        // rewind lúc này sẽ xoá row server mà không khôi phục
+                        // được card nào, nên bỏ quyền rewind của deck cũ.
+                        _lastSwiped = null;
                         if (mounted) ref.invalidate(candidatesProvider);
                       },
                     ),
@@ -190,6 +198,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       return;
     }
     if (_lastSwiped == null) return;
+    if (_rewindInFlight) return;
+    _rewindInFlight = true;
     try {
       final undone =
           await ref.read(discoveryRepositoryProvider).undoLastSwipe();
@@ -198,10 +208,18 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         _lastSwiped = null;
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(discoverySwipeError(e).message)));
+      final err = discoverySwipeError(e);
+      if (err == DiscoverySwipeError.proRequired) {
+        // Entitlement hết hạn phía server trong khi cache client còn Pro —
+        // làm mới để lần bấm sau đi vào nhánh upsell thay vì lặp RPC hỏng.
+        ref.invalidate(entitlementsProvider);
       }
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(err.message)));
+      }
+    } finally {
+      _rewindInFlight = false;
     }
   }
 

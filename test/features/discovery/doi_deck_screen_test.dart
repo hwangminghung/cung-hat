@@ -96,4 +96,51 @@ void main() {
     expect(find.byType(ProUpsellSheet), findsOneWidget);
     expect(find.text('Hết lượt thích hôm nay'), findsOneWidget);
   });
+
+  testWidgets('double-tap rewind chỉ gọi undo_last_swipe một lần', (
+    tester,
+  ) async {
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => false);
+
+    final repo = _MockDiscoveryRepository();
+    when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => false);
+    // undoLastSwipe treo để mô phỏng RPC đang bay khi user bấm rewind lần 2.
+    final pendingUndo = Completer<bool>();
+    when(() => repo.undoLastSwipe()).thenAnswer((_) => pendingUndo.future);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveryRepositoryProvider.overrideWithValue(repo),
+          candidatesProvider.overrideWith(
+            (ref) async => const [
+              Candidate(id: 'c1', displayName: 'A'),
+              Candidate(id: 'c2', displayName: 'B'),
+            ],
+          ),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{'pro'}),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Vuốt 1 card để _lastSwiped có giá trị.
+    await tester.tap(find.byKey(const Key('deck_like_btn')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('deck_rewind_btn')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('deck_rewind_btn')));
+    await tester.pump();
+
+    verify(() => repo.undoLastSwipe()).called(1);
+
+    pendingUndo.complete(true);
+    await tester.pumpAndSettle();
+  });
 }
