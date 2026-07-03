@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../billing/application/billing_providers.dart';
 import '../../discovery/application/discovery_providers.dart';
@@ -100,67 +101,11 @@ class KeoBoardScreen extends ConsumerWidget {
   }
 
   void _showProSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetCtx) => SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xxl,
-              AppSpacing.xl,
-              AppSpacing.xxl,
-              AppSpacing.xl,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTint,
-                    borderRadius: BorderRadius.circular(22),
-                  ),
-                  child: const Icon(
-                    Icons.workspace_premium_rounded,
-                    color: AppColors.primaryDark,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Tạo kèo là tính năng Pro',
-                  style: Theme.of(sheetCtx).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Nâng cấp Pro để tự tạo kèo, mở giới hạn tham gia và dùng bộ lọc nâng cao.',
-                  style: Theme.of(sheetCtx).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                FilledButton.icon(
-                  onPressed: () {
-                    Navigator.pop(sheetCtx);
-                    context.push('/store');
-                  },
-                  icon: const Icon(Icons.flash_on_rounded),
-                  label: const Text('Nâng cấp Pro'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(sheetCtx),
-                  child: const Text('Để sau'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    ProUpsellSheet.show(
+      context,
+      title: 'Tạo kèo là tính năng Pro',
+      subtitle:
+          'Nâng cấp Pro để tự tạo kèo, mở giới hạn tham gia và dùng bộ lọc nâng cao.',
     );
   }
 

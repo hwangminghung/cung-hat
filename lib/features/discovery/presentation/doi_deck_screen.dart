@@ -6,8 +6,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../billing/application/billing_providers.dart';
 import '../application/discovery_providers.dart';
+import '../data/discovery_errors.dart';
 import '../domain/candidate.dart';
 import 'candidate_card.dart';
 import 'deck_action_bar.dart';
@@ -190,12 +192,21 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           }
         })
         .catchError((Object e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Không lưu được lượt vuốt. Thử lại sau.'),
-              ),
-            );
+          if (!mounted) return;
+          final err = discoverySwipeError(e);
+          switch (err) {
+            case DiscoverySwipeError.likeLimit:
+              ProUpsellSheet.show(
+                context,
+                title: 'Hết lượt thích hôm nay',
+                subtitle:
+                    'Pro thích không giới hạn và có 5 Siêu thích mỗi ngày.',
+              );
+            case DiscoverySwipeError.superLimit:
+            case DiscoverySwipeError.proRequired:
+            case DiscoverySwipeError.unknown:
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(err.message)));
           }
         });
   }
