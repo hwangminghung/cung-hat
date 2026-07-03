@@ -26,6 +26,9 @@ class DoiDeckScreen extends ConsumerStatefulWidget {
 class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   final CardSwiperController _controller = CardSwiperController();
 
+  /// Chặn mở trùng ProUpsellSheet khi nhiều swipe lỗi like_limit liên tiếp.
+  bool _upsellShowing = false;
+
   @override
   void initState() {
     super.initState();
@@ -192,16 +195,19 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           }
         })
         .catchError((Object e) {
+          // State.mounted ≡ context.mounted cho context của chính State này.
           if (!mounted) return;
           final err = discoverySwipeError(e);
           switch (err) {
             case DiscoverySwipeError.likeLimit:
+              if (_upsellShowing) return;
+              _upsellShowing = true;
               ProUpsellSheet.show(
                 context,
                 title: 'Hết lượt thích hôm nay',
                 subtitle:
                     'Pro thích không giới hạn và có 5 Siêu thích mỗi ngày.',
-              );
+              ).whenComplete(() => _upsellShowing = false);
             case DiscoverySwipeError.superLimit:
             case DiscoverySwipeError.proRequired:
             case DiscoverySwipeError.unknown:

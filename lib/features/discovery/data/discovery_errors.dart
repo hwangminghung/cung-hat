@@ -1,5 +1,6 @@
-/// Phân loại lỗi record_swipe/undo_last_swipe từ server (message chứa mã lỗi
-/// do plpgsql raise — cùng pattern keo_errors.dart).
+/// Phân loại lỗi các RPC swipe từ server — hiện là record_swipe, thêm
+/// undo_last_swipe khi tính năng rewind lên (message chứa mã lỗi do plpgsql
+/// raise — cùng pattern keo_errors.dart).
 enum DiscoverySwipeError {
   likeLimit('Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.'),
   superLimit('Bạn đã hết lượt Siêu thích hôm nay.'),
