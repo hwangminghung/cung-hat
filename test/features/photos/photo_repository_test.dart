@@ -56,6 +56,19 @@ void main() {
     expect(urls, isEmpty);
   });
 
+  test('signedUrlsOf returns empty list when invoke throws (blocked 403 / edge error)', () async {
+    final client = MockSupabaseClient();
+    final fns = _MockFunctions();
+    when(() => client.functions).thenReturn(fns);
+    when(() => fns.invoke('sign-photo', body: any(named: 'body')))
+        .thenThrow(const FunctionException(status: 403, details: {'urls': <String>[]}));
+
+    final repo = PhotoRepository(client, storage: _MockPhotoStorage());
+    final urls = await repo.signedUrlsOf('user-9');
+
+    expect(urls, const <String>[]);
+  });
+
   test('uploadPhoto uploads then calls set_my_photo_paths with the appended list', () async {
     final client = MockSupabaseClient();
     final auth = _MockGoTrue();

@@ -74,10 +74,19 @@ class PhotoRepository {
     return next;
   }
 
-  /// Signed URLs for [userId]'s photos (empty if none/blocked/soft-deleted).
+  /// Signed URLs for [userId]'s photos. Returns an empty list for every failure
+  /// mode — no photos, soft-deleted, or a blocked pair (the `sign-photo` edge
+  /// function replies HTTP 403, which `invoke` surfaces as a thrown
+  /// [FunctionException]) — so callers degrade to the monogram fallback instead
+  /// of erroring the card/deck. Photos are cosmetic; the broad catch is
+  /// intentional so transport/5xx errors also fall back rather than surface.
   Future<List<String>> signedUrlsOf(String userId) async {
-    final res = await _client.functions.invoke('sign-photo', body: {'target_id': userId});
-    final urls = res.data?['urls'] as List?;
-    return urls == null ? const [] : urls.map((e) => e as String).toList();
+    try {
+      final res = await _client.functions.invoke('sign-photo', body: {'target_id': userId});
+      final urls = res.data?['urls'] as List?;
+      return urls == null ? const [] : urls.map((e) => e as String).toList();
+    } catch (_) {
+      return const [];
+    }
   }
 }
