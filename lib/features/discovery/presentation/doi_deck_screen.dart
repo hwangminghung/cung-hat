@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -8,6 +9,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../billing/application/billing_providers.dart';
+import '../../profile/application/profile_providers.dart';
 import '../application/discovery_providers.dart';
 import '../data/discovery_errors.dart';
 import '../domain/candidate.dart';
@@ -234,43 +236,64 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     }
   }
 
-  void _handleSwipe(Candidate candidate, String dir) {
-    ref
-        .read(discoveryRepositoryProvider)
-        .recordSwipe(candidate.id, dir)
-        .then((isMatch) {
-          if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => MatchCelebration(
-                  otherName: candidate.displayName ?? '',
-                  sharedBaitu: candidate.sharedBaitu,
-                  onChat: () => Navigator.of(context).pop(),
-                ),
-              ),
-            );
-          }
-        })
-        .catchError((Object e) {
-          // State.mounted ≡ context.mounted cho context của chính State này.
-          if (!mounted) return;
-          final err = discoverySwipeError(e);
-          switch (err) {
-            case DiscoverySwipeError.likeLimit:
-              if (_upsellShowing) return;
-              _upsellShowing = true;
-              ProUpsellSheet.show(
-                context,
-                title: 'Hết lượt thích hôm nay',
-                subtitle:
-                    'Pro thích không giới hạn và có 5 Siêu thích mỗi ngày.',
-              ).whenComplete(() => _upsellShowing = false);
-            case DiscoverySwipeError.superLimit:
-            case DiscoverySwipeError.proRequired:
-            case DiscoverySwipeError.unknown:
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(err.message)));
-          }
-        });
+  Future<void> _handleSwipe(Candidate candidate, String dir) async {
+    try {
+      final isMatch = await ref
+          .read(discoveryRepositoryProvider)
+          .recordSwipe(candidate.id, dir);
+      if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
+        final myName =
+            ref.read(myProfileProvider).value?.displayName ?? 'Bạn';
+        // Không để lỗi lấy matchId chặn màn ăn mừng — matchId null vẫn cho
+        // xem MatchCelebration, chỉ là nút "Nhắn tin ngay" sẽ không điều
+        // hướng được.
+        String? matchId;
+        try {
+          matchId = await ref
+              .read(discoveryRepositoryProvider)
+              .getMatchIdWith(candidate.id);
+        } catch (_) {
+          matchId = null;
+        }
+        if (!mounted) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => MatchCelebration(
+              otherName: candidate.displayName ?? '',
+              myName: myName,
+              sharedBaitu: candidate.sharedBaitu,
+              onChat: () {
+                Navigator.of(context).pop();
+                if (matchId != null) {
+                  context.push(
+                      '/chat/$matchId?name=${Uri.encodeComponent(candidate.displayName ?? '')}');
+                }
+              },
+              onContinue: () => Navigator.of(context).pop(),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // State.mounted ≡ context.mounted cho context của chính State này.
+      if (!mounted) return;
+      final err = discoverySwipeError(e);
+      switch (err) {
+        case DiscoverySwipeError.likeLimit:
+          if (_upsellShowing) return;
+          _upsellShowing = true;
+          ProUpsellSheet.show(
+            context,
+            title: 'Hết lượt thích hôm nay',
+            subtitle:
+                'Pro thích không giới hạn và có 5 Siêu thích mỗi ngày.',
+          ).whenComplete(() => _upsellShowing = false);
+        case DiscoverySwipeError.superLimit:
+        case DiscoverySwipeError.proRequired:
+        case DiscoverySwipeError.unknown:
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(err.message)));
+      }
+    }
   }
 }
