@@ -12,6 +12,7 @@ import '../application/discovery_providers.dart';
 import '../data/discovery_errors.dart';
 import '../domain/candidate.dart';
 import 'candidate_card.dart';
+import 'candidate_detail_sheet.dart';
 import 'deck_action_bar.dart';
 import 'match_celebration.dart';
 import 'swipe_overlays.dart';
@@ -142,10 +143,20 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       numberOfCardsDisplayed: candidates.length.clamp(1, 2),
                       maxAngle: 25,
                       threshold: 60,
-                      cardBuilder: (context, index, h, v) => SwipeOverlays(
-                        hProgress: h / 100,
-                        vProgress: v / 100,
-                        child: CandidateCard(candidate: candidates[index]),
+                      cardBuilder: (context, index, h, v) => GestureDetector(
+                        onTap: () => CandidateDetailSheet.show(
+                          context,
+                          candidate: candidates[index],
+                          onPass: () =>
+                              _controller.swipe(CardSwiperDirection.left),
+                          onLike: () =>
+                              _controller.swipe(CardSwiperDirection.right),
+                        ),
+                        child: SwipeOverlays(
+                          hProgress: h / 100,
+                          vProgress: v / 100,
+                          child: CandidateCard(candidate: candidates[index]),
+                        ),
                       ),
                       onSwipe: (previousIndex, currentIndex, direction) {
                         final dir = _directionToSwipe(direction);
