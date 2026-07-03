@@ -29,6 +29,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// Chặn mở trùng ProUpsellSheet khi nhiều swipe lỗi like_limit liên tiếp.
   bool _upsellShowing = false;
 
+  /// Ứng viên vừa vuốt gần nhất, set ở mỗi swipe để rewind có thể khôi phục.
+  Candidate? _lastSwiped;
+
   @override
   void initState() {
     super.initState();
@@ -143,6 +146,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       onSwipe: (previousIndex, currentIndex, direction) {
                         final dir = _directionToSwipe(direction);
                         if (dir != null) {
+                          _lastSwiped = candidates[previousIndex];
                           _handleSwipe(candidates[previousIndex], dir);
                         }
                         return true;
@@ -162,7 +166,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                   ),
                   child: DeckActionBar(
                     rewindEnabled: ref.watch(isProProvider),
-                    onRewind: () {}, // Task 5 sẽ thay bằng _handleRewind
+                    onRewind: _handleRewind,
                     onPass: () => _controller.swipe(CardSwiperDirection.left),
                     onSuperLike: () =>
                         _controller.swipe(CardSwiperDirection.top),
@@ -175,6 +179,30 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleRewind() async {
+    final isPro = ref.read(isProProvider);
+    if (!isPro) {
+      ProUpsellSheet.show(context,
+          title: 'Rút lại lượt vuốt?',
+          subtitle: 'Thành viên Pro có thể rút lại lượt vuốt gần nhất.');
+      return;
+    }
+    if (_lastSwiped == null) return;
+    try {
+      final undone =
+          await ref.read(discoveryRepositoryProvider).undoLastSwipe();
+      if (undone && mounted) {
+        _controller.undo(); // card_swiper đưa card trước đó trở lại deck
+        _lastSwiped = null;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(discoverySwipeError(e).message)));
+      }
+    }
   }
 
   void _handleSwipe(Candidate candidate, String dir) {

@@ -40,4 +40,17 @@ class DiscoveryRepository {
   Future<void> blockUser(String targetId) async {
     await _client.rpc('block_user', params: {'p_blocked': targetId});
   }
+
+  /// Rút lại lượt vuốt gần nhất (Pro). Server raise `pro_required` nếu free.
+  Future<bool> undoLastSwipe() async {
+    final res = await _client.rpc('undo_last_swipe');
+    return res == true;
+  }
+
+  /// Match id đang active với [otherId], null nếu chưa match.
+  Future<String?> getMatchIdWith(String otherId) async {
+    final res =
+        await _client.rpc('get_match_id_with', params: {'p_other': otherId});
+    return res as String?;
+  }
 }
