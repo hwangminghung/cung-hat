@@ -189,8 +189,13 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
           Expanded(
             child: _PhotoSlot(
               key: Key('photo_slot_$i'),
-              index: i,
-              // Slots fill left-to-right from the existing photo list.
+              // Slots fill left-to-right from the existing photo list. `paths`
+              // and `urls` are two independently-fetched lists zipped by index:
+              // `signedUrlsProvider` returns URLs positionally aligned to
+              // `photoPaths` (same order, server-signed by the `sign-photo` edge
+              // function over the same `photo_paths` array), so index `i` is a
+              // valid join key. A shorter `urls` list degrades to the grey
+              // placeholder by design.
               path: i < paths.length ? paths[i] : null,
               url: i < urls.length ? urls[i] : null,
               busy: _busySlot == i,
@@ -208,7 +213,6 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
 class _PhotoSlot extends StatelessWidget {
   const _PhotoSlot({
     super.key,
-    required this.index,
     required this.path,
     required this.url,
     required this.busy,
@@ -217,7 +221,6 @@ class _PhotoSlot extends StatelessWidget {
     required this.onRemove,
   });
 
-  final int index;
   final String? path;
   final String? url;
   final bool busy;
