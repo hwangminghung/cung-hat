@@ -8,6 +8,7 @@ import '../features/billing/application/billing_providers.dart';
 import '../features/chat/presentation/inbox_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/keo/presentation/keo_board_screen.dart';
+import '../features/photos/presentation/photo_manager_sheet.dart';
 import '../features/profile/application/profile_providers.dart';
 
 class HomeShell extends StatefulWidget {
@@ -147,6 +148,23 @@ class _ProfileTab extends ConsumerWidget {
             title: 'Nâng cấp',
             subtitle: 'Pro, boost kèo và bộ lọc nâng cao',
             onTap: () => context.push('/store'),
+          ),
+          _ProfileTile(
+            icon: Icons.photo_library_rounded,
+            title: 'Ảnh hồ sơ',
+            subtitle: 'Thêm tối đa 3 ảnh vào hồ sơ',
+            onTap: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              showDragHandle: false,
+              backgroundColor: AppColors.surface,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppSpacing.radiusSheet),
+                ),
+              ),
+              builder: (_) => const PhotoManagerSheet(),
+            ),
           ),
           _ProfileTile(
             icon: Icons.settings_rounded,
