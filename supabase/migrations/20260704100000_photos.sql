@@ -43,11 +43,19 @@ revoke execute on function public.set_my_photo_paths(text[]) from public, anon;
 grant execute on function public.set_my_photo_paths(text[]) to authenticated;
 
 -- The get_my_profile / upsert_my_profile RPCs return the sanitized composite type
--- public.my_profile, which ENUMERATES columns explicitly (defined in 0002, extended in
--- 0004) — it does not `to_jsonb` the whole row. So the client would never receive
--- photo_paths unless we (a) add the attribute to the composite type and (b) redefine
--- both RPCs to project it. Do both here so the Flutter Profile model can read photos.
-alter type public.my_profile add attribute photo_paths text[] cascade;
+-- public.my_profile, which ENUMERATES columns explicitly (7 columns, defined in 0002;
+-- 0004 only redefined upsert_my_profile, it never altered the type) — it does not
+-- `to_jsonb` the whole row. So the client would never receive photo_paths unless we
+-- (a) add the attribute to the composite type and (b) redefine both RPCs to project it.
+-- Do both here so the Flutter Profile model can read photos. Guarded so re-running the
+-- migration is a no-op (matches the `add column if not exists` above and the precedent in
+-- 20260629023800_add_venue_map_coordinates.sql).
+do $$
+begin
+  alter type public.my_profile add attribute photo_paths text[] cascade;
+exception
+  when duplicate_column then null;
+end $$;
 
 create or replace function public.get_my_profile()
 returns public.my_profile

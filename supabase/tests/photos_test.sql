@@ -47,7 +47,7 @@ select throws_ok(
        '00000000-0000-0000-0000-0000000000a1/2.jpg',
        '00000000-0000-0000-0000-0000000000a1/3.jpg',
        '00000000-0000-0000-0000-0000000000a1/4.jpg']) $$,
-  '23514', null, '>3 photo paths raises check_violation');
+  '23514', 'photo_limit', '>3 photo paths raises check_violation (photo_limit)');
 
 -- 4) a path NOT under the caller's uid folder -> check_violation (23514, "photo_path_invalid").
 --    Here the second path lives under user a2's folder.
@@ -55,7 +55,7 @@ select throws_ok(
   $$ select public.set_my_photo_paths(array[
        '00000000-0000-0000-0000-0000000000a1/ok.jpg',
        '00000000-0000-0000-0000-0000000000a2/steal.jpg']) $$,
-  '23514', null, 'a path outside the caller folder raises check_violation');
+  '23514', 'photo_path_invalid', 'a path outside the caller folder raises check_violation (photo_path_invalid)');
 
 -- 5) Storage RLS: another user cannot SELECT your object.
 --    Asserting this by round-tripping storage.objects under two sets of jwt claims is
