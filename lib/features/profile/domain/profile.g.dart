@@ -14,6 +14,11 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   ageVerified: json['age_verified'] as bool? ?? false,
   bio: json['bio'] as String?,
   language: json['language'] as String? ?? 'vi',
+  photoPaths:
+      (json['photo_paths'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const <String>[],
 );
 
 Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
@@ -24,4 +29,5 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'age_verified': instance.ageVerified,
   'bio': instance.bio,
   'language': instance.language,
+  'photo_paths': instance.photoPaths,
 };
