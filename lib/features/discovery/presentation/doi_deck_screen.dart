@@ -61,6 +61,14 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     return null;
   }
 
+  /// Điểm refetch DUY NHẤT: list mới → ObjectKey đổi → CardSwiper dựng lại
+  /// với history rỗng, nên phải bỏ quyền rewind của deck cũ — nếu không,
+  /// rewind sẽ xoá swipe phía server mà không khôi phục được card nào.
+  void _refreshDeck() {
+    _lastSwiped = null;
+    ref.invalidate(candidatesProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
     final candidatesAsync = ref.watch(candidatesProvider);
@@ -80,7 +88,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
             title: 'Không tải được gợi ý',
             subtitle: 'Kiểm tra kết nối rồi thử lại.',
             actionLabel: 'Thử lại',
-            onAction: () => ref.invalidate(candidatesProvider),
+            onAction: _refreshDeck,
           ),
           data: (candidates) {
             if (candidates.isEmpty) {
@@ -89,7 +97,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                 title: 'Chưa có bạn hát quanh đây',
                 subtitle: 'Mở lại sau một chút để xem gợi ý mới.',
                 actionLabel: 'Làm mới gợi ý',
-                onAction: () => ref.invalidate(candidatesProvider),
+                onAction: _refreshDeck,
               );
             }
 
@@ -124,7 +132,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       ),
                       IconButton.filledTonal(
                         tooltip: 'Làm mới',
-                        onPressed: () => ref.invalidate(candidatesProvider),
+                        onPressed: _refreshDeck,
                         icon: const Icon(Icons.refresh_rounded),
                       ),
                     ],
@@ -173,11 +181,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                         return true;
                       },
                       onEnd: () {
-                        // Refetch dựng CardSwiper mới với history rỗng —
-                        // rewind lúc này sẽ xoá row server mà không khôi phục
-                        // được card nào, nên bỏ quyền rewind của deck cũ.
-                        _lastSwiped = null;
-                        if (mounted) ref.invalidate(candidatesProvider);
+                        if (mounted) _refreshDeck();
                       },
                     ),
                   ),
