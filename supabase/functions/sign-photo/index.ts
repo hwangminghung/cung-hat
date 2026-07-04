@@ -35,8 +35,13 @@ Deno.serve(async (req) => {
   }
 
   // Batched sign: createSignedUrls -> array of { error, path, signedUrl }. Keep only successes.
+  // TTL is 10 min, not seconds: the client caches this batch for the life of a detail
+  // sheet, and a carousel's later pages only fetch their URL when the user swipes to
+  // them — a tight expiry made the 2nd+ photo 400 into the monogram fallback. Still
+  // short-lived enough that a leaked URL is useless minutes later.
+  const SIGNED_URL_TTL_SECONDS = 600;
   const { data: signed } = await admin.storage.from("profile-photos")
-    .createSignedUrls(paths, 60);
+    .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
   const urls = (signed ?? [])
     .map((s) => s.signedUrl)
     .filter((u): u is string => Boolean(u));
