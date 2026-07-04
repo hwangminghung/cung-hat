@@ -102,10 +102,13 @@ class PhotoRepository {
     }
   }
 
-  /// Returns [url] with its origin (scheme + host + port) replaced by [base]'s,
-  /// preserving the path and query (e.g. the `?token=...`). Unparseable input is
-  /// returned unchanged so one bad URL never breaks the batch. Pure and directly
-  /// unit-tested; see [signedUrlsOf] for why the rewrite is needed.
+  /// Returns [url] with its origin (scheme + host + port) fully replaced by
+  /// [base]'s, preserving only the path and query (e.g. the `?token=...`). The
+  /// incoming URL's own port is dropped, not grafted onto [base]'s host — a
+  /// default-port [base] yields no `:port` artifact (`Uri.replace(port: 443)` on
+  /// an https URI omits `:443`). Unparseable input is returned unchanged so one
+  /// bad URL never breaks the batch. Pure and directly unit-tested; see
+  /// [signedUrlsOf] for why the rewrite is needed.
   @visibleForTesting
   static String rebaseOrigin(String url, Uri base) {
     final Uri u;
@@ -118,7 +121,7 @@ class PhotoRepository {
         .replace(
           scheme: base.scheme,
           host: base.host,
-          port: base.hasPort ? base.port : u.port,
+          port: base.port,
         )
         .toString();
   }

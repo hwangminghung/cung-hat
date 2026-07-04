@@ -136,6 +136,18 @@ void main() {
       expect(PhotoRepository.rebaseOrigin(url, base), url);
     });
 
+    test('fully adopts a default-port base, dropping the incoming port', () {
+      // base has no explicit port (https default 443); incoming has :8000.
+      // The result must carry base's origin with NO :port artifact, and must
+      // NOT graft the incoming :8000 onto base's host.
+      final prodBase = Uri.parse('https://proj.supabase.co/storage/v1');
+      final out = PhotoRepository.rebaseOrigin(
+        'http://kong:8000/x?token=t',
+        prodBase,
+      );
+      expect(out, 'https://proj.supabase.co/x?token=t');
+    });
+
     test('returns the input as-is when it cannot be parsed', () {
       const bad = '::: not a url :::';
       expect(PhotoRepository.rebaseOrigin(bad, base), bad);
