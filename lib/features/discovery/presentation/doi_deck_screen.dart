@@ -39,6 +39,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// lượt vuốt CŨ HƠN phía server trong khi deck chỉ khôi phục được 1 card.
   bool _rewindInFlight = false;
 
+  /// Chặn double-tap boost khi RPC activate_boost đang bay — lần 2 sẽ tiêu
+  /// lượt boost thứ hai (hoặc raise boost_active) một cách vô ích.
+  bool _boostInFlight = false;
+
   @override
   void initState() {
     super.initState();
@@ -130,6 +134,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                           ],
                         ),
                       ),
+                      _buildBoostButton(context),
+                      const SizedBox(width: AppSpacing.xs),
                       IconButton.filledTonal(
                         tooltip: 'Làm mới',
                         onPressed: _refreshDeck,
@@ -208,6 +214,66 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildBoostButton(BuildContext context) {
+    final boostExpiry = ref.watch(activeBoostProvider);
+    final boosting =
+        boostExpiry != null && boostExpiry.isAfter(DateTime.now());
+    final tooltip = boosting
+        ? 'Đang boost đến ${_formatHhMm(boostExpiry)}'
+        : 'Boost hồ sơ';
+    return IconButton.filledTonal(
+      key: const Key('deck_boost_btn'),
+      tooltip: tooltip,
+      onPressed: _handleBoost,
+      icon: Icon(
+        Icons.bolt_rounded,
+        color: boosting ? AppColors.primary : null,
+      ),
+    );
+  }
+
+  /// HH:mm không cần package ngoài — chỉ dùng cho tooltip boost.
+  String _formatHhMm(DateTime t) {
+    final h = t.hour.toString().padLeft(2, '0');
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  Future<void> _handleBoost() async {
+    final isPro = ref.read(isProProvider);
+    if (!isPro) {
+      ProUpsellSheet.show(context,
+          title: 'Boost hồ sơ của bạn',
+          subtitle:
+              'Pro được 1 lần Boost 30 phút mỗi ngày — lên đầu deck quanh đây.');
+      return;
+    }
+    if (_boostInFlight) return;
+    _boostInFlight = true;
+    try {
+      final expiry =
+          await ref.read(discoveryRepositoryProvider).activateBoost();
+      ref.read(activeBoostProvider.notifier).state = expiry;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.')));
+      }
+    } catch (e) {
+      final err = discoverySwipeError(e);
+      if (err == DiscoverySwipeError.proRequired) {
+        // Entitlement hết hạn phía server trong khi cache client còn Pro.
+        ref.invalidate(entitlementsProvider);
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(err.message)));
+      }
+    } finally {
+      _boostInFlight = false;
+    }
   }
 
   Future<void> _handleRewind() async {
@@ -298,6 +364,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           ).whenComplete(() => _upsellShowing = false);
         case DiscoverySwipeError.superLimit:
         case DiscoverySwipeError.proRequired:
+        case DiscoverySwipeError.boostActive:
+        case DiscoverySwipeError.boostLimit:
         case DiscoverySwipeError.unknown:
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(err.message)));

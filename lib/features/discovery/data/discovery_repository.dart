@@ -47,6 +47,13 @@ class DiscoveryRepository {
     return res == true;
   }
 
+  /// Kích hoạt Boost 30 phút (Pro). Trả về thời điểm hết hạn. Server raise
+  /// pro_required / boost_active / boost_limit nếu không đủ điều kiện.
+  Future<DateTime> activateBoost() async {
+    final res = await _client.rpc('activate_boost');
+    return DateTime.parse(res as String);
+  }
+
   /// Match id đang active với [otherId], null nếu chưa match.
   Future<String?> getMatchIdWith(String otherId) async {
     final res =
