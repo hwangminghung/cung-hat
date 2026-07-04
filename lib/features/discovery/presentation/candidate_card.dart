@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../photos/presentation/photo_carousel.dart';
 import '../domain/candidate.dart';
 import 'report_sheet.dart';
 
@@ -38,48 +38,43 @@ class CandidateCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const DecoratedBox(
-                  decoration: BoxDecoration(gradient: AppColors.brandGradient),
-                ),
-                Positioned(
-                  left: -36,
-                  top: 34,
-                  child: Transform.rotate(
-                    angle: -0.32,
-                    child: Container(
-                      width: 180,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.secondary.withValues(alpha: 0.48),
-                        borderRadius: BorderRadius.circular(18),
+                PhotoCarousel(
+                  userId: candidate.id,
+                  monogram: monogram,
+                  swipeable: false,
+                  fallbackDecorations: [
+                    Positioned(
+                      left: -36,
+                      top: 34,
+                      child: Transform.rotate(
+                        angle: -0.32,
+                        child: Container(
+                          width: 180,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary.withValues(alpha: 0.48),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  right: -18,
-                  bottom: 54,
-                  child: Transform.rotate(
-                    angle: 0.28,
-                    child: Container(
-                      width: 142,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.tertiaryTint.withValues(alpha: 0.70),
-                        borderRadius: BorderRadius.circular(16),
+                    Positioned(
+                      right: -18,
+                      bottom: 54,
+                      child: Transform.rotate(
+                        angle: 0.28,
+                        child: Container(
+                          width: 142,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color:
+                                AppColors.tertiaryTint.withValues(alpha: 0.70),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    monogram,
-                    style: AppTypography.display(
-                      fontSize: 104,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.onPrimary.withValues(alpha: 0.92),
-                    ),
-                  ),
+                  ],
                 ),
                 Positioned(
                   top: AppSpacing.md,

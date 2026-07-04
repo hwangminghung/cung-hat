@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/discovery/presentation/candidate_detail_sheet.dart';
+import 'package:cung_hat/features/photos/application/photo_providers.dart';
 
 void main() {
   const c = Candidate(
@@ -18,13 +20,21 @@ void main() {
   testWidgets('hiện đủ tên tuổi, khoảng cách, gu chung, bài tủ chung',
       (tester) async {
     String? action;
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: CandidateDetailSheet(
-            candidate: c,
-            onPass: () => action = 'pass',
-            onLike: () => action = 'like',
+    // The sheet now embeds PhotoCarousel (ConsumerWidget) → signedUrlsProvider.
+    // Override with an empty list so it renders the monogram fallback without
+    // touching the uninitialized Supabase client.
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('u1').overrideWith((ref) async => const <String>[]),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CandidateDetailSheet(
+              candidate: c,
+              onPass: () => action = 'pass',
+              onLike: () => action = 'like',
+            ),
           ),
         ),
       ),
@@ -33,19 +43,27 @@ void main() {
     expect(find.textContaining('1-3'), findsOneWidget);
     expect(find.text('#vpop'), findsOneWidget);
     expect(find.text('Nơi Này Có Anh'), findsOneWidget);
+    // The 280px carousel now pushes the action row below the 600px test
+    // viewport (in-app it lives in a scrollable sheet); scroll it in before tap.
+    await tester.ensureVisible(find.byKey(const Key('detail_like_btn')));
     await tester.tap(find.byKey(const Key('detail_like_btn')));
     expect(action, 'like');
   });
 
   testWidgets('không có dữ liệu chung vẫn render (empty-safe)',
       (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: CandidateDetailSheet(
-            candidate: const Candidate(id: 'u2'),
-            onPass: () {},
-            onLike: () {},
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('u2').overrideWith((ref) async => const <String>[]),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CandidateDetailSheet(
+              candidate: const Candidate(id: 'u2'),
+              onPass: () {},
+              onLike: () {},
+            ),
           ),
         ),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../photos/presentation/photo_carousel.dart';
 import '../domain/candidate.dart';
 import 'report_sheet.dart';
 
@@ -62,6 +63,16 @@ class CandidateDetailSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          SizedBox(
+            height: 280,
+            child: PhotoCarousel(
+              userId: candidate.id,
+              monogram: monogram,
+              radius: BorderRadius.circular(AppSpacing.radiusCard),
+              swipeable: true,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
               Container(

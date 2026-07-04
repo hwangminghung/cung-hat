@@ -11,12 +11,22 @@ import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/data/discovery_repository.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/discovery/presentation/doi_deck_screen.dart';
+import 'package:cung_hat/features/photos/application/photo_providers.dart';
+import 'package:cung_hat/features/photos/data/photo_repository.dart';
 import 'package:cung_hat/shared/widgets/empty_state.dart';
 import 'package:cung_hat/shared/widgets/pro_upsell_sheet.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
 
 class _MockDiscoveryRepository extends Mock implements DiscoveryRepository {}
+
+/// Cards embed PhotoCarousel → signedUrlsProvider → photoRepositoryProvider →
+/// Supabase. This fake returns no photos so every card degrades to the monogram
+/// fallback without touching the uninitialized Supabase client.
+class _FakePhotoRepository extends Mock implements PhotoRepository {
+  @override
+  Future<List<String>> signedUrlsOf(String userId) async => const [];
+}
 
 void main() {
   testWidgets(
@@ -68,6 +78,7 @@ void main() {
       ProviderScope(
         overrides: [
           discoveryRepositoryProvider.overrideWithValue(repo),
+          photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
           candidatesProvider.overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'A'),
@@ -115,6 +126,7 @@ void main() {
       ProviderScope(
         overrides: [
           discoveryRepositoryProvider.overrideWithValue(repo),
+          photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
           candidatesProvider.overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'A'),
