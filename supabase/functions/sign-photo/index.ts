@@ -1,6 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-// Mints 60s signed URLs for a TARGET user's photos, if the caller is allowed to see them.
+// Mints short-lived (600s) signed URLs for a TARGET user's photos, if the caller is allowed to see them.
 // Client passes its JWT + only a `target_id` (never a path). Returns { urls: string[] }.
 // Empty array => target has no photos, is soft-deleted, or is blocked in either direction.
 Deno.serve(async (req) => {
