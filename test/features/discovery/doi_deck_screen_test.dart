@@ -10,6 +10,7 @@ import 'package:cung_hat/features/discovery/application/discovery_providers.dart
 import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/data/discovery_repository.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
+import 'package:cung_hat/features/discovery/presentation/candidate_card.dart';
 import 'package:cung_hat/features/discovery/presentation/doi_deck_screen.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
 import 'package:cung_hat/features/photos/data/photo_repository.dart';
@@ -106,6 +107,62 @@ void main() {
 
     expect(find.byType(ProUpsellSheet), findsOneWidget);
     expect(find.text('Hết lượt thích hôm nay'), findsOneWidget);
+  });
+
+  testWidgets('swipe bị từ chối like_limit → card được hoàn về deck', (
+    tester,
+  ) async {
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => false);
+
+    // recordSwipe raise like_limit — server chưa ghi lượt vuốt, nên client
+    // phải undo để card quay lại deck. Dùng completer để lỗi về SAU khi
+    // CardSwiper đã ghi swipe vào history (giống test like_limit dồn dập).
+    final repo = _MockDiscoveryRepository();
+    final pending = Completer<bool>();
+    when(
+      () => repo.recordSwipe(any(), any()),
+    ).thenAnswer((_) => pending.future);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveryRepositoryProvider.overrideWithValue(repo),
+          photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+          candidatesProvider.overrideWith(
+            (ref) async => const [
+              Candidate(id: 'c1', displayName: 'Quỳnh'),
+              Candidate(id: 'c2', displayName: 'Bảo'),
+            ],
+          ),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Card đầu deck là 'Quỳnh'.
+    expect(find.text('Quỳnh'), findsOneWidget);
+
+    // Vuốt phải (like) → onSwipe gán _lastSwiped, gọi _handleSwipe (đang treo).
+    await tester.tap(find.byKey(const Key('deck_like_btn')));
+    await tester.pumpAndSettle();
+
+    // Bây giờ mới raise like_limit — CardSwiper đã ghi swipe vào history.
+    pending.completeError(Exception('like_limit'));
+    await tester.pumpAndSettle();
+
+    // Upsell mở vì hết lượt.
+    expect(find.byType(ProUpsellSheet), findsOneWidget);
+
+    // Sau _controller.undo(), card 'Quỳnh' bị từ chối phải quay lại deck —
+    // front card lại hiển thị (mất undo thì chỉ còn 'Bảo').
+    expect(find.byType(CandidateCard), findsWidgets);
+    expect(find.text('Quỳnh'), findsOneWidget);
   });
 
   testWidgets('free bấm boost → mở ProUpsellSheet, không gọi activateBoost', (

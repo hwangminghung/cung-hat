@@ -357,19 +357,38 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       final err = discoverySwipeError(e);
       switch (err) {
         case DiscoverySwipeError.likeLimit:
-          if (_upsellShowing) return;
-          _upsellShowing = true;
-          ProUpsellSheet.show(
-            context,
-            title: 'Hết lượt thích hôm nay',
-            subtitle:
-                'Pro thích không giới hạn và có 5 Siêu thích mỗi ngày.',
-          ).whenComplete(() => _upsellShowing = false);
+          if (!_upsellShowing) {
+            _upsellShowing = true;
+            ProUpsellSheet.show(
+              context,
+              title: 'Hết lượt thích hôm nay',
+              subtitle:
+                  'Pro thích không giới hạn và có 5 Siêu thích mỗi ngày.',
+            ).whenComplete(() => _upsellShowing = false);
+          }
+          // Server raise like_limit/super_limit TRƯỚC khi ghi swipe, nên ta
+          // BIẾT lượt vuốt chưa được lưu — hoàn card về deck để client khớp
+          // với server. _lastSwiped đã bị onSwipe gán sang ứng viên bị từ chối
+          // này; sau undo, history của CardSwiper rỗng nên phải null nó (như
+          // _handleRewind), nếu không rewind kế tiếp sẽ gọi undo_last_swipe xoá
+          // một swipe CŨ HƠN có thật trong khi deck không còn gì để khôi phục —
+          // đúng cái desync mà _refreshDeck/_handleRewind cảnh báo.
+          if (mounted) {
+            _controller.undo();
+            _lastSwiped = null;
+          }
         case DiscoverySwipeError.superLimit:
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(err.message)));
+          if (mounted) {
+            _controller.undo();
+            _lastSwiped = null;
+          }
         case DiscoverySwipeError.proRequired:
         // boost* chỉ phát sinh từ activate_boost; ở đây chỉ để switch đủ nhánh.
         case DiscoverySwipeError.boostActive:
         case DiscoverySwipeError.boostLimit:
+        // unknown: swipe CÓ THỂ đã được ghi — undo sẽ desync, nên chỉ báo lỗi.
         case DiscoverySwipeError.unknown:
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(err.message)));

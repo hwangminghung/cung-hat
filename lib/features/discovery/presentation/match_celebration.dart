@@ -274,19 +274,25 @@ class _NoteRainPainter extends CustomPainter {
   final double progress;
   static const _count = 18;
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (progress <= 0) return;
+  /// Hằng số per-note + TextPainter đã layout, tính MỘT LẦN thay vì 18
+  /// allocation + layout mỗi frame. xFrac lưu ở dạng 0..1 vì x thực = xFrac *
+  /// size.width chỉ biết được lúc paint. Thứ tự rút Random(42) phải y hệt vòng
+  /// paint cũ (seed → xFrac → alpha → fontSize) để mỗi note ra đúng giá trị cũ,
+  /// giữ output byte-identical.
+  static final List<
+      ({double xFrac, double seed, double alpha, double fontSize, TextPainter painter})>
+  _notes = _buildNotes();
+
+  static List<
+      ({double xFrac, double seed, double alpha, double fontSize, TextPainter painter})>
+  _buildNotes() {
     final random = Random(42);
-    for (var i = 0; i < _count; i++) {
+    return List.generate(_count, (_) {
       final seed = random.nextDouble();
-      final x = random.nextDouble() * size.width;
+      final xFrac = random.nextDouble();
       final alpha = (0.15 + 0.55 * random.nextDouble()).clamp(0.0, 1.0);
       final fontSize = 14.0 + random.nextDouble() * 14;
-      final yFrac = (progress * (0.6 + seed)) % 1.2;
-      final y = yFrac * size.height;
-
-      final textPainter = TextPainter(
+      final painter = TextPainter(
         text: TextSpan(
           text: '♪',
           style: TextStyle(
@@ -296,7 +302,24 @@ class _NoteRainPainter extends CustomPainter {
         ),
         textDirection: ui.TextDirection.ltr,
       )..layout();
-      textPainter.paint(canvas, Offset(x, y));
+      return (
+        xFrac: xFrac,
+        seed: seed,
+        alpha: alpha,
+        fontSize: fontSize,
+        painter: painter,
+      );
+    });
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0) return;
+    for (final note in _notes) {
+      final x = note.xFrac * size.width;
+      final yFrac = (progress * (0.6 + note.seed)) % 1.2;
+      final y = yFrac * size.height;
+      note.painter.paint(canvas, Offset(x, y));
     }
   }
 
