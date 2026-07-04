@@ -23,7 +23,7 @@ insert into public.profiles (id, display_name, dob, age_verified, last_active) v
   ('00000000-0000-0000-0000-0000000000b1','Free B','1990-01-01', true, now()),
   ('00000000-0000-0000-0000-0000000000b2','Pro B','1990-01-01', true, now()),
   ('00000000-0000-0000-0000-0000000000b3','Caller','1990-01-01', true, now()),
-  -- Both candidates: SAME dob, SAME (old) last_active so activity term is equal, no genres/songs.
+  -- Both candidates: SAME dob, IDENTICAL last_active so activity term is equal, no genres/songs.
   ('00000000-0000-0000-0000-0000000000b4','Boosted Cand','1990-01-01', true, now() - interval '10 days'),
   ('00000000-0000-0000-0000-0000000000b5','Plain Cand','1990-01-01', true, now() - interval '10 days')
   on conflict (id) do nothing;
@@ -75,8 +75,9 @@ select throws_ok(
 -- Case 5: ranking -- two candidates at the same location/eligibility for a third caller;
 -- the one with an active boost ranks FIRST. Seed locations via the SECURITY DEFINER RPC
 -- update_my_location (keys off auth.uid(); direct insert into user_locations is RLS-blocked).
--- Same coords for both candidates -> identical dist_m; same old last_active + no shared
--- genres/songs -> all base score terms equal, so the +3.0 boost term is the only tiebreaker.
+-- Same coords for both candidates -> identical dist_m; identical last_active (both seeded
+-- equal -- update_my_location may bump both to now(), still equal) + no shared genres/songs
+-- -> all base score terms equal, so the +3.0 boost term is the only tiebreaker.
 set local role postgres;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000b3","role":"authenticated"}';
 set local role authenticated;
