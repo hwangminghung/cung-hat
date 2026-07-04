@@ -10,6 +10,8 @@ class _MockFunctions extends Mock implements FunctionsClient {}
 
 class _MockGoTrue extends Mock implements GoTrueClient {}
 
+class _MockStorage extends Mock implements SupabaseStorageClient {}
+
 class _MockPhotoStorage extends Mock implements PhotoStorage {}
 
 class _FakeUser extends Fake implements User {
@@ -23,14 +25,27 @@ void main() {
     registerFallbackValue(Uint8List(0));
   });
 
+  /// Stubs `client.storage.url` so the origin-rewrite step in [signedUrlsOf]
+  /// has a base to rebase onto. Mirrors what the real client exposes:
+  /// `http://<host>:<port>/storage/v1`.
+  void stubStorageUrl(MockSupabaseClient client, String storageUrl) {
+    final storage = _MockStorage();
+    when(() => client.storage).thenReturn(storage);
+    when(() => storage.url).thenReturn(storageUrl);
+  }
+
   test('signedUrlsOf invokes sign-photo with target_id and returns urls', () async {
     final client = MockSupabaseClient();
     final fns = _MockFunctions();
+    stubStorageUrl(client, 'http://10.0.2.2:54321/storage/v1');
     when(() => client.functions).thenReturn(fns);
     when(() => fns.invoke('sign-photo', body: any(named: 'body'))).thenAnswer(
       (_) async => FunctionResponse(
         data: {
-          'urls': ['https://a', 'https://b'],
+          'urls': [
+            'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/a?token=x',
+            'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/b?token=y',
+          ],
         },
         status: 200,
       ),
@@ -39,13 +54,45 @@ void main() {
     final repo = PhotoRepository(client, storage: _MockPhotoStorage());
     final urls = await repo.signedUrlsOf('user-9');
 
-    expect(urls, ['https://a', 'https://b']);
+    // Origins already match the client → unchanged (prod no-op case).
+    expect(urls, [
+      'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/a?token=x',
+      'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/b?token=y',
+    ]);
     verify(() => fns.invoke('sign-photo', body: {'target_id': 'user-9'})).called(1);
+  });
+
+  test('signedUrlsOf rewrites the kong internal host to the client origin', () async {
+    final client = MockSupabaseClient();
+    final fns = _MockFunctions();
+    // App's own configured origin (emulator loopback to host Supabase).
+    stubStorageUrl(client, 'http://10.0.2.2:54321/storage/v1');
+    when(() => client.functions).thenReturn(fns);
+    when(() => fns.invoke('sign-photo', body: any(named: 'body'))).thenAnswer(
+      (_) async => FunctionResponse(
+        data: {
+          // Edge returns URLs built from the runtime's internal SUPABASE_URL.
+          'urls': [
+            'http://kong:8000/storage/v1/object/sign/profile-photos/u/1.jpg?token=abc',
+          ],
+        },
+        status: 200,
+      ),
+    );
+
+    final repo = PhotoRepository(client, storage: _MockPhotoStorage());
+    final urls = await repo.signedUrlsOf('user-9');
+
+    // Origin swapped to the client's; path + ?token preserved verbatim.
+    expect(urls, [
+      'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/u/1.jpg?token=abc',
+    ]);
   });
 
   test('signedUrlsOf returns empty list when urls missing', () async {
     final client = MockSupabaseClient();
     final fns = _MockFunctions();
+    stubStorageUrl(client, 'http://10.0.2.2:54321/storage/v1');
     when(() => client.functions).thenReturn(fns);
     when(() => fns.invoke('sign-photo', body: any(named: 'body')))
         .thenAnswer((_) async => FunctionResponse(data: {}, status: 200));
@@ -67,6 +114,32 @@ void main() {
     final urls = await repo.signedUrlsOf('user-9');
 
     expect(urls, const <String>[]);
+  });
+
+  group('rebaseOrigin (pure helper)', () {
+    final base = Uri.parse('http://10.0.2.2:54321/storage/v1');
+
+    test('swaps host+port, keeps path and query intact', () {
+      final out = PhotoRepository.rebaseOrigin(
+        'http://kong:8000/storage/v1/object/sign/profile-photos/u/1.jpg?token=abc',
+        base,
+      );
+      expect(
+        out,
+        'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/u/1.jpg?token=abc',
+      );
+    });
+
+    test('is a no-op when the origin already matches', () {
+      const url =
+          'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/u/1.jpg?token=abc';
+      expect(PhotoRepository.rebaseOrigin(url, base), url);
+    });
+
+    test('returns the input as-is when it cannot be parsed', () {
+      const bad = '::: not a url :::';
+      expect(PhotoRepository.rebaseOrigin(bad, base), bad);
+    });
   });
 
   test('uploadPhoto uploads then calls set_my_photo_paths with the appended list', () async {

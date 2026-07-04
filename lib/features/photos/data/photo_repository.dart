@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Tiny injectable seam over the Supabase Storage builder chain.
@@ -84,9 +85,41 @@ class PhotoRepository {
     try {
       final res = await _client.functions.invoke('sign-photo', body: {'target_id': userId});
       final urls = res.data?['urls'] as List?;
-      return urls == null ? const [] : urls.map((e) => e as String).toList();
+      if (urls == null) return const [];
+
+      // The edge `sign-photo` builds URLs from its runtime's SUPABASE_URL. On
+      // local Supabase that is the internal Docker gateway (`http://kong:8000`),
+      // which no emulator/device/browser can resolve. The signed token signs the
+      // object PATH + expiry — NOT the host — so it stays valid on any origin of
+      // the same project's storage. We therefore rebase each URL onto the app's
+      // OWN configured Supabase origin, which the client always knows correctly
+      // per environment. In production the origins already match, so this is a
+      // no-op; on local/emulator it makes photos reachable.
+      final base = Uri.parse(_client.storage.url);
+      return urls.map((e) => rebaseOrigin(e as String, base)).toList();
     } catch (_) {
       return const [];
     }
+  }
+
+  /// Returns [url] with its origin (scheme + host + port) replaced by [base]'s,
+  /// preserving the path and query (e.g. the `?token=...`). Unparseable input is
+  /// returned unchanged so one bad URL never breaks the batch. Pure and directly
+  /// unit-tested; see [signedUrlsOf] for why the rewrite is needed.
+  @visibleForTesting
+  static String rebaseOrigin(String url, Uri base) {
+    final Uri u;
+    try {
+      u = Uri.parse(url);
+    } catch (_) {
+      return url;
+    }
+    return u
+        .replace(
+          scheme: base.scheme,
+          host: base.host,
+          port: base.hasPort ? base.port : u.port,
+        )
+        .toString();
   }
 }
