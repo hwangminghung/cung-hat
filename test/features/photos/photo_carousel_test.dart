@@ -11,6 +11,7 @@ Future<void> _pump(
   required List<String> urls,
   required String monogram,
   bool swipeable = false,
+  BorderRadius? radius,
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -23,6 +24,7 @@ Future<void> _pump(
             userId: userId,
             monogram: monogram,
             swipeable: swipeable,
+            radius: radius,
           ),
         ),
       ),
@@ -51,5 +53,20 @@ void main() {
 
     expect(find.byType(PageView), findsOneWidget);
     expect(find.byType(PhotoDot), findsNWidgets(2));
+  });
+
+  testWidgets('0 ảnh + radius → fallback vẫn bo góc (ClipRRect)',
+      (tester) async {
+    await _pump(
+      tester,
+      userId: 'u3',
+      urls: const [],
+      monogram: 'N',
+      radius: BorderRadius.circular(24),
+    );
+    await tester.pump();
+
+    expect(find.byType(ClipRRect), findsOneWidget);
+    expect(find.text('N'), findsOneWidget);
   });
 }

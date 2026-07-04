@@ -38,7 +38,11 @@ class PhotoCarousel extends ConsumerWidget {
     final urls = async.asData?.value ?? const <String>[];
 
     if (urls.isEmpty) {
-      return _fallback(monogram: monogram, decorations: fallbackDecorations);
+      return _fallback(
+        monogram: monogram,
+        decorations: fallbackDecorations,
+        radius: radius,
+      );
     }
 
     final pager = _Pager(urls: urls, monogram: monogram, swipeable: swipeable);
