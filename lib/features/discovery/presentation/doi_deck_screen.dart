@@ -234,10 +234,13 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     );
   }
 
-  /// HH:mm không cần package ngoài — chỉ dùng cho tooltip boost.
+  /// HH:mm giờ địa phương — chỉ dùng cho tooltip boost. Expiry parse từ
+  /// timestamptz ('...Z') nên là UTC; phải toLocal() trước khi đọc hour/minute
+  /// (nếu không VN UTC+7 lệch 7 tiếng). Không cần package ngoài.
   String _formatHhMm(DateTime t) {
-    final h = t.hour.toString().padLeft(2, '0');
-    final m = t.minute.toString().padLeft(2, '0');
+    final local = t.toLocal();
+    final h = local.hour.toString().padLeft(2, '0');
+    final m = local.minute.toString().padLeft(2, '0');
     return '$h:$m';
   }
 
@@ -364,6 +367,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           ).whenComplete(() => _upsellShowing = false);
         case DiscoverySwipeError.superLimit:
         case DiscoverySwipeError.proRequired:
+        // boost* chỉ phát sinh từ activate_boost; ở đây chỉ để switch đủ nhánh.
         case DiscoverySwipeError.boostActive:
         case DiscoverySwipeError.boostLimit:
         case DiscoverySwipeError.unknown:

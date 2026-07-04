@@ -195,6 +195,48 @@ void main() {
     );
   });
 
+  testWidgets('tooltip boosting hiện HH:mm giờ ĐỊA PHƯƠNG của expiry', (
+    tester,
+  ) async {
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => false);
+
+    // Expiry phải là UTC — mô phỏng đúng DateTime.parse('...Z') mà repo trả về
+    // từ timestamptz. `expected` tính từ .toLocal() nên đúng ở mọi múi giờ;
+    // test này canh gác việc chuyển UTC→local trong _formatHhMm: mã UTC cũ
+    // (đọc thẳng .hour/.minute) sẽ FAIL trên máy lệch UTC (vd VN UTC+7).
+    final expiry = DateTime.now().toUtc().add(const Duration(minutes: 30));
+    final local = expiry.toLocal();
+    final expected =
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+          candidatesProvider.overrideWith(
+            (ref) async => const [
+              Candidate(id: 'c1', displayName: 'A'),
+              Candidate(id: 'c2', displayName: 'B'),
+            ],
+          ),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{'pro'}),
+          activeBoostProvider.overrideWith((ref) => expiry),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final boostBtn = tester.widget<IconButton>(
+      find.byKey(const Key('deck_boost_btn')),
+    );
+    expect(boostBtn.tooltip, 'Đang boost đến $expected');
+  });
+
   testWidgets('double-tap rewind chỉ gọi undo_last_swipe một lần', (
     tester,
   ) async {
