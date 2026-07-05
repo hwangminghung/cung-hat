@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -118,6 +119,18 @@ class _PagerState extends State<_Pager> {
   int _current = 0;
 
   @override
+  void didUpdateWidget(_Pager oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.urls, widget.urls)) {
+      // Bộ ảnh đổi (State bị tái dụng cho user khác, hoặc URL re-mint) → về
+      // trang 0. KHÔNG gọi widget.onPageChanged ở đây: cha tự reset chỉ số
+      // của nó (didUpdateWidget của CandidateCard) — gọi thêm sẽ giẫm chân.
+      _current = 0;
+      if (_controller.hasClients) _controller.jumpToPage(0);
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -142,8 +155,14 @@ class _PagerState extends State<_Pager> {
               ? null
               : const NeverScrollableScrollPhysics(),
           onPageChanged: (i) {
-            if (widget.swipeable) setState(() => _current = i);
-            widget.onPageChanged?.call(i);
+            // Single-fire có chủ đích: chỉ forward khi cuộn tay (detail
+            // sheet). Ở card mode, _go là nguồn duy nhất — jumpToPage cũng
+            // kích callback này, forward thêm ở đây sẽ khiến cha setState
+            // hai lần cho mỗi cú tap.
+            if (widget.swipeable) {
+              setState(() => _current = i);
+              widget.onPageChanged?.call(i);
+            }
           },
           itemCount: widget.urls.length,
           itemBuilder: (_, i) => Image.network(

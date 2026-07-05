@@ -15,6 +15,16 @@ const _cand = Candidate(
   bio: 'Hát ballad về đêm',
 );
 
+const _candB = Candidate(
+  id: 'u2',
+  displayName: 'Mai',
+  age: 27,
+  distanceBand: '3-5',
+  sharedGenres: ['rock'],
+  sharedBaitu: ['s9'],
+  bio: 'Rock cả tuần',
+);
+
 Widget _host({List<String> urls = const ['u1.jpg', 'u2.jpg', 'u3.jpg']}) {
   return ProviderScope(
     overrides: [
@@ -49,9 +59,59 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hát ballad về đêm'), findsOneWidget);
 
+    // Ảnh cuối: tap phải lần nữa → clamp giữ nguyên, vẫn bio, không exception.
+    await tester.tapAt(Offset(rect.right - 20, rect.center.dy));
+    await tester.pumpAndSettle();
+    expect(find.text('Hát ballad về đêm'), findsOneWidget);
+
     await tester.tapAt(Offset(rect.left + 20, rect.center.dy));
     await tester.pumpAndSettle();
     expect(find.text('#ballad'), findsOneWidget);
+  });
+
+  testWidgets(
+      'đổi ứng viên cùng vị trí cây widget (không key) → chip reset về ảnh 1',
+      (tester) async {
+    // Mô phỏng CardSwiper: card dựng theo VỊ TRÍ, không key, nên khi deck tiến
+    // A→B, Flutter tái dụng _CandidateCardState — didUpdateWidget phải reset
+    // _photoIndex kẻo card của B mở màn bằng chip bio.
+    var current = _cand;
+    late StateSetter swap;
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('u1')
+            .overrideWith((ref) async => const ['a1.jpg', 'a2.jpg', 'a3.jpg']),
+        signedUrlsProvider('u2')
+            .overrideWith((ref) async => const ['b1.jpg', 'b2.jpg', 'b3.jpg']),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              swap = setState;
+              return CandidateCard(candidate: current, onOpenDetail: () {});
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // A: tap tới ảnh 3 → hiện bio của A.
+    final rect = tester.getRect(find.byKey(const Key('card_photo_area')));
+    await tester.tapAt(Offset(rect.right - 20, rect.center.dy));
+    await tester.pumpAndSettle();
+    await tester.tapAt(Offset(rect.right - 20, rect.center.dy));
+    await tester.pumpAndSettle();
+    expect(find.text('Hát ballad về đêm'), findsOneWidget);
+
+    // Đổi sang B không đổi key/vị trí — State bị tái dụng.
+    swap(() => current = _candB);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mai, 27'), findsOneWidget);
+    expect(find.textContaining('Cách 3-5 km'), findsOneWidget);
+    expect(find.text('Rock cả tuần'), findsNothing);
   });
 
   testWidgets('nút ⓘ mở detail (callback)', (tester) async {

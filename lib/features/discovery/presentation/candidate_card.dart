@@ -33,6 +33,16 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
   int _photoIndex = 0;
 
   @override
+  void didUpdateWidget(CandidateCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // CardSwiper dựng card theo VỊ TRÍ (không key) nên State này có thể bị
+    // tái dụng cho ứng viên khác khi deck tiến lên — reset chỉ số ảnh kẻo
+    // card mới mở màn bằng chip bio của trang 3. (Deck cũng đã key theo
+    // candidate.id; đây là lớp phòng thủ cho mọi đường tái dụng khác.)
+    if (oldWidget.candidate.id != widget.candidate.id) _photoIndex = 0;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final candidate = widget.candidate;
     final name = candidate.displayName ?? 'Bạn hát mới';

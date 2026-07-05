@@ -225,6 +225,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                           hProgress: h / 100,
                           vProgress: v / 100,
                           child: CandidateCard(
+                            // CardSwiper dựng card theo vị trí — không key thì
+                            // State (chỉ số ảnh) bị tái dụng cho ứng viên khác
+                            // khi deck tiến lên.
+                            key: ValueKey(candidates[index].id),
                             candidate: candidates[index],
                             onOpenDetail: () => CandidateDetailSheet.show(
                               context,
