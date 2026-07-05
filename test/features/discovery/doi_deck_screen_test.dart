@@ -14,7 +14,6 @@ import 'package:cung_hat/features/discovery/presentation/candidate_card.dart';
 import 'package:cung_hat/features/discovery/presentation/doi_deck_screen.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
 import 'package:cung_hat/features/photos/data/photo_repository.dart';
-import 'package:cung_hat/shared/widgets/empty_state.dart';
 import 'package:cung_hat/shared/widgets/pro_upsell_sheet.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
@@ -31,7 +30,7 @@ class _FakePhotoRepository extends Mock implements PhotoRepository {
 
 void main() {
   testWidgets(
-    'DoiDeckScreen uses the shared EmptyState when no candidates load',
+    'DoiDeckScreen shows the radius-expand empty state when no candidates load',
     (tester) async {
       final locationService = _FakeLocationService();
       when(
@@ -43,6 +42,8 @@ void main() {
           overrides: [
             candidatesProvider.overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
           ],
           child: MaterialApp(
             theme: AppTheme.light(),
@@ -50,10 +51,13 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.byType(EmptyState), findsOneWidget);
+      // Empty-deck (radius=50, chưa hết 100km) hiện nút mở rộng + switch tự
+      // mở rộng thay vì EmptyState/'Làm mới gợi ý' cũ (Tinder-parity mục 2).
       expect(find.text('Chưa có bạn hát quanh đây'), findsOneWidget);
+      expect(find.byKey(const Key('expand_radius_btn')), findsOneWidget);
+      expect(find.byKey(const Key('auto_expand_switch')), findsOneWidget);
     },
   );
 

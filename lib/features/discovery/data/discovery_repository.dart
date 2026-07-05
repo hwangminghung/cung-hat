@@ -5,11 +5,21 @@ class DiscoveryRepository {
   DiscoveryRepository(this._client);
   final SupabaseClient _client;
 
-  Future<List<Candidate>> getCandidates({int limit = 20}) async {
-    final rows = await _client.rpc('get_discovery_candidates', params: {'p_limit': limit});
+  Future<List<Candidate>> getCandidates({int limit = 20, int radiusKm = 50}) async {
+    final rows = await _client.rpc('get_discovery_candidates',
+        params: {'p_limit': limit, 'p_radius_km': radiusKm});
     return (rows as List)
         .map((e) => Candidate.fromJson(Map<String, dynamic>.from(e)))
         .toList();
+  }
+
+  /// Đọc pref "tự mở rộng bán kính khi hết deck" đã lưu server-side.
+  Future<bool> getAutoExpand() async =>
+      await _client.rpc('get_discovery_auto_expand') == true;
+
+  /// Lưu pref "tự mở rộng bán kính khi hết deck" server-side.
+  Future<void> setAutoExpand(bool on) async {
+    await _client.rpc('set_discovery_auto_expand', params: {'p_on': on});
   }
 
   /// Users who have liked the current user. Server raises `entitlement_required`

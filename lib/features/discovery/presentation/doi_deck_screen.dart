@@ -96,12 +96,31 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           ),
           data: (candidates) {
             if (candidates.isEmpty) {
-              return EmptyState(
-                icon: Icons.music_note_rounded,
-                title: 'Chưa có bạn hát quanh đây',
-                subtitle: 'Mở lại sau một chút để xem gợi ý mới.',
-                actionLabel: 'Làm mới gợi ý',
-                onAction: _refreshDeck,
+              final radius = ref.watch(deckRadiusProvider);
+              final autoExpand = ref.watch(autoExpandProvider).value ?? false;
+              // Auto-expand: 50km rỗng + user đã bật → tự lên 100km 1 lần.
+              if (radius == 50 && autoExpand) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    ref.read(deckRadiusProvider.notifier).state = 100;
+                  }
+                });
+                return const Padding(
+                  padding: EdgeInsets.all(AppSpacing.lg),
+                  child: Skeleton(
+                      width: double.infinity, height: double.infinity, radius: 28),
+                );
+              }
+              return _EmptyDeck(
+                radius: radius,
+                autoExpand: autoExpand,
+                onExpand: () =>
+                    ref.read(deckRadiusProvider.notifier).state = 100,
+                onToggleAutoExpand: (on) async {
+                  await ref.read(discoveryRepositoryProvider).setAutoExpand(on);
+                  ref.invalidate(autoExpandProvider);
+                },
+                onRefresh: _refreshDeck,
               );
             }
 
@@ -131,6 +150,17 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: AppColors.textSecondary),
                             ),
+                            if (ref.watch(deckRadiusProvider) == 100)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: AppSpacing.xs),
+                                child: Text('Đang tìm trong 100 km',
+                                    key: const Key('radius_chip'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelMedium
+                                        ?.copyWith(color: AppColors.primaryDark)),
+                              ),
                           ],
                         ),
                       ),
@@ -388,5 +418,67 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               .showSnackBar(SnackBar(content: Text(err.message)));
       }
     }
+  }
+}
+
+class _EmptyDeck extends StatelessWidget {
+  const _EmptyDeck({
+    required this.radius,
+    required this.autoExpand,
+    required this.onExpand,
+    required this.onToggleAutoExpand,
+    required this.onRefresh,
+  });
+
+  final int radius;
+  final bool autoExpand;
+  final VoidCallback onExpand;
+  final ValueChanged<bool> onToggleAutoExpand;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(Icons.music_note_rounded,
+              size: 56, color: AppColors.primary),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            radius >= 100
+                ? 'Đã tìm hết trong 100 km'
+                : 'Chưa có bạn hát quanh đây',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          if (radius < 100)
+            FilledButton.icon(
+              key: const Key('expand_radius_btn'),
+              onPressed: onExpand,
+              icon: const Icon(Icons.travel_explore_rounded),
+              label: const Text('Mở rộng tìm quanh 100 km'),
+            )
+          else
+            OutlinedButton.icon(
+              key: const Key('deck_retry_btn'),
+              onPressed: onRefresh,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Làm mới gợi ý'),
+            ),
+          const SizedBox(height: AppSpacing.sm),
+          SwitchListTile(
+            key: const Key('auto_expand_switch'),
+            title: const Text('Tự mở rộng khi hết người'),
+            subtitle: const Text('Tự động tìm quanh 100 km khi 50 km đã hết'),
+            value: autoExpand,
+            onChanged: onToggleAutoExpand,
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -9,8 +9,17 @@ final discoveryRepositoryProvider =
     Provider((ref) => DiscoveryRepository(ref.watch(supabaseClientProvider)));
 final locationServiceProvider =
     Provider((ref) => LocationService(ref.watch(discoveryRepositoryProvider)));
-final candidatesProvider = FutureProvider<List<Candidate>>(
-    (ref) => ref.watch(discoveryRepositoryProvider).getCandidates());
+
+/// Bán kính deck hiện tại (km). 50 mặc định; 100 khi user mở rộng — reset
+/// mỗi phiên app (server chỉ lưu auto_expand, không lưu bán kính).
+final deckRadiusProvider = StateProvider<int>((ref) => 50);
+
+final autoExpandProvider = FutureProvider<bool>(
+    (ref) => ref.watch(discoveryRepositoryProvider).getAutoExpand());
+
+final candidatesProvider = FutureProvider<List<Candidate>>((ref) => ref
+    .watch(discoveryRepositoryProvider)
+    .getCandidates(radiusKm: ref.watch(deckRadiusProvider)));
 final whoLikedMeProvider = FutureProvider<List<Candidate>>(
     (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe());
 

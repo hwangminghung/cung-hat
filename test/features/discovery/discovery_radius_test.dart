@@ -1,0 +1,229 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:cung_hat/core/theme/app_theme.dart';
+import 'package:cung_hat/features/billing/application/billing_providers.dart';
+import 'package:cung_hat/features/discovery/application/discovery_providers.dart';
+import 'package:cung_hat/features/discovery/application/location_service.dart';
+import 'package:cung_hat/features/discovery/data/discovery_repository.dart';
+import 'package:cung_hat/features/discovery/domain/candidate.dart';
+import 'package:cung_hat/features/discovery/presentation/doi_deck_screen.dart';
+import 'package:cung_hat/features/photos/application/photo_providers.dart';
+import 'package:cung_hat/features/photos/data/photo_repository.dart';
+import '../../support/supabase_mocks.dart';
+
+class _FakeLocationService extends Mock implements LocationService {}
+
+class _FakePhotoRepository extends Mock implements PhotoRepository {
+  @override
+  Future<List<String>> signedUrlsOf(String userId) async => const [];
+}
+
+void main() {
+  test('getCandidates truyền p_radius_km', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('get_discovery_candidates',
+            params: {'p_limit': 20, 'p_radius_km': 100}))
+        .thenAnswer((_) => rpcOk(<dynamic>[]));
+    final repo = DiscoveryRepository(client);
+    final res = await repo.getCandidates(radiusKm: 100);
+    expect(res, isEmpty);
+    verify(() => client.rpc('get_discovery_candidates',
+        params: {'p_limit': 20, 'p_radius_km': 100})).called(1);
+  });
+
+  test('get/setAutoExpand gọi đúng RPC', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('get_discovery_auto_expand'))
+        .thenAnswer((_) => rpcOk(true));
+    when(() => client.rpc('set_discovery_auto_expand',
+            params: {'p_on': true}))
+        .thenAnswer((_) => rpcOk(null));
+    final repo = DiscoveryRepository(client);
+    expect(await repo.getAutoExpand(), isTrue);
+    await repo.setAutoExpand(true);
+    verify(() => client.rpc('set_discovery_auto_expand',
+        params: {'p_on': true})).called(1);
+  });
+
+  group('empty-deck expand UI', () {
+    testWidgets(
+        'deck rỗng hiện nút mở rộng + switch tự mở rộng (autoExpand=false)',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+          ],
+          child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('expand_radius_btn')), findsOneWidget);
+      expect(find.byKey(const Key('auto_expand_switch')), findsOneWidget);
+      expect(find.text('Chưa có bạn hát quanh đây'), findsOneWidget);
+
+      final switchTile = tester.widget<SwitchListTile>(
+        find.byKey(const Key('auto_expand_switch')),
+      );
+      expect(switchTile.value, isFalse);
+    });
+
+    testWidgets('bấm mở rộng → deckRadiusProvider chuyển sang 100',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+          ],
+          child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DoiDeckScreen)),
+      );
+      expect(container.read(deckRadiusProvider), 50);
+
+      await tester.tap(find.byKey(const Key('expand_radius_btn')));
+      await tester.pump();
+
+      expect(container.read(deckRadiusProvider), 100);
+    });
+
+    testWidgets('bật switch tự mở rộng → gọi setAutoExpand trên repository',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+      final repo = _MockDiscoveryRepositoryForRadius();
+      when(() => repo.setAutoExpand(any())).thenAnswer((_) async {});
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            discoveryRepositoryProvider.overrideWithValue(repo),
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+          ],
+          child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('auto_expand_switch')));
+      await tester.pumpAndSettle();
+
+      verify(() => repo.setAutoExpand(true)).called(1);
+    });
+
+    testWidgets(
+        'radius=100 & deck vẫn rỗng → hiện "Đã tìm hết trong 100 km" + nút Làm mới',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+            deckRadiusProvider.overrideWith((ref) => 100),
+          ],
+          child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Đã tìm hết trong 100 km'), findsOneWidget);
+      expect(find.byKey(const Key('deck_retry_btn')), findsOneWidget);
+      expect(find.byKey(const Key('expand_radius_btn')), findsNothing);
+      // radius_chip chỉ nằm trong header của deck KHÔNG rỗng — empty-deck
+      // đã tự truyền đạt "100 km" qua headline riêng của nó.
+      expect(find.byKey(const Key('radius_chip')), findsNothing);
+    });
+
+    testWidgets('deck CÓ candidate + radius=100 → header hiện radius_chip',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider.overrideWith((ref) async => const [
+                  Candidate(id: 'c1', displayName: 'A'),
+                ]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+            deckRadiusProvider.overrideWith((ref) => 100),
+          ],
+          child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('radius_chip')), findsOneWidget);
+      expect(find.text('Đang tìm trong 100 km'), findsOneWidget);
+    });
+
+    testWidgets(
+        'radius=50 rỗng + autoExpand=true → tự động chuyển sang 100 (postframe)',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => true),
+          ],
+          child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DoiDeckScreen)),
+      );
+      expect(container.read(deckRadiusProvider), 100);
+    });
+  });
+}
+
+class _MockDiscoveryRepositoryForRadius extends Mock
+    implements DiscoveryRepository {}
