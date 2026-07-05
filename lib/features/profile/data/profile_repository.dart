@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/profile.dart';
+import '../domain/profile_completion.dart';
 
 class ProfileRepository {
   ProfileRepository(this._client);
@@ -26,5 +27,12 @@ class ProfileRepository {
 
   Future<void> setMyPrompts(List<Map<String, String>> prompts) async {
     await _client.rpc('set_my_prompts', params: {'p_prompts': prompts});
+  }
+
+  Future<TasteCounts> getMyTasteCounts() async {
+    final res = await _client.rpc('get_my_taste');
+    final map = Map<String, dynamic>.from(res as Map);
+    int count(String key) => (map[key] as List?)?.length ?? 0;
+    return TasteCounts(count('genres'), count('artists'), count('baitu'));
   }
 }

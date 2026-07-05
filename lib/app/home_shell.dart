@@ -10,6 +10,7 @@ import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/keo/presentation/keo_board_screen.dart';
 import '../features/photos/presentation/photo_manager_sheet.dart';
 import '../features/profile/application/profile_providers.dart';
+import '../features/profile/domain/profile_completion.dart';
 import '../features/profile/presentation/prompt_editor_sheet.dart';
 import '../shared/widgets/pro_upsell_sheet.dart';
 
@@ -135,7 +136,9 @@ class _ProfileTab extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
+          const _CompletionCard(),
+          const SizedBox(height: AppSpacing.md),
           _ProfileTile(
             icon: Icons.favorite_rounded,
             title: 'Ai đã thích bạn',
@@ -201,6 +204,65 @@ class _ProfileTab extends ConsumerWidget {
   }
 }
 
+class _CompletionCard extends ConsumerWidget {
+  const _CompletionCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(myProfileProvider).value;
+    final taste = ref.watch(myTasteCountsProvider).value;
+    if (profile == null || taste == null) return const SizedBox.shrink();
+    final r = profileCompletion(profile, taste);
+    if (r.percent >= 100) return const SizedBox.shrink();
+    return Container(
+      key: const Key('completion_card'),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Hồ sơ hoàn thiện ${r.percent}%',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+            child: LinearProgressIndicator(value: r.percent / 100, minHeight: 8),
+          ),
+          for (final step in r.nextSteps)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.arrow_circle_up_rounded,
+                    size: 16,
+                    color: AppColors.primaryDark,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      step,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ProfileTile extends StatelessWidget {
   const _ProfileTile({
     required this.icon,
@@ -223,20 +285,23 @@ class _ProfileTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         border: Border.all(color: AppColors.border),
       ),
-      child: ListTile(
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColors.primaryTint,
-            borderRadius: BorderRadius.circular(15),
+      child: Material(
+        type: MaterialType.transparency,
+        child: ListTile(
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primaryTint,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(icon, color: AppColors.primaryDark),
           ),
-          child: Icon(icon, color: AppColors.primaryDark),
+          title: Text(title),
+          subtitle: Text(subtitle),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: onTap,
         ),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right_rounded),
-        onTap: onTap,
       ),
     );
   }
