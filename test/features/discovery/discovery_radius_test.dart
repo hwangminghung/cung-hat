@@ -139,6 +139,44 @@ void main() {
       verify(() => repo.setAutoExpand(true)).called(1);
     });
 
+    testWidgets('setAutoExpand lỗi → SnackBar báo lỗi, không crash',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+      // RPC lỗi async (offline/server) — UI phải nuốt lỗi + báo SnackBar,
+      // KHÔNG leak unhandled exception, KHÔNG invalidate autoExpandProvider.
+      final repo = _MockDiscoveryRepositoryForRadius();
+      when(() => repo.setAutoExpand(any()))
+          .thenAnswer((_) async => throw Exception('offline'));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            discoveryRepositoryProvider.overrideWithValue(repo),
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+          ],
+          child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('auto_expand_switch')));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Không lưu được cài đặt, thử lại.'), findsOneWidget);
+      // Switch giữ nguyên off — lưu thất bại thì không invalidate provider.
+      final switchTile = tester.widget<SwitchListTile>(
+        find.byKey(const Key('auto_expand_switch')),
+      );
+      expect(switchTile.value, isFalse);
+    });
+
     testWidgets(
         'radius=100 & deck vẫn rỗng → hiện "Đã tìm hết trong 100 km" + nút Làm mới',
         (tester) async {

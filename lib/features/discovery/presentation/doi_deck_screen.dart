@@ -73,6 +73,21 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     ref.invalidate(candidatesProvider);
   }
 
+  /// Lưu toggle "tự mở rộng" server-side. Chỉ invalidate provider khi lưu OK;
+  /// lỗi (offline/RPC) thì báo SnackBar và giữ nguyên trạng thái cũ — cùng
+  /// convention try/catch + mounted như _handleBoost/_handleRewind.
+  Future<void> _handleToggleAutoExpand(bool on) async {
+    try {
+      await ref.read(discoveryRepositoryProvider).setAutoExpand(on);
+      if (mounted) ref.invalidate(autoExpandProvider);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Không lưu được cài đặt, thử lại.')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final candidatesAsync = ref.watch(candidatesProvider);
@@ -116,10 +131,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                 autoExpand: autoExpand,
                 onExpand: () =>
                     ref.read(deckRadiusProvider.notifier).state = 100,
-                onToggleAutoExpand: (on) async {
-                  await ref.read(discoveryRepositoryProvider).setAutoExpand(on);
-                  ref.invalidate(autoExpandProvider);
-                },
+                onToggleAutoExpand: _handleToggleAutoExpand,
                 onRefresh: _refreshDeck,
               );
             }
