@@ -13,9 +13,11 @@ import '../../profile/application/profile_providers.dart';
 import '../application/discovery_providers.dart';
 import '../data/discovery_errors.dart';
 import '../domain/candidate.dart';
+import '../domain/deck_item.dart';
 import 'candidate_card.dart';
 import 'candidate_detail_sheet.dart';
 import 'deck_action_bar.dart';
+import 'keo_promo_card.dart';
 import 'match_celebration.dart';
 import 'swipe_overlays.dart';
 
@@ -104,10 +106,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final candidatesAsync = ref.watch(candidatesProvider);
+    final itemsAsync = ref.watch(deckItemsProvider);
     return Scaffold(
       body: SafeArea(
-        child: candidatesAsync.when(
+        child: itemsAsync.when(
           loading: () => const Padding(
             padding: EdgeInsets.all(AppSpacing.lg),
             child: Skeleton(
@@ -123,8 +125,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
             actionLabel: 'Thử lại',
             onAction: _refreshDeck,
           ),
-          data: (candidates) {
-            if (candidates.isEmpty) {
+          data: (items) {
+            final hasCandidates =
+                items.whereType<CandidateItem>().isNotEmpty;
+            if (!hasCandidates) {
               final radius = ref.watch(deckRadiusProvider);
               final autoExpand = ref.watch(autoExpandProvider).value ?? false;
               // Auto-expand: 50km rỗng + user đã bật → tự lên 100km 1 lần.
@@ -212,42 +216,66 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       // Key theo list instance: sau khi vuốt hết deck, CardSwiper
                       // cũ giữ index đã cạn nên list mới fetch về không hiển thị —
                       // đổi key ép dựng swiper mới cho mỗi lần fetch.
-                      key: ObjectKey(candidates),
+                      key: ObjectKey(items),
                       controller: _controller,
-                      cardsCount: candidates.length,
+                      cardsCount: items.length,
                       isLoop: false,
-                      numberOfCardsDisplayed: candidates.length.clamp(1, 2),
+                      numberOfCardsDisplayed: items.length.clamp(1, 2),
                       maxAngle: 25,
                       threshold: 60,
                       cardBuilder: (context, index, h, v) {
                         _scheduleProgress(h / 100, v / 100);
-                        return SwipeOverlays(
-                          hProgress: h / 100,
-                          vProgress: v / 100,
-                          child: CandidateCard(
-                            // CardSwiper dựng card theo vị trí — không key thì
-                            // State (chỉ số ảnh) bị tái dụng cho ứng viên khác
-                            // khi deck tiến lên.
-                            key: ValueKey(candidates[index].id),
-                            candidate: candidates[index],
-                            onOpenDetail: () => CandidateDetailSheet.show(
-                              context,
-                              candidate: candidates[index],
-                              onPass: () =>
-                                  _controller.swipe(CardSwiperDirection.left),
-                              onLike: () =>
-                                  _controller.swipe(CardSwiperDirection.right),
+                        final item = items[index];
+                        return switch (item) {
+                          CandidateItem(:final candidate) => SwipeOverlays(
+                              hProgress: h / 100,
+                              vProgress: v / 100,
+                              child: CandidateCard(
+                                // CardSwiper dựng card theo vị trí — không
+                                // key thì State (chỉ số ảnh) bị tái dụng cho
+                                // ứng viên khác khi deck tiến lên.
+                                key: ValueKey(candidate.id),
+                                candidate: candidate,
+                                onOpenDetail: () => CandidateDetailSheet.show(
+                                  context,
+                                  candidate: candidate,
+                                  onPass: () => _controller
+                                      .swipe(CardSwiperDirection.left),
+                                  onLike: () => _controller
+                                      .swipe(CardSwiperDirection.right),
+                                ),
+                              ),
                             ),
-                          ),
-                        );
+                          KeoPromoItem(:final keo) => SwipeOverlays(
+                              hProgress: h / 100,
+                              vProgress: v / 100,
+                              likeLabel: 'XEM KÈO',
+                              showSuper: false,
+                              child: KeoPromoCard(
+                                  key: ValueKey('keo-promo-${keo.id}'),
+                                  keo: keo),
+                            ),
+                        };
                       },
                       onSwipe: (previousIndex, currentIndex, direction) {
-                        final dir = _directionToSwipe(direction);
-                        if (dir != null) {
-                          _lastSwiped = candidates[previousIndex];
-                          _handleSwipe(candidates[previousIndex], dir);
-                        }
                         _scheduleProgress(0, 0);
+                        final item = items[previousIndex];
+                        switch (item) {
+                          case CandidateItem(:final candidate):
+                            final dir = _directionToSwipe(direction);
+                            if (dir != null) {
+                              _lastSwiped = candidate;
+                              _handleSwipe(candidate, dir);
+                            }
+                          case KeoPromoItem(:final keo):
+                            // Promo: không quota, không record_swipe, không
+                            // rewind — null _lastSwiped để rewind sau promo
+                            // no-op thay vì undo nhầm swipe thật cũ hơn.
+                            _lastSwiped = null;
+                            if (direction == CardSwiperDirection.right) {
+                              context.push('/keo/${keo.id}');
+                            }
+                        }
                         return true;
                       },
                       onEnd: () {

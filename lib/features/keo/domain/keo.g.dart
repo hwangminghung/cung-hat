@@ -21,6 +21,7 @@ _Keo _$KeoFromJson(Map<String, dynamic> json) => _Keo(
   hostName: json['host_name'] as String?,
   status: json['status'] as String? ?? 'open',
   joinMode: json['join_mode'] as String? ?? 'approval',
+  isMine: json['is_mine'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$KeoToJson(_Keo instance) => <String, dynamic>{
@@ -36,4 +37,5 @@ Map<String, dynamic> _$KeoToJson(_Keo instance) => <String, dynamic>{
   'host_name': instance.hostName,
   'status': instance.status,
   'join_mode': instance.joinMode,
+  'is_mine': instance.isMine,
 };

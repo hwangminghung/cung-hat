@@ -17,6 +17,7 @@ abstract class Keo with _$Keo {
     @JsonKey(name: 'host_name') String? hostName,
     @Default('open') String status,
     @JsonKey(name: 'join_mode') @Default('approval') String joinMode,
+    @JsonKey(name: 'is_mine') @Default(false) bool isMine,
   }) = _Keo;
   factory Keo.fromJson(Map<String, dynamic> j) => _$KeoFromJson(j);
 }
