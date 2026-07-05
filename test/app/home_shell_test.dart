@@ -24,7 +24,8 @@ void main() {
         // with a fake that returns false so initState never touches Supabase and
         // never invalidates the empty-deck override.
         overrides: [
-          candidatesProvider.overrideWith((ref) => Future.value(<Candidate>[])),
+          candidatesProvider(null)
+              .overrideWith((ref) => Future.value(<Candidate>[])),
           locationServiceProvider.overrideWithValue(fakeLoc),
           openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
         ],

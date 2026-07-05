@@ -5,7 +5,9 @@ import '../features/admin/presentation/moderation_screen.dart';
 import '../features/auth/application/auth_providers.dart';
 import '../features/auth/presentation/phone_screen.dart';
 import '../features/billing/presentation/store_screen.dart';
+import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/discovery/presentation/likes_screen.dart';
+import '../features/discovery/presentation/theme_board_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/keo/presentation/create_keo_screen.dart';
 import '../features/keo/presentation/keo_chat_screen.dart';
@@ -68,6 +70,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),
       GoRoute(path: '/likes', builder: (_, _) => const LikesScreen()),
+      GoRoute(path: '/explore', builder: (_, _) => const ThemeBoardScreen()),
+      GoRoute(
+        path: '/explore/:genre',
+        // DoiDeckScreen tự dựng Scaffold riêng — không bọc thêm Scaffold ở đây.
+        builder: (_, s) => DoiDeckScreen(genre: s.pathParameters['genre']),
+      ),
       GoRoute(path: '/legal/privacy', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/privacy_vi.md', title: 'Chính sách bảo mật')),
       GoRoute(path: '/legal/tos', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/tos_vi.md', title: 'Điều khoản sử dụng')),
       GoRoute(path: '/plan/shared/:token', builder: (_, s) => SharedPlanScreen(token: s.pathParameters['token']!)),

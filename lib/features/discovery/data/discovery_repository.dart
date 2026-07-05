@@ -5,12 +5,26 @@ class DiscoveryRepository {
   DiscoveryRepository(this._client);
   final SupabaseClient _client;
 
-  Future<List<Candidate>> getCandidates({int limit = 20, int radiusKm = 50}) async {
-    final rows = await _client.rpc('get_discovery_candidates',
-        params: {'p_limit': limit, 'p_radius_km': radiusKm});
+  Future<List<Candidate>> getCandidates(
+      {int limit = 20, int radiusKm = 50, String? genre}) async {
+    final rows = await _client.rpc('get_discovery_candidates', params: {
+      'p_limit': limit,
+      'p_radius_km': radiusKm,
+      'p_genre': genre,
+    });
     return (rows as List)
         .map((e) => Candidate.fromJson(Map<String, dynamic>.from(e)))
         .toList();
+  }
+
+  /// Đếm người active-7-ngày quanh 50km theo từng genre (cho board Khám Phá).
+  Future<Map<String, int>> getThemeDeckCounts(List<String> genreIds) async {
+    final rows = await _client
+        .rpc('get_theme_deck_counts', params: {'p_genres': genreIds});
+    return {
+      for (final r in (rows as List))
+        (r as Map)['genre_id'] as String: (r['live_count'] as int?) ?? 0,
+    };
   }
 
   /// Đọc pref "tự mở rộng bán kính khi hết deck" đã lưu server-side.

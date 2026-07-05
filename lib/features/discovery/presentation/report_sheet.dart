@@ -54,7 +54,10 @@ class ReportSheet extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     try {
       await ref.read(discoveryRepositoryProvider).blockUser(targetId);
-      ref.invalidate(candidatesProvider);
+      // candidatesProvider giờ là family theo genre — invalidate deck chính.
+      // (Deck chủ đề vẫn tự lọc block server-side qua get_discovery_candidates
+      // dù cache client chưa refresh ngay.)
+      ref.invalidate(candidatesProvider(null));
       nav.pop();
       messenger.showSnackBar(const SnackBar(content: Text('Đã chặn.')));
     } catch (_) {

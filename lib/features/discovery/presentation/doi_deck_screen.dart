@@ -14,6 +14,7 @@ import '../application/discovery_providers.dart';
 import '../data/discovery_errors.dart';
 import '../domain/candidate.dart';
 import '../domain/deck_item.dart';
+import '../domain/music_themes.dart';
 import 'candidate_card.dart';
 import 'candidate_detail_sheet.dart';
 import 'deck_action_bar.dart';
@@ -22,7 +23,11 @@ import 'match_celebration.dart';
 import 'swipe_overlays.dart';
 
 class DoiDeckScreen extends ConsumerStatefulWidget {
-  const DoiDeckScreen({super.key});
+  const DoiDeckScreen({super.key, this.genre});
+
+  /// null = deck chính (Đôi hát, tab 0 home shell); khác null = deck chủ đề
+  /// Khám Phá theo gu nhạc (mục 9 Tinder-parity), lọc theo genreId này.
+  final String? genre;
 
   @override
   ConsumerState<DoiDeckScreen> createState() => _DoiDeckScreenState();
@@ -62,8 +67,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Deck chủ đề (genre != null) cũng cần vị trí — giữ capture cho cả 2 chế độ.
       final ok = await ref.read(locationServiceProvider).captureAndPush();
-      if (ok && mounted) ref.invalidate(candidatesProvider);
+      if (ok && mounted) ref.invalidate(candidatesProvider(widget.genre));
     });
   }
 
@@ -86,7 +92,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// rewind sẽ xoá swipe phía server mà không khôi phục được card nào.
   void _refreshDeck() {
     _lastSwiped = null;
-    ref.invalidate(candidatesProvider);
+    ref.invalidate(candidatesProvider(widget.genre));
   }
 
   /// Lưu toggle "tự mở rộng" server-side. Chỉ invalidate provider khi lưu OK;
@@ -106,7 +112,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final itemsAsync = ref.watch(deckItemsProvider);
+    final itemsAsync = ref.watch(deckItemsProvider(widget.genre));
     return Scaffold(
       body: SafeArea(
         child: itemsAsync.when(
@@ -166,17 +172,29 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                   ),
                   child: Row(
                     children: [
+                      if (widget.genre != null)
+                        IconButton(
+                          key: const Key('theme_deck_back'),
+                          onPressed: () => context.pop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                        ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Đôi hát',
+                              widget.genre == null
+                                  ? 'Đôi hát'
+                                  : (musicThemeById(widget.genre!)?.title ??
+                                      'Khám Phá'),
                               style: Theme.of(context).textTheme.headlineMedium,
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             Text(
-                              'Gợi ý hợp gu nhạc và khoảng cách an toàn.',
+                              widget.genre == null
+                                  ? 'Gợi ý hợp gu nhạc và khoảng cách an toàn.'
+                                  : (musicThemeById(widget.genre!)?.subtitle ??
+                                      'Gợi ý hợp gu nhạc và khoảng cách an toàn.'),
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: AppColors.textSecondary),
                             ),
@@ -194,8 +212,17 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                           ],
                         ),
                       ),
-                      _buildBoostButton(context),
-                      const SizedBox(width: AppSpacing.xs),
+                      if (widget.genre == null) ...[
+                        IconButton.filledTonal(
+                          key: const Key('explore_btn'),
+                          tooltip: 'Khám Phá theo gu nhạc',
+                          onPressed: () => context.push('/explore'),
+                          icon: const Icon(Icons.explore_rounded),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        _buildBoostButton(context),
+                        const SizedBox(width: AppSpacing.xs),
+                      ],
                       IconButton.filledTonal(
                         tooltip: 'Làm mới',
                         onPressed: _refreshDeck,

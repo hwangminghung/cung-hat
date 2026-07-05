@@ -24,7 +24,8 @@ Future<void> _pumpProfileTab(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        candidatesProvider.overrideWith((ref) => Future.value(<Candidate>[])),
+        candidatesProvider(null)
+            .overrideWith((ref) => Future.value(<Candidate>[])),
         locationServiceProvider.overrideWithValue(fakeLoc),
         openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
         myProfileProvider.overrideWith((ref) => Future.value(profile)),

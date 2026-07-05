@@ -40,7 +40,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             autoExpandProvider.overrideWith((ref) async => false),
@@ -84,7 +84,7 @@ void main() {
         overrides: [
           discoveryRepositoryProvider.overrideWithValue(repo),
           photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-          candidatesProvider.overrideWith(
+          candidatesProvider(null).overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'A'),
               Candidate(id: 'c2', displayName: 'B'),
@@ -135,7 +135,7 @@ void main() {
         overrides: [
           discoveryRepositoryProvider.overrideWithValue(repo),
           photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-          candidatesProvider.overrideWith(
+          candidatesProvider(null).overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'Quỳnh'),
               Candidate(id: 'c2', displayName: 'Bảo'),
@@ -185,7 +185,7 @@ void main() {
         overrides: [
           discoveryRepositoryProvider.overrideWithValue(repo),
           photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-          candidatesProvider.overrideWith(
+          candidatesProvider(null).overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'A'),
               Candidate(id: 'c2', displayName: 'B'),
@@ -225,7 +225,7 @@ void main() {
         overrides: [
           discoveryRepositoryProvider.overrideWithValue(repo),
           photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-          candidatesProvider.overrideWith(
+          candidatesProvider(null).overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'A'),
               Candidate(id: 'c2', displayName: 'B'),
@@ -277,7 +277,7 @@ void main() {
       ProviderScope(
         overrides: [
           photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-          candidatesProvider.overrideWith(
+          candidatesProvider(null).overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'A'),
               Candidate(id: 'c2', displayName: 'B'),
@@ -317,7 +317,7 @@ void main() {
         overrides: [
           discoveryRepositoryProvider.overrideWithValue(repo),
           photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-          candidatesProvider.overrideWith(
+          candidatesProvider(null).overrideWith(
             (ref) async => const [
               Candidate(id: 'c1', displayName: 'A'),
               Candidate(id: 'c2', displayName: 'B'),

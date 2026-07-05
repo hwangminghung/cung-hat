@@ -23,14 +23,19 @@ class _FakePhotoRepository extends Mock implements PhotoRepository {
 void main() {
   test('getCandidates truyền p_radius_km', () async {
     final client = MockSupabaseClient();
-    when(() => client.rpc('get_discovery_candidates',
-            params: {'p_limit': 20, 'p_radius_km': 100}))
-        .thenAnswer((_) => rpcOk(<dynamic>[]));
+    when(() => client.rpc('get_discovery_candidates', params: {
+          'p_limit': 20,
+          'p_radius_km': 100,
+          'p_genre': null,
+        })).thenAnswer((_) => rpcOk(<dynamic>[]));
     final repo = DiscoveryRepository(client);
     final res = await repo.getCandidates(radiusKm: 100);
     expect(res, isEmpty);
-    verify(() => client.rpc('get_discovery_candidates',
-        params: {'p_limit': 20, 'p_radius_km': 100})).called(1);
+    verify(() => client.rpc('get_discovery_candidates', params: {
+          'p_limit': 20,
+          'p_radius_km': 100,
+          'p_genre': null,
+        })).called(1);
   });
 
   test('get/setAutoExpand gọi đúng RPC', () async {
@@ -59,7 +64,7 @@ void main() {
         ProviderScope(
           overrides: [
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             autoExpandProvider.overrideWith((ref) async => false),
@@ -89,7 +94,7 @@ void main() {
         ProviderScope(
           overrides: [
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             autoExpandProvider.overrideWith((ref) async => false),
@@ -123,7 +128,7 @@ void main() {
           overrides: [
             discoveryRepositoryProvider.overrideWithValue(repo),
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             autoExpandProvider.overrideWith((ref) async => false),
@@ -155,7 +160,7 @@ void main() {
           overrides: [
             discoveryRepositoryProvider.overrideWithValue(repo),
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             autoExpandProvider.overrideWith((ref) async => false),
@@ -188,7 +193,7 @@ void main() {
         ProviderScope(
           overrides: [
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             autoExpandProvider.overrideWith((ref) async => false),
@@ -217,7 +222,7 @@ void main() {
         ProviderScope(
           overrides: [
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            candidatesProvider.overrideWith((ref) async => const [
+            candidatesProvider(null).overrideWith((ref) async => const [
                   Candidate(id: 'c1', displayName: 'A'),
                 ]),
             locationServiceProvider.overrideWithValue(locationService),
@@ -245,7 +250,7 @@ void main() {
         ProviderScope(
           overrides: [
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            candidatesProvider.overrideWith((ref) async => <Candidate>[]),
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             autoExpandProvider.overrideWith((ref) async => true),

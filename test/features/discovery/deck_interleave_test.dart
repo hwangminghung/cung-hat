@@ -80,7 +80,7 @@ void main() {
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
             // Promo TRƯỚC candidate: top card là promo, nhưng hasCandidates
             // vẫn true (có 1 CandidateItem) nên deck không rơi vào empty-state.
-            deckItemsProvider.overrideWith((ref) async => [
+            deckItemsProvider(null).overrideWith((ref) async => [
                   KeoPromoItem(k('b')),
                   CandidateItem(c('1')),
                 ]),
@@ -113,7 +113,7 @@ void main() {
           overrides: [
             discoveryRepositoryProvider.overrideWithValue(repo),
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            deckItemsProvider.overrideWith((ref) async => [
+            deckItemsProvider(null).overrideWith((ref) async => [
                   KeoPromoItem(k('b')),
                   CandidateItem(c('1')),
                 ]),

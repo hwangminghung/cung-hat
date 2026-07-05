@@ -6,6 +6,7 @@ import '../../keo/domain/keo.dart';
 import '../data/discovery_repository.dart';
 import '../domain/candidate.dart';
 import '../domain/deck_item.dart';
+import '../domain/music_themes.dart';
 import 'location_service.dart';
 
 final discoveryRepositoryProvider =
@@ -20,22 +21,36 @@ final deckRadiusProvider = StateProvider<int>((ref) => 50);
 final autoExpandProvider = FutureProvider<bool>(
     (ref) => ref.watch(discoveryRepositoryProvider).getAutoExpand());
 
-final candidatesProvider = FutureProvider<List<Candidate>>((ref) => ref
-    .watch(discoveryRepositoryProvider)
-    .getCandidates(radiusKm: ref.watch(deckRadiusProvider)));
+/// [genre] null = deck chính (không lọc); khác null = deck chủ đề Khám Phá
+/// (mục 9 Tinder-parity), lọc ứng viên theo đúng genre đó phía server.
+final candidatesProvider =
+    FutureProvider.family<List<Candidate>, String?>((ref, genre) => ref
+        .watch(discoveryRepositoryProvider)
+        .getCandidates(radiusKm: ref.watch(deckRadiusProvider), genre: genre));
 final whoLikedMeProvider = FutureProvider<List<Candidate>>(
     (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe());
 
 /// Deck Đôi trộn ứng viên thật với thẻ quảng bá Kèo (mục 13 Tinder-parity).
 /// Kèo lỗi/chưa tải không được chặn deck chính — nuốt lỗi, coi như rỗng.
-final deckItemsProvider = FutureProvider<List<DeckItem>>((ref) async {
-  final candidates = await ref.watch(candidatesProvider.future);
+/// [genre] theo family của candidatesProvider ở trên.
+final deckItemsProvider =
+    FutureProvider.family<List<DeckItem>, String?>((ref, genre) async {
+  final candidates = await ref.watch(candidatesProvider(genre).future);
   List<Keo> keos = const [];
-  try {
-    keos = await ref.watch(openKeosProvider.future);
-  } catch (_) {}
+  if (genre == null) {
+    // Promo Kèo chỉ trộn ở deck chính — deck chủ đề giữ thuần ứng viên.
+    try {
+      keos = await ref.watch(openKeosProvider.future);
+    } catch (_) {}
+  }
   return interleaveDeck(candidates: candidates, keos: keos);
 });
+
+/// Số người "live" (active 7 ngày, quanh 50km) mỗi chủ đề nhạc — cho board
+/// Khám Phá (ThemeBoardScreen).
+final themeDeckCountsProvider = FutureProvider<Map<String, int>>((ref) => ref
+    .watch(discoveryRepositoryProvider)
+    .getThemeDeckCounts([for (final t in musicThemes) t.genreId]));
 
 /// Thời điểm hết hạn của lượt Boost đang chạy; null khi không boost.
 final activeBoostProvider = StateProvider<DateTime?>((ref) => null);
