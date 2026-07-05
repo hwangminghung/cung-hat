@@ -31,7 +31,7 @@ void main() {
     verify(() => repo.requestJoin('k1')).called(1);
   });
 
-  testWidgets('free_join_limit error shows the upgrade dialog', (tester) async {
+  testWidgets('free_join_limit error shows the upgrade sheet', (tester) async {
     final repo = _MockRepo();
     when(() => repo.roster('k1')).thenAnswer((_) async => const []);
     when(() => repo.requestJoin('k1')).thenThrow(
@@ -46,10 +46,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('request_join_btn')));
     await tester.pumpAndSettle();
-    expect(
-        find.text(
-            'Bạn đang tham gia 1 kèo. Rời kèo cũ hoặc nâng cấp Pro để tham gia thêm.'),
-        findsOneWidget);
+    expect(find.text('Tham gia nhiều kèo cùng lúc'), findsOneWidget);
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
   });
 }

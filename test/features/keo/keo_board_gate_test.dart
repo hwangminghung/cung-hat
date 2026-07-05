@@ -113,7 +113,7 @@ void main() {
     await tester.tap(find.text('Tạo kèo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Tạo kèo là tính năng Pro'), findsOneWidget);
+    expect(find.text('Tự tạo kèo của riêng bạn'), findsOneWidget);
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
   });
 
@@ -143,7 +143,7 @@ void main() {
     await tester.tap(find.text('Tạo kèo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Tạo kèo là tính năng Pro'), findsNothing);
+    expect(find.text('Tự tạo kèo của riêng bạn'), findsNothing);
     expect(find.text('create-stub'), findsOneWidget);
   });
 

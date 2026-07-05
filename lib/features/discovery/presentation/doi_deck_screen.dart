@@ -247,10 +247,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   Future<void> _handleBoost() async {
     final isPro = ref.read(isProProvider);
     if (!isPro) {
-      ProUpsellSheet.show(context,
-          title: 'Boost hồ sơ của bạn',
-          subtitle:
-              'Pro được 1 lần Boost 30 phút mỗi ngày — lên đầu deck quanh đây.');
+      ProUpsellSheet.show(context, variant: ProUpsellVariant.boost);
       return;
     }
     if (_boostInFlight) return;
@@ -282,9 +279,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   Future<void> _handleRewind() async {
     final isPro = ref.read(isProProvider);
     if (!isPro) {
-      ProUpsellSheet.show(context,
-          title: 'Rút lại lượt vuốt?',
-          subtitle: 'Thành viên Pro có thể rút lại lượt vuốt gần nhất.');
+      ProUpsellSheet.show(context, variant: ProUpsellVariant.rewind);
       return;
     }
     if (_lastSwiped == null) return;
@@ -359,12 +354,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         case DiscoverySwipeError.likeLimit:
           if (!_upsellShowing) {
             _upsellShowing = true;
-            ProUpsellSheet.show(
-              context,
-              title: 'Hết lượt thích hôm nay',
-              subtitle:
-                  'Pro thích không giới hạn và có 5 Siêu thích mỗi ngày.',
-            ).whenComplete(() => _upsellShowing = false);
+            ProUpsellSheet.show(context, variant: ProUpsellVariant.likeQuota)
+                .whenComplete(() => _upsellShowing = false);
           }
           // Server raise like_limit/super_limit TRƯỚC khi ghi swipe, nên ta
           // BIẾT lượt vuốt chưa được lưu — hoàn card về deck để client khớp
@@ -378,8 +369,11 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
             _lastSwiped = null;
           }
         case DiscoverySwipeError.superLimit:
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(err.message)));
+          if (!_upsellShowing) {
+            _upsellShowing = true;
+            ProUpsellSheet.show(context, variant: ProUpsellVariant.superQuota)
+                .whenComplete(() => _upsellShowing = false);
+          }
           if (mounted) {
             _controller.undo();
             _lastSwiped = null;

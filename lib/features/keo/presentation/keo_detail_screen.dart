@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/keo_providers.dart';
@@ -148,25 +149,7 @@ class KeoDetailScreen extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       if (keoErrorCode(e) == 'free_join_limit') {
-        showDialog<void>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            content: Text(keoErrorMessage(e)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Để sau'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  Navigator.pop(dialogContext);
-                  context.push('/store');
-                },
-                child: const Text('Nâng cấp Pro'),
-              ),
-            ],
-          ),
-        );
+        ProUpsellSheet.show(context, variant: ProUpsellVariant.keoJoinLimit);
       } else {
         _snack(context, keoErrorMessage(e));
       }

@@ -101,12 +101,7 @@ class KeoBoardScreen extends ConsumerWidget {
   }
 
   void _showProSheet(BuildContext context) {
-    ProUpsellSheet.show(
-      context,
-      title: 'Tạo kèo là tính năng Pro',
-      subtitle:
-          'Nâng cấp Pro để tự tạo kèo, mở giới hạn tham gia và dùng bộ lọc nâng cao.',
-    );
+    ProUpsellSheet.show(context, variant: ProUpsellVariant.keoCreate);
   }
 
   Widget _boardHeader(BuildContext context) => Padding(

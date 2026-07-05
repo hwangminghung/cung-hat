@@ -10,6 +10,7 @@ import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/keo/presentation/keo_board_screen.dart';
 import '../features/photos/presentation/photo_manager_sheet.dart';
 import '../features/profile/application/profile_providers.dart';
+import '../shared/widgets/pro_upsell_sheet.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -140,7 +141,11 @@ class _ProfileTab extends ConsumerWidget {
             subtitle: 'Mở danh sách người đã thả tim',
             onTap: () {
               final unlocked = ref.read(hasEntitlementProvider('see_likes'));
-              context.push(unlocked ? '/likes' : '/store');
+              if (unlocked) {
+                context.push('/likes');
+              } else {
+                ProUpsellSheet.show(context, variant: ProUpsellVariant.seeLikes);
+              }
             },
           ),
           _ProfileTile(
