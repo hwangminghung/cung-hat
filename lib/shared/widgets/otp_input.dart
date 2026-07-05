@@ -41,7 +41,7 @@ class _OtpInputState extends State<OtpInput> {
             : widget.length * 46.0 + (widget.length - 1) * gap;
         final boxWidth =
             ((maxWidth - (widget.length - 1) * gap) / widget.length)
-                .clamp(40.0, 46.0)
+                .clamp(24.0, 46.0)
                 .toDouble();
 
         return Stack(
