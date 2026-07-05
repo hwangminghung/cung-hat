@@ -6,16 +6,19 @@ class MatchSummary {
     required this.otherId,
     required this.otherName,
     required this.unread,
+    this.lastSenderId,
   });
   final String matchId;
   final String otherId;
   final String otherName;
   final int unread;
+  final String? lastSenderId;
   factory MatchSummary.fromJson(Map<String, dynamic> j) => MatchSummary(
         matchId: j['match_id'] as String,
         otherId: j['other_id'] as String,
         otherName: (j['other_name'] ?? '') as String,
         unread: (j['unread'] ?? 0) as int,
+        lastSenderId: j['last_sender_id'] as String?,
       );
 }
 
