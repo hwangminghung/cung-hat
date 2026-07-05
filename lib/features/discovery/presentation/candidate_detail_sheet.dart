@@ -3,6 +3,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../photos/presentation/photo_carousel.dart';
+import '../../profile/domain/karaoke_prompts.dart';
 import '../domain/candidate.dart';
 import 'report_sheet.dart';
 
@@ -151,6 +152,29 @@ class CandidateDetailSheet extends StatelessWidget {
                 leading: const Icon(Icons.music_note_rounded,
                     color: AppColors.primary),
                 title: Text(song),
+              ),
+          for (final p in candidate.prompts)
+            if (karaokePromptQuestion(p['prompt_id'] as String? ?? '') != null)
+              Container(
+                margin: const EdgeInsets.only(top: AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryTint,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      karaokePromptQuestion(p['prompt_id'] as String)!,
+                      style: Theme.of(context).textTheme.labelMedium
+                          ?.copyWith(color: AppColors.primaryDark),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text('${p['answer']}',
+                        style: Theme.of(context).textTheme.titleMedium),
+                  ],
+                ),
               ),
           const SizedBox(height: AppSpacing.xl),
           Row(

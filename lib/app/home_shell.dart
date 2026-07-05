@@ -10,6 +10,7 @@ import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/keo/presentation/keo_board_screen.dart';
 import '../features/photos/presentation/photo_manager_sheet.dart';
 import '../features/profile/application/profile_providers.dart';
+import '../features/profile/presentation/prompt_editor_sheet.dart';
 import '../shared/widgets/pro_upsell_sheet.dart';
 
 class HomeShell extends StatefulWidget {
@@ -169,6 +170,23 @@ class _ProfileTab extends ConsumerWidget {
                 ),
               ),
               builder: (_) => const PhotoManagerSheet(),
+            ),
+          ),
+          _ProfileTile(
+            icon: Icons.chat_bubble_outline_rounded,
+            title: 'Thẻ hỏi-đáp',
+            subtitle: 'Chọn tối đa 3 câu để hồ sơ có chuyện mà bắt',
+            onTap: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              showDragHandle: false,
+              backgroundColor: AppColors.surface,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppSpacing.radiusSheet),
+                ),
+              ),
+              builder: (_) => const PromptEditorSheet(),
             ),
           ),
           _ProfileTile(

@@ -23,4 +23,8 @@ class ProfileRepository {
     final map = res is List ? res.first : res;
     return Profile.fromJson(Map<String, dynamic>.from(map as Map));
   }
+
+  Future<void> setMyPrompts(List<Map<String, String>> prompts) async {
+    await _client.rpc('set_my_prompts', params: {'p_prompts': prompts});
+  }
 }

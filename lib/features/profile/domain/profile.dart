@@ -13,6 +13,7 @@ abstract class Profile with _$Profile {
     String? bio,
     @Default('vi') String language,
     @JsonKey(name: 'photo_paths') @Default(<String>[]) List<String> photoPaths,
+    @Default(<Map<String, dynamic>>[]) List<Map<String, dynamic>> prompts,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);

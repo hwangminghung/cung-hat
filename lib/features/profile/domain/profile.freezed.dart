@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Profile {
 
- String get id;@JsonKey(name: 'display_name') String? get displayName;@JsonKey(name: 'full_name') String? get fullName; String? get dob;@JsonKey(name: 'age_verified') bool get ageVerified; String? get bio; String get language;@JsonKey(name: 'photo_paths') List<String> get photoPaths;
+ String get id;@JsonKey(name: 'display_name') String? get displayName;@JsonKey(name: 'full_name') String? get fullName; String? get dob;@JsonKey(name: 'age_verified') bool get ageVerified; String? get bio; String get language;@JsonKey(name: 'photo_paths') List<String> get photoPaths; List<Map<String, dynamic>> get prompts;
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProfileCopyWith<Profile> get copyWith => _$ProfileCopyWithImpl<Profile>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.ageVerified, ageVerified) || other.ageVerified == ageVerified)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.language, language) || other.language == language)&&const DeepCollectionEquality().equals(other.photoPaths, photoPaths));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.ageVerified, ageVerified) || other.ageVerified == ageVerified)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.language, language) || other.language == language)&&const DeepCollectionEquality().equals(other.photoPaths, photoPaths)&&const DeepCollectionEquality().equals(other.prompts, prompts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,fullName,dob,ageVerified,bio,language,const DeepCollectionEquality().hash(photoPaths));
+int get hashCode => Object.hash(runtimeType,id,displayName,fullName,dob,ageVerified,bio,language,const DeepCollectionEquality().hash(photoPaths),const DeepCollectionEquality().hash(prompts));
 
 @override
 String toString() {
-  return 'Profile(id: $id, displayName: $displayName, fullName: $fullName, dob: $dob, ageVerified: $ageVerified, bio: $bio, language: $language, photoPaths: $photoPaths)';
+  return 'Profile(id: $id, displayName: $displayName, fullName: $fullName, dob: $dob, ageVerified: $ageVerified, bio: $bio, language: $language, photoPaths: $photoPaths, prompts: $prompts)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProfileCopyWith<$Res>  {
   factory $ProfileCopyWith(Profile value, $Res Function(Profile) _then) = _$ProfileCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'full_name') String? fullName, String? dob,@JsonKey(name: 'age_verified') bool ageVerified, String? bio, String language,@JsonKey(name: 'photo_paths') List<String> photoPaths
+ String id,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'full_name') String? fullName, String? dob,@JsonKey(name: 'age_verified') bool ageVerified, String? bio, String language,@JsonKey(name: 'photo_paths') List<String> photoPaths, List<Map<String, dynamic>> prompts
 });
 
 
@@ -65,7 +65,7 @@ class _$ProfileCopyWithImpl<$Res>
 
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? fullName = freezed,Object? dob = freezed,Object? ageVerified = null,Object? bio = freezed,Object? language = null,Object? photoPaths = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? fullName = freezed,Object? dob = freezed,Object? ageVerified = null,Object? bio = freezed,Object? language = null,Object? photoPaths = null,Object? prompts = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -75,7 +75,8 @@ as String?,ageVerified: null == ageVerified ? _self.ageVerified : ageVerified //
 as bool,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
 as String?,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,photoPaths: null == photoPaths ? _self.photoPaths : photoPaths // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,prompts: null == prompts ? _self.prompts : prompts // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,
   ));
 }
 
@@ -160,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'full_name')  String? fullName,  String? dob, @JsonKey(name: 'age_verified')  bool ageVerified,  String? bio,  String language, @JsonKey(name: 'photo_paths')  List<String> photoPaths)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'full_name')  String? fullName,  String? dob, @JsonKey(name: 'age_verified')  bool ageVerified,  String? bio,  String language, @JsonKey(name: 'photo_paths')  List<String> photoPaths,  List<Map<String, dynamic>> prompts)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Profile() when $default != null:
-return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVerified,_that.bio,_that.language,_that.photoPaths);case _:
+return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVerified,_that.bio,_that.language,_that.photoPaths,_that.prompts);case _:
   return orElse();
 
 }
@@ -181,10 +182,10 @@ return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVer
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'full_name')  String? fullName,  String? dob, @JsonKey(name: 'age_verified')  bool ageVerified,  String? bio,  String language, @JsonKey(name: 'photo_paths')  List<String> photoPaths)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'full_name')  String? fullName,  String? dob, @JsonKey(name: 'age_verified')  bool ageVerified,  String? bio,  String language, @JsonKey(name: 'photo_paths')  List<String> photoPaths,  List<Map<String, dynamic>> prompts)  $default,) {final _that = this;
 switch (_that) {
 case _Profile():
-return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVerified,_that.bio,_that.language,_that.photoPaths);case _:
+return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVerified,_that.bio,_that.language,_that.photoPaths,_that.prompts);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +202,10 @@ return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVer
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'full_name')  String? fullName,  String? dob, @JsonKey(name: 'age_verified')  bool ageVerified,  String? bio,  String language, @JsonKey(name: 'photo_paths')  List<String> photoPaths)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'full_name')  String? fullName,  String? dob, @JsonKey(name: 'age_verified')  bool ageVerified,  String? bio,  String language, @JsonKey(name: 'photo_paths')  List<String> photoPaths,  List<Map<String, dynamic>> prompts)?  $default,) {final _that = this;
 switch (_that) {
 case _Profile() when $default != null:
-return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVerified,_that.bio,_that.language,_that.photoPaths);case _:
+return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVerified,_that.bio,_that.language,_that.photoPaths,_that.prompts);case _:
   return null;
 
 }
@@ -216,7 +217,7 @@ return $default(_that.id,_that.displayName,_that.fullName,_that.dob,_that.ageVer
 @JsonSerializable()
 
 class _Profile implements Profile {
-  const _Profile({required this.id, @JsonKey(name: 'display_name') this.displayName, @JsonKey(name: 'full_name') this.fullName, this.dob, @JsonKey(name: 'age_verified') this.ageVerified = false, this.bio, this.language = 'vi', @JsonKey(name: 'photo_paths') final  List<String> photoPaths = const <String>[]}): _photoPaths = photoPaths;
+  const _Profile({required this.id, @JsonKey(name: 'display_name') this.displayName, @JsonKey(name: 'full_name') this.fullName, this.dob, @JsonKey(name: 'age_verified') this.ageVerified = false, this.bio, this.language = 'vi', @JsonKey(name: 'photo_paths') final  List<String> photoPaths = const <String>[], final  List<Map<String, dynamic>> prompts = const <Map<String, dynamic>>[]}): _photoPaths = photoPaths,_prompts = prompts;
   factory _Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
 
 @override final  String id;
@@ -233,6 +234,13 @@ class _Profile implements Profile {
   return EqualUnmodifiableListView(_photoPaths);
 }
 
+ final  List<Map<String, dynamic>> _prompts;
+@override@JsonKey() List<Map<String, dynamic>> get prompts {
+  if (_prompts is EqualUnmodifiableListView) return _prompts;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_prompts);
+}
+
 
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
@@ -247,16 +255,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.ageVerified, ageVerified) || other.ageVerified == ageVerified)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.language, language) || other.language == language)&&const DeepCollectionEquality().equals(other._photoPaths, _photoPaths));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Profile&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.ageVerified, ageVerified) || other.ageVerified == ageVerified)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.language, language) || other.language == language)&&const DeepCollectionEquality().equals(other._photoPaths, _photoPaths)&&const DeepCollectionEquality().equals(other._prompts, _prompts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,fullName,dob,ageVerified,bio,language,const DeepCollectionEquality().hash(_photoPaths));
+int get hashCode => Object.hash(runtimeType,id,displayName,fullName,dob,ageVerified,bio,language,const DeepCollectionEquality().hash(_photoPaths),const DeepCollectionEquality().hash(_prompts));
 
 @override
 String toString() {
-  return 'Profile(id: $id, displayName: $displayName, fullName: $fullName, dob: $dob, ageVerified: $ageVerified, bio: $bio, language: $language, photoPaths: $photoPaths)';
+  return 'Profile(id: $id, displayName: $displayName, fullName: $fullName, dob: $dob, ageVerified: $ageVerified, bio: $bio, language: $language, photoPaths: $photoPaths, prompts: $prompts)';
 }
 
 
@@ -267,7 +275,7 @@ abstract mixin class _$ProfileCopyWith<$Res> implements $ProfileCopyWith<$Res> {
   factory _$ProfileCopyWith(_Profile value, $Res Function(_Profile) _then) = __$ProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'full_name') String? fullName, String? dob,@JsonKey(name: 'age_verified') bool ageVerified, String? bio, String language,@JsonKey(name: 'photo_paths') List<String> photoPaths
+ String id,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'full_name') String? fullName, String? dob,@JsonKey(name: 'age_verified') bool ageVerified, String? bio, String language,@JsonKey(name: 'photo_paths') List<String> photoPaths, List<Map<String, dynamic>> prompts
 });
 
 
@@ -284,7 +292,7 @@ class __$ProfileCopyWithImpl<$Res>
 
 /// Create a copy of Profile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? fullName = freezed,Object? dob = freezed,Object? ageVerified = null,Object? bio = freezed,Object? language = null,Object? photoPaths = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? fullName = freezed,Object? dob = freezed,Object? ageVerified = null,Object? bio = freezed,Object? language = null,Object? photoPaths = null,Object? prompts = null,}) {
   return _then(_Profile(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -294,7 +302,8 @@ as String?,ageVerified: null == ageVerified ? _self.ageVerified : ageVerified //
 as bool,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
 as String?,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,photoPaths: null == photoPaths ? _self._photoPaths : photoPaths // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,prompts: null == prompts ? _self._prompts : prompts // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,
   ));
 }
 

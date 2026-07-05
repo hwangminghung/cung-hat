@@ -72,4 +72,40 @@ void main() {
     expect(find.text('Chưa có bài tủ chung — cơ hội khám phá!'),
         findsOneWidget);
   });
+
+  testWidgets(
+      'thẻ hỏi-đáp: hiện câu hỏi + câu trả lời cho prompt_id đã biết, bỏ qua prompt_id lạ',
+      (tester) async {
+    const c = Candidate(
+      id: 'u3',
+      displayName: 'Mai',
+      age: 24,
+      verified: false,
+      prompts: [
+        {'prompt_id': 'p1', 'answer': 'Em cua ngay hom qua'},
+        {'prompt_id': 'unknown_id', 'answer': 'khong hien'},
+      ],
+    );
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('u3').overrideWith((ref) async => const <String>[]),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CandidateDetailSheet(
+              candidate: c,
+              onPass: () {},
+              onLike: () {},
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bài mình luôn giành mic là…'), findsOneWidget);
+    expect(find.text('Em cua ngay hom qua'), findsOneWidget);
+    expect(find.text('khong hien'), findsNothing);
+  });
 }
