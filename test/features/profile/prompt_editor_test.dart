@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -208,6 +210,77 @@ void main() {
           find.byKey(const Key('answer_field_p1')),
         );
         expect(field.controller!.text, '');
+      },
+    );
+
+    testWidgets(
+      'race: rows and Save are inert while the profile is loading; after it '
+      'resolves the one-time seed never clobbers later edits',
+      (tester) async {
+        final repo = _MockProfileRepository();
+        // Completer-backed override: the profile future resolves only when
+        // this test says so, keeping the sheet in its loading window.
+        final completer = Completer<Profile?>();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              profileRepositoryProvider.overrideWithValue(repo),
+              myProfileProvider.overrideWith((ref) => completer.future),
+            ],
+            child: const MaterialApp(
+              home: Scaffold(body: PromptEditorSheet()),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        // BEFORE the profile resolves: tapping a row must be a no-op (no
+        // field opens — otherwise text typed now would collide with the
+        // first seed) and Save must be disabled (saving now would ship the
+        // unseeded empty set and wipe the server rows).
+        await tester.tap(find.byKey(const Key('prompt_row_p1')));
+        await tester.pump();
+        expect(find.byKey(const Key('answer_field_p1')), findsNothing);
+        expect(
+          tester
+              .widget<FilledButton>(find.byKey(const Key('save_prompts_btn')))
+              .onPressed,
+          isNull,
+        );
+
+        // Profile resolves with an existing p1 answer → seeded exactly once.
+        completer.complete(
+          const Profile(
+            id: 'me',
+            ageVerified: true,
+            prompts: [
+              {'prompt_id': 'p1', 'answer': 'Em cua ngay hom qua'},
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Em cua ngay hom qua'), findsOneWidget);
+        expect(
+          tester
+              .widget<FilledButton>(find.byKey(const Key('save_prompts_btn')))
+              .onPressed,
+          isNotNull,
+        );
+
+        // AFTER seeding: edit p1, then trigger more rebuilds (collapse) —
+        // the seed must never run again and overwrite the edit.
+        await tester.tap(find.text('Bài mình luôn giành mic là…'));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('answer_field_p1')),
+          'Bai moi',
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Bài mình luôn giành mic là…')); // collapse
+        await tester.pumpAndSettle();
+
+        expect(find.text('Bai moi'), findsOneWidget);
+        expect(find.text('Em cua ngay hom qua'), findsNothing);
       },
     );
   });

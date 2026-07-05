@@ -8,10 +8,13 @@ import '../domain/karaoke_prompts.dart';
 import '../domain/profile.dart';
 
 /// Bottom sheet to manage the current user's karaoke Q&A prompt cards
-/// (max [maxPrompts]). Pattern-matched on [PhotoManagerSheet]: reads the
-/// existing selection from [myProfileProvider], edits locally, saves via
-/// [ProfileRepository.setMyPrompts] on an explicit Save tap, then invalidates
-/// [myProfileProvider] and pops.
+/// (max [maxPrompts]). Pattern-matched on [PhotoManagerSheet]: seeds the
+/// existing selection from [myProfileProvider] exactly once, on the first
+/// build after the provider resolves — until then the rows and the Save
+/// button are inert (dimmed, taps no-op), so early input can never race the
+/// seed. After that the user edits locally and saves via
+/// [ProfileRepository.setMyPrompts] on an explicit Save tap, which
+/// invalidates [myProfileProvider] and pops.
 class PromptEditorSheet extends ConsumerStatefulWidget {
   const PromptEditorSheet({super.key});
 
@@ -31,19 +34,26 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
 
   bool _saving = false;
 
-  /// Whether [_answers] has been seeded from [myProfileProvider] yet. Seeding
-  /// must happen on first build, not [initState]: `myProfileProvider` is a
-  /// [FutureProvider] and is very likely still loading (value == null) the
-  /// instant this widget is created, so reading it once in `initState` would
-  /// almost always seed an empty map. Seeding in `build` — guarded so it only
-  /// runs once — lets it pick up the resolved value on whichever rebuild it
-  /// actually lands on, without clobbering answers the user has since edited.
+  /// Whether [_answers] has been seeded from [myProfileProvider]. The trigger
+  /// is the provider RESOLVING (first build where it is no longer loading —
+  /// data, empty prompts or error alike), never a user interaction. Seeding
+  /// can't run in [initState]: the [FutureProvider] is almost always still
+  /// loading at that instant. And while it IS loading, every prompt row and
+  /// the Save button are inert (no-op guards + dimmed): otherwise a rebuild
+  /// caused by early typing would run the first seed mid-edit and overwrite
+  /// colliding [_answers] entries, and an early Save would ship the unseeded
+  /// (empty) set and wipe the server rows. After the one-time seed the user
+  /// owns [_answers]; later rebuilds never re-seed.
   bool _seeded = false;
 
-  void _seedFrom(Profile? profile) {
-    if (_seeded || profile == null) return;
+  void _seedFrom(AsyncValue<Profile?> profile) {
+    if (_seeded || profile.isLoading) return;
+    // Resolved: data (possibly a null profile / empty prompts) or error.
+    // On error there is nothing to seed — unlock editing rather than leaving
+    // the sheet permanently dead; saving then simply replaces the set.
     _seeded = true;
-    for (final p in profile.prompts) {
+    final prompts = profile.value?.prompts ?? const <Map<String, dynamic>>[];
+    for (final p in prompts) {
       final id = p['prompt_id'] as String?;
       final answer = p['answer'] as String?;
       if (id != null && answer != null) _answers[id] = answer;
@@ -51,6 +61,7 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
   }
 
   void _toggleExpand(String id) {
+    if (!_seeded) return; // profile still loading — rows are inert
     if (_expandedId == id) {
       setState(() => _expandedId = null);
       return;
@@ -65,6 +76,7 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
   }
 
   void _setAnswer(String id, String value) {
+    if (!_seeded) return; // unreachable while inert; defensive
     setState(() {
       if (value.trim().isEmpty) {
         _answers.remove(id);
@@ -75,6 +87,7 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
   }
 
   void _clear(String id) {
+    if (!_seeded) return; // unreachable while inert; defensive
     setState(() {
       _answers.remove(id);
       if (_expandedId == id) _expandedId = null;
@@ -105,7 +118,7 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
 
   @override
   Widget build(BuildContext context) {
-    _seedFrom(ref.watch(myProfileProvider).value);
+    _seedFrom(ref.watch(myProfileProvider));
     return SafeArea(
       child: SingleChildScrollView(
         // 6 prompt rows + header + Save button routinely exceed the modal
@@ -147,23 +160,36 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              for (final p in karaokePrompts)
-                _PromptRow(
-                  key: Key('prompt_row_${p.id}'),
-                  prompt: p,
-                  answer: _answers[p.id],
-                  expanded: _expandedId == p.id,
-                  onTap: () => _toggleExpand(p.id),
-                  onChanged: (v) => _setAnswer(p.id, v),
-                  onClear: () => _clear(p.id),
+              // Dimmed while the profile hasn't resolved — paired with the
+              // no-op guards in _toggleExpand/_setAnswer/_clear so the rows
+              // are visibly and functionally inert during the load window.
+              Opacity(
+                opacity: _seeded ? 1.0 : 0.5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final p in karaokePrompts)
+                      _PromptRow(
+                        key: Key('prompt_row_${p.id}'),
+                        prompt: p,
+                        answer: _answers[p.id],
+                        expanded: _expandedId == p.id,
+                        onTap: () => _toggleExpand(p.id),
+                        onChanged: (v) => _setAnswer(p.id, v),
+                        onClear: () => _clear(p.id),
+                      ),
+                  ],
                 ),
+              ),
               const SizedBox(height: AppSpacing.lg),
               SizedBox(
                 width: double.infinity,
                 height: AppSpacing.buttonHeight,
                 child: FilledButton(
                   key: const Key('save_prompts_btn'),
-                  onPressed: _saving ? null : _save,
+                  // Also gated on _seeded: saving before the seed would send
+                  // the empty local set and delete the user's server prompts.
+                  onPressed: (_saving || !_seeded) ? null : _save,
                   child: _saving
                       ? const SizedBox(
                           width: 20,
