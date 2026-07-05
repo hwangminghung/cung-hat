@@ -43,6 +43,19 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// lượt boost thứ hai (hoặc raise boost_active) một cách vô ích.
   bool _boostInFlight = false;
 
+  /// Tiến độ kéo hiện tại cho action bar. Cập nhật post-frame vì cardBuilder
+  /// chạy TRONG build — notify ngay sẽ setState-during-build.
+  final ValueNotifier<(double, double)> _dragProgress =
+      ValueNotifier((0.0, 0.0));
+
+  void _scheduleProgress(double h, double v) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _dragProgress.value != (h, v)) {
+        _dragProgress.value = (h, v);
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +68,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _dragProgress.dispose();
     super.dispose();
   }
 
@@ -205,30 +219,35 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       numberOfCardsDisplayed: candidates.length.clamp(1, 2),
                       maxAngle: 25,
                       threshold: 60,
-                      cardBuilder: (context, index, h, v) => GestureDetector(
-                        onTap: () => CandidateDetailSheet.show(
-                          context,
-                          candidate: candidates[index],
-                          onPass: () =>
-                              _controller.swipe(CardSwiperDirection.left),
-                          onLike: () =>
-                              _controller.swipe(CardSwiperDirection.right),
-                        ),
-                        child: SwipeOverlays(
+                      cardBuilder: (context, index, h, v) {
+                        _scheduleProgress(h / 100, v / 100);
+                        return SwipeOverlays(
                           hProgress: h / 100,
                           vProgress: v / 100,
-                          child: CandidateCard(candidate: candidates[index]),
-                        ),
-                      ),
+                          child: CandidateCard(
+                            candidate: candidates[index],
+                            onOpenDetail: () => CandidateDetailSheet.show(
+                              context,
+                              candidate: candidates[index],
+                              onPass: () =>
+                                  _controller.swipe(CardSwiperDirection.left),
+                              onLike: () =>
+                                  _controller.swipe(CardSwiperDirection.right),
+                            ),
+                          ),
+                        );
+                      },
                       onSwipe: (previousIndex, currentIndex, direction) {
                         final dir = _directionToSwipe(direction);
                         if (dir != null) {
                           _lastSwiped = candidates[previousIndex];
                           _handleSwipe(candidates[previousIndex], dir);
                         }
+                        _scheduleProgress(0, 0);
                         return true;
                       },
                       onEnd: () {
+                        _scheduleProgress(0, 0);
                         if (mounted) _refreshDeck();
                       },
                     ),
@@ -241,13 +260,18 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                     AppSpacing.lg,
                     AppSpacing.lg,
                   ),
-                  child: DeckActionBar(
-                    rewindEnabled: ref.watch(isProProvider),
-                    onRewind: _handleRewind,
-                    onPass: () => _controller.swipe(CardSwiperDirection.left),
-                    onSuperLike: () =>
-                        _controller.swipe(CardSwiperDirection.top),
-                    onLike: () => _controller.swipe(CardSwiperDirection.right),
+                  child: ValueListenableBuilder<(double, double)>(
+                    valueListenable: _dragProgress,
+                    builder: (context, prog, _) => DeckActionBar(
+                      rewindEnabled: ref.watch(isProProvider),
+                      hProgress: prog.$1,
+                      vProgress: prog.$2,
+                      onRewind: _handleRewind,
+                      onPass: () => _controller.swipe(CardSwiperDirection.left),
+                      onSuperLike: () =>
+                          _controller.swipe(CardSwiperDirection.top),
+                      onLike: () => _controller.swipe(CardSwiperDirection.right),
+                    ),
                   ),
                 ),
               ],

@@ -105,7 +105,7 @@ set local role authenticated;
 with ranked as (
   select t.id, t.ord as rn
   from public.get_discovery_candidates(20, 50) with ordinality as t(id, display_name, age,
-       distance_band, shared_genres, shared_baitu, verified, active_today, ord)
+       distance_band, shared_genres, shared_baitu, verified, active_today, bio, ord)
 )
 select ok(
   (select rn from ranked where id = '00000000-0000-0000-0000-0000000000b4')

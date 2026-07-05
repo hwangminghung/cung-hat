@@ -13,6 +13,7 @@ abstract class Candidate with _$Candidate {
     @JsonKey(name: 'shared_baitu') @Default([]) List<String> sharedBaitu,
     @Default(false) bool verified,
     @JsonKey(name: 'active_today') @Default(false) bool activeToday,
+    String? bio,
   }) = _Candidate;
   factory Candidate.fromJson(Map<String, dynamic> j) => _$CandidateFromJson(j);
 }

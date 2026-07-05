@@ -1,21 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../photos/application/photo_providers.dart';
 import '../../photos/presentation/photo_carousel.dart';
 import '../domain/candidate.dart';
 import 'report_sheet.dart';
 
-class CandidateCard extends StatelessWidget {
-  const CandidateCard({super.key, required this.candidate});
+/// Card ứng viên trong deck. Chip thông tin dưới tên XOAY theo ảnh đang xem
+/// (Tinder-parity mục 3c): ảnh 1 → khoảng cách + bài tủ chung; ảnh 2 → thể
+/// loại chung; ảnh ≥3 → giới thiệu (bio). Khi hồ sơ có <2 ảnh, không có gì để
+/// xoay theo nên hiện gộp như cũ (mọi chip cùng lúc).
+class CandidateCard extends ConsumerStatefulWidget {
+  const CandidateCard({
+    super.key,
+    required this.candidate,
+    required this.onOpenDetail,
+  });
 
   final Candidate candidate;
 
+  /// Mở sheet chi tiết — trước đây là onTap của cả card, giờ đổi qua nút ⓘ
+  /// vì tap trên ảnh giờ dùng để chuyển trang.
+  final VoidCallback onOpenDetail;
+
+  @override
+  ConsumerState<CandidateCard> createState() => _CandidateCardState();
+}
+
+class _CandidateCardState extends ConsumerState<CandidateCard> {
+  int _photoIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    final candidate = widget.candidate;
     final name = candidate.displayName ?? 'Bạn hát mới';
     final monogram = name.isEmpty ? '?' : name.characters.first.toUpperCase();
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
+    final photoCount =
+        (ref.watch(signedUrlsProvider(candidate.id)).value ?? const [])
+            .length;
 
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -36,12 +61,14 @@ class CandidateCard extends StatelessWidget {
         children: [
           Expanded(
             child: Stack(
+              key: const Key('card_photo_area'),
               fit: StackFit.expand,
               children: [
                 PhotoCarousel(
                   userId: candidate.id,
                   monogram: monogram,
                   swipeable: false,
+                  onPageChanged: (i) => setState(() => _photoIndex = i),
                   fallbackDecorations: [
                     Positioned(
                       left: -36,
@@ -99,6 +126,16 @@ class CandidateCard extends StatelessWidget {
                       foreground: AppColors.secondaryDark,
                     ),
                   ),
+                Positioned(
+                  right: AppSpacing.md,
+                  bottom: AppSpacing.md,
+                  child: IconButton.filledTonal(
+                    key: const Key('card_detail_btn'),
+                    tooltip: 'Xem hồ sơ',
+                    onPressed: widget.onOpenDetail,
+                    icon: const Icon(Icons.info_outline_rounded),
+                  ),
+                ),
               ],
             ),
           ),
@@ -125,41 +162,114 @@ class CandidateCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    _Badge(
-                      icon: Icons.place_rounded,
-                      label: 'Cách ${candidate.distanceBand ?? '?'} km',
-                      background: AppColors.primaryTint,
-                      foreground: AppColors.primaryDark,
-                    ),
-                    _Badge(
-                      icon: Icons.music_note_rounded,
-                      label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
-                      background: AppColors.tertiaryTint,
-                      foreground: AppColors.tertiary,
-                    ),
-                  ],
-                ),
-                if (candidate.sharedGenres.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      for (final genre in candidate.sharedGenres.take(3))
-                        _GenreChip(label: genre),
-                    ],
-                  ),
-                ],
+                ..._infoChips(context, candidate, photoCount),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Chip dưới tên: <2 ảnh → gộp như cũ (không có gì để xoay theo); ≥2 ảnh →
+  /// xoay theo [_photoIndex] — ảnh 1: khoảng cách + bài tủ; ảnh 2: thể loại
+  /// chung; ảnh ≥3: giới thiệu (bio).
+  List<Widget> _infoChips(
+      BuildContext context, Candidate candidate, int photoCount) {
+    if (photoCount < 2) {
+      return [
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            _Badge(
+              icon: Icons.place_rounded,
+              label: 'Cách ${candidate.distanceBand ?? '?'} km',
+              background: AppColors.primaryTint,
+              foreground: AppColors.primaryDark,
+            ),
+            _Badge(
+              icon: Icons.music_note_rounded,
+              label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
+              background: AppColors.tertiaryTint,
+              foreground: AppColors.tertiary,
+            ),
+          ],
+        ),
+        if (candidate.sharedGenres.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final genre in candidate.sharedGenres.take(3))
+                _GenreChip(label: genre),
+            ],
+          ),
+        ],
+      ];
+    }
+
+    if (_photoIndex == 0) {
+      return [
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            _Badge(
+              icon: Icons.place_rounded,
+              label: 'Cách ${candidate.distanceBand ?? '?'} km',
+              background: AppColors.primaryTint,
+              foreground: AppColors.primaryDark,
+            ),
+            _Badge(
+              icon: Icons.music_note_rounded,
+              label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
+              background: AppColors.tertiaryTint,
+              foreground: AppColors.tertiary,
+            ),
+          ],
+        ),
+      ];
+    }
+
+    if (_photoIndex == 1) {
+      if (candidate.sharedGenres.isEmpty) {
+        return [
+          Text(
+            'Chưa chung thể loại nào',
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: AppColors.textSecondary),
+          ),
+        ];
+      }
+      return [
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final genre in candidate.sharedGenres.take(5))
+              _GenreChip(label: genre),
+          ],
+        ),
+      ];
+    }
+
+    return [
+      Text(
+        candidate.bio?.trim().isNotEmpty == true
+            ? candidate.bio!.trim()
+            : 'Chưa có giới thiệu — hỏi thử khi match nhé!',
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(color: AppColors.textSecondary),
+      ),
+    ];
   }
 }
 
