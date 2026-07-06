@@ -68,8 +68,12 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.genre != null) return;
+    // Bất biến tái dùng vị trí: deck chủ đề dùng vị trí đã đẩy từ deck chính
+    // (luôn mount trước ở tab 0); server đọc vị trí LƯU TRỮ nên không cần bắt
+    // lại — bắt lại mỗi lần vào vừa chậm (chờ GPS) vừa xoá cache candidates
+    // của genre qua invalidate bên dưới.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Deck chủ đề (genre != null) cũng cần vị trí — giữ capture cho cả 2 chế độ.
       final ok = await ref.read(locationServiceProvider).captureAndPush();
       if (ok && mounted) ref.invalidate(candidatesProvider(widget.genre));
     });

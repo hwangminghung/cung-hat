@@ -73,6 +73,65 @@ void main() {
     });
   });
 
+  group('DoiDeckScreen — GPS capture chỉ chạy ở deck chính', () {
+    testWidgets(
+        'genre != null → KHÔNG gọi captureAndPush (dùng lại vị trí đã lưu)',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            deckItemsProvider('ballad').overrideWith((ref) async => [
+                  const CandidateItem(
+                      Candidate(id: 'c1', displayName: 'A')),
+                ]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(genre: 'ballad'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      verifyNever(() => locationService.captureAndPush());
+    });
+
+    testWidgets('genre == null (deck chính) → gọi captureAndPush đúng 1 lần',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            deckItemsProvider(null).overrideWith((ref) async => [
+                  const CandidateItem(
+                      Candidate(id: 'c1', displayName: 'A')),
+                ]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      verify(() => locationService.captureAndPush()).called(1);
+    });
+  });
+
   group('ThemeBoardScreen', () {
     GoRouter boardRouter() => GoRouter(
           initialLocation: '/explore',
