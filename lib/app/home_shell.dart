@@ -294,8 +294,12 @@ class _ProfileTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         border: Border.all(color: AppColors.border),
       ),
+      // Mirror _InboxTile (inbox_screen.dart): không borderRadius +
+      // clipBehavior thì ink splash tràn ra ngoài góc bo của card.
       child: Material(
         type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        clipBehavior: Clip.antiAlias,
         child: ListTile(
           leading: Container(
             width: 44,
