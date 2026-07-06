@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/pending_chat_media.dart';
 import 'chat_media_uploader.dart';
 import '../domain/message.dart';
+import '../domain/message_attachment.dart';
 
 /// Converts a Supabase broadcast frame ({type,event,payload}) to a [Message].
 /// The DB trigger's jsonb is nested under the frame's `payload` key.
@@ -35,15 +36,7 @@ class ChatRepository {
   }
 
   Future<List<Message>> history(String threadId) async {
-    final rows = await _client
-        .from('messages')
-        .select()
-        .eq('thread_type', 'match')
-        .eq('thread_id', threadId)
-        .order('created_at');
-    return (rows as List)
-        .map((e) => Message.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
+    return _history(threadType: 'match', threadId: threadId);
   }
 
   /// Live messages on the private topic match:{threadId}.
@@ -88,15 +81,51 @@ class ChatRepository {
   }
 
   Future<List<Message>> keoHistory(String keoId) async {
+    return _history(threadType: 'keo', threadId: keoId);
+  }
+
+  Future<List<Message>> _history({
+    required String threadType,
+    required String threadId,
+  }) async {
     final rows = await _client
         .from('messages')
         .select()
-        .eq('thread_type', 'keo')
-        .eq('thread_id', keoId)
+        .eq('thread_type', threadType)
+        .eq('thread_id', threadId)
         .order('created_at');
-    return (rows as List)
+    final messages = (rows as List)
         .map((e) => Message.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
+
+    final mediaMessageIds = [
+      for (final message in messages)
+        if (message.kind != 'text') message.id,
+    ];
+    if (mediaMessageIds.isEmpty) return messages;
+
+    final attachmentRows = await _client
+        .from('message_attachments')
+        .select()
+        .eq('thread_type', threadType)
+        .eq('thread_id', threadId)
+        .inFilter('message_id', mediaMessageIds);
+    final attachmentsByMessageId = <String, MessageAttachment>{};
+    for (final row in attachmentRows as List) {
+      final map = Map<String, dynamic>.from(row as Map);
+      final messageId = map['message_id'] as String?;
+      if (messageId != null) {
+        attachmentsByMessageId[messageId] = MessageAttachment.fromJson(map);
+      }
+    }
+
+    return [
+      for (final message in messages)
+        if (attachmentsByMessageId[message.id] case final attachment?)
+          message.copyWith(attachment: attachment)
+        else
+          message,
+    ];
   }
 
   /// Live messages on the private topic keo:{keoId}.
