@@ -6,34 +6,70 @@ import 'package:cung_hat/l10n/app_localizations.dart';
 import 'package:cung_hat/features/onboarding/presentation/onboarding_flow.dart';
 import 'package:cung_hat/features/onboarding/application/reference_providers.dart';
 
-/// Regression: the redesigned theme set FilledButton minimumSize to
-/// Size.fromHeight (infinite width), which crashed the Stepper's controlsBuilder
-/// Row (unbounded width) and rendered the whole onboarding body blank. This
-/// pumps the real OnboardingFlow under AppTheme.light and asserts step 1 content
-/// renders — it must not throw an "infinite width" layout assertion.
+Widget _app() => ProviderScope(
+  overrides: [
+    genresProvider.overrideWith((ref) async => []),
+    artistsProvider.overrideWith((ref) async => []),
+    songsProvider.overrideWith((ref) async => []),
+  ],
+  child: MaterialApp(
+    restorationScopeId: 'app',
+    theme: AppTheme.light(),
+    locale: const Locale('vi'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const OnboardingFlow(),
+  ),
+);
+
 void main() {
-  testWidgets('OnboardingFlow renders step 1 content under AppTheme.light',
-      (tester) async {
-    await tester.pumpWidget(ProviderScope(
-      overrides: [
-        genresProvider.overrideWith((ref) async => []),
-        artistsProvider.overrideWith((ref) async => []),
-        songsProvider.overrideWith((ref) async => []),
-      ],
-      child: MaterialApp(
-        theme: AppTheme.light(),
-        locale: const Locale('vi'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const OnboardingFlow(),
-      ),
-    ));
+  testWidgets('OnboardingFlow renders step 1 content under AppTheme.light', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app());
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Chọn ngày sinh'), findsOneWidget);
-    // The vertical Stepper builds controlsBuilder for every step, so several
-    // "Tiếp tục" buttons exist; the point is the body rendered (≥1), not blank.
-    expect(find.text('Tiếp tục'), findsWidgets);
+    expect(find.byKey(const Key('pick_dob_btn')), findsOneWidget);
+  });
+
+  testWidgets('OnboardingFlow restores draft after activity recreation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app());
+    await tester.pump();
+
+    tester
+        .widget<FilledButton>(find.byKey(const Key('onb_continue_btn')).first)
+        .onPressed
+        ?.call();
+    await tester.pump();
+    tester
+        .widget<FilledButton>(find.byKey(const Key('onb_continue_btn')).first)
+        .onPressed
+        ?.call();
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('onb_name')), 'TestPro');
+    await tester.enterText(find.byKey(const Key('onb_bio')), 'QA draft');
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('onb_name')))
+          .controller
+          ?.text,
+      'TestPro',
+    );
+
+    await tester.restartAndRestore();
+    await tester.pump();
+
+    expect(find.byKey(const Key('onb_name')), findsOneWidget);
+    final nameField = tester.widget<TextField>(
+      find.byKey(const Key('onb_name')),
+    );
+    final bioField = tester.widget<TextField>(find.byKey(const Key('onb_bio')));
+    expect(nameField.controller?.text, 'TestPro');
+    expect(bioField.controller?.text, 'QA draft');
   });
 }

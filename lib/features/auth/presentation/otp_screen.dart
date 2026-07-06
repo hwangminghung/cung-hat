@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../application/auth_controller.dart';
@@ -30,6 +31,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final state = ref.watch(authControllerProvider);
+    ref.listen(authControllerProvider, (prev, next) {
+      if (prev?.phase != AuthPhase.verified &&
+          next.phase == AuthPhase.verified) {
+        GoRouter.maybeOf(context)?.go('/');
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: Text(l10n?.otpTitle ?? 'Nhập mã OTP')),
       body: Padding(

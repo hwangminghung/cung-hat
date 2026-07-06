@@ -20,45 +20,89 @@ class OnboardingFlow extends ConsumerStatefulWidget {
   ConsumerState<OnboardingFlow> createState() => _OnboardingFlowState();
 }
 
-class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
-  DateTime? _dob;
-  late final Map<String, bool> _consents = {
-    for (final p in consentPurposes) p: false,
+class _OnboardingFlowState extends ConsumerState<OnboardingFlow>
+    with RestorationMixin {
+  final _dob = RestorableDateTimeN(null);
+  late final Map<String, RestorableBool> _consents = {
+    for (final p in consentPurposes) p: RestorableBool(false),
   };
-  final _nameCtrl = TextEditingController();
-  final _bioCtrl = TextEditingController();
-  final Set<String> _genreSel = {};
-  final Set<String> _artistSel = {};
-  final Set<String> _songSel = {};
-  int _step = 0;
+  final _nameCtrl = RestorableTextEditingController();
+  final _bioCtrl = RestorableTextEditingController();
+  final _genreSel = RestorableString('');
+  final _artistSel = RestorableString('');
+  final _songSel = RestorableString('');
+  final _step = RestorableInt(0);
 
   static const _lastStep = 3;
+
+  @override
+  String? get restorationId => 'onboarding_flow';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_dob, 'dob');
+    registerForRestoration(_step, 'step');
+    registerForRestoration(_nameCtrl, 'name');
+    registerForRestoration(_bioCtrl, 'bio');
+    registerForRestoration(_genreSel, 'genres');
+    registerForRestoration(_artistSel, 'artists');
+    registerForRestoration(_songSel, 'songs');
+    for (final entry in _consents.entries) {
+      registerForRestoration(entry.value, 'consent_${entry.key}');
+    }
+  }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
     _bioCtrl.dispose();
+    _dob.dispose();
+    _step.dispose();
+    _genreSel.dispose();
+    _artistSel.dispose();
+    _songSel.dispose();
+    for (final consent in _consents.values) {
+      consent.dispose();
+    }
     super.dispose();
+  }
+
+  Map<String, bool> get _consentValues => {
+    for (final entry in _consents.entries) entry.key: entry.value.value,
+  };
+
+  Set<String> _decodeSelection(RestorableString source) {
+    if (source.value.isEmpty) return <String>{};
+    return source.value.split(',').where((id) => id.isNotEmpty).toSet();
+  }
+
+  void _toggleSelection(RestorableString source, String id) {
+    final selected = _decodeSelection(source);
+    if (selected.contains(id)) {
+      selected.remove(id);
+    } else {
+      selected.add(id);
+    }
+    source.value = (selected.toList()..sort()).join(',');
   }
 
   void _onFinish() {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-    if (_dob == null || !isAdult(_dob!)) {
+    final dob = _dob.value;
+    if (dob == null || !isAdult(dob)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n?.onbUnder18 ?? 'Bạn phải đủ 18 tuổi.')),
+        SnackBar(content: Text(l10n?.onbUnder18 ?? 'You must be 18+.')),
       );
       return;
     }
-    final missing = missingRequiredConsents(_consents);
+    final missing = missingRequiredConsents(_consentValues);
     if (missing.isNotEmpty) {
-      setState(
-        () => _step = _consentStepIndex,
-      ); // jump back to the consent step (DOB=0, consent=1)
+      setState(() => _step.value = _consentStepIndex);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             l10n?.onbConsentRequired ??
-                'Vui lòng đồng ý các quyền bắt buộc để tiếp tục.',
+                'Please agree to the required permissions.',
           ),
         ),
       );
@@ -67,14 +111,14 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     ref
         .read(onboardingControllerProvider.notifier)
         .submit(
-          displayName: _nameCtrl.text,
-          fullName: _nameCtrl.text,
-          dob: _dob!,
-          bio: _bioCtrl.text,
-          consents: _consents,
-          genreIds: _genreSel.toList(),
-          artistIds: _artistSel.toList(),
-          songIds: _songSel.toList(),
+          displayName: _nameCtrl.value.text,
+          fullName: _nameCtrl.value.text,
+          dob: dob,
+          bio: _bioCtrl.value.text,
+          consents: _consentValues,
+          genreIds: _decodeSelection(_genreSel).toList(),
+          artistIds: _decodeSelection(_artistSel).toList(),
+          songIds: _decodeSelection(_songSel).toList(),
           language: Localizations.localeOf(context).languageCode,
         );
   }
@@ -84,9 +128,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     required AsyncValue<List<T>> async,
     required String Function(T) labelOf,
     required String Function(T) idOf,
-    required Set<String> selected,
+    required RestorableString selected,
   }) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final selectedIds = _decodeSelection(selected);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -98,20 +143,16 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             debugPrint('onboarding: reference load error: $err');
             return EmptyState(
               icon: Icons.wifi_off,
-              title: l10n?.onbLoadError ?? 'Không tải được dữ liệu.',
-              subtitle: 'Thử lại sau ít phút.',
+              title: l10n?.onbLoadError ?? 'Could not load data.',
+              subtitle: 'Try again later.',
             );
           },
           data: (items) => TasteChips<T>(
             items: items,
             labelOf: labelOf,
             idOf: idOf,
-            selected: selected,
-            onToggle: (id) => setState(
-              () => selected.contains(id)
-                  ? selected.remove(id)
-                  : selected.add(id),
-            ),
+            selected: selectedIds,
+            onToggle: (id) => setState(() => _toggleSelection(selected, id)),
           ),
         ),
         const SizedBox(height: 16),
@@ -131,7 +172,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              l10n?.onbSubmitError ?? 'Có lỗi xảy ra, vui lòng thử lại.',
+              l10n?.onbSubmitError ?? 'Something went wrong. Please try again.',
             ),
           ),
         );
@@ -144,7 +185,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n?.onbSetupTitle ?? 'Thiết lập hồ sơ'),
+        title: Text(l10n?.onbSetupTitle ?? 'Set up profile'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(28),
           child: Padding(
@@ -152,7 +193,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Bước ${_step + 1}/4',
+                'Bước ${_step.value + 1}/4',
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: AppColors.primary),
@@ -163,23 +204,30 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       ),
       body: Stepper(
         type: StepperType.vertical,
-        currentStep: _step,
+        currentStep: _step.value,
         onStepContinue: () {
-          if (_step < _lastStep) setState(() => _step += 1);
+          if (_step.value < _lastStep) {
+            setState(() => _step.value += 1);
+          }
         },
         onStepCancel: () {
-          if (_step > 0) setState(() => _step -= 1);
+          if (_step.value > 0) {
+            setState(() => _step.value -= 1);
+          }
         },
         controlsBuilder: (context, details) {
-          final isLast = _step == _lastStep;
+          final isLast = _step.value == _lastStep;
           return Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Row(
               children: [
                 if (!isLast)
                   FilledButton(
+                    key: details.isActive
+                        ? const Key('onb_continue_btn')
+                        : null,
                     onPressed: details.onStepContinue,
-                    child: Text(l10n?.onbContinue ?? 'Tiếp tục'),
+                    child: Text(l10n?.onbContinue ?? 'Continue'),
                   ),
                 if (isLast)
                   FilledButton(
@@ -191,13 +239,13 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(l10n?.onbFinish ?? 'Hoàn tất'),
+                        : Text(l10n?.onbFinish ?? 'Finish'),
                   ),
                 const SizedBox(width: 8),
-                if (_step > 0)
+                if (_step.value > 0)
                   TextButton(
                     onPressed: details.onStepCancel,
-                    child: Text(l10n?.onbBack ?? 'Quay lại'),
+                    child: Text(l10n?.onbBack ?? 'Back'),
                   ),
               ],
             ),
@@ -205,66 +253,70 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         },
         steps: [
           Step(
-            title: Text(l10n?.onbStepDob ?? 'Ngày sinh'),
-            isActive: _step >= 0,
+            title: Text(l10n?.onbStepDob ?? 'Date of birth'),
+            isActive: _step.value >= 0,
             content: DobStep(
-              dob: _dob,
-              onPick: (d) => setState(() => _dob = d),
+              dob: _dob.value,
+              onPick: (d) => setState(() => _dob.value = d),
             ),
           ),
           Step(
-            title: Text(l10n?.onbConsentTitle ?? 'Quyền riêng tư'),
-            isActive: _step >= 1,
+            title: Text(l10n?.onbConsentTitle ?? 'Privacy'),
+            isActive: _step.value >= 1,
             content: ConsentStep(
-              values: _consents,
-              onChanged: (k, v) => setState(() => _consents[k] = v),
+              values: _consentValues,
+              onChanged: (k, v) {
+                final consent = _consents[k];
+                if (consent == null) return;
+                setState(() => consent.value = v);
+              },
             ),
           ),
           Step(
-            title: Text(l10n?.onbStepProfile ?? 'Hồ sơ'),
-            isActive: _step >= 2,
+            title: Text(l10n?.onbStepProfile ?? 'Profile'),
+            isActive: _step.value >= 2,
             content: Column(
               children: [
                 TextField(
                   key: const Key('onb_name'),
-                  controller: _nameCtrl,
+                  controller: _nameCtrl.value,
                   decoration: InputDecoration(
-                    labelText: l10n?.onbNameLabel ?? 'Tên hiển thị',
+                    labelText: l10n?.onbNameLabel ?? 'Display name',
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   key: const Key('onb_bio'),
-                  controller: _bioCtrl,
+                  controller: _bioCtrl.value,
                   decoration: InputDecoration(
-                    labelText: l10n?.onbBioLabel ?? 'Giới thiệu',
+                    labelText: l10n?.onbBioLabel ?? 'Bio',
                   ),
                 ),
               ],
             ),
           ),
           Step(
-            title: Text(l10n?.onbStepTaste ?? 'Gu nhạc'),
-            isActive: _step >= 3,
+            title: Text(l10n?.onbStepTaste ?? 'Music taste'),
+            isActive: _step.value >= 3,
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _tasteSection<Genre>(
-                  label: l10n?.onbTasteGenres ?? 'Thể loại',
+                  label: l10n?.onbTasteGenres ?? 'Genres',
                   async: genres,
                   labelOf: (g) => g.nameVi,
                   idOf: (g) => g.id,
                   selected: _genreSel,
                 ),
                 _tasteSection<Artist>(
-                  label: l10n?.onbTasteArtists ?? 'Nghệ sĩ',
+                  label: l10n?.onbTasteArtists ?? 'Artists',
                   async: artists,
                   labelOf: (a) => a.name,
                   idOf: (a) => a.id,
                   selected: _artistSel,
                 ),
                 _tasteSection<Song>(
-                  label: l10n?.onbBaitu ?? 'Bài tủ',
+                  label: l10n?.onbBaitu ?? 'Signature songs',
                   async: songs,
                   labelOf: (s) => s.title,
                   idOf: (s) => s.id,

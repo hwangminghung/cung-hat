@@ -53,6 +53,7 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      restorationScopeId: 'cung_hat',
       title: 'Cùng Hát',
       theme: AppTheme.light(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
