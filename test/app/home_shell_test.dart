@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:cung_hat/app/home_shell.dart';
+import 'package:cung_hat/features/chat/application/inbox_providers.dart';
+import 'package:cung_hat/features/chat/data/match_inbox.dart';
 import 'package:cung_hat/features/discovery/application/discovery_providers.dart';
 import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
@@ -43,5 +45,45 @@ void main() {
     // the empty-state text and the always-present "Tạo kèo" FAB.
     expect(find.text('Tạo kèo'), findsOneWidget);
     expect(find.text('Chưa có kèo quanh đây'), findsOneWidget);
+  });
+
+  testWidgets('chọn tab Chat → inboxProvider refetch (kể cả lần quay lại)',
+      (tester) async {
+    final fakeLoc = _FakeLocationService();
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    // inboxProvider là FutureProvider one-shot (KHÔNG autoDispose): không
+    // invalidate khi chuyển tab thì lần quay lại Chat dùng cache cũ — pill
+    // 'Đến lượt bạn'/badge unread trễ. Đếm số lần build để chứng minh refetch.
+    var inboxCalls = 0;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null)
+              .overrideWith((ref) => Future.value(<Candidate>[])),
+          locationServiceProvider.overrideWithValue(fakeLoc),
+          openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
+          inboxProvider.overrideWith((ref) {
+            inboxCalls++;
+            return Future.value(<MatchSummary>[]);
+          }),
+        ],
+        child: const MaterialApp(home: HomeShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Provider lazy: chưa vào tab Chat thì chưa build lần nào.
+    expect(inboxCalls, 0);
+
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
+    expect(inboxCalls, 1);
+
+    await tester.tap(find.text('Đôi'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
+    // Không invalidate → provider giữ cache, vẫn 1. Có fix → refetch = 2.
+    expect(inboxCalls, 2);
   });
 }

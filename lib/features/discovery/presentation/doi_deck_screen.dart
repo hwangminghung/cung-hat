@@ -114,6 +114,45 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     }
   }
 
+  /// Deck chủ đề (genre != null) RỖNG vẫn cần lối quay lại in-app: header
+  /// đầy đủ (có nút back) chỉ render ở nhánh CÓ card, còn nhánh rỗng thay cả
+  /// body bằng Skeleton/_EmptyDeck → chỉ còn system back. Bọc thêm hàng
+  /// tối giản nút back (cùng Key('theme_deck_back')) + tiêu đề chủ đề phía
+  /// trên nội dung rỗng. Deck chính (genre == null) trả nguyên [child].
+  Widget _wrapEmptyWithGenreHeader(Widget child) {
+    final genre = widget.genre;
+    if (genre == null) return child;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                key: const Key('theme_deck_back'),
+                onPressed: () => context.pop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+              Expanded(
+                child: Text(
+                  musicThemeById(genre)?.title ?? 'Khám Phá',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: child),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final itemsAsync = ref.watch(deckItemsProvider(widget.genre));
@@ -148,20 +187,20 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                     ref.read(deckRadiusProvider.notifier).state = 100;
                   }
                 });
-                return const Padding(
+                return _wrapEmptyWithGenreHeader(const Padding(
                   padding: EdgeInsets.all(AppSpacing.lg),
                   child: Skeleton(
                       width: double.infinity, height: double.infinity, radius: 28),
-                );
+                ));
               }
-              return _EmptyDeck(
+              return _wrapEmptyWithGenreHeader(_EmptyDeck(
                 radius: radius,
                 autoExpand: autoExpand,
                 onExpand: () =>
                     ref.read(deckRadiusProvider.notifier).state = 100,
                 onToggleAutoExpand: _handleToggleAutoExpand,
                 onRefresh: _refreshDeck,
-              );
+              ));
             }
 
             return Column(

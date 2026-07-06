@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../features/billing/application/billing_providers.dart';
+import '../features/chat/application/inbox_providers.dart';
 import '../features/chat/presentation/inbox_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/keo/presentation/keo_board_screen.dart';
@@ -14,14 +15,14 @@ import '../features/profile/domain/profile_completion.dart';
 import '../features/profile/presentation/prompt_editor_sheet.dart';
 import '../shared/widgets/pro_upsell_sheet.dart';
 
-class HomeShell extends StatefulWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
 
   // Icon set follows design-system/MASTER.md: Đôi group · Kèo mic ·
@@ -52,7 +53,15 @@ class _HomeShellState extends State<HomeShell> {
       },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        onDestinationSelected: (i) {
+          // inboxProvider là FutureProvider one-shot: không refetch khi vào
+          // tab Chat thì pill 'Đến lượt bạn'/badge unread trễ tới khi user mở
+          // 1 chat hoặc restart. Invalidate mỗi lần CHỌN tab 2 (NavigationBar
+          // fire cả khi re-tap tab hiện tại — refetch thừa vô hại, coi như
+          // pull-to-refresh). Realtime subscription: ngoài scope, không làm.
+          if (i == 2) ref.invalidate(inboxProvider);
+          setState(() => _index = i);
+        },
         destinations: [
           for (var i = 0; i < _labels.length; i++)
             NavigationDestination(
@@ -285,8 +294,12 @@ class _ProfileTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         border: Border.all(color: AppColors.border),
       ),
+      // Mirror _InboxTile (inbox_screen.dart): không borderRadius +
+      // clipBehavior thì ink splash tràn ra ngoài góc bo của card.
       child: Material(
         type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        clipBehavior: Clip.antiAlias,
         child: ListTile(
           leading: Container(
             width: 44,
