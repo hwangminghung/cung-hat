@@ -9,22 +9,30 @@ import 'package:cung_hat/features/chat/presentation/chat_screen.dart';
 import 'package:cung_hat/features/discovery/application/discovery_providers.dart';
 import 'package:cung_hat/features/discovery/data/discovery_repository.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
+import 'package:cung_hat/features/onboarding/application/reference_providers.dart';
+import 'package:cung_hat/features/onboarding/domain/music_ref.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
 
 class _MockChatRepo extends Mock implements ChatRepository {}
 
 class _MockDiscoveryRepo extends Mock implements DiscoveryRepository {}
 
+// shared_baitu giữ SONG ID thô — sheet resolve tên qua songsProvider (override
+// bên dưới); UI + câu quote phải hiện 'Nơi Này Có Anh' chứ KHÔNG phải 's5'.
 const _candidate = Candidate(
   id: 'u2',
   displayName: 'Linh',
   age: 24,
   distanceBand: '1-3',
-  sharedBaitu: ['Nơi Này Có Anh'],
+  sharedBaitu: ['s5'],
   prompts: [
     {'prompt_id': 'p1', 'answer': 'Em cua ngay hom qua'},
   ],
 );
+
+const _songs = [
+  Song(id: 's5', title: 'Nơi Này Có Anh', artist: 'Sơn Tùng M-TP'),
+];
 
 /// Stub the chat providers common to every case (history rỗng, no realtime,
 /// markRead no-op) — matches chat_screen_test.dart's harness.
@@ -50,6 +58,7 @@ void main() {
         chatRepositoryProvider.overrideWithValue(chatRepo),
         discoveryRepositoryProvider.overrideWithValue(discoveryRepo),
         signedUrlsProvider('u2').overrideWith((ref) async => const <String>[]),
+        songsProvider.overrideWith((ref) async => _songs),
       ],
       child: const MaterialApp(
         home: ChatScreen(matchId: 't1', otherName: 'Linh'),
@@ -62,7 +71,9 @@ void main() {
 
     verify(() => discoveryRepo.getMatchProfile('t1')).called(1);
     expect(find.text('Linh, 24'), findsOneWidget);
+    // TÊN bài từ bảng songs, KHÔNG phải raw id 's5'.
     expect(find.text('Nơi Này Có Anh'), findsOneWidget);
+    expect(find.text('s5'), findsNothing);
     expect(find.text('Bài mình luôn giành mic là…'), findsOneWidget);
     // Sheet hiện chế độ icebreaker: KHÔNG có nút THÍCH/BỎ QUA (đã match rồi).
     expect(find.byKey(const Key('detail_like_btn')), findsNothing);
@@ -83,6 +94,7 @@ void main() {
         chatRepositoryProvider.overrideWithValue(chatRepo),
         discoveryRepositoryProvider.overrideWithValue(discoveryRepo),
         signedUrlsProvider('u2').overrideWith((ref) async => const <String>[]),
+        songsProvider.overrideWith((ref) async => _songs),
       ],
       child: const MaterialApp(
         home: ChatScreen(matchId: 't1', otherName: 'Linh'),

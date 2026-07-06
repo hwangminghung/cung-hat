@@ -257,6 +257,8 @@ DONE: `test/features/chat/icebreaker_test.dart` tạo mới, 3 case đúng kế 
 
 DONE: `flutter test` 224/224 pass (215 baseline + 4 repo + 2 sheet + 3 icebreaker screen), `flutter analyze` no issues, `npx supabase test db` 131/131 pass (127 baseline + 4). Self-review: composite `discovery_candidate` xác nhận KHÔNG bị alter (grep migration mới không có `alter type`, psql introspection xác nhận vẫn đúng 10 cột theo thứ tự cũ); `in_match` semantics mirror đúng (không double-gate status, note trong migration comment); deck sheet hành vi cũ giữ nguyên 100% khi onQuote null (widget test xác nhận); prefill KHÔNG tự gửi (chỉ set `_controller.text`/`selection`, user vẫn phải bấm nút gửi qua dialog an toàn `messageLooksUnsafe` có sẵn). Commit SHA: xem báo cáo cuối.
 
+REVIEW-FIX (sau approve Task 3): `fix(discovery): hien ten bai tu thay vi id trong detail sheet va quote icebreaker` — shared_baitu giữ SONG ID thô nên sheet render/quote raw id ('s5' thay vì tên bài); CandidateDetailSheet → ConsumerWidget watch `songsProvider` (reference có sẵn) build map id→title, fallback raw id khi loading/lỗi/id lạ (không chặn render), fix luôn hiển thị deck detail có sẵn từ trước; test đổi sang id thật + override songsProvider mọi chỗ pump sheet, thêm case fallback; RED-check revert tạm xác nhận fail đúng (`Về bài "s5"...`); gates 225/225 + analyze sạch (không đụng SQL). Ngoài scope còn `match_celebration.dart:182` cũng render raw baitu id — đã báo coordinator, chưa sửa.
+
 ---
 
 ### Task 4: Teaser "Ai thích bạn" blur server-side

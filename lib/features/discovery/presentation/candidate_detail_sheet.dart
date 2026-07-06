@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../onboarding/application/reference_providers.dart';
+import '../../onboarding/domain/music_ref.dart';
 import '../../photos/presentation/photo_carousel.dart';
 import '../../profile/domain/karaoke_prompts.dart';
 import '../domain/candidate.dart';
@@ -18,7 +21,7 @@ import 'report_sheet.dart';
 ///    ẩn 2 nút THÍCH/BỎ QUA (candidate đã match rồi, không cần swipe lại);
 ///    mỗi bài tủ chung / mỗi prompt / carousel ảnh có nút "Trả lời" gọi
 ///    [onQuote] với câu mồi rồi đóng sheet.
-class CandidateDetailSheet extends StatelessWidget {
+class CandidateDetailSheet extends ConsumerWidget {
   const CandidateDetailSheet({
     super.key,
     required this.candidate,
@@ -78,10 +81,16 @@ class CandidateDetailSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final name = candidate.displayName ?? 'Bạn hát mới';
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
     final monogram = name.isEmpty ? '?' : name[0].toUpperCase();
+
+    // shared_baitu giữ SONG ID thô ('s1'..) — resolve tên hiển thị qua bảng
+    // songs (songsProvider, reference đã cache). Đang loading/lỗi → map rỗng
+    // → fallback hiện raw id, KHÔNG chặn render.
+    final songs = ref.watch(songsProvider).value ?? const <Song>[];
+    final titleById = {for (final s in songs) s.id: s.title};
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -185,13 +194,13 @@ class CandidateDetailSheet extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.music_note_rounded,
                     color: AppColors.primary),
-                title: Text(song),
+                title: Text(titleById[song] ?? song),
                 trailing: onQuote == null
                     ? null
                     : TextButton(
                         key: Key('quote_baitu_$i'),
-                        onPressed: () =>
-                            onQuote!('Về bài "$song" của bạn: '),
+                        onPressed: () => onQuote!(
+                            'Về bài "${titleById[song] ?? song}" của bạn: '),
                         child: const Text('Trả lời'),
                       ),
               ),
