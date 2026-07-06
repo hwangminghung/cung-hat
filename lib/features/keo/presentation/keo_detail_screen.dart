@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -39,11 +40,36 @@ class KeoDetailScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  /// Derives the caller's own roster row (or null if not a member) — shared by
+  /// the AppBar's share-button gate and the body's action panel so both agree
+  /// on exactly who counts as "host or approved member".
+  KeoMember? _myRow(WidgetRef ref, List<KeoMember> roster) {
+    final uid = ref.watch(myProfileProvider).value?.id;
+    for (final member in roster) {
+      if (member.userId == uid) return member;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rosterAsync = ref.watch(keoRosterProvider(keoId));
+    final roster = rosterAsync.value ?? const <KeoMember>[];
+    final myRow = _myRow(ref, roster);
+    final canShare = myRow?.role == 'host' || myRow?.joinStatus == 'approved';
     return Scaffold(
-      appBar: AppBar(title: const Text('Chi tiết kèo')),
+      appBar: AppBar(
+        title: const Text('Chi tiết kèo'),
+        actions: [
+          if (canShare)
+            IconButton(
+              key: const Key('keo_share_btn'),
+              tooltip: 'Chia sẻ kèo',
+              icon: const Icon(Icons.share_rounded),
+              onPressed: () => _shareKeo(context, ref),
+            ),
+        ],
+      ),
       body: rosterAsync.when(
         data: (roster) => _buildBody(context, ref, roster),
         loading: () => ListView(
@@ -61,19 +87,27 @@ class KeoDetailScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _shareKeo(BuildContext context, WidgetRef ref) async {
+    try {
+      final token =
+          await ref.read(keoRepositoryProvider).createKeoShareLink(keoId);
+      await SharePlus.instance.share(ShareParams(
+          text:
+              'Kèo "$title" đang tuyển giọng ca — vào Cùng Hát xin một chỗ: cunghat://keo/shared/$token'));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Không tạo được link, thử lại.')));
+      }
+    }
+  }
+
   Widget _buildBody(
     BuildContext context,
     WidgetRef ref,
     List<KeoMember> roster,
   ) {
-    final uid = ref.watch(myProfileProvider).value?.id;
-    KeoMember? myRow;
-    for (final member in roster) {
-      if (member.userId == uid) {
-        myRow = member;
-        break;
-      }
-    }
+    final myRow = _myRow(ref, roster);
     final isHost = myRow?.role == 'host';
     final isApproved = myRow?.joinStatus == 'approved';
     final notMember = myRow == null || myRow.joinStatus == 'left';

@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/keo.dart';
 import '../domain/keo_match_suggestion.dart';
 import '../domain/keo_member.dart';
+import '../domain/shared_keo.dart';
 
 class KeoRepository {
   KeoRepository(this._client);
@@ -98,5 +99,22 @@ class KeoRepository {
 
   Future<void> confirm(String keoId) async {
     await _client.rpc('confirm_keo', params: {'p_keo': keoId});
+  }
+
+  Future<String> createKeoShareLink(String keoId) async {
+    final res =
+        await _client.rpc('create_keo_share_link', params: {'p_keo': keoId});
+    return res as String;
+  }
+
+  /// null = token sai/het han-khong-ton-tai/keo da xoa.
+  Future<SharedKeo?> resolveSharedKeo(String token) async {
+    final res =
+        await _client.rpc('resolve_share_keo', params: {'p_token': token});
+    if (res == null) return null;
+    final m = Map<String, dynamic>.from(
+        res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
+    if (m['keo_id'] == null) return null; // composite rong (token sai)
+    return SharedKeo.fromJson(m);
   }
 }
