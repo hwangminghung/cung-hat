@@ -1,10 +1,13 @@
 -- Run with: supabase test db
--- Proves migration 20260704100000_photos: private profile-photos bucket + owner-only
--- storage RLS + set_my_photo_paths (max 3, caller-folder-scoped paths).
--- plan(6): the 5 required assertions, with #2 ("setter saves 2 valid paths") split into
--- two subtests — the call succeeds (lives_ok) AND the array was persisted (is).
+-- Proves migration 20260704100000_photos + 20260707100000_photo_cap_6: private
+-- profile-photos bucket + owner-only storage RLS + set_my_photo_paths (max 6 as
+-- of the P2-T1 cap bump, caller-folder-scoped paths).
+-- plan(7): the 5 required assertions, with #2 ("setter saves 2 valid paths") split into
+-- two subtests — the call succeeds (lives_ok) AND the array was persisted (is) — plus
+-- one extra subtest for #3 asserting exactly 6 valid paths still lives_ok (the boundary
+-- just under the new cap).
 begin;
-select plan(6);
+select plan(7);
 
 -- Seed two users (claims pattern copied from doi_swipe_upgrade_test.sql).
 set local role postgres;
@@ -38,7 +41,7 @@ select is(
         '00000000-0000-0000-0000-0000000000a1/b.jpg']::text[],
   'the 2 valid paths were persisted to profiles.photo_paths');
 
--- 3) more than 3 paths -> check_violation (23514, "photo_limit").
+-- 3) more than 6 paths -> check_violation (23514, "photo_limit").
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}';
 set local role authenticated;
 select throws_ok(
@@ -46,8 +49,22 @@ select throws_ok(
        '00000000-0000-0000-0000-0000000000a1/1.jpg',
        '00000000-0000-0000-0000-0000000000a1/2.jpg',
        '00000000-0000-0000-0000-0000000000a1/3.jpg',
-       '00000000-0000-0000-0000-0000000000a1/4.jpg']) $$,
-  '23514', 'photo_limit', '>3 photo paths raises check_violation (photo_limit)');
+       '00000000-0000-0000-0000-0000000000a1/4.jpg',
+       '00000000-0000-0000-0000-0000000000a1/5.jpg',
+       '00000000-0000-0000-0000-0000000000a1/6.jpg',
+       '00000000-0000-0000-0000-0000000000a1/7.jpg']) $$,
+  '23514', 'photo_limit', '>6 photo paths raises check_violation (photo_limit)');
+
+-- 3b) exactly 6 paths (the new boundary) still lives_ok.
+select lives_ok(
+  $$ select public.set_my_photo_paths(array[
+       '00000000-0000-0000-0000-0000000000a1/1.jpg',
+       '00000000-0000-0000-0000-0000000000a1/2.jpg',
+       '00000000-0000-0000-0000-0000000000a1/3.jpg',
+       '00000000-0000-0000-0000-0000000000a1/4.jpg',
+       '00000000-0000-0000-0000-0000000000a1/5.jpg',
+       '00000000-0000-0000-0000-0000000000a1/6.jpg']) $$,
+  'set_my_photo_paths accepts exactly 6 valid own-folder paths (new cap boundary)');
 
 -- 4) a path NOT under the caller's uid folder -> check_violation (23514, "photo_path_invalid").
 --    Here the second path lives under user a2's folder.

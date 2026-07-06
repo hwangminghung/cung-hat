@@ -29,7 +29,7 @@
 - Modify: `lib/app/home_shell.dart` (subtitle tile 'Ảnh hồ sơ': 'Thêm tối đa 3 ảnh' → 6)
 - Test: mở rộng `test/features/photos/photo_manager_sheet_test.dart` (đọc file test hiện có trước)
 
-- [ ] **Step 1: Migration** — giới hạn nằm TRONG RPC `set_my_photo_paths` (20260704100000_photos.sql:27-43, `> 3` → raise `photo_limit`), KHÔNG có table CHECK. Copy VERBATIM function từ 20260704100000 + đổi đúng `> 3` thành `> 6` + sửa comment:
+- [x] **Step 1: Migration** — giới hạn nằm TRONG RPC `set_my_photo_paths` (20260704100000_photos.sql:27-43, `> 3` → raise `photo_limit`), KHÔNG có table CHECK. Copy VERBATIM function từ 20260704100000 + đổi đúng `> 3` thành `> 6` + sửa comment:
 
 ```sql
 -- Tran anh ho so 3 -> 6 (backlog muc 11). Gioi han nam trong RPC (khong co table CHECK).
@@ -39,13 +39,23 @@
 
 Kiểm tra `supabase/functions/sign-photo/index.ts` — KHÔNG cap số path (sign toàn bộ `photo_paths`) → không sửa edge.
 
-- [ ] **Step 2: pgTAP** — kiểm tra `grep -n "photo_limit\|> 3\|array\[" supabase/tests/photos_test.sql` (hoặc tên file photos test thật): nếu có test cap-3 thì SỬA nó thành cap-6 (7 ảnh raise `'23514'`, 6 ảnh lives_ok); nếu không có thì viết `photo_cap6_test.sql` `plan(2)` theo seed convention repo. `npx supabase migration up` && `npx supabase test db` xanh.
+DONE: `supabase/migrations/20260707100000_photo_cap_6.sql` tạo mới, function diff vs 20260704100000 chỉ đúng 1 dòng `> 3` → `> 6` (đã diff xác nhận byte-for-byte, phần còn lại + validate photo_path_invalid + revoke/grant giữ nguyên). `sign-photo/index.ts` xác nhận không cap → không sửa.
 
-- [ ] **Step 3: Test Flutter fail trước** — mở rộng photo_manager test: render sheet (override providers như file test hiện có) → expect 6 widget `Key('photo_slot_0')`..`photo_slot_5`.
+- [x] **Step 2: pgTAP** — kiểm tra `grep -n "photo_limit\|> 3\|array\[" supabase/tests/photos_test.sql` (hoặc tên file photos test thật): nếu có test cap-3 thì SỬA nó thành cap-6 (7 ảnh raise `'23514'`, 6 ảnh lives_ok); nếu không có thì viết `photo_cap6_test.sql` `plan(2)` theo seed convention repo. `npx supabase migration up` && `npx supabase test db` xanh.
 
-- [ ] **Step 4: UI** — `photo_manager_sheet.dart`: `const _maxSlots = 6;`. Layout Row 1 hàng (dòng ~185) sẽ chật với 6 ô → đổi thành `Wrap` 2 hàng × 3 (hoặc `GridView.count(crossAxisCount: 3, shrinkWrap: true, physics: NeverScrollableScrollPhysics())` — chọn cái khớp style file; giữ nguyên `Key('photo_slot_$i')`, `_busySlot`, aspect vuông). Sửa copy trong sheet nếu có chuỗi 'tối đa 3'. `home_shell.dart` tile: `'Thêm tối đa 6 ảnh vào hồ sơ'`.
+DONE: `supabase/tests/photos_test.sql` có sẵn assertion cap-3 (#3) → SỬA thành 7 path raise `'23514'`/`photo_limit`, thêm subtest #3b (6 path lives_ok, boundary mới). `plan(6)` → `plan(7)`. `migration up` + `test db`: 27 files, 120 tests (119 baseline + 1), PASS.
 
-- [ ] **Step 5: Gates + commit** — 3 gates xanh. Commit: `feat(photos): tran anh ho so 3 -> 6`
+- [x] **Step 3: Test Flutter fail trước** — mở rộng photo_manager test: render sheet (override providers như file test hiện có) → expect 6 widget `Key('photo_slot_0')`..`photo_slot_5`.
+
+DONE: mở rộng test 'consent granted → hiện 6 slot' trong `photo_manager_sheet_test.dart`, chạy fail trước khi sửa UI (missing `photo_slot_3`), xác nhận red đúng nguyên nhân (`_maxSlots` vẫn = 3).
+
+- [x] **Step 4: UI** — `photo_manager_sheet.dart`: `const _maxSlots = 6;`. Layout Row 1 hàng (dòng ~185) sẽ chật với 6 ô → đổi thành `Wrap` 2 hàng × 3 (hoặc `GridView.count(crossAxisCount: 3, shrinkWrap: true, physics: NeverScrollableScrollPhysics())` — chọn cái khớp style file; giữ nguyên `Key('photo_slot_$i')`, `_busySlot`, aspect vuông). Sửa copy trong sheet nếu có chuỗi 'tối đa 3'. `home_shell.dart` tile: `'Thêm tối đa 6 ảnh vào hồ sơ'`.
+
+DONE: `_maxSlots = 6`; `_buildGrid()` đổi Row → `GridView.count(crossAxisCount: 3, shrinkWrap: true, physics: NeverScrollableScrollPhysics(), mainAxisSpacing/crossAxisSpacing: AppSpacing.sm)`, `_PhotoSlot` (Key/`_busySlot`/aspect) giữ nguyên 100%. Copy 'tối đa $_maxSlots' đã interpolate sẵn nên tự động lên 6, không cần sửa chuỗi cứng. Phát sinh ngoài kế hoạch: outer `Column` overflow ở viewport thấp (2 hàng ô vuông cao hơn Column cố định chịu được) → bọc `SingleChildScrollView` quanh Column (khớp `isScrollControlled: true` của `showModalBottomSheet` gọi sheet này ở `home_shell.dart`, không phải workaround). `home_shell.dart` subtitle → 'Thêm tối đa 6 ảnh vào hồ sơ'.
+
+- [x] **Step 5: Gates + commit** — 3 gates xanh. Commit: `feat(photos): tran anh ho so 3 -> 6`
+
+DONE: `flutter test` 205/205 pass, `flutter analyze` no issues, `npx supabase test db` 120/120 pass. Commit `feat(photos): tran anh ho so 3 -> 6` (xem SHA trong báo cáo report).
 
 ---
 

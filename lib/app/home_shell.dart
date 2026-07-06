@@ -170,7 +170,7 @@ class _ProfileTab extends ConsumerWidget {
           _ProfileTile(
             icon: Icons.photo_library_rounded,
             title: 'Ảnh hồ sơ',
-            subtitle: 'Thêm tối đa 3 ảnh vào hồ sơ',
+            subtitle: 'Thêm tối đa 6 ảnh vào hồ sơ',
             onTap: () => showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,

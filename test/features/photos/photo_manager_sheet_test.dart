@@ -70,12 +70,15 @@ void main() {
     expect(find.byKey(const Key('photo_slot_2')), findsNothing);
   });
 
-  testWidgets('consent granted → hiện 3 slot, không hiện CTA', (tester) async {
+  testWidgets('consent granted → hiện 6 slot, không hiện CTA', (tester) async {
     await _pumpSheet(tester, photosConsent: true);
 
     expect(find.byKey(const Key('photo_slot_0')), findsOneWidget);
     expect(find.byKey(const Key('photo_slot_1')), findsOneWidget);
     expect(find.byKey(const Key('photo_slot_2')), findsOneWidget);
+    expect(find.byKey(const Key('photo_slot_3')), findsOneWidget);
+    expect(find.byKey(const Key('photo_slot_4')), findsOneWidget);
+    expect(find.byKey(const Key('photo_slot_5')), findsOneWidget);
     expect(find.byKey(const Key('photos_consent_cta')), findsNothing);
   });
 }
