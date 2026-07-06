@@ -6,6 +6,7 @@ import '../../keo/domain/keo.dart';
 import '../data/discovery_repository.dart';
 import '../domain/candidate.dart';
 import '../domain/deck_item.dart';
+import '../domain/like_teaser.dart';
 import '../domain/music_themes.dart';
 import 'location_service.dart';
 
@@ -29,6 +30,10 @@ final candidatesProvider =
         .getCandidates(radiusKm: ref.watch(deckRadiusProvider), genre: genre));
 final whoLikedMeProvider = FutureProvider<List<Candidate>>(
     (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe());
+
+/// Teaser "Ai thích bạn" cho user free — bản mosaic server-side, không id/tên.
+final likesTeaserProvider = FutureProvider<List<LikeTeaser>>(
+    (ref) => ref.watch(discoveryRepositoryProvider).getLikesTeaser());
 
 /// Deck Đôi trộn ứng viên thật với thẻ quảng bá Kèo (mục 13 Tinder-parity).
 /// Kèo lỗi/chưa tải không được chặn deck chính — nuốt lỗi, coi như rỗng.

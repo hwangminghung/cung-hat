@@ -7,6 +7,7 @@ import '../features/auth/presentation/phone_screen.dart';
 import '../features/billing/presentation/store_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/discovery/presentation/likes_screen.dart';
+import '../features/discovery/presentation/likes_teaser_screen.dart';
 import '../features/discovery/presentation/theme_board_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/keo/presentation/create_keo_screen.dart';
@@ -73,6 +74,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),
       GoRoute(path: '/likes', builder: (_, _) => const LikesScreen()),
+      GoRoute(
+          path: '/likes-teaser', builder: (_, _) => const LikesTeaserScreen()),
       GoRoute(path: '/explore', builder: (_, _) => const ThemeBoardScreen()),
       GoRoute(
         path: '/explore/:genre',

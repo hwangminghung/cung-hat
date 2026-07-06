@@ -1,7 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cung_hat/features/discovery/data/discovery_repository.dart';
 import '../../support/supabase_mocks.dart';
+
+class _MockFunctions extends Mock implements FunctionsClient {}
+
+class _MockStorage extends Mock implements SupabaseStorageClient {}
 
 void main() {
   test('getCandidates maps the sanitized RPC rows', () async {
@@ -114,6 +119,97 @@ void main() {
       final result = await DiscoveryRepository(client).getMatchProfile('m1');
       expect(result, isNotNull);
       expect(result!.id, 'u2');
+    });
+  });
+
+  group('getLikesTeaser', () {
+    /// Mirror photo_repository_test: stub `client.functions` + `client.storage.url`
+    /// (the rebase step needs a base origin, like signedUrlsOf).
+    (MockSupabaseClient, _MockFunctions) clientWithFns(String storageUrl) {
+      final client = MockSupabaseClient();
+      final fns = _MockFunctions();
+      final storage = _MockStorage();
+      when(() => client.functions).thenReturn(fns);
+      when(() => client.storage).thenReturn(storage);
+      when(() => storage.url).thenReturn(storageUrl);
+      return (client, fns);
+    }
+
+    test('maps likers and rebases the kong internal host to the client origin',
+        () async {
+      final (client, fns) = clientWithFns('http://10.0.2.2:54321/storage/v1');
+      when(() => fns.invoke('likes-teaser')).thenAnswer(
+        (_) async => FunctionResponse(
+          data: {
+            'likers': [
+              {
+                // Edge builds URLs from its runtime SUPABASE_URL (kong:8000
+                // on local) — must come back rebased onto the client origin.
+                'teaser_url':
+                    'http://kong:8000/storage/v1/object/sign/profile-photos/u9/teaser.jpg?token=abc',
+                'age': 24,
+                'verified': true,
+                'shared_genre': 'ballad',
+              },
+              {
+                // Liker without photos: teaser_url null stays null (no rebase).
+                'teaser_url': null,
+                'age': null,
+                'verified': false,
+                'shared_genre': null,
+              },
+            ],
+          },
+          status: 200,
+        ),
+      );
+
+      final list = await DiscoveryRepository(client).getLikesTeaser();
+
+      expect(list, hasLength(2));
+      expect(
+        list.first.teaserUrl,
+        'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/u9/teaser.jpg?token=abc',
+      );
+      expect(list.first.age, 24);
+      expect(list.first.verified, isTrue);
+      expect(list.first.sharedGenre, 'ballad');
+      expect(list.last.teaserUrl, isNull);
+      expect(list.last.age, isNull);
+      expect(list.last.verified, isFalse);
+      expect(list.last.sharedGenre, isNull);
+      verify(() => fns.invoke('likes-teaser')).called(1);
+    });
+
+    test('keeps an already-matching origin unchanged (prod no-op case)',
+        () async {
+      final (client, fns) = clientWithFns('http://10.0.2.2:54321/storage/v1');
+      const url =
+          'http://10.0.2.2:54321/storage/v1/object/sign/profile-photos/u9/teaser.jpg?token=abc';
+      when(() => fns.invoke('likes-teaser')).thenAnswer(
+        (_) async => FunctionResponse(
+          data: {
+            'likers': [
+              {'teaser_url': url, 'age': 30, 'verified': false},
+            ],
+          },
+          status: 200,
+        ),
+      );
+
+      final list = await DiscoveryRepository(client).getLikesTeaser();
+
+      expect(list.single.teaserUrl, url);
+    });
+
+    test('returns [] when the response has no likers key', () async {
+      final (client, fns) = clientWithFns('http://10.0.2.2:54321/storage/v1');
+      when(() => fns.invoke('likes-teaser')).thenAnswer(
+          (_) async => FunctionResponse(data: <String, dynamic>{}, status: 200));
+
+      final list = await DiscoveryRepository(client).getLikesTeaser();
+
+      expect(list, isEmpty);
     });
   });
 }

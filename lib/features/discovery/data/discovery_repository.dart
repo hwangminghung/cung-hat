@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/candidate.dart';
+import '../domain/like_teaser.dart';
 
 class DiscoveryRepository {
   DiscoveryRepository(this._client);
@@ -95,5 +96,18 @@ class DiscoveryRepository {
         res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
     if (m['id'] == null) return null; // composite null-row (đối phương xoá mem)
     return Candidate.fromJson(m);
+  }
+
+  /// Teaser cho user free — danh sách người thích mình đã làm mờ (edge
+  /// `likes-teaser`): KHÔNG id/tên; ảnh là bản mosaic server-side, không bao
+  /// giờ là ảnh gốc. Rebase origin như sign-photo (kong:8000 local).
+  Future<List<LikeTeaser>> getLikesTeaser() async {
+    final res = await _client.functions.invoke('likes-teaser');
+    final list = (res.data?['likers'] as List?) ?? const [];
+    final base = Uri.parse(_client.storage.url);
+    return [
+      for (final e in list)
+        LikeTeaser.fromJson(Map<String, dynamic>.from(e as Map)).rebase(base),
+    ];
   }
 }
