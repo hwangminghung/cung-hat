@@ -6,6 +6,9 @@ import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/message_safety.dart';
+import '../../discovery/application/discovery_providers.dart';
+import '../../discovery/domain/candidate.dart';
+import '../../discovery/presentation/candidate_detail_sheet.dart';
 import '../application/chat_providers.dart';
 import '../domain/message.dart';
 
@@ -111,6 +114,39 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
   }
 
+  /// Icebreaker: xem hồ sơ người ĐÃ match từ chat, tap "Trả lời" trong sheet
+  /// để prefill composer (KHÔNG tự gửi — user vẫn phải bấm gửi qua dialog
+  /// an toàn như bình thường).
+  Future<void> _openMatchProfile() async {
+    Candidate? candidate;
+    try {
+      candidate = await ref
+          .read(discoveryRepositoryProvider)
+          .getMatchProfile(widget.matchId);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không mở được hồ sơ. Thử lại sau.')),
+      );
+      return;
+    }
+    if (!mounted) return;
+    if (candidate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hồ sơ không còn.')),
+      );
+      return;
+    }
+    CandidateDetailSheet.show(
+      context,
+      candidate: candidate,
+      onQuote: (q) {
+        _controller.text = q;
+        _controller.selection = TextSelection.collapsed(offset: q.length);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final myUid = _myUid;
@@ -147,6 +183,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         title: Text(widget.otherName),
         actions: [
+          IconButton(
+            key: const Key('chat_profile_btn'),
+            onPressed: _openMatchProfile,
+            icon: const Icon(Icons.person_rounded),
+            tooltip: 'Hồ sơ',
+          ),
           TextButton.icon(
             onPressed: () => context.push('/keo/create'),
             icon: const Icon(Icons.groups_rounded),

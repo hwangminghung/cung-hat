@@ -84,4 +84,16 @@ class DiscoveryRepository {
         await _client.rpc('get_match_id_with', params: {'p_other': otherId});
     return res as String?;
   }
+
+  /// Hồ sơ người ĐÃ match (icebreaker trong chat). null = RPC không trả gì,
+  /// hoặc đối phương đã xoá tài khoản (composite null-row, id null).
+  Future<Candidate?> getMatchProfile(String matchId) async {
+    final res =
+        await _client.rpc('get_match_profile', params: {'p_match': matchId});
+    if (res == null) return null;
+    final m = Map<String, dynamic>.from(
+        res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
+    if (m['id'] == null) return null; // composite null-row (đối phương xoá mem)
+    return Candidate.fromJson(m);
+  }
 }

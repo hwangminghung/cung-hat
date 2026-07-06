@@ -108,4 +108,86 @@ void main() {
     expect(find.text('Em cua ngay hom qua'), findsOneWidget);
     expect(find.text('khong hien'), findsNothing);
   });
+
+  testWidgets(
+      'chế độ deck (onQuote null): KHÔNG render bất kỳ nút Trả lời nào',
+      (tester) async {
+    const c = Candidate(
+      id: 'u4',
+      displayName: 'Mai',
+      age: 24,
+      sharedBaitu: ['Nơi Này Có Anh'],
+      prompts: [
+        {'prompt_id': 'p1', 'answer': 'Em cua ngay hom qua'},
+      ],
+    );
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('u4').overrideWith((ref) async => const <String>[]),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CandidateDetailSheet(
+              candidate: c,
+              onPass: () {},
+              onLike: () {},
+              // onQuote intentionally omitted (null) — deck mode.
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('quote_photo')), findsNothing);
+    expect(find.byKey(const Key('quote_baitu_0')), findsNothing);
+    expect(find.byKey(const Key('quote_prompt_p1')), findsNothing);
+    expect(find.text('Trả lời'), findsNothing);
+    expect(find.text('Trả lời ảnh này'), findsNothing);
+    // deck THÍCH/BỎ QUA buttons still present (unchanged).
+    expect(find.byKey(const Key('detail_pass_btn')), findsOneWidget);
+    expect(find.byKey(const Key('detail_like_btn')), findsOneWidget);
+  });
+
+  testWidgets(
+      'chế độ icebreaker (onQuote khác null): ẩn nút THÍCH/BỎ QUA, hiện nút Trả lời',
+      (tester) async {
+    const c = Candidate(
+      id: 'u5',
+      displayName: 'Mai',
+      age: 24,
+      sharedBaitu: ['Nơi Này Có Anh'],
+      prompts: [
+        {'prompt_id': 'p1', 'answer': 'Em cua ngay hom qua'},
+      ],
+    );
+    String? quoted;
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('u5').overrideWith((ref) async => const <String>[]),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CandidateDetailSheet(
+              candidate: c,
+              onQuote: (q) => quoted = q,
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('detail_pass_btn')), findsNothing);
+    expect(find.byKey(const Key('detail_like_btn')), findsNothing);
+    expect(find.byKey(const Key('quote_photo')), findsOneWidget);
+    expect(find.byKey(const Key('quote_baitu_0')), findsOneWidget);
+    expect(find.byKey(const Key('quote_prompt_p1')), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const Key('quote_baitu_0')));
+    await tester.tap(find.byKey(const Key('quote_baitu_0')));
+    expect(quoted, 'Về bài "Nơi Này Có Anh" của bạn: ');
+  });
 }

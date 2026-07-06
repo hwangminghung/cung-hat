@@ -9,23 +9,38 @@ import 'report_sheet.dart';
 
 /// Sheet chi tiết ứng viên (tap card để mở). Dữ liệu = những gì
 /// get_discovery_candidates đã trả (sanitized, band-only) — không gọi thêm RPC.
+///
+/// Chế độ kép:
+///  * Chế độ deck (mặc định, [onQuote] null): [onPass]/[onLike] bắt buộc về ý
+///    nghĩa (deck luôn truyền cả 2), 2 nút THÍCH/BỎ QUA hiện; không có nút
+///    "Trả lời" nào (giữ nguyên hành vi cũ 100%).
+///  * Chế độ icebreaker (mở từ ChatScreen sau match, [onQuote] khác null):
+///    ẩn 2 nút THÍCH/BỎ QUA (candidate đã match rồi, không cần swipe lại);
+///    mỗi bài tủ chung / mỗi prompt / carousel ảnh có nút "Trả lời" gọi
+///    [onQuote] với câu mồi rồi đóng sheet.
 class CandidateDetailSheet extends StatelessWidget {
   const CandidateDetailSheet({
     super.key,
     required this.candidate,
-    required this.onPass,
-    required this.onLike,
+    this.onPass,
+    this.onLike,
+    this.onQuote,
   });
 
   final Candidate candidate;
-  final VoidCallback onPass;
-  final VoidCallback onLike;
+  final VoidCallback? onPass;
+  final VoidCallback? onLike;
+
+  /// Khác null = chế độ icebreaker (xem từ ChatScreen). Nhận câu mồi để
+  /// prefill composer chat.
+  final ValueChanged<String>? onQuote;
 
   static Future<void> show(
     BuildContext context, {
     required Candidate candidate,
-    required VoidCallback onPass,
-    required VoidCallback onLike,
+    VoidCallback? onPass,
+    VoidCallback? onLike,
+    ValueChanged<String>? onQuote,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -38,14 +53,24 @@ class CandidateDetailSheet extends StatelessWidget {
           controller: controller,
           child: CandidateDetailSheet(
             candidate: candidate,
-            onPass: () {
-              Navigator.of(sheetCtx).pop();
-              onPass();
-            },
-            onLike: () {
-              Navigator.of(sheetCtx).pop();
-              onLike();
-            },
+            onPass: onPass == null
+                ? null
+                : () {
+                    Navigator.of(sheetCtx).pop();
+                    onPass();
+                  },
+            onLike: onLike == null
+                ? null
+                : () {
+                    Navigator.of(sheetCtx).pop();
+                    onLike();
+                  },
+            onQuote: onQuote == null
+                ? null
+                : (q) {
+                    Navigator.of(sheetCtx).pop();
+                    onQuote(q);
+                  },
           ),
         ),
       ),
@@ -73,6 +98,15 @@ class CandidateDetailSheet extends StatelessWidget {
               swipeable: true,
             ),
           ),
+          if (onQuote != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                key: const Key('quote_photo'),
+                onPressed: () => onQuote!('Ảnh này xịn quá! '),
+                child: const Text('Trả lời ảnh này'),
+              ),
+            ),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
@@ -145,13 +179,21 @@ class CandidateDetailSheet extends StatelessWidget {
                     .bodyMedium
                     ?.copyWith(color: AppColors.textSecondary))
           else
-            for (final song in candidate.sharedBaitu)
+            for (final (i, song) in candidate.sharedBaitu.indexed)
               ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.music_note_rounded,
                     color: AppColors.primary),
                 title: Text(song),
+                trailing: onQuote == null
+                    ? null
+                    : TextButton(
+                        key: Key('quote_baitu_$i'),
+                        onPressed: () =>
+                            onQuote!('Về bài "$song" của bạn: '),
+                        child: const Text('Trả lời'),
+                      ),
               ),
           for (final p in candidate.prompts)
             if (karaokePromptQuestion(p['prompt_id'] as String? ?? '') != null)
@@ -173,31 +215,45 @@ class CandidateDetailSheet extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text('${p['answer']}',
                         style: Theme.of(context).textTheme.titleMedium),
+                    if (onQuote != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          key: Key('quote_prompt_${p['prompt_id']}'),
+                          onPressed: () => onQuote!(
+                              'Bạn nói "${p['answer']}" — kể thêm đi: '),
+                          child: const Text('Trả lời'),
+                        ),
+                      ),
                   ],
                 ),
               ),
           const SizedBox(height: AppSpacing.xl),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('detail_pass_btn'),
-                  onPressed: onPass,
-                  icon: const Icon(Icons.close_rounded),
-                  label: const Text('Bỏ qua'),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const Key('detail_like_btn'),
-                  onPressed: onLike,
-                  icon: const Icon(Icons.favorite_rounded),
-                  label: const Text('Thích'),
-                ),
-              ),
-            ],
-          ),
+          if (onPass != null || onLike != null)
+            Row(
+              children: [
+                if (onPass != null)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const Key('detail_pass_btn'),
+                      onPressed: onPass,
+                      icon: const Icon(Icons.close_rounded),
+                      label: const Text('Bỏ qua'),
+                    ),
+                  ),
+                if (onPass != null && onLike != null)
+                  const SizedBox(width: AppSpacing.md),
+                if (onLike != null)
+                  Expanded(
+                    child: FilledButton.icon(
+                      key: const Key('detail_like_btn'),
+                      onPressed: onLike,
+                      icon: const Icon(Icons.favorite_rounded),
+                      label: const Text('Thích'),
+                    ),
+                  ),
+              ],
+            ),
           const SizedBox(height: AppSpacing.sm),
           Center(
             child: TextButton(
