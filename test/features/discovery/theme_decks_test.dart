@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +20,8 @@ import 'package:cung_hat/features/photos/data/photo_repository.dart';
 import '../../support/supabase_mocks.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
+
+class _MockDiscoveryRepository extends Mock implements DiscoveryRepository {}
 
 class _FakePhotoRepository extends Mock implements PhotoRepository {
   @override
@@ -199,6 +203,96 @@ void main() {
       expect(find.byKey(const Key('explore_btn')), findsOneWidget);
       expect(find.byKey(const Key('deck_boost_btn')), findsOneWidget);
       expect(find.byKey(const Key('theme_deck_back')), findsNothing);
+    });
+  });
+
+  group('Neo rewind xuyên deck (lastSwipeAnchorProvider)', () {
+    Future<void> pumpMainDeck(
+      WidgetTester tester, {
+      required DiscoveryRepository repo,
+    }) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            discoveryRepositoryProvider.overrideWithValue(repo),
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            deckItemsProvider(null).overrideWith((ref) async => const [
+                  CandidateItem(Candidate(id: 'x1', displayName: 'X1')),
+                  CandidateItem(Candidate(id: 'x2', displayName: 'X2')),
+                ]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{'pro'}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+        'neo thuộc deck KHÁC → rewind trên main deck no-op, KHÔNG gọi undo_last_swipe',
+        (tester) async {
+      final repo = _MockDiscoveryRepository();
+      when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => false);
+      when(() => repo.undoLastSwipe()).thenAnswer((_) async => true);
+
+      await pumpMainDeck(tester, repo: repo);
+
+      // Vuốt X1 trên main deck — neo rewind trỏ vào deck chính.
+      await tester.tap(find.byKey(const Key('deck_like_btn')));
+      await tester.pumpAndSettle();
+
+      // Mô phỏng: user push /explore/ballad (main deck vẫn mounted phía dưới)
+      // và vuốt Y ở đó — swipe THẬT mới nhất phía server giờ thuộc deck
+      // ballad, không phải main. undo_last_swipe là GLOBAL: gọi từ main deck
+      // lúc này sẽ xoá nhầm swipe Y của deck ballad trong khi UI main khôi
+      // phục X1 — chính là desync mà neo toàn cục phải chặn.
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DoiDeckScreen)),
+      );
+      container.read(lastSwipeAnchorProvider.notifier).state = (
+        genre: 'ballad',
+        candidate: const Candidate(id: 'y', displayName: 'Y'),
+      );
+
+      await tester.tap(find.byKey(const Key('deck_rewind_btn')));
+      await tester.pumpAndSettle();
+
+      verifyNever(() => repo.undoLastSwipe());
+    });
+
+    testWidgets(
+        'neo thuộc ĐÚNG deck → rewind vẫn gọi undo_last_swipe bình thường',
+        (tester) async {
+      final repo = _MockDiscoveryRepository();
+      when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => false);
+      final pendingUndo = Completer<bool>();
+      when(() => repo.undoLastSwipe()).thenAnswer((_) => pendingUndo.future);
+
+      await pumpMainDeck(tester, repo: repo);
+
+      // Vuốt X1 trên main deck → neo = (genre: null, candidate: X1), khớp
+      // deck đang đứng.
+      await tester.tap(find.byKey(const Key('deck_like_btn')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('deck_rewind_btn')));
+      await tester.pump();
+
+      verify(() => repo.undoLastSwipe()).called(1);
+
+      pendingUndo.complete(true);
+      await tester.pumpAndSettle();
+
+      // Card X1 được khôi phục về deck (controller.undo thành công).
+      expect(find.text('X1'), findsOneWidget);
     });
   });
 }

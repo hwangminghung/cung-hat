@@ -152,7 +152,8 @@ void main() {
     // Card đầu deck là 'Quỳnh'.
     expect(find.text('Quỳnh'), findsOneWidget);
 
-    // Vuốt phải (like) → onSwipe gán _lastSwiped, gọi _handleSwipe (đang treo).
+    // Vuốt phải (like) → onSwipe gán neo rewind (lastSwipeAnchorProvider),
+    // gọi _handleSwipe (đang treo).
     await tester.tap(find.byKey(const Key('deck_like_btn')));
     await tester.pumpAndSettle();
 
@@ -331,7 +332,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Vuốt 1 card để _lastSwiped có giá trị.
+    // Vuốt 1 card để neo rewind (lastSwipeAnchorProvider) có giá trị.
     await tester.tap(find.byKey(const Key('deck_like_btn')));
     await tester.pumpAndSettle();
 

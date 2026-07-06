@@ -54,3 +54,9 @@ final themeDeckCountsProvider = FutureProvider<Map<String, int>>((ref) => ref
 
 /// Thời điểm hết hạn của lượt Boost đang chạy; null khi không boost.
 final activeBoostProvider = StateProvider<DateTime?>((ref) => null);
+
+/// Neo rewind toàn cục: swipe THẬT gần nhất trên bất kỳ deck nào (main/genre).
+/// undo_last_swipe phía server là GLOBAL nên rewind chỉ hợp lệ khi neo thuộc
+/// đúng deck đang bấm — neo lệch deck mà vẫn undo là desync client/server.
+final lastSwipeAnchorProvider =
+    StateProvider<({String? genre, Candidate candidate})?>((ref) => null);

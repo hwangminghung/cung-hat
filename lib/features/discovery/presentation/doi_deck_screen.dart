@@ -39,8 +39,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   /// Chặn mở trùng ProUpsellSheet khi nhiều swipe lỗi like_limit liên tiếp.
   bool _upsellShowing = false;
 
-  /// Ứng viên vừa vuốt gần nhất, set ở mỗi swipe để rewind có thể khôi phục.
-  Candidate? _lastSwiped;
+  // Neo rewind KHÔNG còn là field per-State: main deck vẫn mounted dưới route
+  // /explore/:genre, nên field cục bộ sẽ giữ neo cũ trong khi swipe thật mới
+  // nhất phía server thuộc deck khác → dùng lastSwipeAnchorProvider (toàn cục,
+  // ghi kèm genre của deck) thay thế.
 
   /// Chặn double-tap rewind khi RPC undo đang bay — gọi lần 2 sẽ xoá nhầm
   /// lượt vuốt CŨ HƠN phía server trong khi deck chỉ khôi phục được 1 card.
@@ -88,10 +90,12 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   }
 
   /// Điểm refetch DUY NHẤT: list mới → ObjectKey đổi → CardSwiper dựng lại
-  /// với history rỗng, nên phải bỏ quyền rewind của deck cũ — nếu không,
+  /// với history rỗng, nên phải bỏ neo rewind của deck cũ — nếu không,
   /// rewind sẽ xoá swipe phía server mà không khôi phục được card nào.
+  /// (Null neo TOÀN CỤC là hướng an toàn: nếu neo đang thuộc deck khác thì
+  /// deck đó chỉ mất tiện ích rewind, không bao giờ desync.)
   void _refreshDeck() {
-    _lastSwiped = null;
+    ref.read(lastSwipeAnchorProvider.notifier).state = null;
     ref.invalidate(candidatesProvider(widget.genre));
   }
 
@@ -291,14 +295,23 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                           case CandidateItem(:final candidate):
                             final dir = _directionToSwipe(direction);
                             if (dir != null) {
-                              _lastSwiped = candidate;
+                              // Neo toàn cục ghi kèm genre: rewind chỉ hợp lệ
+                              // từ đúng deck sở hữu swipe thật mới nhất.
+                              ref
+                                  .read(lastSwipeAnchorProvider.notifier)
+                                  .state = (
+                                genre: widget.genre,
+                                candidate: candidate,
+                              );
                               _handleSwipe(candidate, dir);
                             }
                           case KeoPromoItem(:final keo):
                             // Promo: không quota, không record_swipe, không
-                            // rewind — null _lastSwiped để rewind sau promo
-                            // no-op thay vì undo nhầm swipe thật cũ hơn.
-                            _lastSwiped = null;
+                            // rewind — null neo để rewind sau promo no-op
+                            // thay vì undo nhầm swipe thật cũ hơn.
+                            ref
+                                .read(lastSwipeAnchorProvider.notifier)
+                                .state = null;
                             if (direction == CardSwiperDirection.right) {
                               context.push('/keo/${keo.id}');
                             }
@@ -407,7 +420,14 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       ProUpsellSheet.show(context, variant: ProUpsellVariant.rewind);
       return;
     }
-    if (_lastSwiped == null) return;
+    // Bất biến xuyên deck: undo_last_swipe phía server xoá swipe MỚI NHẤT
+    // toàn cục (bất kể deck), nên chỉ được rewind khi neo thuộc ĐÚNG deck
+    // này. Neo null hoặc thuộc deck khác (vd: vuốt trên main deck rồi sang
+    // /explore/ballad vuốt tiếp, quay lại main bấm rewind) → no-op im lặng;
+    // nếu cứ undo, server xoá swipe của deck kia trong khi UI deck này khôi
+    // phục nhầm card của mình — silent desync.
+    final anchor = ref.read(lastSwipeAnchorProvider);
+    if (anchor == null || anchor.genre != widget.genre) return;
     if (_rewindInFlight) return;
     _rewindInFlight = true;
     try {
@@ -415,7 +435,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           await ref.read(discoveryRepositoryProvider).undoLastSwipe();
       if (undone && mounted) {
         _controller.undo(); // card_swiper đưa card trước đó trở lại deck
-        _lastSwiped = null;
+        ref.read(lastSwipeAnchorProvider.notifier).state = null;
       }
     } catch (e) {
       final err = discoverySwipeError(e);
@@ -484,14 +504,14 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           }
           // Server raise like_limit/super_limit TRƯỚC khi ghi swipe, nên ta
           // BIẾT lượt vuốt chưa được lưu — hoàn card về deck để client khớp
-          // với server. _lastSwiped đã bị onSwipe gán sang ứng viên bị từ chối
+          // với server. Neo rewind đã bị onSwipe gán sang ứng viên bị từ chối
           // này; sau undo, history của CardSwiper rỗng nên phải null nó (như
           // _handleRewind), nếu không rewind kế tiếp sẽ gọi undo_last_swipe xoá
           // một swipe CŨ HƠN có thật trong khi deck không còn gì để khôi phục —
           // đúng cái desync mà _refreshDeck/_handleRewind cảnh báo.
           if (mounted) {
             _controller.undo();
-            _lastSwiped = null;
+            ref.read(lastSwipeAnchorProvider.notifier).state = null;
           }
         case DiscoverySwipeError.superLimit:
           if (!_upsellShowing) {
@@ -501,7 +521,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           }
           if (mounted) {
             _controller.undo();
-            _lastSwiped = null;
+            ref.read(lastSwipeAnchorProvider.notifier).state = null;
           }
         case DiscoverySwipeError.proRequired:
         // boost* chỉ phát sinh từ activate_boost; ở đây chỉ để switch đủ nhánh.
