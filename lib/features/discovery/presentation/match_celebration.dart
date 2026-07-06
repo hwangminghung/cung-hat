@@ -3,15 +3,21 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../onboarding/application/reference_providers.dart';
+import '../../onboarding/domain/music_ref.dart';
 
 /// Màn hình chúc mừng "match" toàn màn hình — hai monogram bay vào từ hai
 /// bên, trái tim phóng to ở giữa, tiêu đề scale-in, và mưa nốt nhạc rơi nền.
 /// Tôn trọng reduced-motion: nếu bật, nhảy thẳng tới trạng thái cuối.
-class MatchCelebration extends StatefulWidget {
+///
+/// [sharedBaitu] giữ SONG ID thô — resolve tên hiển thị qua songsProvider
+/// (cùng pattern CandidateDetailSheet); loading/lỗi/id lạ → raw id fallback.
+class MatchCelebration extends ConsumerStatefulWidget {
   const MatchCelebration({
     super.key,
     required this.otherName,
@@ -28,10 +34,10 @@ class MatchCelebration extends StatefulWidget {
   final VoidCallback onContinue;
 
   @override
-  State<MatchCelebration> createState() => _MatchCelebrationState();
+  ConsumerState<MatchCelebration> createState() => _MatchCelebrationState();
 }
 
-class _MatchCelebrationState extends State<MatchCelebration>
+class _MatchCelebrationState extends ConsumerState<MatchCelebration>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _slide;
@@ -87,6 +93,11 @@ class _MatchCelebrationState extends State<MatchCelebration>
 
   @override
   Widget build(BuildContext context) {
+    // Đang loading/lỗi → map rỗng → fallback raw id, KHÔNG chặn màn ăn mừng;
+    // watch nên khi songs resolve xong widget tự rebuild ra tên bài.
+    final songs = ref.watch(songsProvider).value ?? const <Song>[];
+    final titleById = {for (final s in songs) s.id: s.title};
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.brandGradient),
@@ -179,7 +190,7 @@ class _MatchCelebrationState extends State<MatchCelebration>
                                 ),
                                 child: Text(
                                   'Cùng tủ: '
-                                  '${widget.sharedBaitu.take(2).join(' · ')}',
+                                  '${widget.sharedBaitu.take(2).map((id) => titleById[id] ?? id).join(' · ')}',
                                   style: const TextStyle(
                                     color: AppColors.onPrimary,
                                     fontSize: 13,

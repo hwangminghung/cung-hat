@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/candidate.dart';
+import '../domain/like_teaser.dart';
 
 class DiscoveryRepository {
   DiscoveryRepository(this._client);
@@ -83,5 +84,30 @@ class DiscoveryRepository {
     final res =
         await _client.rpc('get_match_id_with', params: {'p_other': otherId});
     return res as String?;
+  }
+
+  /// Hồ sơ người ĐÃ match (icebreaker trong chat). null = RPC không trả gì,
+  /// hoặc đối phương đã xoá tài khoản (composite null-row, id null).
+  Future<Candidate?> getMatchProfile(String matchId) async {
+    final res =
+        await _client.rpc('get_match_profile', params: {'p_match': matchId});
+    if (res == null) return null;
+    final m = Map<String, dynamic>.from(
+        res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
+    if (m['id'] == null) return null; // composite null-row (đối phương xoá mem)
+    return Candidate.fromJson(m);
+  }
+
+  /// Teaser cho user free — danh sách người thích mình đã làm mờ (edge
+  /// `likes-teaser`): KHÔNG id/tên; ảnh là bản mosaic server-side, không bao
+  /// giờ là ảnh gốc. Rebase origin như sign-photo (kong:8000 local).
+  Future<List<LikeTeaser>> getLikesTeaser() async {
+    final res = await _client.functions.invoke('likes-teaser');
+    final list = (res.data?['likers'] as List?) ?? const [];
+    final base = Uri.parse(_client.storage.url);
+    return [
+      for (final e in list)
+        LikeTeaser.fromJson(Map<String, dynamic>.from(e as Map)).rebase(base),
+    ];
   }
 }

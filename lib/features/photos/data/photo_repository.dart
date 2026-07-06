@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Tiny injectable seam over the Supabase Storage builder chain.
@@ -108,8 +107,9 @@ class PhotoRepository {
   /// default-port [base] yields no `:port` artifact (`Uri.replace(port: 443)` on
   /// an https URI omits `:443`). Unparseable input is returned unchanged so one
   /// bad URL never breaks the batch. Pure and directly unit-tested; see
-  /// [signedUrlsOf] for why the rewrite is needed.
-  @visibleForTesting
+  /// [signedUrlsOf] for why the rewrite is needed. Khong con @visibleForTesting:
+  /// LikeTeaser.rebase (likes-teaser edge tra URL cung dang kong:8000) dung
+  /// chung helper nay tu production code.
   static String rebaseOrigin(String url, Uri base) {
     final Uri u;
     try {

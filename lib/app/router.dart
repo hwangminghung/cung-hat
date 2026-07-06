@@ -7,6 +7,7 @@ import '../features/auth/presentation/phone_screen.dart';
 import '../features/billing/presentation/store_screen.dart';
 import '../features/discovery/presentation/doi_deck_screen.dart';
 import '../features/discovery/presentation/likes_screen.dart';
+import '../features/discovery/presentation/likes_teaser_screen.dart';
 import '../features/discovery/presentation/theme_board_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/keo/presentation/create_keo_screen.dart';
@@ -15,6 +16,7 @@ import '../features/keo/presentation/keo_detail_screen.dart';
 import '../features/legal/presentation/legal_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
 import '../features/onboarding/presentation/onboarding_flow.dart';
+import '../features/keo/presentation/shared_keo_screen.dart';
 import '../features/plan/presentation/plan_screen.dart';
 import '../features/plan/presentation/shared_plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
@@ -33,7 +35,9 @@ String? authRedirect({
   required String location,
 }) {
   final authArea = location == '/auth' || location == '/otp';
-  final publicArea = authArea || location.startsWith('/plan/shared');
+  final publicArea = authArea ||
+      location.startsWith('/plan/shared') ||
+      location.startsWith('/keo/shared');
   if (!signedIn) return publicArea ? null : '/auth';
   if (hasProfile == null) return null;
   if (!hasProfile) return location == '/onboarding' ? null : '/onboarding';
@@ -70,6 +74,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),
       GoRoute(path: '/likes', builder: (_, _) => const LikesScreen()),
+      GoRoute(
+          path: '/likes-teaser', builder: (_, _) => const LikesTeaserScreen()),
       GoRoute(path: '/explore', builder: (_, _) => const ThemeBoardScreen()),
       GoRoute(
         path: '/explore/:genre',
@@ -80,6 +86,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/legal/tos', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/tos_vi.md', title: 'Điều khoản sử dụng')),
       GoRoute(path: '/plan/shared/:token', builder: (_, s) => SharedPlanScreen(token: s.pathParameters['token']!)),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
+      GoRoute(path: '/keo/shared/:token', builder: (_, s) => SharedKeoScreen(token: s.pathParameters['token']!)),
       GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
       GoRoute(
         path: '/keo/plan/:id',

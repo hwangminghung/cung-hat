@@ -23,6 +23,9 @@ void main() {
   test('unauthenticated can view a shared plan', () {
     expect(authRedirect(signedIn: false, hasProfile: false, location: '/plan/shared/tok'), isNull);
   });
+  test('unauthenticated can view a shared keo', () {
+    expect(authRedirect(signedIn: false, hasProfile: false, location: '/keo/shared/tok'), isNull);
+  });
 
   // Profile chưa load xong (null = unknown): đứng yên chờ, KHÔNG được đoán
   // /onboarding — tránh flash màn onboarding cho user đã có hồ sơ (bug OTP kẹt).

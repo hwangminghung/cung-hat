@@ -12,7 +12,7 @@ import '../../profile/application/profile_providers.dart';
 import '../../settings/application/settings_providers.dart';
 import '../application/photo_providers.dart';
 
-const _maxSlots = 3;
+const _maxSlots = 6;
 
 /// Default gallery pick used in production. Overridden in widget tests via the
 /// [PhotoManagerSheet.pickBytes] seam so tests never touch a real gallery.
@@ -136,40 +136,48 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
           AppSpacing.lg,
           AppSpacing.xl,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        // Scrollable: at _maxSlots=6 the 2-row grid of square slots is taller
+        // than a fixed-height Column tolerates on short viewports. The sheet is
+        // presented via showModalBottomSheet(isScrollControlled: true) in
+        // home_shell.dart, so growing/scrolling here is the intended behavior
+        // rather than a workaround.
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Ảnh hồ sơ', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Thêm tối đa $_maxSlots ảnh để hồ sơ nổi bật hơn.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            consents.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                child: Center(child: CircularProgressIndicator()),
+              const SizedBox(height: AppSpacing.lg),
+              Text('Ảnh hồ sơ', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Thêm tối đa $_maxSlots ảnh để hồ sơ nổi bật hơn.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
               ),
-              error: (_, _) => const _ConsentGate(),
-              data: (map) =>
-                  (map['photos'] == true) ? _buildGrid() : const _ConsentGate(),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              consents.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, _) => const _ConsentGate(),
+                data: (map) => (map['photos'] == true)
+                    ? _buildGrid()
+                    : const _ConsentGate(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -182,29 +190,33 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
         : ref.watch(signedUrlsProvider(userId));
     final urls = urlsAsync.value ?? const <String>[];
     final paths = ref.watch(myPhotoPathsProvider);
-    return Row(
+    // 2-row x 3-col grid (was a single Row of 3, which would overflow at
+    // _maxSlots=6). GridView over a Row keeps each slot's own widget/keys/
+    // busy-logic untouched — only the container layout changes.
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: AppSpacing.sm,
+      crossAxisSpacing: AppSpacing.sm,
       children: [
-        for (var i = 0; i < _maxSlots; i++) ...[
-          if (i > 0) const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: _PhotoSlot(
-              key: Key('photo_slot_$i'),
-              // Slots fill left-to-right from the existing photo list. `paths`
-              // and `urls` are two independently-fetched lists zipped by index:
-              // `signedUrlsProvider` returns URLs positionally aligned to
-              // `photoPaths` (same order, server-signed by the `sign-photo` edge
-              // function over the same `photo_paths` array), so index `i` is a
-              // valid join key. A shorter `urls` list degrades to the grey
-              // placeholder by design.
-              path: i < paths.length ? paths[i] : null,
-              url: i < urls.length ? urls[i] : null,
-              busy: _busySlot == i,
-              disabled: _busySlot != null && _busySlot != i,
-              onAdd: () => _add(i),
-              onRemove: (path) => _remove(i, path),
-            ),
+        for (var i = 0; i < _maxSlots; i++)
+          _PhotoSlot(
+            key: Key('photo_slot_$i'),
+            // Slots fill left-to-right, top-to-bottom from the existing photo
+            // list. `paths` and `urls` are two independently-fetched lists
+            // zipped by index: `signedUrlsProvider` returns URLs positionally
+            // aligned to `photoPaths` (same order, server-signed by the
+            // `sign-photo` edge function over the same `photo_paths` array),
+            // so index `i` is a valid join key. A shorter `urls` list degrades
+            // to the grey placeholder by design.
+            path: i < paths.length ? paths[i] : null,
+            url: i < urls.length ? urls[i] : null,
+            busy: _busySlot == i,
+            disabled: _busySlot != null && _busySlot != i,
+            onAdd: () => _add(i),
+            onRemove: (path) => _remove(i, path),
           ),
-        ],
       ],
     );
   }

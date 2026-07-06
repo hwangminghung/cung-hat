@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../onboarding/application/reference_providers.dart';
+import '../../onboarding/domain/music_ref.dart';
 import '../../photos/presentation/photo_carousel.dart';
 import '../../profile/domain/karaoke_prompts.dart';
 import '../domain/candidate.dart';
@@ -9,23 +12,38 @@ import 'report_sheet.dart';
 
 /// Sheet chi tiết ứng viên (tap card để mở). Dữ liệu = những gì
 /// get_discovery_candidates đã trả (sanitized, band-only) — không gọi thêm RPC.
-class CandidateDetailSheet extends StatelessWidget {
+///
+/// Chế độ kép:
+///  * Chế độ deck (mặc định, [onQuote] null): [onPass]/[onLike] bắt buộc về ý
+///    nghĩa (deck luôn truyền cả 2), 2 nút THÍCH/BỎ QUA hiện; không có nút
+///    "Trả lời" nào (giữ nguyên hành vi cũ 100%).
+///  * Chế độ icebreaker (mở từ ChatScreen sau match, [onQuote] khác null):
+///    ẩn 2 nút THÍCH/BỎ QUA (candidate đã match rồi, không cần swipe lại);
+///    mỗi bài tủ chung / mỗi prompt / carousel ảnh có nút "Trả lời" gọi
+///    [onQuote] với câu mồi rồi đóng sheet.
+class CandidateDetailSheet extends ConsumerWidget {
   const CandidateDetailSheet({
     super.key,
     required this.candidate,
-    required this.onPass,
-    required this.onLike,
+    this.onPass,
+    this.onLike,
+    this.onQuote,
   });
 
   final Candidate candidate;
-  final VoidCallback onPass;
-  final VoidCallback onLike;
+  final VoidCallback? onPass;
+  final VoidCallback? onLike;
+
+  /// Khác null = chế độ icebreaker (xem từ ChatScreen). Nhận câu mồi để
+  /// prefill composer chat.
+  final ValueChanged<String>? onQuote;
 
   static Future<void> show(
     BuildContext context, {
     required Candidate candidate,
-    required VoidCallback onPass,
-    required VoidCallback onLike,
+    VoidCallback? onPass,
+    VoidCallback? onLike,
+    ValueChanged<String>? onQuote,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -38,14 +56,24 @@ class CandidateDetailSheet extends StatelessWidget {
           controller: controller,
           child: CandidateDetailSheet(
             candidate: candidate,
-            onPass: () {
-              Navigator.of(sheetCtx).pop();
-              onPass();
-            },
-            onLike: () {
-              Navigator.of(sheetCtx).pop();
-              onLike();
-            },
+            onPass: onPass == null
+                ? null
+                : () {
+                    Navigator.of(sheetCtx).pop();
+                    onPass();
+                  },
+            onLike: onLike == null
+                ? null
+                : () {
+                    Navigator.of(sheetCtx).pop();
+                    onLike();
+                  },
+            onQuote: onQuote == null
+                ? null
+                : (q) {
+                    Navigator.of(sheetCtx).pop();
+                    onQuote(q);
+                  },
           ),
         ),
       ),
@@ -53,10 +81,16 @@ class CandidateDetailSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final name = candidate.displayName ?? 'Bạn hát mới';
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
     final monogram = name.isEmpty ? '?' : name[0].toUpperCase();
+
+    // shared_baitu giữ SONG ID thô ('s1'..) — resolve tên hiển thị qua bảng
+    // songs (songsProvider, reference đã cache). Đang loading/lỗi → map rỗng
+    // → fallback hiện raw id, KHÔNG chặn render.
+    final songs = ref.watch(songsProvider).value ?? const <Song>[];
+    final titleById = {for (final s in songs) s.id: s.title};
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -73,6 +107,15 @@ class CandidateDetailSheet extends StatelessWidget {
               swipeable: true,
             ),
           ),
+          if (onQuote != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                key: const Key('quote_photo'),
+                onPressed: () => onQuote!('Ảnh này xịn quá! '),
+                child: const Text('Trả lời ảnh này'),
+              ),
+            ),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
@@ -145,13 +188,21 @@ class CandidateDetailSheet extends StatelessWidget {
                     .bodyMedium
                     ?.copyWith(color: AppColors.textSecondary))
           else
-            for (final song in candidate.sharedBaitu)
+            for (final (i, song) in candidate.sharedBaitu.indexed)
               ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.music_note_rounded,
                     color: AppColors.primary),
-                title: Text(song),
+                title: Text(titleById[song] ?? song),
+                trailing: onQuote == null
+                    ? null
+                    : TextButton(
+                        key: Key('quote_baitu_$i'),
+                        onPressed: () => onQuote!(
+                            'Về bài "${titleById[song] ?? song}" của bạn: '),
+                        child: const Text('Trả lời'),
+                      ),
               ),
           for (final p in candidate.prompts)
             if (karaokePromptQuestion(p['prompt_id'] as String? ?? '') != null)
@@ -173,31 +224,45 @@ class CandidateDetailSheet extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text('${p['answer']}',
                         style: Theme.of(context).textTheme.titleMedium),
+                    if (onQuote != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          key: Key('quote_prompt_${p['prompt_id']}'),
+                          onPressed: () => onQuote!(
+                              'Bạn nói "${p['answer']}" — kể thêm đi: '),
+                          child: const Text('Trả lời'),
+                        ),
+                      ),
                   ],
                 ),
               ),
           const SizedBox(height: AppSpacing.xl),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('detail_pass_btn'),
-                  onPressed: onPass,
-                  icon: const Icon(Icons.close_rounded),
-                  label: const Text('Bỏ qua'),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const Key('detail_like_btn'),
-                  onPressed: onLike,
-                  icon: const Icon(Icons.favorite_rounded),
-                  label: const Text('Thích'),
-                ),
-              ),
-            ],
-          ),
+          if (onPass != null || onLike != null)
+            Row(
+              children: [
+                if (onPass != null)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const Key('detail_pass_btn'),
+                      onPressed: onPass,
+                      icon: const Icon(Icons.close_rounded),
+                      label: const Text('Bỏ qua'),
+                    ),
+                  ),
+                if (onPass != null && onLike != null)
+                  const SizedBox(width: AppSpacing.md),
+                if (onLike != null)
+                  Expanded(
+                    child: FilledButton.icon(
+                      key: const Key('detail_like_btn'),
+                      onPressed: onLike,
+                      icon: const Icon(Icons.favorite_rounded),
+                      label: const Text('Thích'),
+                    ),
+                  ),
+              ],
+            ),
           const SizedBox(height: AppSpacing.sm),
           Center(
             child: TextButton(

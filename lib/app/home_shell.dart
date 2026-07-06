@@ -13,7 +13,6 @@ import '../features/photos/presentation/photo_manager_sheet.dart';
 import '../features/profile/application/profile_providers.dart';
 import '../features/profile/domain/profile_completion.dart';
 import '../features/profile/presentation/prompt_editor_sheet.dart';
-import '../shared/widgets/pro_upsell_sheet.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
@@ -157,7 +156,9 @@ class _ProfileTab extends ConsumerWidget {
               if (unlocked) {
                 context.push('/likes');
               } else {
-                ProUpsellSheet.show(context, variant: ProUpsellVariant.seeLikes);
+                // Free: màn teaser mosaic thay vì bung sheet Pro ngay — sheet
+                // giờ nằm sau CTA trong màn teaser (likes_teaser_screen.dart).
+                context.push('/likes-teaser');
               }
             },
           ),
@@ -170,7 +171,7 @@ class _ProfileTab extends ConsumerWidget {
           _ProfileTile(
             icon: Icons.photo_library_rounded,
             title: 'Ảnh hồ sơ',
-            subtitle: 'Thêm tối đa 3 ảnh vào hồ sơ',
+            subtitle: 'Thêm tối đa 6 ảnh vào hồ sơ',
             onTap: () => showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,
