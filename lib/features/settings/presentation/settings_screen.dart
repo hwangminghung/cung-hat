@@ -43,15 +43,8 @@ class SettingsScreen extends ConsumerWidget {
                           key: Key('consent_$purpose'),
                           title: Text(consentLabelsVi[purpose] ?? purpose),
                           value: consents[purpose] ?? false,
-                          onChanged: (value) async {
-                            final repo = ref.read(settingsRepositoryProvider);
-                            if (value) {
-                              await repo.grantConsent(purpose);
-                            } else {
-                              await repo.withdrawConsent(purpose);
-                            }
-                            ref.invalidate(myConsentsProvider);
-                          },
+                          onChanged: (value) =>
+                              _handleToggleConsent(context, ref, purpose, value),
                         ),
                     ],
                   ),
@@ -105,6 +98,33 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Lưu 1 consent toggle server-side. Chỉ invalidate provider khi lưu OK;
+  /// lỗi (offline/RPC) thì báo SnackBar và giữ nguyên trạng thái cũ — cùng
+  /// convention try/catch + mounted như _handleToggleAutoExpand
+  /// (doi_deck_screen.dart) — nếu không, RPC lỗi sẽ leak unhandled async
+  /// exception và switch tự nhảy lại vị trí cũ mà không có phản hồi gì.
+  Future<void> _handleToggleConsent(
+    BuildContext context,
+    WidgetRef ref,
+    String purpose,
+    bool value,
+  ) async {
+    try {
+      final repo = ref.read(settingsRepositoryProvider);
+      if (value) {
+        await repo.grantConsent(purpose);
+      } else {
+        await repo.withdrawConsent(purpose);
+      }
+      ref.invalidate(myConsentsProvider);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Không lưu được cài đặt, thử lại.')));
+      }
+    }
   }
 
   Future<void> _exportData(BuildContext context, WidgetRef ref) async {
