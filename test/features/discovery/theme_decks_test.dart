@@ -14,6 +14,7 @@ import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/discovery/domain/deck_item.dart';
 import 'package:cung_hat/features/discovery/domain/music_themes.dart';
 import 'package:cung_hat/features/discovery/presentation/doi_deck_screen.dart';
+import 'package:cung_hat/features/discovery/presentation/filter_sheet.dart';
 import 'package:cung_hat/features/discovery/presentation/theme_board_screen.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
 import 'package:cung_hat/features/photos/data/photo_repository.dart';
@@ -219,6 +220,8 @@ void main() {
                 ]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(
             theme: AppTheme.light(),
@@ -231,10 +234,11 @@ void main() {
       expect(find.text(musicThemeById('ballad')!.title), findsOneWidget);
       expect(find.byKey(const Key('explore_btn')), findsNothing);
       expect(find.byKey(const Key('deck_boost_btn')), findsNothing);
+      expect(find.byKey(const Key('filter_btn')), findsNothing);
       expect(find.byKey(const Key('theme_deck_back')), findsOneWidget);
     });
 
-    testWidgets('genre == null (deck chính) → có nút explore + boost',
+    testWidgets('genre == null (deck chính) → có nút explore + boost + filter',
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
@@ -250,6 +254,8 @@ void main() {
                 ]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(
             theme: AppTheme.light(),
@@ -261,7 +267,41 @@ void main() {
 
       expect(find.byKey(const Key('explore_btn')), findsOneWidget);
       expect(find.byKey(const Key('deck_boost_btn')), findsOneWidget);
+      expect(find.byKey(const Key('filter_btn')), findsOneWidget);
       expect(find.byKey(const Key('theme_deck_back')), findsNothing);
+    });
+
+    testWidgets('bấm filter_btn (deck chính) → mở FilterSheet',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            deckItemsProvider(null).overrideWith((ref) async => [
+                  const CandidateItem(
+                      Candidate(id: 'c1', displayName: 'A')),
+                ]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('filter_btn')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FilterSheet), findsOneWidget);
     });
   });
 
@@ -299,7 +339,8 @@ void main() {
                 .overrideWith((ref) async => <DeckItem>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp.router(
             theme: AppTheme.light(),
@@ -337,7 +378,8 @@ void main() {
             deckItemsProvider(null).overrideWith((ref) async => <DeckItem>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(
             theme: AppTheme.light(),

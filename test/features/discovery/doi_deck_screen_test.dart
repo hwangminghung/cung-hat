@@ -43,7 +43,8 @@ void main() {
             candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(
             theme: AppTheme.light(),

@@ -37,6 +37,22 @@ class DiscoveryRepository {
     await _client.rpc('set_discovery_auto_expand', params: {'p_on': on});
   }
 
+  /// (auto_expand, radius_km) — nguồn chính cho Bộ lọc.
+  Future<({bool autoExpand, int radiusKm})> getDiscoveryPrefs() async {
+    final res = await _client.rpc('get_discovery_prefs');
+    final m = Map<String, dynamic>.from(
+        res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
+    return (
+      autoExpand: m['auto_expand'] == true,
+      radiusKm: (m['radius_km'] as num?)?.toInt() ?? 50,
+    );
+  }
+
+  /// Lưu bán kính tìm kiếm (km, 5-100) server-side qua Bộ lọc.
+  Future<void> setDiscoveryRadius(int km) async {
+    await _client.rpc('set_discovery_radius', params: {'p_km': km});
+  }
+
   /// Users who have liked the current user. Server raises `entitlement_required`
   /// (surfaced as an error) when the caller lacks the `see_likes` entitlement.
   Future<List<Candidate>> whoLikedMe() async {

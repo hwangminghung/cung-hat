@@ -52,6 +52,45 @@ void main() {
         params: {'p_on': true})).called(1);
   });
 
+  group('getDiscoveryPrefs', () {
+    test('map hoá composite row (auto_expand, radius_km)', () async {
+      final client = MockSupabaseClient();
+      when(() => client.rpc('get_discovery_prefs')).thenAnswer(
+          (_) => rpcOk({'auto_expand': true, 'radius_km': 80}));
+      final result = await DiscoveryRepository(client).getDiscoveryPrefs();
+      expect(result.autoExpand, isTrue);
+      expect(result.radiusKm, 80);
+    });
+
+    test('unwrap List-shaped result (setof-style)', () async {
+      final client = MockSupabaseClient();
+      when(() => client.rpc('get_discovery_prefs')).thenAnswer((_) => rpcOk([
+            {'auto_expand': false, 'radius_km': 50},
+          ]));
+      final result = await DiscoveryRepository(client).getDiscoveryPrefs();
+      expect(result.autoExpand, isFalse);
+      expect(result.radiusKm, 50);
+    });
+
+    test('radius_km null → mặc định 50, auto_expand thiếu → false', () async {
+      final client = MockSupabaseClient();
+      when(() => client.rpc('get_discovery_prefs'))
+          .thenAnswer((_) => rpcOk(<String, dynamic>{}));
+      final result = await DiscoveryRepository(client).getDiscoveryPrefs();
+      expect(result.autoExpand, isFalse);
+      expect(result.radiusKm, 50);
+    });
+  });
+
+  test('setDiscoveryRadius gọi đúng RPC set_discovery_radius', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('set_discovery_radius', params: {'p_km': 80}))
+        .thenAnswer((_) => rpcOk(null));
+    await DiscoveryRepository(client).setDiscoveryRadius(80);
+    verify(() => client.rpc('set_discovery_radius', params: {'p_km': 80}))
+        .called(1);
+  });
+
   group('empty-deck expand UI', () {
     testWidgets(
         'deck rỗng hiện nút mở rộng + switch tự mở rộng (autoExpand=false)',
@@ -67,7 +106,8 @@ void main() {
             candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
         ),
@@ -97,7 +137,8 @@ void main() {
             candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
         ),
@@ -107,7 +148,8 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(DoiDeckScreen)),
       );
-      expect(container.read(deckRadiusProvider), 50);
+      // Chưa bấm mở rộng: override phiên vẫn null (dùng bán kính server 50).
+      expect(container.read(deckRadiusProvider), isNull);
 
       await tester.tap(find.byKey(const Key('expand_radius_btn')));
       await tester.pump();
@@ -131,7 +173,8 @@ void main() {
             candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
         ),
@@ -150,7 +193,7 @@ void main() {
       when(() => locationService.captureAndPush())
           .thenAnswer((_) async => false);
       // RPC lỗi async (offline/server) — UI phải nuốt lỗi + báo SnackBar,
-      // KHÔNG leak unhandled exception, KHÔNG invalidate autoExpandProvider.
+      // KHÔNG leak unhandled exception, KHÔNG invalidate discoveryPrefsProvider.
       final repo = _MockDiscoveryRepositoryForRadius();
       when(() => repo.setAutoExpand(any()))
           .thenAnswer((_) async => throw Exception('offline'));
@@ -163,7 +206,8 @@ void main() {
             candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
           ],
           child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
         ),
@@ -196,7 +240,8 @@ void main() {
             candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
             deckRadiusProvider.overrideWith((ref) => 100),
           ],
           child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
@@ -227,7 +272,8 @@ void main() {
                 ]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => false),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50)),
             deckRadiusProvider.overrideWith((ref) => 100),
           ],
           child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
@@ -253,7 +299,8 @@ void main() {
             candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
-            autoExpandProvider.overrideWith((ref) async => true),
+            discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: true, radiusKm: 50)),
           ],
           child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
         ),
