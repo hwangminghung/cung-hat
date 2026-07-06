@@ -1,6 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-// Validates a store purchase server-side, then grants the entitlement.
+// Fails closed until store receipt verification is implemented server-side.
 // Client passes its JWT; we resolve the user from it (never trust a user_id body field).
 Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -9,32 +9,25 @@ Deno.serve(async (req) => {
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) return new Response("unauthorized", { status: 401 });
 
-  const { platform, store_product_id, store_txn_id, receipt } = await req.json();
+  const { platform, store_product_id, store_txn_id, receipt } = await req.json().catch(() => ({}));
+  if (!platform || !store_product_id || !store_txn_id || !receipt) {
+    return new Response(JSON.stringify({ error: "missing_purchase_fields" }), { status: 400 });
+  }
+  if (!["ios", "android"].includes(platform)) {
+    return new Response(JSON.stringify({ error: "bad_platform" }), { status: 400 });
+  }
 
-  // TODO(prod): verify `receipt`/token with Apple App Store Server API (APPLE_*) or
-  // Google Play Developer API (GOOGLE_PLAY_SA_JSON). Reject if invalid/already-consumed.
-  const valid = Boolean(receipt && store_txn_id); // placeholder until store creds are wired
-  if (!valid) return new Response(JSON.stringify({ error: "invalid_receipt" }), { status: 400 });
-
-  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const { data: product } = await admin.from("products")
-    .select("id,type").eq("store_product_id", store_product_id).eq("platform", platform).maybeSingle();
-  if (!product) return new Response(JSON.stringify({ error: "unknown_product" }), { status: 400 });
-
-  await admin.from("purchases").upsert({
-    user_id: user.id, product_id: product.id, platform,
-    store_txn_id, receipt_ref: "stored", state: "validated",
-  }, { onConflict: "platform,store_txn_id" });
-
-  // boost = 24h window; see_likes/premium_filters = permanent.
-  const activeUntil = product.type === "boost"
-    ? new Date(Date.now() + 24 * 3600 * 1000).toISOString() : null;
-  await admin.from("entitlements").upsert({
-    user_id: user.id, feature: product.type,
-    source: platform === "ios" ? "ios_iap" : "play_billing", active_until: activeUntil,
-  }, { onConflict: "user_id,feature" });
-
-  return new Response(JSON.stringify({ ok: true, feature: product.type }), {
+  const verifierEnv = platform === "ios"
+    ? Deno.env.get("APPLE_SHARED_SECRET")
+    : Deno.env.get("GOOGLE_PLAY_SA_JSON");
+  if (!verifierEnv) {
+    return new Response(JSON.stringify({ error: "iap_verifier_not_configured" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  return new Response(JSON.stringify({ error: "iap_verifier_not_implemented" }), {
+    status: 501,
     headers: { "Content-Type": "application/json" },
   });
 });

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import '../../profile/application/profile_providers.dart';
 import '../application/auth_controller.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
@@ -16,6 +18,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final state = ref.watch(authControllerProvider);
+    ref.listen(authControllerProvider, (prev, next) {
+      if (prev?.phase != AuthPhase.verified &&
+          next.phase == AuthPhase.verified) {
+        ref.invalidate(myProfileProvider);
+        context.go('/');
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: Text(l10n?.otpTitle ?? 'Nhập mã OTP')),
       body: Padding(
@@ -28,20 +37,27 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             TextField(
               controller: _ctrl,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n?.otpLabel ?? 'Mã 6 số'),
+              decoration: InputDecoration(
+                labelText: l10n?.otpLabel ?? 'Mã 6 số',
+              ),
             ),
             const SizedBox(height: 16),
             FilledButton(
               key: const Key('verify_otp_btn'),
               onPressed: state.phase == AuthPhase.verifying
                   ? null
-                  : () => ref.read(authControllerProvider.notifier).verifyOtp(_ctrl.text),
+                  : () => ref
+                        .read(authControllerProvider.notifier)
+                        .verifyOtp(_ctrl.text),
               child: Text(l10n?.verify ?? 'Xác nhận'),
             ),
             if (state.phase == AuthPhase.error)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: Text(state.error ?? 'Lỗi', style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  state.error ?? 'Lỗi',
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
           ],
         ),

@@ -8,7 +8,7 @@ Flutter + Supabase music-meetup app (Vietnam): match strangers by music taste to
 3. `& "C:\Users\Public\flutter\bin\flutter.bat" run -d chrome --dart-define-from-file=env/dev.json`
 
 Codegen after model/ARB changes:
-`flutter gen-l10n && dart run build_runner build --delete-conflicting-outputs`
+`flutter gen-l10n && dart run build_runner build`
 
 Tests: `flutter test`. Static analysis: `flutter analyze`.
 Backend reset: `supabase db reset`. DB (pgTAP) tests: `supabase test db`.
