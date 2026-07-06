@@ -18,6 +18,8 @@ _VenueSuggestion _$VenueSuggestionFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       distanceBand: json['distance_band'] as String?,
+      lat: (json['lat'] as num?)?.toDouble(),
+      lng: (json['lng'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$VenueSuggestionToJson(_VenueSuggestion instance) =>
@@ -28,4 +30,6 @@ Map<String, dynamic> _$VenueSuggestionToJson(_VenueSuggestion instance) =>
       'style_tag': instance.styleTag,
       'photos': instance.photos,
       'distance_band': instance.distanceBand,
+      'lat': instance.lat,
+      'lng': instance.lng,
     };

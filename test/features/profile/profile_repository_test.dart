@@ -17,4 +17,33 @@ void main() {
     expect(p!.displayName, 'Mai');
     verify(() => client.rpc('get_my_profile')).called(1);
   });
+
+  test('getMyTasteCounts maps jsonb lists to counts', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('get_my_taste')).thenAnswer((_) => rpcOk({
+          'genres': ['pop', 'rock', 'ballad'],
+          'artists': ['son_tung'],
+          'baitu': ['s1', 's2', 's3'],
+        }));
+    final repo = ProfileRepository(client);
+    final taste = await repo.getMyTasteCounts();
+    expect(taste.genres, 3);
+    expect(taste.artists, 1);
+    expect(taste.baitu, 3);
+    verify(() => client.rpc('get_my_taste')).called(1);
+  });
+
+  test('getMyTasteCounts treats null lists as 0', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('get_my_taste')).thenAnswer((_) => rpcOk({
+          'genres': null,
+          'artists': null,
+          'baitu': null,
+        }));
+    final repo = ProfileRepository(client);
+    final taste = await repo.getMyTasteCounts();
+    expect(taste.genres, 0);
+    expect(taste.artists, 0);
+    expect(taste.baitu, 0);
+  });
 }

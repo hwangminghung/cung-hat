@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:cung_hat/l10n/app_localizations.dart';
 import '../../../core/providers/supabase_providers.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/message_safety.dart';
 import '../../chat/application/chat_providers.dart';
 import '../../chat/domain/message.dart';
@@ -21,22 +22,19 @@ class KeoChatScreen extends ConsumerStatefulWidget {
 class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
-
-  /// Live messages appended from the realtime stream; merged after history.
   final List<Message> _live = <Message>[];
 
-  /// Guards against double-send on rapid taps.
   bool _sending = false;
-
-  /// Ensures we only auto-scroll once when the initial history loads.
   bool _initialScrollDone = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // markKeoRead returns void; a failure here must not crash the screen.
-      ref.read(chatRepositoryProvider).markKeoRead(widget.keoId).catchError((_) {});
+      ref
+          .read(chatRepositoryProvider)
+          .markKeoRead(widget.keoId)
+          .catchError((_) {});
     });
   }
 
@@ -59,16 +57,14 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
     try {
       return ref.read(supabaseClientProvider).auth.currentUser?.id;
     } catch (_) {
-      // supabaseClientProvider is overridden in main(); in widget tests that
-      // don't override it, treat the current user as unknown (left-align).
       return null;
     }
   }
 
   Future<void> _send() async {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    if (_sending) return;
+    if (text.isEmpty || _sending) return;
+
     setState(() => _sending = true);
     try {
       await _doSend(text);
@@ -79,24 +75,21 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
 
   Future<void> _doSend(String text) async {
     if (messageLooksUnsafe(text)) {
-      final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(l10n?.sendThisTitle ?? 'Gửi tin này?'),
-          content: Text(
-            l10n?.sendThisBody ??
-                'Tin nhắn này có vẻ liên quan đến tiền bạc hoặc thông tin nhạy cảm. '
-                    'Hãy cẩn thận với lừa đảo. Vẫn muốn gửi?',
+          title: const Text('Gửi tin này?'),
+          content: const Text(
+            'Tin nhắn có vẻ liên quan tới tiền bạc hoặc thông tin nhạy cảm. Hãy kiểm tra kỹ trước khi gửi.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(l10n?.cancel ?? 'Hủy'),
+              child: const Text('Hủy'),
             ),
-            TextButton(
+            FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(l10n?.send ?? 'Gửi'),
+              child: const Text('Gửi'),
             ),
           ],
         ),
@@ -104,16 +97,15 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
       if (confirmed != true) return;
     }
 
-    // An approved-but-unconfirmed user can reach this screen, but the server
-    // raises `not_in_keo` for them. Surface a friendly message instead of
-    // crashing the composer.
     try {
       await ref.read(chatRepositoryProvider).sendKeoMessage(widget.keoId, text);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Chưa mở chat nhóm (cần tất cả thành viên đồng ý)'),
+          content: Text(
+            'Chưa mở chat nhóm. Cần tất cả thành viên đồng ý tham gia.',
+          ),
         ),
       );
       return;
@@ -127,14 +119,12 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
   Widget build(BuildContext context) {
     final myUid = _myUid;
 
-    // Append new live messages as they arrive (dedupe by id).
     ref.listen(keoLiveMessagesProvider(widget.keoId), (prev, next) {
-      next.whenData((m) {
-        if (_live.any((e) => e.id == m.id)) return;
-        setState(() => _live.add(m));
+      next.whenData((message) {
+        if (_live.any((existing) => existing.id == message.id)) return;
+        setState(() => _live.add(message));
         _scrollToBottom();
-        // Clear the unread badge while actively reading; skip our own echoes.
-        if (m.senderId != myUid) {
+        if (message.senderId != myUid) {
           ref
               .read(chatRepositoryProvider)
               .markKeoRead(widget.keoId)
@@ -146,17 +136,15 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
     final historyAsync = ref.watch(keoMessageHistoryProvider(widget.keoId));
     final history = historyAsync.value ?? const <Message>[];
 
-    // Scroll to newest once, after the initial history resolves.
     if (!_initialScrollDone && historyAsync.hasValue) {
       _initialScrollDone = true;
       _scrollToBottom();
     }
 
-    // Combine history + live, deduping by id (history wins).
     final seen = <String>{};
     final messages = <Message>[];
-    for (final m in [...history, ..._live]) {
-      if (seen.add(m.id)) messages.add(m);
+    for (final message in [...history, ..._live]) {
+      if (seen.add(message.id)) messages.add(message);
     }
 
     return Scaffold(
@@ -165,56 +153,76 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
         children: [
           const _GroupRulesBanner(),
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(12),
-              itemCount: messages.length,
-              itemBuilder: (context, i) {
-                final m = messages[i];
-                final mine = m.senderId == myUid;
-                return Align(
-                  alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    constraints: const BoxConstraints(maxWidth: 280),
-                    decoration: BoxDecoration(
-                      color: mine
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(m.body),
-                  ),
-                );
-              },
-            ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 8, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _send(),
-                      decoration: const InputDecoration(
-                        hintText: 'Nhắn gì đó…',
-                        border: OutlineInputBorder(),
-                        isDense: true,
+            child: messages.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xxl),
+                      child: Text(
+                        'Chưa có tin nhắn. Mở lời bằng một bài tủ của bạn.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      AppSpacing.lg,
+                    ),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      return _MessageBubble(
+                        message: message,
+                        mine: message.senderId == myUid,
+                      );
+                    },
                   ),
-                  IconButton(
-                    key: const Key('send_btn'),
-                    icon: const Icon(Icons.send),
-                    onPressed: _sending ? null : _send,
-                  ),
-                ],
-              ),
+          ),
+          _Composer(controller: _controller, sending: _sending, onSend: _send),
+        ],
+      ),
+    );
+  }
+}
+
+class _GroupRulesBanner extends StatelessWidget {
+  const _GroupRulesBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.secondary.withValues(alpha: 0.36),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
+      ),
+      child: const ExpansionTile(
+        leading: Icon(Icons.info_rounded, color: AppColors.secondaryDark),
+        iconColor: AppColors.secondaryDark,
+        collapsedIconColor: AppColors.secondaryDark,
+        title: Text('Luật nhóm'),
+        childrenPadding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          0,
+          AppSpacing.lg,
+          AppSpacing.md,
+        ),
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Không quay/chụp khi chưa đồng ý · Chia tiền rõ ràng · Tôn trọng riêng tư',
             ),
           ),
         ],
@@ -223,27 +231,96 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
   }
 }
 
-/// Collapsible reminder of the group ground rules, shown atop the chat.
-class _GroupRulesBanner extends StatelessWidget {
-  const _GroupRulesBanner();
+class _MessageBubble extends StatelessWidget {
+  const _MessageBubble({required this.message, required this.mine});
+
+  final Message message;
+  final bool mine;
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
-      margin: EdgeInsets.fromLTRB(8, 8, 8, 0),
-      child: ExpansionTile(
-        leading: Icon(Icons.info_outline),
-        title: Text('Luật nhóm'),
-        childrenPadding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Không quay/chụp khi chưa đồng ý · Chia tiền rõ ràng · '
-              'Tôn trọng riêng tư',
-            ),
+    return Align(
+      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        constraints: const BoxConstraints(maxWidth: 292),
+        decoration: BoxDecoration(
+          color: mine ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(mine ? 18 : 6),
+            bottomRight: Radius.circular(mine ? 6 : 18),
           ),
-        ],
+          border: mine ? null : Border.all(color: AppColors.border),
+        ),
+        child: Text(
+          message.body,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: mine ? AppColors.onPrimary : AppColors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Composer extends StatelessWidget {
+  const _Composer({
+    required this.controller,
+    required this.sending,
+    required this.onSend,
+  });
+
+  final TextEditingController controller;
+  final bool sending;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        decoration: const BoxDecoration(color: AppColors.background),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSend(),
+                decoration: const InputDecoration(
+                  hintText: 'Nhắn gì đó...',
+                  isDense: true,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            IconButton.filled(
+              key: const Key('send_btn'),
+              onPressed: sending ? null : onSend,
+              icon: sending
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.onPrimary,
+                      ),
+                    )
+                  : const Icon(Icons.send_rounded),
+            ),
+          ],
+        ),
       ),
     );
   }

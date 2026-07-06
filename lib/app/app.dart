@@ -3,6 +3,7 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import '../core/theme/app_theme.dart';
 import 'router.dart';
 
 class CungHatApp extends ConsumerStatefulWidget {
@@ -53,7 +54,7 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Cùng Hát',
-      theme: ThemeData(colorSchemeSeed: const Color(0xFF6750A4), useMaterial3: true),
+      theme: AppTheme.light(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('vi'),

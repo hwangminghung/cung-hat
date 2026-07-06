@@ -30,7 +30,11 @@ class ReportSheet extends ConsumerWidget {
     );
   }
 
-  Future<void> _report(BuildContext context, WidgetRef ref, String reason) async {
+  Future<void> _report(
+    BuildContext context,
+    WidgetRef ref,
+    String reason,
+  ) async {
     final nav = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -39,8 +43,9 @@ class ReportSheet extends ConsumerWidget {
       messenger.showSnackBar(const SnackBar(content: Text('Đã gửi báo cáo.')));
     } catch (_) {
       nav.pop();
-      messenger
-          .showSnackBar(const SnackBar(content: Text('Không gửi được báo cáo.')));
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Không gửi được báo cáo.')),
+      );
     }
   }
 
@@ -49,7 +54,10 @@ class ReportSheet extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     try {
       await ref.read(discoveryRepositoryProvider).blockUser(targetId);
-      ref.invalidate(candidatesProvider);
+      // candidatesProvider giờ là family theo genre — invalidate deck chính.
+      // (Deck chủ đề vẫn tự lọc block server-side qua get_discovery_candidates
+      // dù cache client chưa refresh ngay.)
+      ref.invalidate(candidatesProvider(null));
       nav.pop();
       messenger.showSnackBar(const SnackBar(content: Text('Đã chặn.')));
     } catch (_) {

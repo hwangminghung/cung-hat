@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Candidate {
 
- String get id;@JsonKey(name: 'display_name') String? get displayName; int? get age;@JsonKey(name: 'distance_band') String? get distanceBand;@JsonKey(name: 'shared_genres') List<String> get sharedGenres;@JsonKey(name: 'shared_baitu') List<String> get sharedBaitu; bool get verified;@JsonKey(name: 'active_today') bool get activeToday;
+ String get id;@JsonKey(name: 'display_name') String? get displayName; int? get age;@JsonKey(name: 'distance_band') String? get distanceBand;@JsonKey(name: 'shared_genres') List<String> get sharedGenres;@JsonKey(name: 'shared_baitu') List<String> get sharedBaitu; bool get verified;@JsonKey(name: 'active_today') bool get activeToday; String? get bio; List<Map<String, dynamic>> get prompts;
 /// Create a copy of Candidate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CandidateCopyWith<Candidate> get copyWith => _$CandidateCopyWithImpl<Candidate>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Candidate&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.age, age) || other.age == age)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand)&&const DeepCollectionEquality().equals(other.sharedGenres, sharedGenres)&&const DeepCollectionEquality().equals(other.sharedBaitu, sharedBaitu)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.activeToday, activeToday) || other.activeToday == activeToday));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Candidate&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.age, age) || other.age == age)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand)&&const DeepCollectionEquality().equals(other.sharedGenres, sharedGenres)&&const DeepCollectionEquality().equals(other.sharedBaitu, sharedBaitu)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.activeToday, activeToday) || other.activeToday == activeToday)&&(identical(other.bio, bio) || other.bio == bio)&&const DeepCollectionEquality().equals(other.prompts, prompts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,age,distanceBand,const DeepCollectionEquality().hash(sharedGenres),const DeepCollectionEquality().hash(sharedBaitu),verified,activeToday);
+int get hashCode => Object.hash(runtimeType,id,displayName,age,distanceBand,const DeepCollectionEquality().hash(sharedGenres),const DeepCollectionEquality().hash(sharedBaitu),verified,activeToday,bio,const DeepCollectionEquality().hash(prompts));
 
 @override
 String toString() {
-  return 'Candidate(id: $id, displayName: $displayName, age: $age, distanceBand: $distanceBand, sharedGenres: $sharedGenres, sharedBaitu: $sharedBaitu, verified: $verified, activeToday: $activeToday)';
+  return 'Candidate(id: $id, displayName: $displayName, age: $age, distanceBand: $distanceBand, sharedGenres: $sharedGenres, sharedBaitu: $sharedBaitu, verified: $verified, activeToday: $activeToday, bio: $bio, prompts: $prompts)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CandidateCopyWith<$Res>  {
   factory $CandidateCopyWith(Candidate value, $Res Function(Candidate) _then) = _$CandidateCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'display_name') String? displayName, int? age,@JsonKey(name: 'distance_band') String? distanceBand,@JsonKey(name: 'shared_genres') List<String> sharedGenres,@JsonKey(name: 'shared_baitu') List<String> sharedBaitu, bool verified,@JsonKey(name: 'active_today') bool activeToday
+ String id,@JsonKey(name: 'display_name') String? displayName, int? age,@JsonKey(name: 'distance_band') String? distanceBand,@JsonKey(name: 'shared_genres') List<String> sharedGenres,@JsonKey(name: 'shared_baitu') List<String> sharedBaitu, bool verified,@JsonKey(name: 'active_today') bool activeToday, String? bio, List<Map<String, dynamic>> prompts
 });
 
 
@@ -65,7 +65,7 @@ class _$CandidateCopyWithImpl<$Res>
 
 /// Create a copy of Candidate
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? age = freezed,Object? distanceBand = freezed,Object? sharedGenres = null,Object? sharedBaitu = null,Object? verified = null,Object? activeToday = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? age = freezed,Object? distanceBand = freezed,Object? sharedGenres = null,Object? sharedBaitu = null,Object? verified = null,Object? activeToday = null,Object? bio = freezed,Object? prompts = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -75,7 +75,9 @@ as String?,sharedGenres: null == sharedGenres ? _self.sharedGenres : sharedGenre
 as List<String>,sharedBaitu: null == sharedBaitu ? _self.sharedBaitu : sharedBaitu // ignore: cast_nullable_to_non_nullable
 as List<String>,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
 as bool,activeToday: null == activeToday ? _self.activeToday : activeToday // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as String?,prompts: null == prompts ? _self.prompts : prompts // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,
   ));
 }
 
@@ -160,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName,  int? age, @JsonKey(name: 'distance_band')  String? distanceBand, @JsonKey(name: 'shared_genres')  List<String> sharedGenres, @JsonKey(name: 'shared_baitu')  List<String> sharedBaitu,  bool verified, @JsonKey(name: 'active_today')  bool activeToday)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName,  int? age, @JsonKey(name: 'distance_band')  String? distanceBand, @JsonKey(name: 'shared_genres')  List<String> sharedGenres, @JsonKey(name: 'shared_baitu')  List<String> sharedBaitu,  bool verified, @JsonKey(name: 'active_today')  bool activeToday,  String? bio,  List<Map<String, dynamic>> prompts)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Candidate() when $default != null:
-return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sharedGenres,_that.sharedBaitu,_that.verified,_that.activeToday);case _:
+return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sharedGenres,_that.sharedBaitu,_that.verified,_that.activeToday,_that.bio,_that.prompts);case _:
   return orElse();
 
 }
@@ -181,10 +183,10 @@ return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sh
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName,  int? age, @JsonKey(name: 'distance_band')  String? distanceBand, @JsonKey(name: 'shared_genres')  List<String> sharedGenres, @JsonKey(name: 'shared_baitu')  List<String> sharedBaitu,  bool verified, @JsonKey(name: 'active_today')  bool activeToday)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'display_name')  String? displayName,  int? age, @JsonKey(name: 'distance_band')  String? distanceBand, @JsonKey(name: 'shared_genres')  List<String> sharedGenres, @JsonKey(name: 'shared_baitu')  List<String> sharedBaitu,  bool verified, @JsonKey(name: 'active_today')  bool activeToday,  String? bio,  List<Map<String, dynamic>> prompts)  $default,) {final _that = this;
 switch (_that) {
 case _Candidate():
-return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sharedGenres,_that.sharedBaitu,_that.verified,_that.activeToday);case _:
+return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sharedGenres,_that.sharedBaitu,_that.verified,_that.activeToday,_that.bio,_that.prompts);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +203,10 @@ return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sh
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'display_name')  String? displayName,  int? age, @JsonKey(name: 'distance_band')  String? distanceBand, @JsonKey(name: 'shared_genres')  List<String> sharedGenres, @JsonKey(name: 'shared_baitu')  List<String> sharedBaitu,  bool verified, @JsonKey(name: 'active_today')  bool activeToday)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'display_name')  String? displayName,  int? age, @JsonKey(name: 'distance_band')  String? distanceBand, @JsonKey(name: 'shared_genres')  List<String> sharedGenres, @JsonKey(name: 'shared_baitu')  List<String> sharedBaitu,  bool verified, @JsonKey(name: 'active_today')  bool activeToday,  String? bio,  List<Map<String, dynamic>> prompts)?  $default,) {final _that = this;
 switch (_that) {
 case _Candidate() when $default != null:
-return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sharedGenres,_that.sharedBaitu,_that.verified,_that.activeToday);case _:
+return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sharedGenres,_that.sharedBaitu,_that.verified,_that.activeToday,_that.bio,_that.prompts);case _:
   return null;
 
 }
@@ -216,7 +218,7 @@ return $default(_that.id,_that.displayName,_that.age,_that.distanceBand,_that.sh
 @JsonSerializable()
 
 class _Candidate implements Candidate {
-  const _Candidate({required this.id, @JsonKey(name: 'display_name') this.displayName, this.age, @JsonKey(name: 'distance_band') this.distanceBand, @JsonKey(name: 'shared_genres') final  List<String> sharedGenres = const [], @JsonKey(name: 'shared_baitu') final  List<String> sharedBaitu = const [], this.verified = false, @JsonKey(name: 'active_today') this.activeToday = false}): _sharedGenres = sharedGenres,_sharedBaitu = sharedBaitu;
+  const _Candidate({required this.id, @JsonKey(name: 'display_name') this.displayName, this.age, @JsonKey(name: 'distance_band') this.distanceBand, @JsonKey(name: 'shared_genres') final  List<String> sharedGenres = const [], @JsonKey(name: 'shared_baitu') final  List<String> sharedBaitu = const [], this.verified = false, @JsonKey(name: 'active_today') this.activeToday = false, this.bio, final  List<Map<String, dynamic>> prompts = const <Map<String, dynamic>>[]}): _sharedGenres = sharedGenres,_sharedBaitu = sharedBaitu,_prompts = prompts;
   factory _Candidate.fromJson(Map<String, dynamic> json) => _$CandidateFromJson(json);
 
 @override final  String id;
@@ -239,6 +241,14 @@ class _Candidate implements Candidate {
 
 @override@JsonKey() final  bool verified;
 @override@JsonKey(name: 'active_today') final  bool activeToday;
+@override final  String? bio;
+ final  List<Map<String, dynamic>> _prompts;
+@override@JsonKey() List<Map<String, dynamic>> get prompts {
+  if (_prompts is EqualUnmodifiableListView) return _prompts;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_prompts);
+}
+
 
 /// Create a copy of Candidate
 /// with the given fields replaced by the non-null parameter values.
@@ -253,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Candidate&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.age, age) || other.age == age)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand)&&const DeepCollectionEquality().equals(other._sharedGenres, _sharedGenres)&&const DeepCollectionEquality().equals(other._sharedBaitu, _sharedBaitu)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.activeToday, activeToday) || other.activeToday == activeToday));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Candidate&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.age, age) || other.age == age)&&(identical(other.distanceBand, distanceBand) || other.distanceBand == distanceBand)&&const DeepCollectionEquality().equals(other._sharedGenres, _sharedGenres)&&const DeepCollectionEquality().equals(other._sharedBaitu, _sharedBaitu)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.activeToday, activeToday) || other.activeToday == activeToday)&&(identical(other.bio, bio) || other.bio == bio)&&const DeepCollectionEquality().equals(other._prompts, _prompts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,age,distanceBand,const DeepCollectionEquality().hash(_sharedGenres),const DeepCollectionEquality().hash(_sharedBaitu),verified,activeToday);
+int get hashCode => Object.hash(runtimeType,id,displayName,age,distanceBand,const DeepCollectionEquality().hash(_sharedGenres),const DeepCollectionEquality().hash(_sharedBaitu),verified,activeToday,bio,const DeepCollectionEquality().hash(_prompts));
 
 @override
 String toString() {
-  return 'Candidate(id: $id, displayName: $displayName, age: $age, distanceBand: $distanceBand, sharedGenres: $sharedGenres, sharedBaitu: $sharedBaitu, verified: $verified, activeToday: $activeToday)';
+  return 'Candidate(id: $id, displayName: $displayName, age: $age, distanceBand: $distanceBand, sharedGenres: $sharedGenres, sharedBaitu: $sharedBaitu, verified: $verified, activeToday: $activeToday, bio: $bio, prompts: $prompts)';
 }
 
 
@@ -273,7 +283,7 @@ abstract mixin class _$CandidateCopyWith<$Res> implements $CandidateCopyWith<$Re
   factory _$CandidateCopyWith(_Candidate value, $Res Function(_Candidate) _then) = __$CandidateCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'display_name') String? displayName, int? age,@JsonKey(name: 'distance_band') String? distanceBand,@JsonKey(name: 'shared_genres') List<String> sharedGenres,@JsonKey(name: 'shared_baitu') List<String> sharedBaitu, bool verified,@JsonKey(name: 'active_today') bool activeToday
+ String id,@JsonKey(name: 'display_name') String? displayName, int? age,@JsonKey(name: 'distance_band') String? distanceBand,@JsonKey(name: 'shared_genres') List<String> sharedGenres,@JsonKey(name: 'shared_baitu') List<String> sharedBaitu, bool verified,@JsonKey(name: 'active_today') bool activeToday, String? bio, List<Map<String, dynamic>> prompts
 });
 
 
@@ -290,7 +300,7 @@ class __$CandidateCopyWithImpl<$Res>
 
 /// Create a copy of Candidate
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? age = freezed,Object? distanceBand = freezed,Object? sharedGenres = null,Object? sharedBaitu = null,Object? verified = null,Object? activeToday = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? age = freezed,Object? distanceBand = freezed,Object? sharedGenres = null,Object? sharedBaitu = null,Object? verified = null,Object? activeToday = null,Object? bio = freezed,Object? prompts = null,}) {
   return _then(_Candidate(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -300,7 +310,9 @@ as String?,sharedGenres: null == sharedGenres ? _self._sharedGenres : sharedGenr
 as List<String>,sharedBaitu: null == sharedBaitu ? _self._sharedBaitu : sharedBaitu // ignore: cast_nullable_to_non_nullable
 as List<String>,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
 as bool,activeToday: null == activeToday ? _self.activeToday : activeToday // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as String?,prompts: null == prompts ? _self._prompts : prompts // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,
   ));
 }
 

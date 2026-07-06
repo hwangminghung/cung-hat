@@ -11,6 +11,7 @@ const _storeProductIds = <String, String>{
   'boost': 'com.cunghat.boost',
   'see_likes': 'com.cunghat.see_likes',
   'premium_filters': 'com.cunghat.filters',
+  'pro': 'com.cunghat.pro',
 };
 
 /// Features sold as consumables (re-buyable); everything else is non-consumable.

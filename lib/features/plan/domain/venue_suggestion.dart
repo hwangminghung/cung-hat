@@ -11,6 +11,8 @@ abstract class VenueSuggestion with _$VenueSuggestion {
     @JsonKey(name: 'style_tag') @Default('k_style') String styleTag,
     @Default([]) List<String> photos,
     @JsonKey(name: 'distance_band') String? distanceBand,
+    double? lat,
+    double? lng,
   }) = _VenueSuggestion;
   factory VenueSuggestion.fromJson(Map<String, dynamic> j) =>
       _$VenueSuggestionFromJson(j);

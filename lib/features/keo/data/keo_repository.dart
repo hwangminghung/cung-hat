@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/keo.dart';
+import '../domain/keo_match_suggestion.dart';
 import '../domain/keo_member.dart';
 
 class KeoRepository {
@@ -20,6 +21,15 @@ class KeoRepository {
         .toList();
   }
 
+  Future<List<KeoMatchSuggestion>> suggestMatch({int limit = 3}) async {
+    final rows =
+        await _client.rpc('suggest_keo_match', params: {'p_limit': limit});
+    return (rows as List)
+        .map((e) =>
+            KeoMatchSuggestion.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
   Future<String> createKeo({
     required String title,
     required double lat,
@@ -31,6 +41,7 @@ class KeoRepository {
     String? intent,
     String? vibe,
     List<String> genres = const [],
+    String joinMode = 'approval',
   }) async {
     final id = await _client.rpc('create_keo', params: {
       'p_title': title,
@@ -43,6 +54,26 @@ class KeoRepository {
       'p_intent': intent,
       'p_vibe': vibe,
       'p_genres': genres,
+      'p_join_mode': joinMode,
+    });
+    return id as String;
+  }
+
+  Future<String> createAutoMatchedKeo({
+    required String title,
+    required DateTime start,
+    required DateTime end,
+    required int size,
+    List<String> genres = const [],
+    String joinMode = 'open',
+  }) async {
+    final id = await _client.rpc('create_auto_matched_keo', params: {
+      'p_title': title,
+      'p_start': start.toUtc().toIso8601String(),
+      'p_end': end.toUtc().toIso8601String(),
+      'p_size': size,
+      'p_genres': genres,
+      'p_join_mode': joinMode,
     });
     return id as String;
   }

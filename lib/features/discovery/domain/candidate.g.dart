@@ -23,6 +23,12 @@ _Candidate _$CandidateFromJson(Map<String, dynamic> json) => _Candidate(
       const [],
   verified: json['verified'] as bool? ?? false,
   activeToday: json['active_today'] as bool? ?? false,
+  bio: json['bio'] as String?,
+  prompts:
+      (json['prompts'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList() ??
+      const <Map<String, dynamic>>[],
 );
 
 Map<String, dynamic> _$CandidateToJson(_Candidate instance) =>
@@ -35,4 +41,6 @@ Map<String, dynamic> _$CandidateToJson(_Candidate instance) =>
       'shared_baitu': instance.sharedBaitu,
       'verified': instance.verified,
       'active_today': instance.activeToday,
+      'bio': instance.bio,
+      'prompts': instance.prompts,
     };

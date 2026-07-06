@@ -50,6 +50,16 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1
   app_links: ^7.2.0
+  google_fonts: ^6.2.1
+  google_maps_flutter: ^2.17.1
+  image_picker: ^1.2.3
+
+# WORKAROUND (dev machine): path_provider_foundation >=2.4 pulls package:objective_c
+# whose native-assets build hook breaks on Windows user paths containing spaces
+# ("C:\Users\Hwang Ming Hung"), failing `flutter test` and `flutter build web`.
+# 2.3.2 predates the hook. iOS-only code path — no effect on Android/web output.
+dependency_overrides:
+  path_provider_foundation: 2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +73,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  geolocator_platform_interface: ^4.2.8
   build_runner: ^2.15.0
   freezed: ^3.2.6-dev.1
   json_serializable: ^6.14.0
@@ -100,6 +111,10 @@ flutter:
   assets:
     - assets/legal/
     - assets/icon/
+    # Bundled Quicksand/Inter TTFs: the google_fonts package picks these up
+    # by filename, so text renders correctly with no network fetch (first
+    # launch offline used to fall back to the system font).
+    - google_fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

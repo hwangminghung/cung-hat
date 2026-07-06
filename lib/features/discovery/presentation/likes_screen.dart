@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/skeleton.dart';
 import '../application/discovery_providers.dart';
 
 class LikesScreen extends ConsumerWidget {
@@ -14,40 +19,65 @@ class LikesScreen extends ConsumerWidget {
       body: likes.when(
         data: (people) {
           if (people.isEmpty) {
-            return const Center(child: Text('Chưa có ai thích bạn'));
+            return const EmptyState(
+              icon: Icons.favorite_rounded,
+              title: 'Chưa có ai thích bạn',
+              subtitle: 'Cứ hát hết mình, người hợp gu sẽ tới.',
+            );
           }
           return ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.xxxl,
+            ),
             children: [
-              for (final p in people)
-                ListTile(
-                  leading: CircleAvatar(
-                    child: Text(_monogram(p.displayName)),
+              for (final person in people)
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                    border: Border.all(color: AppColors.border),
                   ),
-                  title: Text(p.displayName ?? 'Ẩn danh'),
+                  child: ListTile(
+                    leading: Container(
+                      width: 46,
+                      height: 46,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.brandGradient,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        _monogram(person.displayName),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(color: AppColors.onPrimary),
+                      ),
+                    ),
+                    title: Text(person.displayName ?? 'Ẩn danh'),
+                  ),
                 ),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Mở khoá để xem ai đã thích bạn'),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => context.push('/store'),
-                child: const Text('Nâng cấp'),
-              ),
-            ],
-          ),
+        loading: () => ListView(
+          padding: const EdgeInsets.only(top: AppSpacing.lg),
+          children: const [SkeletonTile(), SkeletonTile(), SkeletonTile()],
+        ),
+        error: (_, _) => EmptyState(
+          icon: Icons.lock_rounded,
+          title: 'Mở khóa để xem ai đã thích bạn',
+          actionLabel: 'Nâng cấp',
+          onAction: () => context.push('/store'),
         ),
       ),
     );
   }
 
   String _monogram(String? name) {
-    final n = (name ?? '').trim();
-    return n.isEmpty ? '?' : n.characters.first.toUpperCase();
+    final trimmed = (name ?? '').trim();
+    return trimmed.isEmpty ? '?' : trimmed.characters.first.toUpperCase();
   }
 }

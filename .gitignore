@@ -10,3 +10,7 @@ env/*.json
 
 # Supabase Edge Function secrets (never commit real keys)
 supabase/functions/.env
+
+# QA screenshot artifacts (emulator/manual verify runs)
+qa_screenshots/
+test/screenshots/

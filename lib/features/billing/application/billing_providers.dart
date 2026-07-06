@@ -10,6 +10,13 @@ final entitlementsProvider = FutureProvider<Set<String>>((ref) async {
   return list.map((e) => e['feature'] as String).toSet();
 });
 
-/// Convenience gate used by features (e.g. see-who-liked).
+/// True when the user holds the Pro membership (a superset of all paid features).
+final isProProvider = Provider<bool>((ref) => ref
+    .watch(entitlementsProvider)
+    .maybeWhen(data: (s) => s.contains('pro'), orElse: () => false));
+
+/// Feature gate. Pro is a superset, so any Pro user passes every check.
 final hasEntitlementProvider = Provider.family<bool, String>((ref, feature) =>
-    ref.watch(entitlementsProvider).maybeWhen(data: (s) => s.contains(feature), orElse: () => false));
+    ref.watch(entitlementsProvider).maybeWhen(
+        data: (s) => s.contains('pro') || s.contains(feature),
+        orElse: () => false));

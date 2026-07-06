@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../onboarding/application/reference_providers.dart';
 import '../application/keo_providers.dart';
+import '../data/keo_errors.dart';
 
 class CreateKeoScreen extends ConsumerStatefulWidget {
   const CreateKeoScreen({super.key});
@@ -18,6 +22,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
   DateTime? _start;
   DateTime? _end;
   int _size = 4;
+  String _joinMode = 'approval';
   final Set<String> _genreIds = {};
   bool _submitting = false;
 
@@ -76,10 +81,14 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
       final pos = await ref.read(locationServiceProvider).currentPosition();
       if (!mounted) return;
       if (pos == null) {
-        _snack('Cần quyền vị trí để tạo kèo');
+        _snack(
+          'Không lấy được vị trí. Bật Location trên emulator rồi thử lại.',
+        );
         return;
       }
-      final id = await ref.read(keoRepositoryProvider).createKeo(
+      final id = await ref
+          .read(keoRepositoryProvider)
+          .createKeo(
             title: title,
             lat: pos.latitude,
             lng: pos.longitude,
@@ -88,12 +97,13 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
             end: _end!,
             size: _size,
             genres: _genreIds.toList(),
+            joinMode: _joinMode,
           );
       if (!mounted) return;
       context.go('/keo/$id');
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-      _snack('Không tạo được kèo, thử lại');
+      _snack(keoErrorMessage(e));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -105,107 +115,220 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Tạo kèo')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.xxxl,
+        ),
         children: [
-          TextField(
-            controller: _titleCtrl,
-            decoration: const InputDecoration(labelText: 'Tên kèo'),
+          Text(
+            'Rủ một nhóm đi hát',
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _areaCtrl,
-            decoration: const InputDecoration(labelText: 'Khu vực (tuỳ chọn)'),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Chọn thời gian, gu nhạc và cách duyệt thành viên.',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
-          const SizedBox(height: 16),
-          Row(
+          const SizedBox(height: AppSpacing.xl),
+          _FormSection(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _submitting
-                      ? null
-                      : () async {
-                          final dt = await _pickDateTime(_start);
-                          if (dt != null) setState(() => _start = dt);
-                        },
-                  child: Text('Bắt đầu: ${_fmt(_start)}'),
+              TextField(
+                controller: _titleCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Tên kèo',
+                  hintText: 'V-Pop tối nay',
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _submitting
-                      ? null
-                      : () async {
-                          final dt = await _pickDateTime(_end);
-                          if (dt != null) setState(() => _end = dt);
-                        },
-                  child: Text('Kết thúc: ${_fmt(_end)}'),
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: _areaCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Khu vực',
+                  hintText: 'Quận 1, Hồ Chí Minh',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            key: const Key('create_keo_venue_hint'),
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withValues(alpha: 0.34),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Icon(
+                    Icons.place_rounded,
+                    color: AppColors.secondaryDark,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Chọn quán sau khi tạo kèo',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Chủ kèo sẽ chốt quán ở màn Kế hoạch.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          OutlinedButton.icon(
+            onPressed: _submitting
+                ? null
+                : () async {
+                    final dt = await _pickDateTime(_start);
+                    if (dt != null) setState(() => _start = dt);
+                  },
+            icon: const Icon(Icons.schedule_rounded),
+            label: Text('Bắt đầu: ${_fmt(_start)}'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: _submitting
+                ? null
+                : () async {
+                    final dt = await _pickDateTime(_end);
+                    if (dt != null) setState(() => _end = dt);
+                  },
+            icon: const Icon(Icons.flag_rounded),
+            label: Text('Kết thúc: ${_fmt(_end)}'),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _FormSection(
             children: [
-              const Text('Số người:'),
-              const SizedBox(width: 12),
-              DropdownButton<int>(
-                value: _size,
+              DropdownButtonFormField<int>(
+                initialValue: _size,
+                decoration: const InputDecoration(labelText: 'Số người'),
                 items: const [
-                  DropdownMenuItem(value: 2, child: Text('2')),
-                  DropdownMenuItem(value: 3, child: Text('3')),
-                  DropdownMenuItem(value: 4, child: Text('4')),
-                  DropdownMenuItem(value: 5, child: Text('5')),
+                  DropdownMenuItem(value: 2, child: Text('2 người')),
+                  DropdownMenuItem(value: 3, child: Text('3 người')),
+                  DropdownMenuItem(value: 4, child: Text('4 người')),
+                  DropdownMenuItem(value: 5, child: Text('5 người')),
                 ],
                 onChanged: _submitting
                     ? null
-                    : (v) {
-                        if (v != null) setState(() => _size = v);
+                    : (value) {
+                        if (value != null) setState(() => _size = value);
                       },
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text('Thể loại', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: AppSpacing.sm),
+              genresAsync.when(
+                data: (genres) => Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    for (final genre in genres)
+                      FilterChip(
+                        key: Key('keo_genre_${genre.id}'),
+                        label: Text(genre.nameVi),
+                        selected: _genreIds.contains(genre.id),
+                        onSelected: _submitting
+                            ? null
+                            : (selected) => setState(() {
+                                if (selected) {
+                                  _genreIds.add(genre.id);
+                                } else {
+                                  _genreIds.remove(genre.id);
+                                }
+                              }),
+                      ),
+                  ],
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => const Text('Không tải được thể loại'),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const Text('Thể loại'),
-          const SizedBox(height: 8),
-          genresAsync.when(
-            data: (genres) => Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final g in genres)
-                  FilterChip(
-                    key: Key('keo_genre_${g.id}'),
-                    label: Text(g.nameVi),
-                    selected: _genreIds.contains(g.id),
-                    onSelected: _submitting
-                        ? null
-                        : (sel) => setState(() {
-                              if (sel) {
-                                _genreIds.add(g.id);
-                              } else {
-                                _genreIds.remove(g.id);
-                              }
-                            }),
-                  ),
-              ],
-            ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => const Text('Không tải được thể loại'),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Chế độ tham gia',
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-          const SizedBox(height: 24),
-          FilledButton(
+          const SizedBox(height: AppSpacing.sm),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(
+                value: 'approval',
+                label: Text('Cần duyệt'),
+                icon: Icon(Icons.verified_user_rounded),
+              ),
+              ButtonSegment(
+                value: 'open',
+                label: Text('Mở'),
+                icon: Icon(Icons.lock_open_rounded),
+              ),
+            ],
+            selected: {_joinMode},
+            onSelectionChanged: _submitting
+                ? null
+                : (selection) => setState(() => _joinMode = selection.first),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          FilledButton.icon(
             key: const Key('create_keo_btn'),
             onPressed: _submitting ? null : _submit,
-            child: _submitting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+            icon: _submitting
+                ? const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.onPrimary,
+                    ),
                   )
-                : const Text('Tạo kèo'),
+                : const Icon(Icons.add_rounded),
+            label: const Text('Tạo kèo'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FormSection extends StatelessWidget {
+  const _FormSection({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
       ),
     );
   }

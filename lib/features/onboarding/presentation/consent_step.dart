@@ -1,53 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:cung_hat/l10n/app_localizations.dart';
 
-const consentPurposes = ['location', 'photos', 'matching', 'marketing', 'cross_border'];
+const consentPurposes = [
+  'location',
+  'photos',
+  'matching',
+  'marketing',
+  'cross_border',
+];
 
-/// Purposes a user MUST grant to complete onboarding (core function + PDPL data residency).
+/// Purposes a user MUST grant to complete onboarding.
 const requiredConsents = {'matching', 'cross_border'};
 
-/// Returns the required purposes that are NOT granted in [values].
-List<String> missingRequiredConsents(Map<String, bool> values) =>
-    [for (final p in requiredConsents) if (values[p] != true) p];
+List<String> missingRequiredConsents(Map<String, bool> values) => [
+  for (final purpose in requiredConsents)
+    if (values[purpose] != true) purpose,
+];
 
 const consentLabelsVi = {
   'location': 'Dùng vị trí để gợi ý người/kèo gần bạn',
-  'photos': 'Lưu & hiển thị ảnh hồ sơ (tùy chọn)',
+  'photos': 'Lưu và hiển thị ảnh hồ sơ',
   'matching': 'Dùng gu nhạc để ghép người',
   'marketing': 'Nhận thông báo khuyến mãi',
-  'cross_border': 'Dữ liệu lưu tại Singapore (chuyển xuyên biên giới)',
+  'cross_border':
+      'Tôi đồng ý Chính sách bảo mật, Điều khoản và việc lưu dữ liệu tại Singapore',
 };
 
 class ConsentStep extends StatelessWidget {
   const ConsentStep({super.key, required this.values, required this.onChanged});
+
   final Map<String, bool> values;
   final void Function(String purpose, bool value) onChanged;
 
   @override
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-    String labelFor(String p) {
-      final localized = switch (p) {
+
+    String labelFor(String purpose) {
+      if (purpose == 'cross_border') return consentLabelsVi[purpose]!;
+      final localized = switch (purpose) {
         'location' => l10n?.consentLocation,
         'photos' => l10n?.consentPhotos,
         'matching' => l10n?.consentMatching,
         'marketing' => l10n?.consentMarketing,
-        'cross_border' => l10n?.consentCrossBorder,
         _ => null,
       };
-      return localized ?? consentLabelsVi[p] ?? p;
+      return localized ?? consentLabelsVi[purpose] ?? purpose;
     }
 
-    return ListView(
-      shrinkWrap: true,
+    String subtitleFor(String purpose) {
+      if (requiredConsents.contains(purpose)) {
+        return 'Bắt buộc để tiếp tục';
+      }
+      return 'Tùy chọn, có thể đổi sau trong Cài đặt';
+    }
+
+    // Plain Column: this widget lives inside the Stepper's own scrollable.
+    // A nested vertical ListView here becomes the "primary" scroll view and
+    // swallows every drag over the tiles, so the page can't be scrolled and
+    // the continue button below stays unreachable on small screens.
+    return Column(
       children: [
-        for (final p in values.keys)
-          SwitchListTile(
-            key: Key('consent_$p'),
-            title: Text(labelFor(p)),
-            value: values[p] ?? false,
-            onChanged: (v) => onChanged(p, v),
+        for (final purpose in values.keys)
+          CheckboxListTile(
+            key: Key('consent_$purpose'),
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Text(labelFor(purpose)),
+            subtitle: Text(subtitleFor(purpose)),
+            value: values[purpose] ?? false,
+            onChanged: (value) => onChanged(purpose, value ?? false),
           ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

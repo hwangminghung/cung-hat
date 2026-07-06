@@ -5,12 +5,36 @@ import 'package:cung_hat/features/onboarding/presentation/consent_step.dart';
 void main() {
   testWidgets('toggling a purpose reports its new value', (tester) async {
     final changes = <String, bool>{};
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: ConsentStep(
-      values: const {'location': false, 'matching': false},
-      onChanged: (k, v) => changes[k] = v,
-    ))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ConsentStep(
+            values: const {'location': false, 'matching': false},
+            onChanged: (k, v) => changes[k] = v,
+          ),
+        ),
+      ),
+    );
     await tester.tap(find.byKey(const Key('consent_location')));
     await tester.pump();
     expect(changes['location'], isTrue);
+  });
+
+  testWidgets('purposes render as visible checkboxes, not switches', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ConsentStep(
+            values: const {'matching': false, 'cross_border': false},
+            onChanged: (_, _) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CheckboxListTile), findsNWidgets(2));
+    expect(find.byType(SwitchListTile), findsNothing);
   });
 }
