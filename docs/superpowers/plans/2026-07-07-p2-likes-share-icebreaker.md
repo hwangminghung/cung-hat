@@ -70,7 +70,7 @@ DONE: `flutter test` 205/205 pass, `flutter analyze` no issues, `npx supabase te
 - Modify: `lib/app/router.dart` (route `/keo/shared/:token` + authRedirect exempt)
 - Test: `test/features/keo/share_keo_test.dart` (mới)
 
-- [ ] **Step 1: Migration:**
+- [x] **Step 1: Migration:**
 
 ```sql
 -- Share keo qua token (backlog muc 10) — mirror share_plans (0016) + resolve anon (0023).
