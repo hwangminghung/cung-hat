@@ -206,6 +206,93 @@ void main() {
     });
   });
 
+  group('DoiDeckScreen — deck chủ đề RỖNG vẫn có nút back', () {
+    testWidgets(
+        'genre deck rỗng → theme_deck_back + expand_radius_btn cùng hiện; bấm back → pop về board',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      // Harness router mirror app router (router.dart): /explore/:genre dựng
+      // DoiDeckScreen THẬT — pop phải quan sát được qua nội dung route dưới.
+      final router = GoRouter(
+        initialLocation: '/explore',
+        routes: [
+          GoRoute(
+            path: '/explore',
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('BOARD'))),
+          ),
+          GoRoute(
+            path: '/explore/:genre',
+            builder: (_, s) =>
+                DoiDeckScreen(genre: s.pathParameters['genre']),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            deckItemsProvider('ballad')
+                .overrideWith((ref) async => <DeckItem>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.light(),
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      router.push('/explore/ballad');
+      await tester.pumpAndSettle();
+
+      // Deck rỗng: empty state hiện NHƯNG vẫn phải có lối quay lại in-app.
+      expect(find.byKey(const Key('theme_deck_back')), findsOneWidget);
+      expect(find.byKey(const Key('expand_radius_btn')), findsOneWidget);
+      expect(find.text(musicThemeById('ballad')!.title), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('theme_deck_back')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('BOARD'), findsOneWidget);
+      expect(find.byKey(const Key('theme_deck_back')), findsNothing);
+    });
+
+    testWidgets('main deck rỗng (genre == null) → KHÔNG có theme_deck_back',
+        (tester) async {
+      final locationService = _FakeLocationService();
+      when(() => locationService.captureAndPush())
+          .thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            deckItemsProvider(null).overrideWith((ref) async => <DeckItem>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            autoExpandProvider.overrideWith((ref) async => false),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('expand_radius_btn')), findsOneWidget);
+      expect(find.byKey(const Key('theme_deck_back')), findsNothing);
+    });
+  });
+
   group('Neo rewind xuyên deck (lastSwipeAnchorProvider)', () {
     Future<void> pumpMainDeck(
       WidgetTester tester, {
