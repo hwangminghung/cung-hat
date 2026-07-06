@@ -259,6 +259,8 @@ DONE: `flutter test` 224/224 pass (215 baseline + 4 repo + 2 sheet + 3 icebreake
 
 REVIEW-FIX (sau approve Task 3): `fix(discovery): hien ten bai tu thay vi id trong detail sheet va quote icebreaker` — shared_baitu giữ SONG ID thô nên sheet render/quote raw id ('s5' thay vì tên bài); CandidateDetailSheet → ConsumerWidget watch `songsProvider` (reference có sẵn) build map id→title, fallback raw id khi loading/lỗi/id lạ (không chặn render), fix luôn hiển thị deck detail có sẵn từ trước; test đổi sang id thật + override songsProvider mọi chỗ pump sheet, thêm case fallback; RED-check revert tạm xác nhận fail đúng (`Về bài "s5"...`); gates 225/225 + analyze sạch (không đụng SQL). Ngoài scope còn `match_celebration.dart:182` cũng render raw baitu id — đã báo coordinator, chưa sửa.
 
+REVIEW-FIX 2: `fix(discovery): hien ten bai tu trong man an mung match` — MatchCelebration ('Cùng tủ: ...') cùng defect raw id; chuyển ConsumerStatefulWidget watch `songsProvider` cùng pattern sheet (chọn widget-side watch thay vì caller resolve vì reactive: songs chưa load lúc match thì widget tự rebuild ra tên khi resolve xong, còn `ref.read` một-lần ở `_handleSwipe` sẽ kẹt raw id suốt màn; call site doi_deck_screen không đổi); test bọc ProviderScope + override songsProvider, case 1 gộp title-resolve ('s5'→'Nơi Này Có Anh') + fallback ('s9' raw) trong cùng chuỗi 'Cùng tủ'; RED-check revert tạm xác nhận fail đúng; gates 225/225 + analyze sạch.
+
 ---
 
 ### Task 4: Teaser "Ai thích bạn" blur server-side
