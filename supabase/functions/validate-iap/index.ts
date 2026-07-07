@@ -38,9 +38,18 @@ Deno.serve(async (req) => {
   } else {
     const bundleId = Deno.env.get("APP_BUNDLE_ID");
     if (!bundleId) return json(503, { error: "iap_verifier_not_configured" });
+    const environment = Deno.env.get("APPLE_ENVIRONMENT") ?? "Sandbox";
+    // appAppleId: thu vien Apple BAT BUOC khi env=Production -> fail-closed truoc khi verify.
+    const appAppleIdRaw = Deno.env.get("APPLE_APP_APPLE_ID");
+    if (environment === "Production" && !appAppleIdRaw) {
+      return json(503, { error: "iap_verifier_not_configured" });
+    }
+    const appAppleId = appAppleIdRaw ? Number(appAppleIdRaw) : undefined;
+    if (appAppleIdRaw && Number.isNaN(appAppleId)) {
+      return json(503, { error: "iap_verifier_not_configured" });
+    }
     const v = await verifyAppleReceipt({
-      receipt, bundleId,
-      environment: Deno.env.get("APPLE_ENVIRONMENT") ?? "Sandbox",
+      receipt, bundleId, environment, appAppleId,
       sharedSecret: Deno.env.get("APPLE_SHARED_SECRET"),
       expectedTxnId: String(store_txn_id), expectedProductId: store_product_id,
     });

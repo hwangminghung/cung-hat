@@ -24,6 +24,7 @@ async function appleRoots(): Promise<Buffer[]> {
 export async function verifyAppleReceipt(opts: {
   receipt: string; bundleId: string; environment: string;
   sharedSecret: string | undefined; expectedTxnId: string; expectedProductId: string;
+  appAppleId?: number; // bat buoc khi environment=Production (thu vien Apple throw neu thieu)
 }): Promise<{ ok: boolean; reason?: string }> {
   const isJws = opts.receipt.split(".").length === 3;
   if (isJws) {
@@ -31,7 +32,7 @@ export async function verifyAppleReceipt(opts: {
       const roots = await appleRoots();
       const env = opts.environment === "Production"
         ? Environment.PRODUCTION : Environment.SANDBOX;
-      const verifier = new SignedDataVerifier(roots, false, env, opts.bundleId);
+      const verifier = new SignedDataVerifier(roots, false, env, opts.bundleId, opts.appAppleId);
       const txn = await verifier.verifyAndDecodeTransaction(opts.receipt);
       if (String(txn.transactionId) !== opts.expectedTxnId) {
         return { ok: false, reason: "txn_mismatch" };
