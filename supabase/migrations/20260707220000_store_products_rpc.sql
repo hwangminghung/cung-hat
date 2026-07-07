@@ -10,3 +10,6 @@ as $$
   from public.products p
   where p.platform = p_platform and p.is_active;
 $$;
+
+revoke execute on function public.get_store_products(text) from public, anon;
+grant execute on function public.get_store_products(text) to authenticated;
