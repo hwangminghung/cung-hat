@@ -31,7 +31,10 @@ void main() {
     when(() => repo.currentPlan('k1')).thenAnswer((_) async => null);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [planRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          planRepositoryProvider.overrideWithValue(repo),
+          keoMidpointProvider.overrideWith((ref, keoId) async => null),
+        ],
         child: const MaterialApp(
           home: PlanScreen(keoId: 'k1', isHost: true, useNativeMap: false),
         ),
@@ -55,7 +58,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [planRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          planRepositoryProvider.overrideWithValue(repo),
+          keoMidpointProvider.overrideWith((ref, keoId) async => null),
+        ],
         child: const MaterialApp(
           home: PlanScreen(keoId: 'k1', isHost: true, useNativeMap: false),
         ),
@@ -89,7 +95,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [planRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          planRepositoryProvider.overrideWithValue(repo),
+          keoMidpointProvider.overrideWith((ref, keoId) async => null),
+        ],
         child: MaterialApp(
           home: PlanScreen(
             keoId: 'k1',

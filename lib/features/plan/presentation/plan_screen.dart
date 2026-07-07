@@ -58,6 +58,7 @@ class PlanScreen extends ConsumerWidget {
           venuesAsync.when(
             data: (list) => VenueMapSurface(
               venues: list,
+              midpoint: ref.watch(keoMidpointProvider(keoId)).asData?.value,
               useNativeMap: useNativeMap,
               onVenueSelected: isHost
                   ? (venue) => _pickVenue(context, ref, venue)
@@ -97,7 +98,10 @@ class PlanScreen extends ConsumerWidget {
                   subtitle:
                       'Khi có dữ liệu quán từ Places hoặc seed, bản đồ sẽ hiển thị marker để chọn điểm hẹn.',
                   actionLabel: 'Tải lại',
-                  onAction: () => ref.invalidate(nearestVenuesProvider(keoId)),
+                  onAction: () {
+                    ref.invalidate(nearestVenuesProvider(keoId));
+                    ref.invalidate(keoMidpointProvider(keoId));
+                  },
                 );
               }
               return Column(
