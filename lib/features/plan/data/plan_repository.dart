@@ -84,11 +84,10 @@ class PlanRepository {
   }
 
   Future<String> startVenuePayment({
-    required String planId, required String venueId,
-    required int amountMinor, required String gateway,
+    required String planId, required String venueId, required String gateway,
   }) async {
     final res = await _client.functions.invoke('create-venue-payment', body: {
-      'plan_id': planId, 'venue_id': venueId, 'amount_minor': amountMinor, 'gateway': gateway,
+      'plan_id': planId, 'venue_id': venueId, 'gateway': gateway,
     });
     if (res.status >= 400) {
       throw Exception('create-venue-payment failed (${res.status}): ${res.data}');

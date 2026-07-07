@@ -9,12 +9,10 @@ class BookingButton extends ConsumerWidget {
     super.key,
     required this.planId,
     required this.venueId,
-    this.amountMinor = 200000,
   });
 
   final String planId;
   final String venueId;
-  final int amountMinor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +23,7 @@ class BookingButton extends ConsumerWidget {
       onPressed: () async {
         try {
           final url = await ref.read(planRepositoryProvider).startVenuePayment(
-              planId: planId, venueId: venueId, amountMinor: amountMinor, gateway: 'momo');
+              planId: planId, venueId: venueId, gateway: 'momo');
           final uri = Uri.parse(url);
           if (await canLaunchUrl(uri)) {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
