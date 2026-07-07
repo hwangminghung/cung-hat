@@ -1,25 +1,95 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { hmacSha256Hex, json } from "../_shared/hmac.ts";
 
-// Gateway IPN/webhook: verify signature, mark the booking paid + compute commission. Service role.
+// IPN/callback gateway. verify_jwt=false (config.toml) vi gateway khong co JWT Supabase —
+// chu ky HMAC cua gateway CHINH LA lop xac thuc. Fail-closed khi thieu secret.
+// State machine: initiated -> paid|failed; RIENG paid-IPN hop le den tren row 'failed'
+// (vd truoc do bi danh dau failed do mat mang) van reconcile -> paid (co log).
+// Row da 'paid' -> idempotent no-op. Amount lech -> KHONG cap paid.
 Deno.serve(async (req) => {
-  const body = await req.json();
-  const { gateway_ref, status } = body;
+  const gateway = new URL(req.url).searchParams.get("gateway");
+  const body = await req.json().catch(() => ({}));
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-  // TODO(prod): verify the gateway HMAC signature (MOMO_*/ZALOPAY_*). Reject on mismatch.
-  const signatureValid = Boolean(gateway_ref); // placeholder until merchant creds exist
-  if (!signatureValid) return new Response("bad signature", { status: 401 });
-
-  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const { data: booking } = await admin.from("venue_bookings")
-    .select("id,amount_minor").eq("gateway_ref", gateway_ref).maybeSingle();
-  if (!booking) return new Response("not found", { status: 404 });
-
-  if (status === "paid") {
-    const commission = Math.round(booking.amount_minor * 0.1); // 10% platform commission
-    await admin.from("venue_bookings").update({ state: "paid", commission_minor: commission })
-      .eq("id", booking.id);
-  } else {
-    await admin.from("venue_bookings").update({ state: "failed" }).eq("id", booking.id);
+  async function settle(gatewayRef: string, paid: boolean, ipnAmount: number) {
+    const { data: booking, error: qErr } = await admin.from("venue_bookings")
+      .select("id,amount_minor,state").eq("gateway_ref", gatewayRef).maybeSingle();
+    if (qErr) {
+      console.error("[payments-webhook] booking lookup failed", qErr);
+      return "lookup_error";
+    }
+    if (!booking) return "not_found";
+    if (booking.state === "paid") return "already_paid"; // idempotent
+    if (paid && ipnAmount !== booking.amount_minor) {
+      console.error(`[payments-webhook] amount mismatch ref=${gatewayRef} ipn=${ipnAmount} db=${booking.amount_minor}`);
+      if (booking.state === "initiated") {
+        await admin.from("venue_bookings").update({ state: "failed" }).eq("id", booking.id);
+      }
+      return "amount_mismatch";
+    }
+    if (paid) {
+      if (booking.state === "failed") {
+        console.warn(`[payments-webhook] reconciling paid IPN on failed booking ref=${gatewayRef}`);
+      }
+      const commission = Math.round(booking.amount_minor * 0.1); // hoa hong 10%
+      const { error: updErr } = await admin.from("venue_bookings")
+        .update({ state: "paid", commission_minor: commission }).eq("id", booking.id);
+      if (updErr) {
+        console.error("[payments-webhook] paid update failed", updErr);
+        return "update_error";
+      }
+      return "paid";
+    }
+    if (booking.state === "initiated") {
+      const { error: updErr } = await admin.from("venue_bookings")
+        .update({ state: "failed" }).eq("id", booking.id);
+      if (updErr) console.error("[payments-webhook] failed update failed", updErr);
+    }
+    return "failed";
   }
-  return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+
+  if (gateway === "momo") {
+    const accessKey = Deno.env.get("MOMO_ACCESS_KEY");
+    const secretKey = Deno.env.get("MOMO_SECRET_KEY");
+    if (!accessKey || !secretKey) return json(503, { error: "payment_gateway_not_configured" });
+    // Chuoi ky IPN v2 theo docs MoMo (thu tu alphabet co dinh).
+    const raw =
+      `accessKey=${accessKey}&amount=${body.amount}&extraData=${body.extraData ?? ""}` +
+      `&message=${body.message}&orderId=${body.orderId}&orderInfo=${body.orderInfo}` +
+      `&orderType=${body.orderType}&partnerCode=${body.partnerCode}&payType=${body.payType}` +
+      `&requestId=${body.requestId}&responseTime=${body.responseTime}` +
+      `&resultCode=${body.resultCode}&transId=${body.transId}`;
+    const expected = await hmacSha256Hex(secretKey, raw);
+    if (!body.signature || expected !== body.signature) {
+      return new Response("bad signature", { status: 401 });
+    }
+    const outcome = await settle(String(body.orderId), body.resultCode === 0, Number(body.amount));
+    if (outcome === "not_found") return new Response("not found", { status: 404 });
+    if (outcome === "lookup_error" || outcome === "update_error") {
+      return new Response("retry later", { status: 500 }); // MoMo se retry
+    }
+    return new Response(null, { status: 204 }); // MoMo yeu cau 204
+  }
+
+  if (gateway === "zalopay") {
+    const key2 = Deno.env.get("ZALOPAY_KEY2");
+    if (!key2) return json(503, { error: "payment_gateway_not_configured" });
+    const { data, mac } = body;
+    if (typeof data !== "string" || !mac) return json(200, { return_code: -1, return_message: "bad request" });
+    const expected = await hmacSha256Hex(key2, data);
+    if (expected !== mac) return json(200, { return_code: -1, return_message: "mac not equal" });
+    let payload: Record<string, unknown>;
+    try { payload = JSON.parse(data); } catch { return json(200, { return_code: -1, return_message: "bad data" }); }
+    // ZaloPay chi callback khi thanh toan THANH CONG.
+    const outcome = await settle(String(payload.app_trans_id), true, Number(payload.amount));
+    if (outcome === "not_found") return json(200, { return_code: -1, return_message: "order not found" });
+    if (outcome === "lookup_error" || outcome === "update_error") {
+      return json(200, { return_code: 0, return_message: "retry" }); // != 1 -> ZaloPay retry
+    }
+    if (outcome === "amount_mismatch") return json(200, { return_code: -1, return_message: "amount mismatch" });
+    return json(200, { return_code: 1, return_message: "success" });
+  }
+
+  return json(400, { error: "unknown_gateway" });
 });
