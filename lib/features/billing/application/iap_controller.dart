@@ -4,16 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'billing_providers.dart';
 
-/// Maps an app-level feature to its platform store product id.
-/// TODO(prod): query the seeded `products` table for the current platform
-/// instead of this const map.
-const _storeProductIds = <String, String>{
-  'boost': 'com.cunghat.boost',
-  'see_likes': 'com.cunghat.see_likes',
-  'premium_filters': 'com.cunghat.filters',
-  'pro': 'com.cunghat.pro',
-};
-
 /// Features sold as consumables (re-buyable); everything else is non-consumable.
 const _consumables = <String>{'boost'};
 
@@ -22,6 +12,7 @@ class IapController {
 
   final Ref ref;
   final InAppPurchase _iap = InAppPurchase.instance;
+  Map<String, String>? _catalog;
 
   /// Call from app startup (NOT from the constructor) — touches platform channels.
   Future<void> init() async {
@@ -29,9 +20,20 @@ class IapController {
     _iap.purchaseStream.listen(_onPurchases);
   }
 
+  Future<String?> _productIdFor(String feature) async {
+    try {
+      _catalog ??= await ref.read(billingRepositoryProvider).storeProductIds(
+          defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android');
+    } catch (e) {
+      debugPrint('IAP catalog load failed: $e');
+      return null;
+    }
+    return _catalog![feature];
+  }
+
   /// Best-effort purchase kick-off. Real product wiring is TODO(prod).
   Future<void> buy(String feature) async {
-    final productId = _storeProductIds[feature];
+    final productId = await _productIdFor(feature);
     if (productId == null) return;
     try {
       final response = await _iap.queryProductDetails({productId});
