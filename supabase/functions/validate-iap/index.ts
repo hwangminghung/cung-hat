@@ -27,6 +27,11 @@ Deno.serve(async (req) => {
     .eq("platform", platform).maybeSingle();
   if (!product) return json(400, { error: "unknown_product" });
 
+  // Txn id authoritative de dedup: Google = orderId tu response DA verify (khong tin
+  // client; fallback purchaseToken khi license-tester thieu orderId — token van unique
+  // theo purchase). Apple = store_txn_id (da bind vao receipt qua txn matching).
+  let authoritativeTxnId: string;
+
   if (platform === "android") {
     const saJson = Deno.env.get("GOOGLE_PLAY_SA_JSON");
     const packageName = Deno.env.get("ANDROID_PACKAGE_NAME");
@@ -35,6 +40,11 @@ Deno.serve(async (req) => {
       saJson, packageName, productId: store_product_id, purchaseToken: receipt,
     });
     if (!v.ok) return json(400, { error: "invalid_receipt", reason: v.reason });
+    // Defense-in-depth: boost la consumable — token da consume khong duoc cap lai.
+    if (product.type === "boost" && v.consumptionState === 1) {
+      return json(400, { error: "invalid_receipt", reason: "already_consumed" });
+    }
+    authoritativeTxnId = v.orderId ?? receipt;
   } else {
     const bundleId = Deno.env.get("APP_BUNDLE_ID");
     if (!bundleId) return json(503, { error: "iap_verifier_not_configured" });
@@ -54,20 +64,31 @@ Deno.serve(async (req) => {
       expectedTxnId: String(store_txn_id), expectedProductId: store_product_id,
     });
     if (!v.ok) return json(400, { error: "invalid_receipt", reason: v.reason });
+    authoritativeTxnId = String(store_txn_id);
   }
 
-  await admin.from("purchases").upsert({
-    user_id: user.id, product_id: product.id, platform,
-    store_txn_id, receipt_ref: "stored", state: "validated",
-  }, { onConflict: "platform,store_txn_id" });
-
-  // boost = cua so 24h; con lai vinh vien (active_until null).
-  const activeUntil = product.type === "boost"
-    ? new Date(Date.now() + 24 * 3600 * 1000).toISOString() : null;
-  await admin.from("entitlements").upsert({
-    user_id: user.id, feature: product.type,
-    source: platform === "ios" ? "ios_iap" : "play_billing", active_until: activeUntil,
-  }, { onConflict: "user_id,feature" });
+  // Grant CHI lan dau cho moi purchase (1 giao dich = 1 lan cap quyen). Re-POST
+  // receipt cu -> insert bi ignore (duplicate) -> KHONG refresh entitlement, van 200
+  // de idempotent voi retry cua store/client.
+  const { data: inserted, error: purErr } = await admin.from("purchases")
+    .upsert({
+      user_id: user.id, product_id: product.id, platform,
+      store_txn_id: authoritativeTxnId, receipt_ref: "stored", state: "validated",
+    }, { onConflict: "platform,store_txn_id", ignoreDuplicates: true })
+    .select("id");
+  if (purErr) {
+    console.error("[validate-iap] purchase insert failed", purErr);
+    return json(500, { error: "grant_failed" });
+  }
+  if (inserted && inserted.length > 0) {
+    // boost = cua so 24h; con lai vinh vien (active_until null).
+    const activeUntil = product.type === "boost"
+      ? new Date(Date.now() + 24 * 3600 * 1000).toISOString() : null;
+    await admin.from("entitlements").upsert({
+      user_id: user.id, feature: product.type,
+      source: platform === "ios" ? "ios_iap" : "play_billing", active_until: activeUntil,
+    }, { onConflict: "user_id,feature" });
+  }
 
   return json(200, { ok: true, feature: product.type });
 });

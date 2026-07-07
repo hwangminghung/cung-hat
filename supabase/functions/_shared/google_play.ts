@@ -12,7 +12,7 @@ function pemToDer(pem: string): Uint8Array {
 
 export async function verifyGooglePurchase(opts: {
   saJson: string; packageName: string; productId: string; purchaseToken: string;
-}): Promise<{ ok: boolean; reason?: string }> {
+}): Promise<{ ok: boolean; reason?: string; orderId?: string; consumptionState?: number }> {
   let sa: { client_email: string; private_key: string; token_uri: string };
   try { sa = JSON.parse(opts.saJson); } catch { return { ok: false, reason: "bad_sa_json" }; }
 
@@ -55,7 +55,15 @@ export async function verifyGooglePurchase(opts: {
         body: "{}",
       });
     }
-    return { ok: true };
+    // orderId/consumptionState lay tu response DA verify — caller dung orderId lam
+    // txn id authoritative (KHONG tin store_txn_id client) va chan boost da consume.
+    return {
+      ok: true,
+      orderId: typeof purchase.orderId === "string" && purchase.orderId !== ""
+        ? purchase.orderId : undefined,
+      consumptionState: typeof purchase.consumptionState === "number"
+        ? purchase.consumptionState : undefined,
+    };
   } catch (e) {
     return { ok: false, reason: `google_verify_error:${(e as Error).message}` };
   }
