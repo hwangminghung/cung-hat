@@ -127,7 +127,11 @@ Both should be non-empty for HN, HCM and TN before opening signups in a city.
    - **Places server key** (restrict: Places API (New)) — nếu chưa có, xem mục 1
      (`GOOGLE_PLACES_API_KEY`) và mục 3 (`ingest-places-venues`) ở trên.
 2. Android: ghi `MAPS_API_KEY=<maps-sdk-key>` vào `android/local.properties` (KHÔNG commit).
-3. iOS: truyền build setting `MAPS_API_KEY=<maps-sdk-key>` (xcconfig user-level, KHÔNG commit).
+3. iOS: tạo `ios/Flutter/Maps.xcconfig` với nội dung `MAPS_API_KEY=<maps-sdk-key>`
+   (file này đã được gitignore, KHÔNG commit; dòng `#include? "Maps.xcconfig"` đã có sẵn
+   trong `Debug.xcconfig`/`Release.xcconfig`).
 4. Lật `"GOOGLE_MAPS_ENABLED": true` trong file env dùng để build, rebuild app.
+   > ⚠️ Trên iOS, bước key (3) và bước lật cờ (4) BẮT BUỘC đi cùng nhau — bật cờ mà thiếu
+   > key sẽ crash runtime GMSMapView ("must be initialized via provideAPIKey").
 5. Places ingestion: đã có runbook riêng ở mục 1 (bảng secrets) và mục 3
    (`scripts/run_places_ingest.sh`) — không lặp lại ở đây.
