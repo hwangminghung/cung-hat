@@ -18,6 +18,7 @@ import '../domain/music_themes.dart';
 import 'candidate_card.dart';
 import 'candidate_detail_sheet.dart';
 import 'deck_action_bar.dart';
+import 'filter_sheet.dart';
 import 'keo_promo_card.dart';
 import 'match_celebration.dart';
 import 'swipe_overlays.dart';
@@ -68,8 +69,12 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.genre != null) return;
+    // Bất biến tái dùng vị trí: deck chủ đề dùng vị trí đã đẩy từ deck chính
+    // (luôn mount trước ở tab 0); server đọc vị trí LƯU TRỮ nên không cần bắt
+    // lại — bắt lại mỗi lần vào vừa chậm (chờ GPS) vừa xoá cache candidates
+    // của genre qua invalidate bên dưới.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Deck chủ đề (genre != null) cũng cần vị trí — giữ capture cho cả 2 chế độ.
       final ok = await ref.read(locationServiceProvider).captureAndPush();
       if (ok && mounted) ref.invalidate(candidatesProvider(widget.genre));
     });
@@ -105,13 +110,23 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   Future<void> _handleToggleAutoExpand(bool on) async {
     try {
       await ref.read(discoveryRepositoryProvider).setAutoExpand(on);
-      if (mounted) ref.invalidate(autoExpandProvider);
+      if (mounted) ref.invalidate(discoveryPrefsProvider);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Không lưu được cài đặt, thử lại.')));
       }
     }
+  }
+
+  /// Bán kính HIỆU LỰC của deck: override phiên ([deckRadiusProvider]) nếu
+  /// có, nếu không thì bán kính đã lưu server; pref chưa tải xong/lỗi → mặc
+  /// định 50 (không chặn UI chờ bộ lọc — cùng convention swallow-to-50 với
+  /// candidatesProvider).
+  int _effectiveRadius() {
+    final override = ref.watch(deckRadiusProvider);
+    if (override != null) return override;
+    return ref.watch(discoveryPrefsProvider).value?.radiusKm ?? 50;
   }
 
   /// Deck chủ đề (genre != null) RỖNG vẫn cần lối quay lại in-app: header
@@ -178,10 +193,13 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
             final hasCandidates =
                 items.whereType<CandidateItem>().isNotEmpty;
             if (!hasCandidates) {
-              final radius = ref.watch(deckRadiusProvider);
-              final autoExpand = ref.watch(autoExpandProvider).value ?? false;
-              // Auto-expand: 50km rỗng + user đã bật → tự lên 100km 1 lần.
-              if (radius == 50 && autoExpand) {
+              final radius = _effectiveRadius();
+              final autoExpand =
+                  ref.watch(discoveryPrefsProvider).value?.autoExpand ?? false;
+              // Auto-expand: hiệu lực CHƯA tới 100km + rỗng + user đã bật →
+              // tự lên 100km 1 lần (so hiệu lực, không so cứng == 50 — pref
+              // server có thể đã lưu bán kính khác 50).
+              if (radius < 100 && autoExpand) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
                     ref.read(deckRadiusProvider.notifier).state = 100;
@@ -241,7 +259,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: AppColors.textSecondary),
                             ),
-                            if (ref.watch(deckRadiusProvider) == 100)
+                            if (_effectiveRadius() >= 100)
                               Padding(
                                 padding:
                                     const EdgeInsets.only(top: AppSpacing.xs),
@@ -256,6 +274,17 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                         ),
                       ),
                       if (widget.genre == null) ...[
+                        IconButton.filledTonal(
+                          key: const Key('filter_btn'),
+                          tooltip: 'Bộ lọc',
+                          onPressed: () => showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (_) => const FilterSheet(),
+                          ),
+                          icon: const Icon(Icons.tune_rounded),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
                         IconButton.filledTonal(
                           key: const Key('explore_btn'),
                           tooltip: 'Khám Phá theo gu nhạc',

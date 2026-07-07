@@ -15,19 +15,36 @@ final discoveryRepositoryProvider =
 final locationServiceProvider =
     Provider((ref) => LocationService(ref.watch(discoveryRepositoryProvider)));
 
-/// Bán kính deck hiện tại (km). 50 mặc định; 100 khi user mở rộng — reset
-/// mỗi phiên app (server chỉ lưu auto_expand, không lưu bán kính).
-final deckRadiusProvider = StateProvider<int>((ref) => 50);
+/// (auto_expand, radius_km) đã lưu server-side — nguồn chính cho Bộ lọc và
+/// cho bán kính hiệu lực của deck (xem [candidatesProvider]).
+final discoveryPrefsProvider = FutureProvider<({bool autoExpand, int radiusKm})>(
+    (ref) => ref.watch(discoveryRepositoryProvider).getDiscoveryPrefs());
 
-final autoExpandProvider = FutureProvider<bool>(
-    (ref) => ref.watch(discoveryRepositoryProvider).getAutoExpand());
+/// Override PHIÊN (session) cho bán kính — one-shot "mở rộng 100km" khi deck
+/// rỗng. null = dùng bán kính đã lưu server ([discoveryPrefsProvider]); khác
+/// null = ghi đè tạm cho phiên app hiện tại, KHÔNG lưu server, reset khi user
+/// lưu bộ lọc mới (FilterSheet null hoá lại override này sau khi Áp dụng).
+final deckRadiusProvider = StateProvider<int?>((ref) => null);
 
 /// [genre] null = deck chính (không lọc); khác null = deck chủ đề Khám Phá
 /// (mục 9 Tinder-parity), lọc ứng viên theo đúng genre đó phía server.
+/// Bán kính hiệu lực: override phiên ([deckRadiusProvider]) nếu có, nếu
+/// không thì bán kính đã lưu server ([discoveryPrefsProvider]); lỗi đọc pref
+/// (offline/RPC) nuốt về mặc định 50 — không được chặn deck chỉ vì bộ lọc
+/// chưa tải xong.
 final candidatesProvider =
-    FutureProvider.family<List<Candidate>, String?>((ref, genre) => ref
-        .watch(discoveryRepositoryProvider)
-        .getCandidates(radiusKm: ref.watch(deckRadiusProvider), genre: genre));
+    FutureProvider.family<List<Candidate>, String?>((ref, genre) async {
+  final override = ref.watch(deckRadiusProvider);
+  int radius;
+  try {
+    radius = override ?? (await ref.watch(discoveryPrefsProvider.future)).radiusKm;
+  } catch (_) {
+    radius = override ?? 50;
+  }
+  return ref
+      .watch(discoveryRepositoryProvider)
+      .getCandidates(radiusKm: radius, genre: genre);
+});
 final whoLikedMeProvider = FutureProvider<List<Candidate>>(
     (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe());
 
