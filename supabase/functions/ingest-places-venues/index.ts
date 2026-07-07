@@ -19,7 +19,9 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         textQuery: text_query,
-        pageSize: 20,
+        pageSize: 20, // pageSize max 20; chua phan trang (pageToken) -> quan day dac co the bi cat
+        languageCode: "vi",
+        regionCode: "VN",
         locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: radius_m } },
       }),
     });
@@ -38,11 +40,27 @@ Deno.serve(async (req) => {
       }),
     });
   }
+  if (!res.ok) {
+    return new Response(JSON.stringify({ error: `places_api_${res.status}`, detail: await res.text() }), {
+      status: 502, headers: { "Content-Type": "application/json" },
+    });
+  }
   const data = await res.json();
   const places: any[] = data.places ?? [];
+  // locationBias co the tra ket qua NGOAI vung tron -> loc cung theo khoang cach
+  // (searchNearby da hard-filter bang locationRestriction, khong can loc lai).
+  const withinRadius = (p: any) => {
+    const dLat = (p.location.latitude - lat) * Math.PI / 180;
+    const dLng = (p.location.longitude - lng) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat * Math.PI / 180) * Math.cos(p.location.latitude * Math.PI / 180) *
+      Math.sin(dLng / 2) ** 2;
+    return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) <= radius_m;
+  };
+  const filtered = text_query ? places.filter((p) => p.id && p.location && withinRadius(p)) : places;
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   let upserted = 0;
-  for (const p of places) {
+  for (const p of filtered) {
     if (!p.id) continue;
     const row = {
       name: p.displayName?.text ?? "Karaoke",
@@ -57,7 +75,7 @@ Deno.serve(async (req) => {
     const { error } = await sb.from("venues").upsert(row, { onConflict: "places_id" });
     if (!error) upserted++;
   }
-  return new Response(JSON.stringify({ found: places.length, upserted }), {
+  return new Response(JSON.stringify({ found: places.length, kept: filtered.length, upserted }), {
     headers: { "Content-Type": "application/json" },
   });
 });
