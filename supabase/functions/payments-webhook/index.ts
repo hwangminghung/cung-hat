@@ -13,8 +13,11 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   async function settle(gatewayRef: string, paid: boolean, ipnAmount: number) {
+    // .eq gateway: chong cross-gateway ref collision (defense-in-depth; settle chi
+    // duoc goi trong 2 branch momo/zalopay nen closure `gateway` luon non-null o day).
     const { data: booking, error: qErr } = await admin.from("venue_bookings")
-      .select("id,amount_minor,state").eq("gateway_ref", gatewayRef).maybeSingle();
+      .select("id,amount_minor,state")
+      .eq("gateway_ref", gatewayRef).eq("gateway", gateway).maybeSingle();
     if (qErr) {
       console.error("[payments-webhook] booking lookup failed", qErr);
       return "lookup_error";
@@ -24,7 +27,9 @@ Deno.serve(async (req) => {
     if (paid && ipnAmount !== booking.amount_minor) {
       console.error(`[payments-webhook] amount mismatch ref=${gatewayRef} ipn=${ipnAmount} db=${booking.amount_minor}`);
       if (booking.state === "initiated") {
-        await admin.from("venue_bookings").update({ state: "failed" }).eq("id", booking.id);
+        const { error: updErr } = await admin.from("venue_bookings")
+          .update({ state: "failed" }).eq("id", booking.id).eq("state", "initiated");
+        if (updErr) console.error("[payments-webhook] mismatch failed-write failed", updErr);
       }
       return "amount_mismatch";
     }
@@ -33,8 +38,10 @@ Deno.serve(async (req) => {
         console.warn(`[payments-webhook] reconciling paid IPN on failed booking ref=${gatewayRef}`);
       }
       const commission = Math.round(booking.amount_minor * 0.1); // hoa hong 10%
+      // paid wins: chi cap paid tu trang thai chua chot (khong ghi de paid/refunded khi race).
       const { error: updErr } = await admin.from("venue_bookings")
-        .update({ state: "paid", commission_minor: commission }).eq("id", booking.id);
+        .update({ state: "paid", commission_minor: commission })
+        .eq("id", booking.id).in("state", ["initiated", "failed"]);
       if (updErr) {
         console.error("[payments-webhook] paid update failed", updErr);
         return "update_error";
@@ -43,7 +50,7 @@ Deno.serve(async (req) => {
     }
     if (booking.state === "initiated") {
       const { error: updErr } = await admin.from("venue_bookings")
-        .update({ state: "failed" }).eq("id", booking.id);
+        .update({ state: "failed" }).eq("id", booking.id).eq("state", "initiated");
       if (updErr) console.error("[payments-webhook] failed update failed", updErr);
     }
     return "failed";
