@@ -11,11 +11,13 @@ set -euo pipefail
 #   trang thai row trong venue_bookings. KHONG bao gio gia mao 1 check de pass:
 #   check nao fail thi debug CODE hoac tinh dung cua CHECK, roi bao cao that.
 #
-# PHAM VI CHECK (17 check() calls, gom 11 nhom):
+# PHAM VI CHECK (20 check() calls, gom 12 nhom):
 #   1  momo IPN co chu ky        -> 204
 #   2  booking -> paid + hoa hong 10% (2 check)
 #   3  momo IPN replay           -> 204, state/commission KHONG doi (2 check)
 #   4  momo IPN sua amount        -> 401 (chu ky vo hieu), state van paid (2 check)
+#   4b momo IPN KY DUNG nhung amount lech DB -> 204 (ack de MoMo ngung retry —
+#      mismatch la terminal), row initiated -> failed, commission van 0 (3 check)
 #   5  zalopay callback co chu ky -> return_code 1 + booking paid (2 check)
 #   6  zalopay sai mac            -> return_code -1, row van initiated (2 check)
 #   7  webhook gateway la         -> 400
@@ -161,6 +163,27 @@ C="$(http_code "$BASE/payments-webhook?gateway=momo" -X POST -H "apikey: $ANON" 
 check "momo ipn tampered amount -> 401" "401" "$C"
 ST="$(PSQL "select state from venue_bookings where gateway_ref='$REF_MOMO';")"
 check "momo tampered state still paid" "paid" "$ST"
+
+# ---------------------------------------------------------------------------
+# 4b  MoMo IPN KY DUNG nhung amount LECH so voi booking (reconciliation path):
+#     chu ky verify OK (raw string dung amount lech) -> settle() phat hien
+#     amount_mismatch -> row initiated -> failed, KHONG cap paid/commission.
+#     HTTP van 204: theo contract MoMo, mismatch la terminal -> ack de MoMo
+#     ngung retry (retry cung khong sua duoc lech tien).
+# ---------------------------------------------------------------------------
+REF_MM="${RUN}-momo-mm"
+PSQL "insert into venue_bookings (venue_id, amount_minor, gateway, gateway_ref, state) values ('$VENUE', 200000, 'momo', '$REF_MM', 'initiated');" >/dev/null
+AMT_MM="$(PSQL "select amount_minor from venue_bookings where gateway_ref='$REF_MM';")"
+BAD_AMT="$((AMT_MM + 1))"
+RAW_MM="accessKey=${MOMO_ACCESS_KEY}&amount=${BAD_AMT}&extraData=&message=Success&orderId=${REF_MM}&orderInfo=test&orderType=momo_wallet&partnerCode=PC&payType=qr&requestId=r1&responseTime=1&resultCode=0&transId=99"
+SIG_MM="$(printf '%s' "$RAW_MM" | openssl dgst -sha256 -hmac "$MOMO_SECRET_KEY" -r | cut -d' ' -f1)"
+BODY_MM="$(printf '{"amount":%s,"extraData":"","message":"Success","orderId":"%s","orderInfo":"test","orderType":"momo_wallet","partnerCode":"PC","payType":"qr","requestId":"r1","responseTime":1,"resultCode":0,"transId":99,"signature":"%s"}' "$BAD_AMT" "$REF_MM" "$SIG_MM")"
+C="$(http_code "$BASE/payments-webhook?gateway=momo" -X POST -H "apikey: $ANON" -H "Content-Type: application/json" -d "$BODY_MM")"
+check "momo signed amount-mismatch -> 204" "204" "$C"
+ST="$(PSQL "select state from venue_bookings where gateway_ref='$REF_MM';")"
+check "momo mismatch booking -> failed" "failed" "$ST"
+COMM_MM="$(PSQL "select coalesce(commission_minor,-1) from venue_bookings where gateway_ref='$REF_MM';")"
+check "momo mismatch commission stays 0" "0" "$COMM_MM"
 
 # ---------------------------------------------------------------------------
 # 5  ZaloPay callback co chu ky -> return_code 1 + paid

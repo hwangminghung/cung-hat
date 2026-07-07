@@ -44,8 +44,8 @@ Crypto **thật** (HMAC-SHA256 bằng `openssl`, đúng chuỗi ký của gatewa
 vào edge runtime local, đối chiếu HTTP status + row `venue_bookings`. Chạy lặp lại
 được (dùng `gateway_ref` có timestamp + trap cleanup, không để lại row rác).
 
-Kết quả: **17/17 PASS, 0 FAIL** (2 lần chạy liên tiếp đều `PASS=17 FAIL=0`, exit 0,
-0 row `verify-%` sót lại).
+Kết quả: **20/20 PASS, 0 FAIL** (`PASS=20 FAIL=0`, exit 0, 0 row `verify-%` sót lại;
+chạy lặp lại nhiều lần đều xanh).
 
 | # | Check | Want | Got | KQ |
 |---|-------|------|-----|----|
@@ -56,16 +56,19 @@ Kết quả: **17/17 PASS, 0 FAIL** (2 lần chạy liên tiếp đều `PASS=17
 | 5 | momo replay state unchanged | paid/20000 | paid/20000 | PASS |
 | 6 | momo ipn tampered amount -> 401 | 401 | 401 | PASS |
 | 7 | momo tampered state still paid | paid | paid | PASS |
-| 8 | zalopay callback signed -> return_code 1 | 1 | 1 | PASS |
-| 9 | zalopay booking -> paid | paid | paid | PASS |
-| 10 | zalopay bad mac -> return_code -1 | -1 | -1 | PASS |
-| 11 | zalopay bad mac row stays initiated | initiated | initiated | PASS |
-| 12 | webhook unknown gateway -> 400 | 400 | 400 | PASS |
-| 13 | validate-iap no jwt -> 401 | 401 | 401 | PASS |
-| 14 | validate-iap jwt+garbage -> 503 | 503 | 503 | PASS |
-| 15 | create-venue-payment no jwt -> 401 | 401 | 401 | PASS |
-| 16 | create-venue-payment jwt+bogus plan -> 403 | 403 | 403 | PASS |
-| 17 | ingest-places anon-jwt no secret -> 403 | 403 | 403 | PASS |
+| 8 | momo signed amount-mismatch -> 204 | 204 | 204 | PASS |
+| 9 | momo mismatch booking -> failed | failed | failed | PASS |
+| 10 | momo mismatch commission stays 0 | 0 | 0 | PASS |
+| 11 | zalopay callback signed -> return_code 1 | 1 | 1 | PASS |
+| 12 | zalopay booking -> paid | paid | paid | PASS |
+| 13 | zalopay bad mac -> return_code -1 | -1 | -1 | PASS |
+| 14 | zalopay bad mac row stays initiated | initiated | initiated | PASS |
+| 15 | webhook unknown gateway -> 400 | 400 | 400 | PASS |
+| 16 | validate-iap no jwt -> 401 | 401 | 401 | PASS |
+| 17 | validate-iap jwt+garbage -> 503 | 503 | 503 | PASS |
+| 18 | create-venue-payment no jwt -> 401 | 401 | 401 | PASS |
+| 19 | create-venue-payment jwt+bogus plan -> 403 | 403 | 403 | PASS |
+| 20 | ingest-places anon-jwt no secret -> 403 | 403 | 403 | PASS |
 
 Ý nghĩa từng nhóm:
 
@@ -74,14 +77,19 @@ Kết quả: **17/17 PASS, 0 FAIL** (2 lần chạy liên tiếp đều `PASS=17
 - **4–5:** Replay IPN đã `paid` → idempotent (vẫn 204, state/commission không đổi).
 - **6–7:** Sửa `amount` trong body nhưng giữ nguyên chữ ký cũ → server tính lại HMAC
   trên amount mới → **khác chữ ký** → 401, row **không** bị đổi (bảo vệ chống tamper).
-- **8–9:** ZaloPay callback ký đúng → `return_code 1` + settle paid.
-- **10–11:** ZaloPay sai `mac` → `return_code -1`, row giữ `initiated` (fail-closed).
-- **12:** gateway không hợp lệ → 400.
-- **13–14:** `validate-iap` chặn không JWT (401); có JWT thật + receipt rác nhưng
+- **8–10:** IPN **ký đúng** nhưng amount **lệch** so với booking (đường reconciliation
+  trong `settle()`): chữ ký verify OK, server phát hiện `amount_mismatch` → row
+  `initiated → failed`, KHÔNG cấp paid, commission giữ 0. HTTP vẫn **204** vì theo
+  contract MoMo mismatch là terminal — ack để MoMo ngừng retry (retry cũng không sửa
+  được lệch tiền). Khác nhóm 6–7: ở đó chữ ký chết trước khi tới settle().
+- **11–12:** ZaloPay callback ký đúng → `return_code 1` + settle paid.
+- **13–14:** ZaloPay sai `mac` → `return_code -1`, row giữ `initiated` (fail-closed).
+- **15:** gateway không hợp lệ → 400.
+- **16–17:** `validate-iap` chặn không JWT (401); có JWT thật + receipt rác nhưng
   **thiếu creds store** → 503 (fail-closed đúng, không cấp entitlement).
-- **15–16:** `create-venue-payment` chặn không JWT (401); có JWT thật nhưng plan không
+- **18–19:** `create-venue-payment` chặn không JWT (401); có JWT thật nhưng plan không
   phải kèo của user → 403 (`not_a_plan_member`, gate authz qua RLS).
-- **17:** `ingest-places-venues` chỉ có anon-JWT, thiếu `x-ingest-secret` → 403
+- **20:** `ingest-places-venues` chỉ có anon-JWT, thiếu `x-ingest-secret` → 403
   (secret-gated, không lộ cho app).
 
 ---
@@ -94,7 +102,7 @@ Kết quả: **17/17 PASS, 0 FAIL** (2 lần chạy liên tiếp đều `PASS=17
 | Flutter analyze | `flutter analyze` | **No issues found!** (ran in 24.3s) |
 | pgTAP | `npx supabase test db` | **Files=34, Tests=150, Result: PASS** |
 
-Harness: `bash scripts/verify_payments_local.sh` → **PASS=17 FAIL=0** (exit 0).
+Harness: `bash scripts/verify_payments_local.sh` → **PASS=20 FAIL=0** (exit 0).
 
 ---
 
@@ -103,7 +111,8 @@ Harness: `bash scripts/verify_payments_local.sh` → **PASS=17 FAIL=0** (exit 0)
 - **T8 — smoke MoMo + ZaloPay self-signed end-to-end với DB state:** ký IPN/callback
   bằng chính thuật toán/chuỗi ký của gateway (secret dummy), bắn vào webhook thật,
   quan sát `venue_bookings` chuyển `initiated → paid`, hoa hồng 10%, idempotent replay,
-  chống tamper amount, sai mac giữ `initiated`. (Chính là các check 1–12 của harness.)
+  chống tamper amount, đường reconciliation amount-mismatch (ký đúng, lệch tiền →
+  `failed`), sai mac giữ `initiated`. (Chính là các check 1–15 của harness.)
 - **T9 — boot + 503 fail-closed với JWT thật:** `validate-iap` với JWT thật (GoTrue OTP)
   + receipt rác, khi thiếu creds store (`GOOGLE_PLAY_SA_JSON`/`ANDROID_PACKAGE_NAME`
   hoặc `APP_BUNDLE_ID`) → 503, không bao giờ cấp entitlement (không có short-circuit
@@ -169,4 +178,4 @@ Harness: `bash scripts/verify_payments_local.sh` → **PASS=17 FAIL=0** (exit 0)
 | **Payments/IAP** | MoMo/ZaloPay merchant creds + `PAYMENTS_WEBHOOK_URL`/`PAYMENTS_REDIRECT_URL` public; Apple/Google IAP creds + sandbox testers | Đặt cọc phòng thật qua MoMo/ZaloPay (create-order → pay_url → IPN settle); mua hàng số thật qua Apple/Google IAP (verify receipt → cấp entitlement). |
 
 Tất cả gate trên đều **fail-closed** khi thiếu creds (đã chứng minh qua harness check
-14 & 17 và smoke T7/T9): không có creds → 503/403, tuyệt đối không settle/cấp quyền chay.
+17 & 20 và smoke T7/T9): không có creds → 503/403, tuyệt đối không settle/cấp quyền chay.
