@@ -84,10 +84,50 @@ Deno.serve(async (req) => {
     // boost = cua so 24h; con lai vinh vien (active_until null).
     const activeUntil = product.type === "boost"
       ? new Date(Date.now() + 24 * 3600 * 1000).toISOString() : null;
-    await admin.from("entitlements").upsert({
+    const { error: entErr } = await admin.from("entitlements").upsert({
       user_id: user.id, feature: product.type,
       source: platform === "ios" ? "ios_iap" : "play_billing", active_until: activeUntil,
     }, { onConflict: "user_id,feature" });
+    if (entErr) {
+      console.error("[validate-iap] entitlement grant failed", entErr);
+      // Compensate: xoa purchase row vua insert de retry cua store lam lai tu dau.
+      const { error: delErr } = await admin.from("purchases")
+        .delete().eq("id", inserted[0].id);
+      if (delErr) console.error("[validate-iap] compensation delete failed", delErr);
+      return json(500, { error: "grant_failed" });
+    }
+  } else {
+    // Duplicate txn: self-heal truong hop hiem purchase da ghi nhung entitlement thieu
+    // (crash giua 2 buoc truoc khi co compensating delete). CHI khi purchase row thuoc
+    // CHINH user nay — replay receipt cua user khac thi KHONG cap gi, van 200 nhu cu.
+    const { data: owned, error: ownErr } = await admin.from("purchases").select("id")
+      .eq("platform", platform).eq("store_txn_id", authoritativeTxnId)
+      .eq("user_id", user.id).maybeSingle();
+    if (ownErr) {
+      console.error("[validate-iap] duplicate ownership lookup failed", ownErr);
+      return json(500, { error: "grant_failed" });
+    }
+    if (owned) {
+      const { data: ent, error: entSelErr } = await admin.from("entitlements")
+        .select("user_id").eq("user_id", user.id).eq("feature", product.type).maybeSingle();
+      if (entSelErr) {
+        // Khong xac dinh duoc trang thai -> KHONG upsert bua (tranh refresh boost oan).
+        console.error("[validate-iap] entitlement lookup failed", entSelErr);
+        return json(500, { error: "grant_failed" });
+      }
+      if (!ent) {
+        const activeUntil = product.type === "boost"
+          ? new Date(Date.now() + 24 * 3600 * 1000).toISOString() : null;
+        const { error: entErr } = await admin.from("entitlements").upsert({
+          user_id: user.id, feature: product.type,
+          source: platform === "ios" ? "ios_iap" : "play_billing", active_until: activeUntil,
+        }, { onConflict: "user_id,feature" });
+        if (entErr) {
+          console.error("[validate-iap] self-heal entitlement failed", entErr);
+          return json(500, { error: "grant_failed" });
+        }
+      }
+    }
   }
 
   return json(200, { ok: true, feature: product.type });
