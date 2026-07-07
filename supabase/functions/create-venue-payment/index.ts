@@ -25,6 +25,13 @@ Deno.serve(async (req) => {
   if (!venue?.is_active) return json(400, { error: "unknown_venue" });
   const amount = venue.booking_deposit_minor as number;
 
+  // Chan dat coc ngoai keo: doc plans qua userClient (RLS plans_member_read = in_keo)
+  // -> non-member nhan 0 row. Venue phai khop dung venue cua plan.
+  const { data: plan } = await userClient.from("plans")
+    .select("id,venue_id").eq("id", plan_id).maybeSingle();
+  if (!plan) return json(403, { error: "not_a_plan_member" });
+  if (plan.venue_id !== venue_id) return json(400, { error: "venue_plan_mismatch" });
+
   if (gateway === "momo") {
     const partnerCode = Deno.env.get("MOMO_PARTNER_CODE");
     const accessKey = Deno.env.get("MOMO_ACCESS_KEY");
@@ -38,7 +45,10 @@ Deno.serve(async (req) => {
       plan_id, venue_id, user_id: user.id, amount_minor: amount,
       gateway, gateway_ref: orderId, state: "initiated",
     });
-    if (insErr) return json(400, { error: insErr.message });
+    if (insErr) {
+      console.error("[create-venue-payment] booking insert failed", insErr);
+      return json(400, { error: "booking_insert_failed" });
+    }
 
     const requestId = orderId;
     const orderInfo = "Coc phong hat Cung Hat";
@@ -61,10 +71,18 @@ Deno.serve(async (req) => {
       }),
     }).catch(() => null);
     const data = res ? await res.json().catch(() => null) : null;
-    if (!res?.ok || data?.resultCode !== 0 || !data?.payUrl) {
-      await admin.from("venue_bookings").update({ state: "failed" })
-        .eq("gateway_ref", orderId);
-      return json(502, { error: "gateway_create_failed", detail: data?.message ?? null });
+    if (!res || !res.ok || !data) {
+      // Mo ho (mat mang/HTTP loi/parse fail): order co the DA ton tai phia gateway.
+      // Giu 'initiated' de IPN muon van settle duoc (state machine initiated->paid o webhook).
+      console.error("[create-venue-payment] momo unreachable", res?.status ?? "fetch_failed");
+      return json(502, { error: "gateway_unreachable" });
+    }
+    if (data.resultCode !== 0 || !data.payUrl) {
+      // Gateway tu choi dut khoat -> danh dau failed.
+      const { error: updErr } = await admin.from("venue_bookings")
+        .update({ state: "failed" }).eq("gateway_ref", orderId);
+      if (updErr) console.error("[create-venue-payment] mark-failed update error", updErr);
+      return json(502, { error: "gateway_create_failed", detail: data.message ?? null });
     }
     return json(200, { pay_url: data.payUrl, gateway_ref: orderId });
   }
@@ -85,7 +103,10 @@ Deno.serve(async (req) => {
     plan_id, venue_id, user_id: user.id, amount_minor: amount,
     gateway, gateway_ref: appTransId, state: "initiated",
   });
-  if (insErr) return json(400, { error: insErr.message });
+  if (insErr) {
+    console.error("[create-venue-payment] booking insert failed", insErr);
+    return json(400, { error: "booking_insert_failed" });
+  }
 
   const appTime = Date.now();
   const embedData = JSON.stringify({ redirecturl: redirectUrl });
@@ -105,10 +126,17 @@ Deno.serve(async (req) => {
     body: form.toString(),
   }).catch(() => null);
   const data = res ? await res.json().catch(() => null) : null;
-  if (!res?.ok || data?.return_code !== 1 || !data?.order_url) {
-    await admin.from("venue_bookings").update({ state: "failed" })
-      .eq("gateway_ref", appTransId);
-    return json(502, { error: "gateway_create_failed", detail: data?.return_message ?? null });
+  if (!res || !res.ok || !data) {
+    // Mo ho (mat mang/HTTP loi/parse fail): giu 'initiated' cho IPN muon settle.
+    console.error("[create-venue-payment] zalopay unreachable", res?.status ?? "fetch_failed");
+    return json(502, { error: "gateway_unreachable" });
+  }
+  if (data.return_code !== 1 || !data.order_url) {
+    // Gateway tu choi dut khoat -> danh dau failed.
+    const { error: updErr } = await admin.from("venue_bookings")
+      .update({ state: "failed" }).eq("gateway_ref", appTransId);
+    if (updErr) console.error("[create-venue-payment] mark-failed update error", updErr);
+    return json(502, { error: "gateway_create_failed", detail: data.return_message ?? null });
   }
   return json(200, { pay_url: data.order_url, gateway_ref: appTransId });
 });
