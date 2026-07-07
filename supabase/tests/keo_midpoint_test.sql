@@ -2,6 +2,8 @@
 -- Run with: supabase test db
 -- Proves migration 20260707180000: get_keo_midpoint — in_keo gate, snap 3 decimals,
 -- empty set when members have no locations. Seed pattern copied from plans_test.sql.
+-- Median trick: geometric median cua {A, A, B} = CHINH XAC A (bat dang thuc tam giac),
+-- nen seed A voi 4 chu so le -> round(,3) trong RPC la load-bearing (xoa round la fail).
 begin;
 select plan(5);
 
@@ -9,14 +11,16 @@ select ok(exists(select 1 from pg_proc where proname='get_keo_midpoint'), 'get_k
 
 set local role postgres;
 insert into auth.users (id) values
-  ('00000000-0000-0000-0000-0000000000e1'),  -- host
-  ('00000000-0000-0000-0000-0000000000e2'),  -- member
-  ('00000000-0000-0000-0000-0000000000e3')   -- outsider
+  ('00000000-0000-0000-0000-0000000000e1'),  -- host (diem A)
+  ('00000000-0000-0000-0000-0000000000e2'),  -- member (diem A)
+  ('00000000-0000-0000-0000-0000000000e3'),  -- outsider
+  ('00000000-0000-0000-0000-0000000000e4')   -- member 2 (diem B cua {A,A,B})
   on conflict (id) do nothing;
 insert into public.profiles (id, display_name, dob) values
   ('00000000-0000-0000-0000-0000000000e1', 'Mid Host', '1990-01-01'),
   ('00000000-0000-0000-0000-0000000000e2', 'Mid Member', '1991-01-01'),
-  ('00000000-0000-0000-0000-0000000000e3', 'Mid Outsider', '1992-01-01')
+  ('00000000-0000-0000-0000-0000000000e3', 'Mid Outsider', '1992-01-01'),
+  ('00000000-0000-0000-0000-0000000000e4', 'Mid Member2', '1993-01-01')
   on conflict (id) do nothing;
 insert into public.entitlements (user_id, feature, source) values
   ('00000000-0000-0000-0000-0000000000e1', 'pro', 'promo')
@@ -36,24 +40,28 @@ select is(
   (select count(*) from public.get_keo_midpoint((select id from _mid_keo)))::int,
   0, 'khong co vi tri thanh vien -> 0 dong');
 
--- seed vi tri: ca 2 thanh vien CUNG toa do -> median = chinh toa do do (deterministic).
+-- seed vi tri {A, A, B}: host + e2 tai A = (105.8547, 21.0283) 4 chu so le, e4 tai B.
+-- Median cua {A,A,B} = chinh xac A (deterministic), va A KHONG nam tren luoi 0.001
+-- -> ket qua dung (21.028, 105.855) CHI khi RPC co round(,3).
 set local role postgres;
 insert into public.keo_members (keo_id, user_id, join_status, confirmed) values
-  ((select id from _mid_keo), '00000000-0000-0000-0000-0000000000e2', 'approved', true)
+  ((select id from _mid_keo), '00000000-0000-0000-0000-0000000000e2', 'approved', true),
+  ((select id from _mid_keo), '00000000-0000-0000-0000-0000000000e4', 'approved', true)
   on conflict do nothing;
 insert into public.user_locations (user_id, location) values
-  ('00000000-0000-0000-0000-0000000000e1', ST_SetSRID(ST_MakePoint(105.854, 21.028), 4326)::geography),
-  ('00000000-0000-0000-0000-0000000000e2', ST_SetSRID(ST_MakePoint(105.854, 21.028), 4326)::geography)
+  ('00000000-0000-0000-0000-0000000000e1', ST_SetSRID(ST_MakePoint(105.8547, 21.0283), 4326)::geography),
+  ('00000000-0000-0000-0000-0000000000e2', ST_SetSRID(ST_MakePoint(105.8547, 21.0283), 4326)::geography),
+  ('00000000-0000-0000-0000-0000000000e4', ST_SetSRID(ST_MakePoint(105.8600, 21.0400), 4326)::geography)
   on conflict (user_id) do update set location = excluded.location;
 
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000e1"}';
 set local role authenticated;
 
--- 2) midpoint = toa do chung, da round 3 chu so le.
+-- 2) midpoint = A da round 3 chu so le: 21.0283 -> 21.028, 105.8547 -> 105.855.
 select results_eq(
   $$ select lat, lng from public.get_keo_midpoint((select id from _mid_keo)) $$,
-  $$ values (21.028::double precision, 105.854::double precision) $$,
-  'midpoint = toa do chung, round 3 decimals');
+  $$ values (21.028::double precision, 105.855::double precision) $$,
+  'midpoint = diem A cua {A,A,B}, round 3 decimals');
 
 -- 3) khong lo toa do tho: round(,3) cua gia tri tra ve phai bang chinh no
 -- (so sanh qua numeric de ne floating-point, KHONG dung floor(x*1000)).
