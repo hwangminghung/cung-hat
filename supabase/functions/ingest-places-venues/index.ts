@@ -5,20 +5,39 @@ Deno.serve(async (req) => {
   if (req.headers.get("x-ingest-secret") !== Deno.env.get("PLACES_INGEST_SECRET")) {
     return new Response("forbidden", { status: 403 });
   }
-  const { city, lat, lng, radius_m = 5000, style_tag = "k_style" } = await req.json();
-  const res = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": Deno.env.get("GOOGLE_PLACES_API_KEY")!,
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location",
-    },
-    body: JSON.stringify({
-      includedTypes: ["karaoke"],
-      maxResultCount: 20,
-      locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius: radius_m } },
-    }),
-  });
+  const { city, lat, lng, radius_m = 5000, style_tag = "k_style", text_query } =
+    await req.json();
+  let res: Response;
+  if (text_query) {
+    // searchText: bat "music box"/"phong hat mini" ma searchNearby type=karaoke bo sot.
+    res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": Deno.env.get("GOOGLE_PLACES_API_KEY")!,
+        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location",
+      },
+      body: JSON.stringify({
+        textQuery: text_query,
+        pageSize: 20,
+        locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: radius_m } },
+      }),
+    });
+  } else {
+    res = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": Deno.env.get("GOOGLE_PLACES_API_KEY")!,
+        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location",
+      },
+      body: JSON.stringify({
+        includedTypes: ["karaoke"],
+        maxResultCount: 20,
+        locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius: radius_m } },
+      }),
+    });
+  }
   const data = await res.json();
   const places: any[] = data.places ?? [];
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
