@@ -17,6 +17,13 @@ class Plan {
   );
 }
 
+/// Diem giua nhom da duoc server tinh va snap (~110m). KHONG phai vi tri thanh vien.
+class MapPoint {
+  const MapPoint({required this.lat, required this.lng});
+  final double lat;
+  final double lng;
+}
+
 class PlanRepository {
   PlanRepository(this._client);
   final SupabaseClient _client;
@@ -27,6 +34,17 @@ class PlanRepository {
     return (rows as List)
         .map((e) => VenueSuggestion.fromJson(Map<String, dynamic>.from(e)))
         .toList();
+  }
+
+  Future<MapPoint?> getKeoMidpoint(String keoId) async {
+    final rows =
+        await _client.rpc('get_keo_midpoint', params: {'p_keo': keoId}) as List<dynamic>;
+    if (rows.isEmpty) return null;
+    final m = rows.first as Map<String, dynamic>;
+    final lat = (m['lat'] as num?)?.toDouble();
+    final lng = (m['lng'] as num?)?.toDouble();
+    if (lat == null || lng == null) return null;
+    return MapPoint(lat: lat, lng: lng);
   }
 
   Future<String> proposePlan(String keoId, String venueId, DateTime when) async {
