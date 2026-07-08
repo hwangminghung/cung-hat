@@ -11,7 +11,7 @@ set -euo pipefail
 #   trang thai row trong venue_bookings. KHONG bao gio gia mao 1 check de pass:
 #   check nao fail thi debug CODE hoac tinh dung cua CHECK, roi bao cao that.
 #
-# PHAM VI CHECK (20 check() calls, gom 12 nhom):
+# PHAM VI CHECK (24 check() calls, gom 13 nhom):
 #   1  momo IPN co chu ky        -> 204
 #   2  booking -> paid + hoa hong 10% (2 check)
 #   3  momo IPN replay           -> 204, state/commission KHONG doi (2 check)
@@ -25,6 +25,10 @@ set -euo pipefail
 #   9  validate-iap JWT + receipt rac -> 503 (fail-closed khi thieu creds store)
 #   10 create-venue-payment khong JWT -> 401; JWT + plan bao   -> 403 (2 check)
 #   11 ingest-places anon-JWT khong secret -> 403
+#   12 send-sms khong chu ky        -> 401 (Standard Webhooks gate)
+#   13 send-sms tu ky dung          -> 503 (qua chu ky -> provider gate fail-closed)
+#   14 send-sms tamper body         -> 401 (chu ky vo hieu)
+#   15 push-fanout thieu env        -> 503 (fail-closed)
 #
 # YEU CAU TRUOC KHI CHAY
 #   - Supabase local stack DANG CHAY (docker: supabase_db_cung-hat + edge runtime).
@@ -246,6 +250,33 @@ check "create-venue-payment jwt+bogus plan -> 403" "403" "$C"
 # ---------------------------------------------------------------------------
 C="$(http_code "$BASE/ingest-places-venues" -X POST -H "apikey: $ANON" -H "Authorization: Bearer $ANON" -H "Content-Type: application/json" -d '{}')"
 check "ingest-places anon-jwt no secret -> 403" "403" "$C"
+
+# ---------------------------------------------------------------------------
+# 12  send-sms Standard Webhooks (AH-T8) + push-fanout fail-closed
+#     send-sms verify_jwt=false: GoTrue goi khong kem JWT. Xac thuc = Standard
+#     Webhooks signature. Chung minh verify chay: signed -> qua gate chu ky ->
+#     503 (SMS_API_KEY absent local). unsigned/tampered -> 401.
+# ---------------------------------------------------------------------------
+# khong chu ky -> 401 (toi duoc function, gate chu ky chan)
+check "send-sms unsigned -> 401" "401" "$(http_code "$BASE/send-sms" -X POST -H "Content-Type: application/json" -d '{}')"
+
+# tu ky dung thuat toan Standard Webhooks: base64(HMAC-SHA256(id.ts.body, decode(secret)))
+SMS_SECRET_RAW="$(read_env SEND_SMS_HOOK_SECRET)"
+[ -n "$SMS_SECRET_RAW" ] || die "Thieu SEND_SMS_HOOK_SECRET trong $ENV_FILE. Them dummy roi: npx supabase stop && npx supabase start"
+SMS_SECRET_B64="${SMS_SECRET_RAW#whsec_}"
+KEYHEX="$(printf '%s' "$SMS_SECRET_B64" | base64 -d | xxd -p -c 256 | tr -d '\n')"
+WID="msg_$(date +%s)"; WTS="$(date +%s)"
+WBODY='{"user":{"phone":"+84900000009"},"sms":{"otp":"000000"}}'
+WSIG="$(printf '%s' "${WID}.${WTS}.${WBODY}" | openssl dgst -sha256 -mac HMAC -macopt "hexkey:$KEYHEX" -binary | base64)"
+C="$(http_code "$BASE/send-sms" -X POST -H "Content-Type: application/json" -H "webhook-id: $WID" -H "webhook-timestamp: $WTS" -H "webhook-signature: v1,$WSIG" -d "$WBODY")"
+check "send-sms signed -> 503 (qua chu ky, provider gate)" "503" "$C"
+
+# tamper body, giu nguyen chu ky -> 401 (chu ky vo hieu)
+C="$(http_code "$BASE/send-sms" -X POST -H "Content-Type: application/json" -H "webhook-id: $WID" -H "webhook-timestamp: $WTS" -H "webhook-signature: v1,$WSIG" -d '{"user":{"phone":"+84999999999"},"sms":{"otp":"111111"}}')"
+check "send-sms tampered -> 401" "401" "$C"
+
+# push-fanout: PUSH_FANOUT_SECRET khong co trong .env local -> 503 fail-closed
+check "push-fanout thieu env -> 503" "503" "$(http_code "$BASE/push-fanout" -X POST -H "apikey: $ANON" -H "Authorization: Bearer $ANON" -H "Content-Type: application/json" -d '{}')"
 
 # --- summary ----------------------------------------------------------------
 cleanup

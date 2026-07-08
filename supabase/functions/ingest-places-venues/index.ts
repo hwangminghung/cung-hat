@@ -2,9 +2,9 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // Ops-only: invoked manually per city. Secret-gated; NEVER exposed to the app.
 Deno.serve(async (req) => {
-  if (req.headers.get("x-ingest-secret") !== Deno.env.get("PLACES_INGEST_SECRET")) {
-    return new Response("forbidden", { status: 403 });
-  }
+  const secret = Deno.env.get("PLACES_INGEST_SECRET");
+  if (!secret) return new Response(JSON.stringify({ error: "ingest_not_configured" }), { status: 503, headers: { "Content-Type": "application/json" } });
+  if (req.headers.get("x-ingest-secret") !== secret) return new Response("forbidden", { status: 403 });
   const { city, lat, lng, radius_m = 5000, style_tag = "k_style", text_query } =
     await req.json();
   let res: Response;
