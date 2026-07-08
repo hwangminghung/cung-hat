@@ -23,6 +23,12 @@ class ChatRepository {
     await _client.rpc('mark_match_read', params: {'p_thread': threadId});
   }
 
+  /// [A-I1] Cat ket noi voi mot match ma khong can block hay xoa tai khoan.
+  /// Idempotent tren server (RPC no-op neu da unmatched truoc do).
+  Future<void> unmatch(String matchId) async {
+    await _client.rpc('unmatch', params: {'p_match': matchId});
+  }
+
   Future<List<Message>> history(String threadId) async {
     final rows = await _client
         .from('messages')

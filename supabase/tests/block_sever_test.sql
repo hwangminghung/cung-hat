@@ -2,7 +2,7 @@
 -- Proves 20260708120000: block unmatch cap dang active; record_swipe chan cap da block;
 -- who_liked_me loc block 2 chieu; unblock->reswipe KHONG hoi sinh (ghost) match cu.
 begin;
-select plan(9);
+select plan(10);
 set local role postgres;
 insert into auth.users (id) values
   ('cccccccc-cccc-4ccc-8ccc-cccccccccc01'),
@@ -89,6 +89,21 @@ select throws_ok(
          where user_a='cccccccc-cccc-4ccc-8ccc-cccccccccc01'
            and user_b='cccccccc-cccc-4ccc-8ccc-cccccccccc02'), 'hi') $$,
   '23514', null, 'send_message van bi chan tren thread da cat');
+
+-- 10) A-C: bo block roi swipe lai -- C da like A tu dau file, nen day la
+--     nhanh insert-MOI (A-C chua tung co matches row nao, khac voi nhanh
+--     "reswipe ghost" o assertion 7-8 tren cap A-B). Positive control cho
+--     record_swipe: chung minh no VAN tao match that khi khong con block,
+--     chu khong phai lam ham luon tra false/loi.
+set local role postgres;
+delete from public.blocks
+ where blocker_id='cccccccc-cccc-4ccc-8ccc-cccccccccc01'
+   and blocked_id='cccccccc-cccc-4ccc-8ccc-cccccccccc03';
+set local request.jwt.claims to '{"sub":"cccccccc-cccc-4ccc-8ccc-cccccccccc01","role":"authenticated"}';
+set local role authenticated;
+select is(
+  public.record_swipe('cccccccc-cccc-4ccc-8ccc-cccccccccc03', 'like'),
+  true, 'fresh mutual match tra true (positive control)');
 
 select * from finish();
 rollback;
