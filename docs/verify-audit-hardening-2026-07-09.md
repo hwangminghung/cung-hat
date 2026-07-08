@@ -83,7 +83,7 @@ db:
   steps:
     - uses: actions/checkout@v4
     - uses: supabase/setup-cli@v1
-      with: { version: 2.105.0 }      # pin CLI (khớp bản local đã PASS 200 test)
+      with: { version: 2.109.1 }      # pin CLI (khớp bản local đã PASS 200 test — npx resolve 2.109.1)
     - run: supabase db start
     - run: supabase test db
 ```
