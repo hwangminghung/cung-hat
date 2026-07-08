@@ -25,6 +25,9 @@ class _Upgrade {
 }
 
 /// Copy + icon tinh theo type (khong doi thuong xuyen); gia lay tu catalog.
+///
+/// GIA DINH: 1 row/type/platform trong products. Neu them SKU thu 2 cung type
+/// (vd pro lifetime), PHAI chuyen key sang sku/storeProductId — xem audit AH-T9.
 const _copy =
     <String, ({String title, String description, IconData icon, bool highlight})>{
   'pro': (

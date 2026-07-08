@@ -92,4 +92,73 @@ void main() {
     expect(find.text('Không tải được cửa hàng'), findsNothing);
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
   });
+
+  testWidgets('tiles giu thu tu _order du catalog xao tron; type la xuong cuoi '
+      'voi fallback title/icon', (tester) async {
+    // Catalog XAO TRON + 1 type la khong co trong _copy.
+    const shuffled = <StoreProduct>[
+      StoreProduct(
+        sku: 'filters_android',
+        type: 'premium_filters',
+        storeProductId: 'filters',
+        priceMinor: 79000,
+      ),
+      StoreProduct(
+        sku: 'unknown_x_android',
+        type: 'unknown_x',
+        storeProductId: 'unknown_x',
+        priceMinor: 10000,
+      ),
+      StoreProduct(
+        sku: 'pro_android',
+        type: 'pro',
+        storeProductId: 'pro',
+        priceMinor: 199000,
+      ),
+      StoreProduct(
+        sku: 'boost_android',
+        type: 'boost',
+        storeProductId: 'boost',
+        priceMinor: 49000,
+      ),
+      StoreProduct(
+        sku: 'see_likes_android',
+        type: 'see_likes',
+        storeProductId: 'see_likes',
+        priceMinor: 99000,
+      ),
+    ];
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storeProductsProvider.overrideWith((ref) async => shuffled),
+        ],
+        child: const MaterialApp(home: StoreScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Type la: title fallback = chinh type, icon fallback = Icons.star.
+    expect(find.text('unknown_x'), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsOneWidget);
+
+    // Thu tu render theo _order (pro, boost, see_likes, premium_filters),
+    // type la CUOI cung — do dy cua title tang dan.
+    double dy(String title) => tester.getTopLeft(find.text(title)).dy;
+    final titlesInExpectedOrder = [
+      'Nâng cấp Pro',
+      'Đẩy kèo lên top',
+      'Xem ai đã thích bạn',
+      'Bộ lọc nâng cao',
+      'unknown_x',
+    ];
+    for (var i = 0; i < titlesInExpectedOrder.length - 1; i++) {
+      expect(
+        dy(titlesInExpectedOrder[i]),
+        lessThan(dy(titlesInExpectedOrder[i + 1])),
+        reason:
+            '${titlesInExpectedOrder[i]} phai nam TREN ${titlesInExpectedOrder[i + 1]}',
+      );
+    }
+  });
 }

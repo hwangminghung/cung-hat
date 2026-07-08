@@ -41,6 +41,7 @@ class BillingRepository {
   /// Catalog product-id theo platform tu bang products (het hardcode client).
   Future<Map<String, String>> storeProductIds(String platform) async {
     final list = await storeProducts(platform);
+    // Dedup theo type (last-wins) — chi dung khi 1 row/type; xem comment o store_screen.
     return {for (final p in list) p.type: p.storeProductId};
   }
 }
