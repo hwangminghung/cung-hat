@@ -4,8 +4,11 @@
 --   share_plans (0016_plans.sql): cot chu (owner) la `user_id`, KHONG PHAI `created_by`.
 --   share_keos  (20260707110000_share_keo.sql): ton tai, cot chu la `created_by` —
 --     them khoa share_keo_links moi (khong co trong export goc).
+-- Strip cot noi bo (khong phai du lieu cua user): venue_bookings.commission_minor
+-- (hoa hong nen tang, payments-webhook ghi khi paid), messages.hidden/soft_deleted_at
+-- (co moderation), profiles.report_risk (da strip tu 0019).
 create or replace function public.export_my_data()
-returns jsonb language sql security definer set search_path='' as $$
+returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'profile', (select to_jsonb(p) - 'report_risk' from public.profiles p where p.id = auth.uid()),
     'genres',  (select coalesce(jsonb_agg(genre_id), '[]'::jsonb) from public.user_genres where user_id = auth.uid()),
@@ -13,7 +16,7 @@ returns jsonb language sql security definer set search_path='' as $$
     'baitu',   (select coalesce(jsonb_agg(song_id),  '[]'::jsonb) from public.user_baitu where user_id = auth.uid()),
     'consents',(select coalesce(jsonb_agg(to_jsonb(c)),'[]'::jsonb) from public.consents c where c.user_id = auth.uid()),
     'prompts', (select coalesce(jsonb_agg(to_jsonb(pp) - 'user_id'),'[]'::jsonb) from public.profile_prompts pp where pp.user_id = auth.uid()),
-    'messages_sent', (select coalesce(jsonb_agg(to_jsonb(m) - 'sender_id'),'[]'::jsonb) from public.messages m where m.sender_id = auth.uid()),
+    'messages_sent', (select coalesce(jsonb_agg(to_jsonb(m) - 'sender_id' - 'hidden' - 'soft_deleted_at'),'[]'::jsonb) from public.messages m where m.sender_id = auth.uid()),
     'swipes_made', (select coalesce(jsonb_agg(to_jsonb(s) - 'swiper_id'),'[]'::jsonb) from public.swipes s where s.swiper_id = auth.uid()),
     'matches', (select coalesce(jsonb_agg(jsonb_build_object('id', m.id, 'status', m.status, 'created_at', m.created_at)),'[]'::jsonb)
                 from public.matches m where m.user_a = auth.uid() or m.user_b = auth.uid()),
@@ -23,7 +26,7 @@ returns jsonb language sql security definer set search_path='' as $$
                    from public.keo_members km where km.user_id = auth.uid()),
     'purchases', (select coalesce(jsonb_agg(to_jsonb(pu) - 'user_id'),'[]'::jsonb) from public.purchases pu where pu.user_id = auth.uid()),
     'entitlements', (select coalesce(jsonb_agg(to_jsonb(e) - 'user_id'),'[]'::jsonb) from public.entitlements e where e.user_id = auth.uid()),
-    'venue_bookings', (select coalesce(jsonb_agg(to_jsonb(vb) - 'user_id'),'[]'::jsonb) from public.venue_bookings vb where vb.user_id = auth.uid()),
+    'venue_bookings', (select coalesce(jsonb_agg(to_jsonb(vb) - 'user_id' - 'commission_minor'),'[]'::jsonb) from public.venue_bookings vb where vb.user_id = auth.uid()),
     'boosts', (select coalesce(jsonb_agg(to_jsonb(bo) - 'user_id'),'[]'::jsonb) from public.boosts bo where bo.user_id = auth.uid()),
     'checkins', (select coalesce(jsonb_agg(to_jsonb(ci) - 'user_id'),'[]'::jsonb) from public.checkins ci where ci.user_id = auth.uid()),
     'device_tokens', (select coalesce(jsonb_agg(to_jsonb(dt) - 'user_id'),'[]'::jsonb) from public.device_tokens dt where dt.user_id = auth.uid()),
@@ -33,7 +36,8 @@ returns jsonb language sql security definer set search_path='' as $$
   );
 $$;
 
--- [D] deletion bo sung: device_tokens (het push sau khi xoa), prompts, an anh ngay.
+-- [D] deletion bo sung: device_tokens (het push sau khi xoa), prompts, an anh ngay,
+-- dob = null (data minimization — cot nullable, xac nhan qua information_schema).
 -- Body con lai copy VERBATIM tu 0019_pdpl.sql (doi chieu tung dong truoc khi apply).
 create or replace function public.request_account_deletion()
 returns void language plpgsql security definer set search_path='' as $$
@@ -41,7 +45,7 @@ begin
   update public.profiles
     set soft_deleted_at = now(), tombstone = true,
         display_name = 'Người dùng đã rời', full_name = null, bio = null,
-        photo_paths = '{}'
+        photo_paths = '{}', dob = null
     where id = auth.uid();
   delete from public.device_tokens where user_id = auth.uid();
   delete from public.profile_prompts where user_id = auth.uid();
