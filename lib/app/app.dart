@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../core/theme/app_theme.dart';
+import 'deep_link.dart';
 import 'router.dart';
 
 class CungHatApp extends ConsumerStatefulWidget {
@@ -34,13 +35,8 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
 
   void _handleUri(Uri uri) {
     try {
-      // cunghat://plan/<token>
-      if (uri.scheme == 'cunghat' &&
-          uri.host == 'plan' &&
-          uri.pathSegments.isNotEmpty) {
-        final token = uri.pathSegments.first;
-        ref.read(goRouterProvider).go('/plan/shared/$token');
-      }
+      final location = deepLinkLocation(uri);
+      if (location != null) ref.read(goRouterProvider).go(location);
     } catch (_) {}
   }
 
