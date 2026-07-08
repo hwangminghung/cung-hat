@@ -1,11 +1,14 @@
 -- supabase/tests/keo_midpoint_test.sql
 -- Run with: supabase test db
--- Proves migration 20260707180000: get_keo_midpoint — in_keo gate, snap 3 decimals,
--- empty set when members have no locations. Seed pattern copied from plans_test.sql.
+-- Proves migration 20260707180000 + 20260708140000: get_keo_midpoint — in_keo gate,
+-- snap 3 decimals, empty set when members have no locations, AND empty set when
+-- only 1 member has a location ([A-M3] — a single located member must not leak
+-- their own ~110m-snapped location as "the midpoint"). Seed pattern copied from
+-- plans_test.sql.
 -- Median trick: geometric median cua {A, A, B} = CHINH XAC A (bat dang thuc tam giac),
 -- nen seed A voi 4 chu so le -> round(,3) trong RPC la load-bearing (xoa round la fail).
 begin;
-select plan(5);
+select plan(6);
 
 select ok(exists(select 1 from pg_proc where proname='get_keo_midpoint'), 'get_keo_midpoint exists');
 
@@ -48,8 +51,23 @@ insert into public.keo_members (keo_id, user_id, join_status, confirmed) values
   ((select id from _mid_keo), '00000000-0000-0000-0000-0000000000e2', 'approved', true),
   ((select id from _mid_keo), '00000000-0000-0000-0000-0000000000e4', 'approved', true)
   on conflict do nothing;
+
+-- host (e1) co vi tri TRUOC, con e2/e4 thi chua -> chi 1 thanh vien co vi tri.
 insert into public.user_locations (user_id, location) values
-  ('00000000-0000-0000-0000-0000000000e1', ST_SetSRID(ST_MakePoint(105.8547, 21.0283), 4326)::geography),
+  ('00000000-0000-0000-0000-0000000000e1', ST_SetSRID(ST_MakePoint(105.8547, 21.0283), 4326)::geography)
+  on conflict (user_id) do update set location = excluded.location;
+
+-- 2) [A-M3] chi 1 nguoi (host) co vi tri -> phai tra 0 dong, KHONG duoc lo toa do
+-- ~110m cua rieng host nhu the no la "midpoint".
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000e1"}';
+set local role authenticated;
+select is(
+  (select count(*)::int from public.get_keo_midpoint((select id from _mid_keo))),
+  0, '1 vi tri -> 0 dong');
+
+-- gio moi them vi tri e2 (tai A) va e4 (tai B), hoan tat cau truc {A,A,B}.
+set local role postgres;
+insert into public.user_locations (user_id, location) values
   ('00000000-0000-0000-0000-0000000000e2', ST_SetSRID(ST_MakePoint(105.8547, 21.0283), 4326)::geography),
   ('00000000-0000-0000-0000-0000000000e4', ST_SetSRID(ST_MakePoint(105.8600, 21.0400), 4326)::geography)
   on conflict (user_id) do update set location = excluded.location;
@@ -57,13 +75,13 @@ insert into public.user_locations (user_id, location) values
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000e1"}';
 set local role authenticated;
 
--- 2) midpoint = A da round 3 chu so le: 21.0283 -> 21.028, 105.8547 -> 105.855.
+-- 3) midpoint = A da round 3 chu so le: 21.0283 -> 21.028, 105.8547 -> 105.855.
 select results_eq(
   $$ select lat, lng from public.get_keo_midpoint((select id from _mid_keo)) $$,
   $$ values (21.028::double precision, 105.855::double precision) $$,
   'midpoint = diem A cua {A,A,B}, round 3 decimals');
 
--- 3) khong lo toa do tho: round(,3) cua gia tri tra ve phai bang chinh no
+-- 4) khong lo toa do tho: round(,3) cua gia tri tra ve phai bang chinh no
 -- (so sanh qua numeric de ne floating-point, KHONG dung floor(x*1000)).
 select ok(
   (select round(lat::numeric, 3)::double precision = lat
@@ -71,7 +89,7 @@ select ok(
      from public.get_keo_midpoint((select id from _mid_keo))),
   'lat/lng snap luoi 0.001');
 
--- 4) nguoi ngoai keo -> check_violation.
+-- 5) nguoi ngoai keo -> check_violation.
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000e3"}';
 select throws_ok(
   $$ select * from public.get_keo_midpoint((select id from _mid_keo)) $$,
