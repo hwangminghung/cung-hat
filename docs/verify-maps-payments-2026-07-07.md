@@ -179,3 +179,53 @@ Harness: `bash scripts/verify_payments_local.sh` → **PASS=20 FAIL=0** (exit 0)
 
 Tất cả gate trên đều **fail-closed** khi thiếu creds (đã chứng minh qua harness check
 17 & 20 và smoke T7/T9): không có creds → 503/403, tuyệt đối không settle/cấp quyền chay.
+
+---
+
+## 8. Verify emulator UI (2026-07-07)
+
+Chạy app THẬT trên emulator Android `cunghat_test3` (pixel 1080x2400), build debug
+`flutter build apk --debug --dart-define-from-file=env/dev.emulator.json`
+(`GOOGLE_MAPS_ENABLED=false`, `SUPABASE_URL=http://10.0.2.2:54321`), install lên
+emulator, đăng nhập sẵn user **Minh** (phone 900000001). Mục tiêu: chứng minh các UI
+surface của đợt hoạt động trong app thật, không chỉ test/harness.
+
+Ảnh chụp: `docs/verify-screenshots-maps-payments/`.
+
+| Mã | Kiểm chứng | KQ | Bằng chứng | Ghi chú |
+|----|-----------|----|-----------|---------|
+| VER-E1 | Pseudo-map fallback + venue markers + **pin midpoint** (vòng tròn nhỏ + icon nhóm, key `midpoint_marker`), native GoogleMap OFF | **PASS** | `04-plan-map-midpoint.png` | PlanScreen "Kế hoạch": pseudo-map (gradient + lưới đường), nhiều venue pin hình giọt nước (orange) + 1 pin midpoint tròn có icon 2-người bên phải — phân biệt rõ với venue pin. RPC `get_keo_midpoint` trả `21.005/105.871` (median 2 thành viên); `nearest_venues_for_keo` trả 5 quán. |
+| VER-E2 | Plan `confirmed` → nút "Đặt phòng & giữ chỗ" mở bottom sheet header **"Chọn cổng thanh toán"** + 2 tile MoMo/ZaloPay | **PASS** | `05-booking-gateway-sheet.png` | Plan card "Kpop Karaoke", "Trạng thái: Đã chốt". Sheet đúng header + tile "MoMo" (icon ví) + "ZaloPay" (icon thẻ). |
+| VER-E3 | Tap MoMo → `create-venue-payment` trả **503 `payment_gateway_not_configured`** → SnackBar **"Cổng thanh toán chưa được cấu hình"** (KHÔNG phải message generic, KHÔNG crash) | **PASS** | `06-failclosed-snackbar.png` | SnackBar hiện đúng chuỗi fail-closed → chứng minh đường string-match `contains('not_configured')` sống end-to-end. Pre-check HTTP trực tiếp (JWT thật qua OTP): cả `momo` và `zalopay` đều `HTTP 503 {"error":"payment_gateway_not_configured"}`. Edge log xác nhận `serving ... create-venue-payment`. |
+| VER-E4 | Mở lại sheet → tap ra ngoài (scrim) → sheet đóng, không fire gì, app ổn định | **PASS** | `07-sheet-dismissed.png` | Sheet reopen OK rồi dismiss sạch về PlanScreen, không SnackBar, không crash. |
+| VER-E5 | Regression: deck Đôi load; board Kèo liệt kê kèo (không crash do đợt) | **PASS** | `01-doi-deck.png`, `02-keo-board.png` | Tab Đôi render card ("QA An KPop, 26"); board Kèo "Kèo quanh bạn" liệt kê các kèo bình thường. |
+
+**Kết luận:** VER-E1..E5 = **5/5 PASS**. Không phát hiện bug hồi quy nào từ đợt maps-payments.
+
+### Những gì phải điều chỉnh so với recipe (report trung thực)
+
+- **Docker Desktop DOWN lúc bắt đầu** (2 WSL distro Stopped) dù recipe nói stack UP. Đã
+  khởi động Docker Desktop; stack Supabase tự lên. Container **`supabase_edge_runtime_cung-hat`
+  Exited (255)** sau khi Docker tắt — `docker start` container này lại là đủ (code+env vẫn
+  mount), không cần stop/start toàn stack vì `.env` không đổi.
+- **Seed schema khác recipe:** SQL mẫu trong task dùng cột không tồn tại
+  (`city`/`location`/`starts_at`/`ends_at`/`capacity`/`join_mode` cho `keo`). Schema thật
+  (`0012_keo.sql`): `title, area_label, area_geo(geography NOT NULL), time_window_start/end,
+  group_size_target(2-5), status, genres`. Đã seed lại đúng cột; `keo_members` có `role`
+  (`host`/`member`). Plan seed khớp cột thật (`keo_id, venue_id, scheduled_at, status`).
+- **Board chỉ hiện kèo `status='open'`:** `list_open_keos` lọc `where k.status='open'`, nên
+  kèo seed `planning` KHÔNG lên board. Đã đổi seed sang `status='open'` để tap vào được
+  KeoDetailScreen (không ảnh hưởng midpoint/plan/booking — các hàm này không check keo
+  status). Đã xoá toàn bộ row seed lúc cleanup.
+- **Nút host là "Chốt quán"** (key `host_pick_venue_btn`), không phải "Xem kế hoạch"
+  ("Xem kế hoạch"/`view_plan_btn` là của member non-host).
+- **Emulator `cunghat_test3` bất ổn — segfault (exit 139) lặp lại**, cả windowed lẫn
+  headless, cả `-gpu swiftshader_indirect` lẫn `-gpu guest`; tuổi thọ ~2 phút/lần boot
+  (nguyên nhân ở tầng đồ hoạ host: SwiftShader/llvmpipe Vulkan; boot 1 chết ở
+  `UpdateLayeredWindowIndirect`). **Cách ổn định hoá đã dùng:** tạo
+  `~/.android/advancedFeatures.ini` với `Vulkan = off` + `GLDirectMem = on`, và tắt animation
+  (`settings put global {window,transition,animator}_*_scale 0`), rồi chạy toàn bộ flow
+  trong một mạch nhanh (không dừng lâu giữa bước — thời gian "suy nghĩ" giữa các lệnh làm
+  emulator hết tuổi thọ). Sau khi tắt Vulkan + animation, emulator sống đủ lâu để hoàn tất
+  E1→E4 liên tục. **Lưu ý để lại:** file `advancedFeatures.ini` (Vulkan=off) vẫn còn — nên
+  giữ vì giúp emulator ổn định cho lần sau; xoá nếu muốn về mặc định.
