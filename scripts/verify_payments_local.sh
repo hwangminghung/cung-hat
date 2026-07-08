@@ -28,7 +28,7 @@ set -euo pipefail
 #   12 send-sms khong chu ky        -> 401 (Standard Webhooks gate)
 #   13 send-sms tu ky dung          -> 503 (qua chu ky -> provider gate fail-closed)
 #   14 send-sms tamper body         -> 401 (chu ky vo hieu)
-#   15 push-fanout thieu env        -> 503 (fail-closed)
+#   15 push-fanout: env thieu -> 503 (fail-closed); env co -> sai secret -> 403
 #
 # YEU CAU TRUOC KHI CHAY
 #   - Supabase local stack DANG CHAY (docker: supabase_db_cung-hat + edge runtime).
@@ -92,6 +92,7 @@ trap cleanup EXIT
 # --- preflight --------------------------------------------------------------
 command -v openssl >/dev/null 2>&1 || die "openssl khong co tren PATH (can Git Bash)."
 command -v curl    >/dev/null 2>&1 || die "curl khong co tren PATH."
+command -v xxd     >/dev/null 2>&1 || die "xxd khong co tren PATH (can Git Bash; can cho check send-sms)."
 [ -f "$ENV_FILE" ] || die "Khong thay $ENV_FILE."
 [ -f "$DEV_JSON" ] || die "Khong thay $DEV_JSON."
 docker exec "$DB_CONTAINER" true 2>/dev/null || die "Container $DB_CONTAINER khong chay. Chay: npx supabase start"
@@ -100,9 +101,11 @@ read_env() { grep -E "^$1=" "$ENV_FILE" | head -1 | cut -d= -f2- || true; }
 MOMO_ACCESS_KEY="$(read_env MOMO_ACCESS_KEY)"
 MOMO_SECRET_KEY="$(read_env MOMO_SECRET_KEY)"
 ZALOPAY_KEY2="$(read_env ZALOPAY_KEY2)"
+SMS_SECRET_RAW="$(read_env SEND_SMS_HOOK_SECRET)"
 [ -n "$MOMO_ACCESS_KEY" ] || die "Thieu MOMO_ACCESS_KEY trong $ENV_FILE. Them dummy roi: npx supabase stop && npx supabase start"
 [ -n "$MOMO_SECRET_KEY" ] || die "Thieu MOMO_SECRET_KEY trong $ENV_FILE. Them dummy roi: npx supabase stop && npx supabase start"
 [ -n "$ZALOPAY_KEY2" ]    || die "Thieu ZALOPAY_KEY2 trong $ENV_FILE. Them dummy roi: npx supabase stop && npx supabase start"
+[ -n "$SMS_SECRET_RAW" ]  || die "Thieu SEND_SMS_HOOK_SECRET trong $ENV_FILE. Them dummy (whsec_<base64>) roi: npx supabase stop && npx supabase start"
 
 ANON="$(grep -o '"SUPABASE_ANON_KEY"[[:space:]]*:[[:space:]]*"[^"]*"' "$DEV_JSON" | head -1 | cut -d'"' -f4 || true)"
 [ -n "$ANON" ] || die "Khong doc duoc SUPABASE_ANON_KEY tu $DEV_JSON."
@@ -261,9 +264,9 @@ check "ingest-places anon-jwt no secret -> 403" "403" "$C"
 check "send-sms unsigned -> 401" "401" "$(http_code "$BASE/send-sms" -X POST -H "Content-Type: application/json" -d '{}')"
 
 # tu ky dung thuat toan Standard Webhooks: base64(HMAC-SHA256(id.ts.body, decode(secret)))
-SMS_SECRET_RAW="$(read_env SEND_SMS_HOOK_SECRET)"
-[ -n "$SMS_SECRET_RAW" ] || die "Thieu SEND_SMS_HOOK_SECRET trong $ENV_FILE. Them dummy roi: npx supabase stop && npx supabase start"
-SMS_SECRET_B64="${SMS_SECRET_RAW#whsec_}"
+# SMS_SECRET_RAW da duoc die-gate o preflight; chap nhan ca 3 dang secret nhu function:
+# v1,whsec_<b64> / whsec_<b64> / <b64> tran
+SMS_SECRET_B64="${SMS_SECRET_RAW#v1,}"; SMS_SECRET_B64="${SMS_SECRET_B64#whsec_}"
 KEYHEX="$(printf '%s' "$SMS_SECRET_B64" | base64 -d | xxd -p -c 256 | tr -d '\n')"
 WID="msg_$(date +%s)"; WTS="$(date +%s)"
 WBODY='{"user":{"phone":"+84900000009"},"sms":{"otp":"000000"}}'
@@ -275,8 +278,14 @@ check "send-sms signed -> 503 (qua chu ky, provider gate)" "503" "$C"
 C="$(http_code "$BASE/send-sms" -X POST -H "Content-Type: application/json" -H "webhook-id: $WID" -H "webhook-timestamp: $WTS" -H "webhook-signature: v1,$WSIG" -d '{"user":{"phone":"+84999999999"},"sms":{"otp":"111111"}}')"
 check "send-sms tampered -> 401" "401" "$C"
 
-# push-fanout: PUSH_FANOUT_SECRET khong co trong .env local -> 503 fail-closed
-check "push-fanout thieu env -> 503" "503" "$(http_code "$BASE/push-fanout" -X POST -H "apikey: $ANON" -H "Authorization: Bearer $ANON" -H "Content-Type: application/json" -d '{}')"
+# push-fanout fail-closed: check HANH VI theo env that trong .env —
+# thieu/rong PUSH_FANOUT_SECRET -> 503; co secret -> gui sai secret -> 403.
+FANOUT_SECRET="$(read_env PUSH_FANOUT_SECRET)"
+if [ -z "$FANOUT_SECRET" ]; then
+  check "push-fanout thieu env -> 503" "503" "$(http_code "$BASE/push-fanout" -X POST -H "apikey: $ANON" -H "Authorization: Bearer $ANON" -H "Content-Type: application/json" -d '{}')"
+else
+  check "push-fanout sai secret -> 403" "403" "$(http_code "$BASE/push-fanout" -X POST -H "apikey: $ANON" -H "Authorization: Bearer $ANON" -H "x-fanout-secret: wrong-$RUN" -H "Content-Type: application/json" -d '{}')"
+fi
 
 # --- summary ----------------------------------------------------------------
 cleanup
