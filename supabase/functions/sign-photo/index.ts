@@ -13,7 +13,9 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const target_id = body?.target_id;
   if (typeof target_id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(target_id)) {
-    return new Response(JSON.stringify({ urls: [] }), {
+    // 4xx bodies share the { error } shape (see 429 below); the client throws on
+    // any non-2xx before reading the body, so no consumer parses urls from a 400.
+    return new Response(JSON.stringify({ error: "invalid_target" }), {
       status: 400, headers: { "Content-Type": "application/json" },
     });
   }
