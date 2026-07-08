@@ -39,4 +39,25 @@ void main() {
     ).proposePlan('k1', 'v1', DateTime.utc(2026, 6, 21, 19));
     expect(id, 'p1');
   });
+
+  group('getKeoMidpoint', () {
+    test('tra MapPoint khi RPC co dong', () async {
+      final client = MockSupabaseClient();
+      when(() => client.rpc('get_keo_midpoint', params: any(named: 'params')))
+          .thenAnswer((_) => rpcOk([
+                {'lat': 21.028, 'lng': 105.854}
+              ]));
+      final mid = await PlanRepository(client).getKeoMidpoint('k1');
+      expect(mid, isNotNull);
+      expect(mid!.lat, 21.028);
+      expect(mid.lng, 105.854);
+    });
+
+    test('tra null khi RPC rong (chua ai co vi tri)', () async {
+      final client = MockSupabaseClient();
+      when(() => client.rpc('get_keo_midpoint', params: any(named: 'params')))
+          .thenAnswer((_) => rpcOk(<dynamic>[]));
+      expect(await PlanRepository(client).getKeoMidpoint('k1'), isNull);
+    });
+  });
 }

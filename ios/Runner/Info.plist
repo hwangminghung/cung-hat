@@ -4,6 +4,8 @@
 	<dict>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Để gợi ý người và kèo gần bạn.</string>
+		<key>GMapsAPIKey</key>
+		<string>$(MAPS_API_KEY)</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>

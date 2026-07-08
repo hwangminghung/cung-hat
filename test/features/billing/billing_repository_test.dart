@@ -42,4 +42,17 @@ void main() {
     final e = await BillingRepository(client).myEntitlements();
     expect(e.single['feature'], 'see_likes');
   });
+
+  group('storeProductIds', () {
+    test('map type -> store_product_id theo platform', () async {
+      final client = MockSupabaseClient();
+      when(() => client.rpc('get_store_products', params: any(named: 'params')))
+          .thenAnswer((_) => rpcOk([
+                {'type': 'boost', 'store_product_id': 'com.cunghat.boost'},
+                {'type': 'pro', 'store_product_id': 'com.cunghat.pro'},
+              ]));
+      final ids = await BillingRepository(client).storeProductIds('android');
+      expect(ids, {'boost': 'com.cunghat.boost', 'pro': 'com.cunghat.pro'});
+    });
+  });
 }
