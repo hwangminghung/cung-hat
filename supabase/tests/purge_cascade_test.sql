@@ -1,8 +1,10 @@
 -- Run with: supabase test db
 -- Proves 20260708100000: purge_expired_accounts khong bi FK moderation_audit chan;
 -- cascade sach moi bang; audit row giu lai voi actor=null; control user con nguyen.
+-- Kem guard pg_constraint: khong FK NO-ACTION/RESTRICT nao (ke ca bang tuong lai)
+-- tro vao purge closure (auth.users/profiles/keo/plans) — chong re-wedge kieu A-C1.
 begin;
-select plan(10);
+select plan(13);
 set local role postgres;
 
 insert into auth.users (id) values
@@ -44,15 +46,29 @@ select lives_ok($$ select app_private.purge_expired_accounts() $$, 'purge chay k
 select is((select count(*)::int from auth.users where id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'P da bi hard-delete');
 select is((select count(*)::int from auth.users where id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02'), 1, 'K con nguyen');
 
--- 4-8) cascade sach tung bang (tat ca FK user_id/actor deu on delete cascade -> 0 dong con lai):
+-- 4-11) cascade sach tung bang (tat ca FK user_id/actor deu on delete cascade -> 0 dong con lai):
+select is((select count(*)::int from public.profiles where id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'profiles P da xoa (PDPL)');
+select is((select count(*)::int from public.user_locations where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'user_locations sach');
 select is((select count(*)::int from public.entitlements where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'entitlements sach');
 select is((select count(*)::int from public.purchases where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'purchases sach');
 select is((select count(*)::int from public.venue_bookings where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'venue_bookings sach (FK on delete cascade, xac nhan 0020_monetization.sql)');
 select is((select count(*)::int from public.device_tokens where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'device_tokens sach');
 select is((select count(*)::int from public.boosts where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'boosts sach');
 select is((select count(*)::int from public.profile_prompts where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'), 0, 'profile_prompts sach');
--- 9) audit row GIU LAI, actor=null:
+-- 12) audit row GIU LAI, actor=null:
 select is((select count(*)::int from public.moderation_audit where target_id='someone' and actor is null), 1, 'audit row giu, actor null');
+
+-- 13) Guard tuong lai: bat ky bang MOI nao them FK NO-ACTION/RESTRICT vao purge closure
+-- se lam wedge purge_expired_accounts y het A-C1 — seed-based test o tren khong bat duoc
+-- bang chua ai nho seed, nen chan ngay o pg_constraint (xac nhan 0 dong tren toan schema
+-- truoc khi them assertion nay; confdeltype: a = NO ACTION, r = RESTRICT).
+select is(
+  (select count(*)::int from pg_constraint
+   where contype='f'
+     and confrelid in ('auth.users'::regclass, 'public.profiles'::regclass, 'public.keo'::regclass, 'public.plans'::regclass)
+     and confdeltype in ('a','r')),
+  0,
+  'khong co FK NO-ACTION/RESTRICT vao purge closure (se lam wedge purge_expired_accounts)');
 
 select * from finish();
 rollback;
