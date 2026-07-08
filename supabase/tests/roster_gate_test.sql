@@ -1,12 +1,15 @@
 -- Run with: supabase test db
 -- Proves migration 20260708140000: get_keo_roster gates 'requested' rows to the
--- keo's host only ([A-I3] — anyone could otherwise enumerate any keo's roster,
--- INCLUDING pending join-requesters). Everyone else — approved members and
--- outsiders alike — sees only 'approved' rows (roster preview stays a product
--- feature; only the pending-requester identities are gated). Seed pattern
+-- keo's host AND the requester themselves ([A-I3] — anyone could otherwise
+-- enumerate any keo's roster, INCLUDING pending join-requesters). Everyone
+-- else — approved members and outsiders alike — sees only 'approved' rows
+-- (roster preview stays a product feature; only OTHER pending-requester
+-- identities are gated). The requester MUST keep seeing their own row:
+-- KeoDetailScreen derives _myRow from this roster, and without it the
+-- "Xin vao keo" button re-appears for someone already pending. Seed pattern
 -- copied from keo_midpoint_test.sql (create_keo needs a pro host).
 begin;
-select plan(3);
+select plan(4);
 
 set local role postgres;
 insert into auth.users (id) values
@@ -62,6 +65,15 @@ set local role authenticated;
 select is(
   (select count(*)::int from public.get_keo_roster((select id from _roster_keo))),
   2, 'nguoi ngoai chi thay 2 hang (chi approved + host)');
+
+-- 4) CHINH requester (f3) phai thay row cua minh: host + approved + own requested = 3.
+-- Thieu row nay thi KeoDetailScreen mat _myRow -> nut "Xin vao keo" hien lai va
+-- tile pending bien mat voi nguoi vua xin vao (regression UX moi keo approval-mode).
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000f3"}';
+set local role authenticated;
+select is(
+  (select count(*)::int from public.get_keo_roster((select id from _roster_keo))),
+  3, 'requester thay row cua chinh minh (host + approved + own)');
 
 select * from finish();
 rollback;

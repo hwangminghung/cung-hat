@@ -1,4 +1,6 @@
--- [A-I3] requested rows chi host thay; nguoi khac chi thay approved (giu preview san pham).
+-- [A-I3] requested rows chi host VA chinh requester thay; nguoi khac chi thay approved
+-- (giu preview san pham). Requester phai thay row cua minh: KeoDetailScreen lay _myRow
+-- tu roster; thieu no thi nut "Xin vao keo" hien lai voi nguoi dang cho duyet.
 create or replace function public.get_keo_roster(p_keo uuid)
 returns setof public.keo_member_row language sql security definer set search_path='' as $$
   select m.user_id, p.display_name, p.age_verified, m.role, m.join_status
@@ -7,7 +9,8 @@ returns setof public.keo_member_row language sql security definer set search_pat
   where m.keo_id = p_keo
     and (m.join_status = 'approved'
          or (m.join_status = 'requested'
-             and exists (select 1 from public.keo k where k.id = p_keo and k.host_id = auth.uid())))
+             and (m.user_id = auth.uid()
+                  or exists (select 1 from public.keo k where k.id = p_keo and k.host_id = auth.uid()))))
   order by case m.role when 'host' then 0 else 1 end, m.joined_at;
 $$;
 revoke execute on function public.get_keo_roster(uuid) from public, anon;
