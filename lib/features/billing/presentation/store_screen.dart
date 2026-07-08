@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../application/billing_providers.dart';
 import '../application/iap_controller.dart';
 
 class _Upgrade {
@@ -23,46 +24,39 @@ class _Upgrade {
   final bool highlight;
 }
 
-const _upgrades = <_Upgrade>[
-  _Upgrade(
-    feature: 'pro',
+/// Copy + icon tinh theo type (khong doi thuong xuyen); gia lay tu catalog.
+const _copy =
+    <String, ({String title, String description, IconData icon, bool highlight})>{
+  'pro': (
     title: 'Nâng cấp Pro',
     description:
         'Tạo kèo, tham gia không giới hạn và mở mọi tính năng trả phí.',
-    price: '99k',
     icon: Icons.workspace_premium_rounded,
     highlight: true,
   ),
-  _Upgrade(
-    feature: 'pro',
-    title: 'Pro trọn đời launch',
-    description: 'Một lần mua trong giai đoạn đầu, giữ Pro lâu dài.',
-    price: '699k',
-    icon: Icons.all_inclusive_rounded,
-    highlight: true,
-  ),
-  _Upgrade(
-    feature: 'boost',
+  'boost': (
     title: 'Đẩy kèo lên top',
     description: 'Đưa kèo của bạn lên đầu bảng trong 24 giờ.',
-    price: '29k',
     icon: Icons.local_fire_department_rounded,
+    highlight: false,
   ),
-  _Upgrade(
-    feature: 'see_likes',
+  'see_likes': (
     title: 'Xem ai đã thích bạn',
     description: 'Mở khóa danh sách người đã thả tim bạn.',
-    price: '49k',
     icon: Icons.favorite_rounded,
+    highlight: false,
   ),
-  _Upgrade(
-    feature: 'premium_filters',
+  'premium_filters': (
     title: 'Bộ lọc nâng cao',
     description: 'Lọc theo gu nhạc, độ tuổi, khu vực và trạng thái hoạt động.',
-    price: '39k',
     icon: Icons.tune_rounded,
+    highlight: false,
   ),
-];
+};
+
+const _order = ['pro', 'boost', 'see_likes', 'premium_filters'];
+
+String formatPriceK(int minor) => '${(minor / 1000).round()}k';
 
 class StoreScreen extends ConsumerWidget {
   const StoreScreen({super.key});
@@ -128,12 +122,52 @@ class StoreScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            for (final upgrade in _upgrades)
-              _UpgradeTile(
-                upgrade: upgrade,
-                onBuy: () =>
-                    ref.read(iapControllerProvider).buy(upgrade.feature),
-              ),
+            ref
+                .watch(storeProductsProvider)
+                .when(
+                  data: (products) {
+                    final sorted = [...products]..sort((a, b) {
+                      final ia = _order.indexOf(a.type);
+                      final ib = _order.indexOf(b.type);
+                      return (ia == -1 ? _order.length : ia).compareTo(
+                        ib == -1 ? _order.length : ib,
+                      );
+                    });
+                    return Column(
+                      children: [
+                        for (final product in sorted)
+                          _UpgradeTile(
+                            upgrade: _Upgrade(
+                              feature: product.type,
+                              title: _copy[product.type]?.title ?? product.type,
+                              description:
+                                  _copy[product.type]?.description ?? '',
+                              price: formatPriceK(product.priceMinor),
+                              icon: _copy[product.type]?.icon ?? Icons.star,
+                              highlight:
+                                  _copy[product.type]?.highlight ?? false,
+                            ),
+                            onBuy: () => ref
+                                .read(iapControllerProvider)
+                                .buy(product.type),
+                          ),
+                      ],
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) => Column(
+                    children: [
+                      const Text('Không tải được cửa hàng'),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextButton(
+                        onPressed: () =>
+                            ref.invalidate(storeProductsProvider),
+                        child: const Text('Thử lại'),
+                      ),
+                    ],
+                  ),
+                ),
           ],
         ),
       ),
