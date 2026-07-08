@@ -1,8 +1,8 @@
 -- supabase/tests/block_sever_test.sql
 -- Proves 20260708120000: block unmatch cap dang active; record_swipe chan cap da block;
--- who_liked_me loc block 2 chieu.
+-- who_liked_me loc block 2 chieu; unblock->reswipe KHONG hoi sinh (ghost) match cu.
 begin;
-select plan(6);
+select plan(9);
 set local role postgres;
 insert into auth.users (id) values
   ('cccccccc-cccc-4ccc-8ccc-cccccccccc01'),
@@ -58,6 +58,37 @@ select is((select count(*)::int from public.who_liked_me(20)), 0, 'who_liked_me 
 
 -- 6) block van idempotent (goi lai khong loi):
 select lives_ok($$ select public.block_user('cccccccc-cccc-4ccc-8ccc-cccccccccc03') $$, 'block idempotent');
+
+-- 7) unblock -> reswipe: KHONG hoi sinh (ghost) match cu.
+-- Seed swipe nguoc B->A 'like' de nhanh reciprocity chay that (match A-B von seed
+-- truc tiep vao matches, khong co swipe row nao cua B) -- thieu no thi duong ghost
+-- khong bao gio duoc thuc thi va test xanh gia tren code loi.
+set local role postgres;
+delete from public.blocks
+ where blocker_id='cccccccc-cccc-4ccc-8ccc-cccccccccc01'
+   and blocked_id='cccccccc-cccc-4ccc-8ccc-cccccccccc02';
+insert into public.swipes (swiper_id, target_type, target_id, direction) values
+  ('cccccccc-cccc-4ccc-8ccc-cccccccccc02','user','cccccccc-cccc-4ccc-8ccc-cccccccccc01','like');
+set local request.jwt.claims to '{"sub":"cccccccc-cccc-4ccc-8ccc-cccccccccc01","role":"authenticated"}';
+set local role authenticated;
+select is(
+  public.record_swipe('cccccccc-cccc-4ccc-8ccc-cccccccccc02', 'like'),
+  false, 'reswipe sau unblock: KHONG celebrate ghost match');
+
+-- 8) row van unmatched sau reswipe (khong bi hoi sinh):
+select is(
+  (select status from public.matches
+    where user_a='cccccccc-cccc-4ccc-8ccc-cccccccccc01' and user_b='cccccccc-cccc-4ccc-8ccc-cccccccccc02'),
+  'unmatched', 'row van unmatched sau reswipe');
+
+-- 9) send_message van bi chan tren thread da cat (in_match doi status=active;
+--    0010_chat: raise not_a_member, errcode check_violation = 23514):
+select throws_ok(
+  $$ select public.send_message(
+       (select id from public.matches
+         where user_a='cccccccc-cccc-4ccc-8ccc-cccccccccc01'
+           and user_b='cccccccc-cccc-4ccc-8ccc-cccccccccc02'), 'hi') $$,
+  '23514', null, 'send_message van bi chan tren thread da cat');
 
 select * from finish();
 rollback;

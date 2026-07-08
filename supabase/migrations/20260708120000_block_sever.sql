@@ -6,11 +6,16 @@
 --   A-M2: who_liked_me khong loc nguoi ma caller da block -> van hien thi likers
 --         da bi block trong danh sach "ai da thich ban".
 --
--- block_user: copy body tu 0007_safety.sql + THEM update unmatch cap dang active.
+-- block_user: copy body tu 0007_safety.sql + THEM pair-lock + update unmatch cap dang active.
 -- Tin nhan cu KHONG bi an (giong huy ghep thuong -- chi status doi active -> unmatched).
 create or replace function public.block_user(p_blocked uuid)
 returns void language plpgsql security definer set search_path='' as $$
 begin
+  -- Serialize voi record_swipe tren cung canonical pair-lock (TOCTOU): hoac swipe
+  -- commit truoc va block unmatch match vua tao, hoac block commit truoc va swipe
+  -- PHAI thay blocks row -> raise blocked_pair. Het cua so match song sot song song.
+  perform pg_advisory_xact_lock(
+    hashtextextended(least(auth.uid(), p_blocked)::text || ':' || greatest(auth.uid(), p_blocked)::text, 0));
   insert into public.blocks(blocker_id, blocked_id) values (auth.uid(), p_blocked)
   on conflict do nothing;
   update public.matches set status='unmatched', unmatched_at=now()
@@ -22,19 +27,14 @@ revoke execute on function public.block_user(uuid) from public, anon;
 grant execute on function public.block_user(uuid) to authenticated;
 
 -- record_swipe -- copy VERBATIM tu 20260703100000_doi_swipe_upgrade.sql (ban moi nhat,
--- co quota daily_like/daily_super) + THEM DUY NHAT block-check ngay sau dong
--- enforce_rate_limit('swipe', ...) o dau ham, truoc moi quota/insert/match logic khac.
+-- co quota daily_like/daily_super) + 2 thay doi: (1) block-check NGAY SAU pair-lock
+-- (serialize voi block_user - het TOCTOU block<->swipe), (2) matched suy tu status
+-- row that (khong celebrate ghost match tren row da unmatched truoc do).
 create or replace function public.record_swipe(p_target uuid, p_direction text)
 returns boolean language plpgsql security definer set search_path='' as $$
 declare a uuid; b uuid; reciprocal boolean; matched boolean := false;
 begin
   perform app_private.enforce_rate_limit('swipe', 200, interval '1 day');
-  -- [A-I2] cap da block khong duoc tao swipe/match moi (deck von an ho; day la chan RPC truc tiep).
-  if exists (select 1 from public.blocks b
-             where (b.blocker_id = auth.uid() and b.blocked_id = p_target)
-                or (b.blocker_id = p_target and b.blocked_id = auth.uid())) then
-    raise exception 'blocked_pair' using errcode='check_violation';
-  end if;
   -- Quota kieu dating-app (server-authoritative, Pro qua app_private.is_pro()).
   -- Quota is deliberately consumed BEFORE the on-conflict-do-nothing insert (fail-closed;
   -- moving it after the insert would open a concurrent-check TOCTOU window).
@@ -60,6 +60,14 @@ begin
   perform pg_advisory_xact_lock(
     hashtextextended(
       least(auth.uid(), p_target)::text || ':' || greatest(auth.uid(), p_target)::text, 0));
+  -- [A-I2] cap da block khong duoc tao swipe/match moi (deck von an ho; day la chan
+  -- RPC truc tiep). Check SAU pair-lock: block_user giu cung lock, nen neu block
+  -- commit truoc thi swipe PHAI thay blocks row -> raise (het TOCTOU).
+  if exists (select 1 from public.blocks b
+             where (b.blocker_id = auth.uid() and b.blocked_id = p_target)
+                or (b.blocker_id = p_target and b.blocked_id = auth.uid())) then
+    raise exception 'blocked_pair' using errcode='check_violation';
+  end if;
   insert into public.swipes(swiper_id, target_type, target_id, direction)
   values (auth.uid(), 'user', p_target::text, p_direction)
   on conflict (swiper_id, target_type, target_id) do nothing;
@@ -74,10 +82,13 @@ begin
       a := least(auth.uid(), p_target); b := greatest(auth.uid(), p_target);
       insert into public.matches(user_a, user_b) values (a, b)
       on conflict (user_a, user_b) do nothing;
-      matched := true;
+      -- Chi celebrate match THAT SU active; row da unmatched (block/unmatch cu)
+      -- khong duoc hoi sinh boi swipe reciprocal cu.
+      select (m.status = 'active') into matched
+      from public.matches m where m.user_a = a and m.user_b = b;
     end if;
   end if;
-  return matched;
+  return coalesce(matched, false);
 end; $$;
 revoke execute on function public.record_swipe(uuid,text) from public, anon;
 grant execute on function public.record_swipe(uuid,text) to authenticated;
