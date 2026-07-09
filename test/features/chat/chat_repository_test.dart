@@ -14,6 +14,14 @@ void main() {
         params: {'p_thread': 't1', 'p_body': 'hello'})).called(1);
   });
 
+  test('unmatch calls the unmatch RPC with the match id', () async {
+    final client = MockSupabaseClient();
+    when(() => client.rpc('unmatch', params: any(named: 'params')))
+        .thenAnswer((_) => rpcOk(null));
+    await expectLater(ChatRepository(client).unmatch('t1'), completes);
+    verify(() => client.rpc('unmatch', params: {'p_match': 't1'})).called(1);
+  });
+
   test('messageFromBroadcast unwraps the frame payload envelope', () {
     final frame = <String, dynamic>{
       'type': 'broadcast',

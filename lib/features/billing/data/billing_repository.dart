@@ -23,13 +23,40 @@ class BillingRepository {
     return (rows as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 
-  /// Catalog product-id theo platform tu bang products (het hardcode client).
-  Future<Map<String, String>> storeProductIds(String platform) async {
+  /// Catalog day du (sku, type, store_product_id, price_minor) theo platform.
+  Future<List<StoreProduct>> storeProducts(String platform) async {
     final rows = await _client
         .rpc('get_store_products', params: {'p_platform': platform}) as List<dynamic>;
-    return {
+    return [
       for (final r in rows.cast<Map<String, dynamic>>())
-        r['type'] as String: r['store_product_id'] as String,
-    };
+        StoreProduct(
+          sku: r['sku'] as String,
+          type: r['type'] as String,
+          storeProductId: r['store_product_id'] as String,
+          priceMinor: (r['price_minor'] as num).toInt(),
+        )
+    ];
   }
+
+  /// Catalog product-id theo platform tu bang products (het hardcode client).
+  Future<Map<String, String>> storeProductIds(String platform) async {
+    final list = await storeProducts(platform);
+    // Dedup theo type (last-wins) — chi dung khi 1 row/type; xem comment o store_screen.
+    return {for (final p in list) p.type: p.storeProductId};
+  }
+}
+
+/// Mot dong catalog tu bang products.
+class StoreProduct {
+  const StoreProduct({
+    required this.sku,
+    required this.type,
+    required this.storeProductId,
+    required this.priceMinor,
+  });
+
+  final String sku;
+  final String type;
+  final String storeProductId;
+  final int priceMinor;
 }

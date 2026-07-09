@@ -1,0 +1,1 @@
+-- seed rong: seed that nam o scripts/seed_launch.sql (chay tay theo LAUNCH.md)

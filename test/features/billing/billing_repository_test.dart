@@ -48,11 +48,24 @@ void main() {
       final client = MockSupabaseClient();
       when(() => client.rpc('get_store_products', params: any(named: 'params')))
           .thenAnswer((_) => rpcOk([
-                {'type': 'boost', 'store_product_id': 'com.cunghat.boost'},
-                {'type': 'pro', 'store_product_id': 'com.cunghat.pro'},
+                {'sku': 'boost_android', 'type': 'boost', 'store_product_id': 'com.cunghat.boost', 'price_minor': 49000},
+                {'sku': 'pro_android', 'type': 'pro', 'store_product_id': 'com.cunghat.pro', 'price_minor': 199000},
               ]));
       final ids = await BillingRepository(client).storeProductIds('android');
       expect(ids, {'boost': 'com.cunghat.boost', 'pro': 'com.cunghat.pro'});
+    });
+  });
+
+  group('storeProducts', () {
+    test('storeProducts tra list day du truong', () async {
+      final client = MockSupabaseClient();
+      when(() => client.rpc('get_store_products', params: any(named: 'params')))
+          .thenAnswer((_) => rpcOk([
+                {'sku': 'pro_android', 'type': 'pro', 'store_product_id': 'pro', 'price_minor': 199000},
+              ]));
+      final list = await BillingRepository(client).storeProducts('android');
+      expect(list.single.priceMinor, 199000);
+      expect(list.single.type, 'pro');
     });
   });
 }

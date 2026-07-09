@@ -10,7 +10,15 @@ Deno.serve(async (req) => {
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) return new Response("unauthorized", { status: 401 });
 
-  const { target_id } = await req.json();
+  const body = await req.json().catch(() => ({}));
+  const target_id = body?.target_id;
+  if (typeof target_id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(target_id)) {
+    // 4xx bodies share the { error } shape (see 429 below); the client throws on
+    // any non-2xx before reading the body, so no consumer parses urls from a 400.
+    return new Response(JSON.stringify({ error: "invalid_target" }), {
+      status: 400, headers: { "Content-Type": "application/json" },
+    });
+  }
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   // Gate: target exists, not soft-deleted. (Never trust a path from the client — only target_id.)
@@ -25,6 +33,13 @@ Deno.serve(async (req) => {
 
   // Block check applies only to OTHERS; a user's own photos are always visible to them.
   if (target_id !== user.id) {
+    // [B-1] chong scrape: toi da 300 luot sign nguoi khac / ngay / caller.
+    const { data: allowed, error: rlErr } = await admin.rpc("consume_service_rate_limit", {
+      p_user: user.id, p_bucket: "sign_photo", p_limit: 300, p_window: "1 day",
+    });
+    if (rlErr) { console.error("[sign-photo] rate limit rpc failed", rlErr); return new Response("retry later", { status: 500 }); }
+    if (allowed !== true) return new Response(JSON.stringify({ error: "rate_limited" }), { status: 429, headers: { "Content-Type": "application/json" } });
+
     const { count } = await admin.from("blocks").select("*", { count: "exact", head: true })
       .or(`and(blocker_id.eq.${user.id},blocked_id.eq.${target_id}),and(blocker_id.eq.${target_id},blocked_id.eq.${user.id})`);
     if ((count ?? 0) > 0) {

@@ -10,6 +10,7 @@ import '../../discovery/application/discovery_providers.dart';
 import '../../discovery/domain/candidate.dart';
 import '../../discovery/presentation/candidate_detail_sheet.dart';
 import '../application/chat_providers.dart';
+import '../application/inbox_providers.dart';
 import '../domain/message.dart';
 
 /// 1-1 chat thread: history + realtime bubbles, composer with outbound safety.
@@ -29,6 +30,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final List<Message> _live = <Message>[];
 
   bool _sending = false;
+  bool _unmatching = false;
   bool _initialScrollDone = false;
 
   @override
@@ -147,6 +149,55 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  /// [A-I1] Huỷ ghép: cắt kết nối mà không cần block hay xoá tài khoản.
+  /// Xác nhận qua dialog trước khi gọi RPC. Unmatch là vĩnh viễn cho cặp này
+  /// (swipes cũ còn nguyên → không quay lại deck của nhau; record_swipe cũng
+  /// không hồi sinh match đã unmatched).
+  Future<void> _confirmUnmatch() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Huỷ ghép?'),
+        content: const Text('Hai bạn sẽ không nhắn tin được với nhau nữa.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Để sau'),
+          ),
+          FilledButton(
+            key: const Key('unmatch_confirm_btn'),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Huỷ ghép'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    // Guard chống double-pop (mirror pattern _sending): confirm lần 2 lọt
+    // vào cửa sổ await bên dưới thì RPC idempotent vô hại, nhưng pop lần 2
+    // trong lúc animation sẽ over-pop quá màn chat.
+    if (_unmatching) return;
+    setState(() => _unmatching = true);
+    try {
+      await ref.read(chatRepositoryProvider).unmatch(widget.matchId);
+      // Inbox liệt kê match qua get_my_matches (FutureProvider one-shot) —
+      // invalidate TRƯỚC khi pop để danh sách hết match vừa cắt ngay khi
+      // quay lại, bất kể ChatScreen được push từ đâu (inbox hay màn ăn mừng
+      // match mới).
+      ref.invalidate(inboxProvider);
+      if (mounted) context.pop();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Không huỷ ghép được, thử lại sau')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _unmatching = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final myUid = _myUid;
@@ -188,6 +239,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             onPressed: _openMatchProfile,
             icon: const Icon(Icons.person_rounded),
             tooltip: 'Hồ sơ',
+          ),
+          PopupMenuButton<String>(
+            key: const Key('chat_menu_btn'),
+            // Khoá menu khi đang huỷ ghép: chặn luôn ca mở-lại-dialog trong
+            // lúc RPC bay (dialog 2 đang mở đúng lúc pop chạy thì pop nuốt
+            // dialog thay vì màn chat — màn chat kẹt lại dù đã unmatch).
+            enabled: !_unmatching,
+            onSelected: (v) {
+              if (v == 'unmatch') _confirmUnmatch();
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'unmatch',
+                key: Key('unmatch_btn'),
+                child: Text('Huỷ ghép'),
+              ),
+            ],
           ),
           TextButton.icon(
             onPressed: () => context.push('/keo/create'),

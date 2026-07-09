@@ -422,3 +422,8 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.payments-webhook]
 verify_jwt = false
+
+# GoTrue send-sms hook: GoTrue KHONG gui Supabase JWT -> phai tat verify_jwt.
+# Xac thuc thay bang Standard Webhooks signature ben trong function (SEND_SMS_HOOK_SECRET).
+[functions.send-sms]
+verify_jwt = false
