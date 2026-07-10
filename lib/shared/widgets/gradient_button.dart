@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_spacing.dart';
 
 class GradientButton extends StatelessWidget {
@@ -28,20 +29,13 @@ class GradientButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: enabled ? gradient : null,
           color: enabled ? null : AppColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-          boxShadow: enabled
-              ? [
-                  BoxShadow(
-                    color: AppColors.shadow.withValues(alpha: 0.18),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
-                  ),
-                ]
-              : null,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+          border: Border.all(color: AppColors.border, width: 2),
+          boxShadow: enabled ? const [AppShadows.hard] : null,
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onPressed,

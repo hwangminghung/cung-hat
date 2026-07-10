@@ -302,7 +302,7 @@ abstract final class AppTheme {
           side: const BorderSide(color: AppColors.border, width: 2),
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         elevation: 0,
@@ -310,6 +310,11 @@ abstract final class AppTheme {
         hoverElevation: 0,
         highlightElevation: 0,
         disabledElevation: 0,
+        extendedTextStyle: ctaTextStyle,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+          side: const BorderSide(color: AppColors.border, width: 2),
+        ),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.primary,
