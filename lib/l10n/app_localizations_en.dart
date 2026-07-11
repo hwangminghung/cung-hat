@@ -85,7 +85,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onbStepDob => 'Date of birth';
 
   @override
-  String get onbStepProfile => 'Profile';
+  String get onbStepProfile => 'Set up your profile';
+
+  @override
+  String get onbProfileQuestion => 'What would you like everyone to call you?';
 
   @override
   String get onbStepTaste => 'Music taste';

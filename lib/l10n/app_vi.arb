@@ -25,7 +25,8 @@
   "onbConsentRequired": "Vui lòng đồng ý các quyền bắt buộc để tiếp tục.",
   "onbSetupTitle": "Thiết lập hồ sơ",
   "onbStepDob": "Ngày sinh",
-  "onbStepProfile": "Hồ sơ",
+  "onbStepProfile": "Thiết lập hồ sơ",
+  "onbProfileQuestion": "Bạn muốn mọi người gọi mình là gì?",
   "onbStepTaste": "Gu nhạc",
   "onbProgress": "Bước {step}/4",
   "@onbProgress": {

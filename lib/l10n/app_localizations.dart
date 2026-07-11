@@ -251,8 +251,14 @@ abstract class AppLocalizations {
   /// No description provided for @onbStepProfile.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Set up your profile'**
   String get onbStepProfile;
+
+  /// No description provided for @onbProfileQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like everyone to call you?'**
+  String get onbProfileQuestion;
 
   /// No description provided for @onbStepTaste.
   ///

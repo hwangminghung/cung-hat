@@ -85,7 +85,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get onbStepDob => 'Ngày sinh';
 
   @override
-  String get onbStepProfile => 'Hồ sơ';
+  String get onbStepProfile => 'Thiết lập hồ sơ';
+
+  @override
+  String get onbProfileQuestion => 'Bạn muốn mọi người gọi mình là gì?';
 
   @override
   String get onbStepTaste => 'Gu nhạc';

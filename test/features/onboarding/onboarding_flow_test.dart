@@ -76,7 +76,54 @@ void main() {
     await tester.pump();
 
     expect(find.text('Bước 3/4'), findsOneWidget);
-    expect(find.text('Hồ sơ'), findsOneWidget);
+    expect(find.text('Thiết lập hồ sơ'), findsNWidgets(2));
     expect(find.text('Quyền riêng tư'), findsNothing);
+  });
+
+  testWidgets('profile step shows branded preview and preserves field values', (
+    tester,
+  ) async {
+    await pumpFlow(tester);
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+
+    expect(find.text('Bước 3/4'), findsOneWidget);
+    expect(find.text('Thiết lập hồ sơ'), findsNWidgets(2));
+    expect(find.text('Bạn muốn mọi người gọi mình là gì?'), findsOneWidget);
+    expect(find.byKey(const Key('onb_profile_preview')), findsOneWidget);
+    expect(find.text('Cùng Hát'), findsOneWidget);
+    expect(find.text('Mixtape Sáng'), findsNothing);
+    expect(find.byKey(const Key('onb_name')), findsOneWidget);
+    expect(find.byKey(const Key('onb_bio')), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('onb_bio'))).maxLines,
+      greaterThan(1),
+    );
+
+    await tester.enterText(find.byKey(const Key('onb_name')), 'Minh');
+    await tester.enterText(find.byKey(const Key('onb_bio')), 'Mê V-Pop.');
+
+    await tester.tap(find.byKey(const Key('onb_back')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('onb_name')))
+          .controller
+          ?.text,
+      'Minh',
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('onb_bio')))
+          .controller
+          ?.text,
+      'Mê V-Pop.',
+    );
   });
 }

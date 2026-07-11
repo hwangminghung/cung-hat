@@ -25,7 +25,8 @@
   "onbConsentRequired": "Please agree to the required permissions to continue.",
   "onbSetupTitle": "Set up your profile",
   "onbStepDob": "Date of birth",
-  "onbStepProfile": "Profile",
+  "onbStepProfile": "Set up your profile",
+  "onbProfileQuestion": "What would you like everyone to call you?",
   "onbStepTaste": "Music taste",
   "onbProgress": "Step {step}/4",
   "@onbProgress": {
