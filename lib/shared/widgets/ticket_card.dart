@@ -29,6 +29,10 @@ class TicketCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const clipper = TicketCardClipper();
+    final detailsPainter = TicketCardPainter(
+      showPerforation: showPerforation,
+      perforationPosition: perforationPosition,
+    );
 
     return Padding(
       padding: EdgeInsets.only(
@@ -48,14 +52,14 @@ class TicketCard extends StatelessWidget {
               ),
             ),
           ),
-          CustomPaint(
-            painter: TicketCardPainter(
-              showPerforation: showPerforation,
-              perforationPosition: perforationPosition,
-            ),
-            child: ClipPath(
-              clipper: clipper,
-              child: Padding(padding: padding, child: child),
+          ClipPath(
+            clipper: clipper,
+            child: ColoredBox(
+              color: detailsPainter.surfaceColor,
+              child: CustomPaint(
+                foregroundPainter: detailsPainter,
+                child: Padding(padding: padding, child: child),
+              ),
             ),
           ),
         ],
@@ -83,7 +87,7 @@ class TicketCardClipper extends CustomClipper<Path> {
       radius != oldClipper.radius || notchRadius != oldClipper.notchRadius;
 }
 
-/// Paints the cream ticket surface, ink outline, and optional perforation.
+/// Supplies the cream surface token and paints the ticket's foreground details.
 class TicketCardPainter extends CustomPainter {
   const TicketCardPainter({
     this.showPerforation = true,
@@ -111,7 +115,6 @@ class TicketCardPainter extends CustomPainter {
       inset: outlineWidth / 2,
     );
 
-    canvas.drawPath(path, Paint()..color = surfaceColor);
     canvas.drawPath(
       path,
       Paint()

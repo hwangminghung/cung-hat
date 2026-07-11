@@ -15,15 +15,57 @@ TicketCardPainter _painter(WidgetTester tester) {
   final paintFinder = find.descendant(
     of: find.byType(TicketCard),
     matching: find.byWidgetPredicate(
-      (widget) => widget is CustomPaint && widget.painter is TicketCardPainter,
+      (widget) =>
+          widget is CustomPaint &&
+          widget.foregroundPainter is TicketCardPainter,
     ),
   );
   expect(paintFinder, findsOneWidget);
-  return (tester.widget<CustomPaint>(paintFinder).painter!
+  return (tester.widget<CustomPaint>(paintFinder).foregroundPainter!
       as TicketCardPainter);
 }
 
 void main() {
+  testWidgets(
+    'TicketCard foreground details stay clipped over full-bleed content',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          const TicketCard(
+            padding: EdgeInsets.zero,
+            perforationPosition: 0.01,
+            child: SizedBox(
+              height: 80,
+              child: ColoredBox(color: AppColors.primary),
+            ),
+          ),
+        ),
+      );
+
+      final paintFinder = find.descendant(
+        of: find.byType(TicketCard),
+        matching: find.byType(CustomPaint),
+      );
+      final paint = tester.widget<CustomPaint>(paintFinder);
+      expect(paint.painter, isNull);
+      expect(paint.foregroundPainter, isA<TicketCardPainter>());
+      expect(
+        find.ancestor(
+          of: paintFinder,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is ClipPath && widget.clipper is TicketCardClipper,
+          ),
+        ),
+        findsOneWidget,
+      );
+
+      final painter = paint.foregroundPainter! as TicketCardPainter;
+      expect(painter.perforationPosition, 0.01);
+      expect(painter.showPerforation, isTrue);
+    },
+  );
+
   testWidgets(
     'TicketCard clips its child and paints the configured perforation',
     (tester) async {
@@ -77,7 +119,8 @@ void main() {
         of: find.byType(TicketCard),
         matching: find.byWidgetPredicate(
           (widget) =>
-              widget is CustomPaint && widget.painter is TicketCardPainter,
+              widget is CustomPaint &&
+              widget.foregroundPainter is TicketCardPainter,
         ),
       );
       expect(
