@@ -161,7 +161,7 @@ abstract class AppLocalizations {
   /// No description provided for @onbDobTitle.
   ///
   /// In en, this message translates to:
-  /// **'When were you born? (must be 18+)'**
+  /// **'When were you born?'**
   String get onbDobTitle;
 
   /// No description provided for @onbUnder18.
@@ -241,6 +241,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Music taste'**
   String get onbStepTaste;
+
+  /// No description provided for @onbProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step}/4'**
+  String onbProgress(int step);
+
+  /// No description provided for @onbDobDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get onbDobDay;
+
+  /// No description provided for @onbDobMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get onbDobMonth;
+
+  /// No description provided for @onbDobYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get onbDobYear;
 
   /// No description provided for @onbContinue.
   ///

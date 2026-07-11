@@ -39,7 +39,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get verify => 'Xác nhận';
 
   @override
-  String get onbDobTitle => 'Bạn sinh ngày nào? (phải đủ 18 tuổi)';
+  String get onbDobTitle => 'Bạn sinh ngày nào?';
 
   @override
   String get onbUnder18 => 'Bạn phải đủ 18 tuổi để dùng ứng dụng.';
@@ -80,6 +80,20 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get onbStepTaste => 'Gu nhạc';
+
+  @override
+  String onbProgress(int step) {
+    return 'Bước $step/4';
+  }
+
+  @override
+  String get onbDobDay => 'Ngày';
+
+  @override
+  String get onbDobMonth => 'Tháng';
+
+  @override
+  String get onbDobYear => 'Năm';
 
   @override
   String get onbContinue => 'Tiếp tục';

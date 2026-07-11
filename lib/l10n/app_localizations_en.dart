@@ -39,7 +39,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verify => 'Confirm';
 
   @override
-  String get onbDobTitle => 'When were you born? (must be 18+)';
+  String get onbDobTitle => 'When were you born?';
 
   @override
   String get onbUnder18 => 'You must be 18 or older to use the app.';
@@ -80,6 +80,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onbStepTaste => 'Music taste';
+
+  @override
+  String onbProgress(int step) {
+    return 'Step $step/4';
+  }
+
+  @override
+  String get onbDobDay => 'Day';
+
+  @override
+  String get onbDobMonth => 'Month';
+
+  @override
+  String get onbDobYear => 'Year';
 
   @override
   String get onbContinue => 'Continue';

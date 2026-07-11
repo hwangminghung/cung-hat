@@ -1,1 +1,93 @@
-{ "@@locale": "vi", "appTitle": "Cùng Hát", "tabDoi": "Đôi", "tabKeo": "Kèo", "comingSoon": "Sắp có", "authTitle": "Đăng nhập", "phoneLabel": "Số điện thoại", "sendOtp": "Gửi mã OTP", "otpTitle": "Nhập mã OTP", "otpLabel": "Mã 6 số", "verify": "Xác nhận", "onbDobTitle": "Bạn sinh ngày nào? (phải đủ 18 tuổi)", "onbUnder18": "Bạn phải đủ 18 tuổi để dùng ứng dụng.", "onbConsentTitle": "Quyền riêng tư", "onbNameLabel": "Tên hiển thị", "onbBioLabel": "Giới thiệu", "onbTasteGenres": "Thể loại", "onbTasteArtists": "Nghệ sĩ", "onbBaitu": "Bài tủ", "onbFinish": "Hoàn tất", "onbConsentRequired": "Vui lòng đồng ý các quyền bắt buộc để tiếp tục.", "onbSetupTitle": "Thiết lập hồ sơ", "onbStepDob": "Ngày sinh", "onbStepProfile": "Hồ sơ", "onbStepTaste": "Gu nhạc", "onbContinue": "Tiếp tục", "onbBack": "Quay lại", "onbLoadError": "Không tải được dữ liệu.", "onbSubmitError": "Có lỗi xảy ra, vui lòng thử lại.", "consentLocation": "Dùng vị trí để gợi ý người/kèo gần bạn", "consentPhotos": "Lưu & hiển thị ảnh hồ sơ (tùy chọn)", "consentMatching": "Dùng gu nhạc để ghép người", "consentMarketing": "Nhận thông báo khuyến mãi", "consentCrossBorder": "Dữ liệu lưu tại Singapore (chuyển xuyên biên giới)", "chatPromoteKeo": "Lập kèo", "sendThisTitle": "Gửi tin này?", "sendThisBody": "Tin này có thể chứa thông tin tài chính/liên hệ. Vẫn gửi?", "cancel": "Hủy", "send": "Gửi", "privacyTitle": "Chính sách bảo mật", "tosTitle": "Điều khoản sử dụng", "settingsTitle": "Cài đặt", "exportData": "Tải dữ liệu của tôi", "deleteAccount": "Xoá tài khoản", "deleteConfirm": "Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xoá.", "storeTitle": "Nâng cấp", "boostTitle": "Đẩy kèo lên top", "seeLikesTitle": "Xem ai đã thích bạn", "filtersTitle": "Bộ lọc nâng cao", "buy": "Mua", "bookVenue": "Đặt phòng & giữ chỗ", "entitlementNeeded": "Cần nâng cấp để dùng tính năng này", "authTagline": "Kết bạn qua những bài hát", "authPhoneTitle": "Đăng nhập bằng số điện thoại", "authPhoneBody": "Nhập số của bạn để nhận mã OTP. Tụi mình chỉ dùng để giữ tài khoản an toàn.", "authPhoneHint": "901 234 567", "authResponsibility": "Bằng việc tiếp tục, bạn đồng ý dùng Cùng Hát có trách nhiệm và tôn trọng người khác.", "authSendOtpError": "Không gửi được mã", "authResendCountdown": "Gửi lại mã sau {seconds}s", "@authResendCountdown": {"placeholders": {"seconds": {"type": "int"}}}, "authResend": "Gửi lại mã", "authCheckMessages": "Kiểm tra tin nhắn", "authOtpSentPrefix": "Mã đã gửi tới ", "authOtpSentTo": "Mã đã gửi tới {phone}", "@authOtpSentTo": {"placeholders": {"phone": {"type": "String"}}}, "authPhoneFallback": "số điện thoại của bạn", "authOtpHelp": "Không nhận được mã? Quay lại để kiểm tra số điện thoại.", "authOtpError": "Mã OTP chưa đúng" }
+{
+  "@@locale": "vi",
+  "appTitle": "Cùng Hát",
+  "tabDoi": "Đôi",
+  "tabKeo": "Kèo",
+  "comingSoon": "Sắp có",
+  "authTitle": "Đăng nhập",
+  "phoneLabel": "Số điện thoại",
+  "sendOtp": "Gửi mã OTP",
+  "otpTitle": "Nhập mã OTP",
+  "otpLabel": "Mã 6 số",
+  "verify": "Xác nhận",
+  "onbDobTitle": "Bạn sinh ngày nào?",
+  "onbUnder18": "Bạn phải đủ 18 tuổi để dùng ứng dụng.",
+  "onbConsentTitle": "Quyền riêng tư",
+  "onbNameLabel": "Tên hiển thị",
+  "onbBioLabel": "Giới thiệu",
+  "onbTasteGenres": "Thể loại",
+  "onbTasteArtists": "Nghệ sĩ",
+  "onbBaitu": "Bài tủ",
+  "onbFinish": "Hoàn tất",
+  "onbConsentRequired": "Vui lòng đồng ý các quyền bắt buộc để tiếp tục.",
+  "onbSetupTitle": "Thiết lập hồ sơ",
+  "onbStepDob": "Ngày sinh",
+  "onbStepProfile": "Hồ sơ",
+  "onbStepTaste": "Gu nhạc",
+  "onbProgress": "Bước {step}/4",
+  "@onbProgress": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "onbDobDay": "Ngày",
+  "onbDobMonth": "Tháng",
+  "onbDobYear": "Năm",
+  "onbContinue": "Tiếp tục",
+  "onbBack": "Quay lại",
+  "onbLoadError": "Không tải được dữ liệu.",
+  "onbSubmitError": "Có lỗi xảy ra, vui lòng thử lại.",
+  "consentLocation": "Dùng vị trí để gợi ý người/kèo gần bạn",
+  "consentPhotos": "Lưu & hiển thị ảnh hồ sơ (tùy chọn)",
+  "consentMatching": "Dùng gu nhạc để ghép người",
+  "consentMarketing": "Nhận thông báo khuyến mãi",
+  "consentCrossBorder": "Dữ liệu lưu tại Singapore (chuyển xuyên biên giới)",
+  "chatPromoteKeo": "Lập kèo",
+  "sendThisTitle": "Gửi tin này?",
+  "sendThisBody": "Tin này có thể chứa thông tin tài chính/liên hệ. Vẫn gửi?",
+  "cancel": "Hủy",
+  "send": "Gửi",
+  "privacyTitle": "Chính sách bảo mật",
+  "tosTitle": "Điều khoản sử dụng",
+  "settingsTitle": "Cài đặt",
+  "exportData": "Tải dữ liệu của tôi",
+  "deleteAccount": "Xoá tài khoản",
+  "deleteConfirm": "Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xoá.",
+  "storeTitle": "Nâng cấp",
+  "boostTitle": "Đẩy kèo lên top",
+  "seeLikesTitle": "Xem ai đã thích bạn",
+  "filtersTitle": "Bộ lọc nâng cao",
+  "buy": "Mua",
+  "bookVenue": "Đặt phòng & giữ chỗ",
+  "entitlementNeeded": "Cần nâng cấp để dùng tính năng này",
+  "authTagline": "Kết bạn qua những bài hát",
+  "authPhoneTitle": "Đăng nhập bằng số điện thoại",
+  "authPhoneBody": "Nhập số của bạn để nhận mã OTP. Tụi mình chỉ dùng để giữ tài khoản an toàn.",
+  "authPhoneHint": "901 234 567",
+  "authResponsibility": "Bằng việc tiếp tục, bạn đồng ý dùng Cùng Hát có trách nhiệm và tôn trọng người khác.",
+  "authSendOtpError": "Không gửi được mã",
+  "authResendCountdown": "Gửi lại mã sau {seconds}s",
+  "@authResendCountdown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authResend": "Gửi lại mã",
+  "authCheckMessages": "Kiểm tra tin nhắn",
+  "authOtpSentPrefix": "Mã đã gửi tới ",
+  "authOtpSentTo": "Mã đã gửi tới {phone}",
+  "@authOtpSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "authPhoneFallback": "số điện thoại của bạn",
+  "authOtpHelp": "Không nhận được mã? Quay lại để kiểm tra số điện thoại.",
+  "authOtpError": "Mã OTP chưa đúng"
+}
