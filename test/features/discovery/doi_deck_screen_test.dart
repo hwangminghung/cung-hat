@@ -44,7 +44,8 @@ void main() {
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
             discoveryPrefsProvider.overrideWith(
-                (ref) async => (autoExpand: false, radiusKm: 50)),
+              (ref) async => (autoExpand: false, radiusKm: 50),
+            ),
           ],
           child: MaterialApp(
             theme: AppTheme.light(),
@@ -66,9 +67,7 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(
-      () => locationService.captureAndPush(),
-    ).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
 
     // recordSwipe trả future treo để dồn 2 lỗi like_limit về cùng lúc,
     // mô phỏng user vuốt nhanh khi đã hết lượt.
@@ -94,7 +93,10 @@ void main() {
           locationServiceProvider.overrideWithValue(locationService),
           entitlementsProvider.overrideWith((ref) async => <String>{}),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -118,9 +120,7 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(
-      () => locationService.captureAndPush(),
-    ).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
 
     // recordSwipe raise like_limit — server chưa ghi lượt vuốt, nên client
     // phải undo để card quay lại deck. Dùng completer để lỗi về SAU khi
@@ -145,7 +145,10 @@ void main() {
           locationServiceProvider.overrideWithValue(locationService),
           entitlementsProvider.overrideWith((ref) async => <String>{}),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -175,9 +178,7 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(
-      () => locationService.captureAndPush(),
-    ).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
 
     final repo = _MockDiscoveryRepository();
     when(() => repo.activateBoost()).thenAnswer((_) async => DateTime.now());
@@ -196,7 +197,10 @@ void main() {
           locationServiceProvider.overrideWithValue(locationService),
           entitlementsProvider.overrideWith((ref) async => <String>{}),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -209,62 +213,64 @@ void main() {
     verifyNever(() => repo.activateBoost());
   });
 
-  testWidgets('double-tap boost chỉ gọi activate_boost một lần + hiện SnackBar', (
-    tester,
-  ) async {
-    final locationService = _FakeLocationService();
-    when(
-      () => locationService.captureAndPush(),
-    ).thenAnswer((_) async => false);
+  testWidgets(
+    'double-tap boost chỉ gọi activate_boost một lần + hiện SnackBar',
+    (tester) async {
+      final locationService = _FakeLocationService();
+      when(
+        () => locationService.captureAndPush(),
+      ).thenAnswer((_) async => false);
 
-    final repo = _MockDiscoveryRepository();
-    // activateBoost treo để mô phỏng RPC đang bay khi user bấm boost lần 2.
-    final pendingBoost = Completer<DateTime>();
-    when(() => repo.activateBoost()).thenAnswer((_) => pendingBoost.future);
+      final repo = _MockDiscoveryRepository();
+      // activateBoost treo để mô phỏng RPC đang bay khi user bấm boost lần 2.
+      final pendingBoost = Completer<DateTime>();
+      when(() => repo.activateBoost()).thenAnswer((_) => pendingBoost.future);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          discoveryRepositoryProvider.overrideWithValue(repo),
-          photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-          candidatesProvider(null).overrideWith(
-            (ref) async => const [
-              Candidate(id: 'c1', displayName: 'A'),
-              Candidate(id: 'c2', displayName: 'B'),
-            ],
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            discoveryRepositoryProvider.overrideWithValue(repo),
+            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+            candidatesProvider(null).overrideWith(
+              (ref) async => const [
+                Candidate(id: 'c1', displayName: 'A'),
+                Candidate(id: 'c2', displayName: 'B'),
+              ],
+            ),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{'pro'}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
           ),
-          locationServiceProvider.overrideWithValue(locationService),
-          entitlementsProvider.overrideWith((ref) async => <String>{'pro'}),
-        ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
-      ),
-    );
-    await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('deck_boost_btn')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('deck_boost_btn')));
-    await tester.pump();
+      await tester.tap(find.byKey(const Key('deck_boost_btn')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('deck_boost_btn')));
+      await tester.pump();
 
-    verify(() => repo.activateBoost()).called(1);
+      verify(() => repo.activateBoost()).called(1);
 
-    pendingBoost.complete(DateTime.now().add(const Duration(minutes: 30)));
-    await tester.pumpAndSettle();
+      pendingBoost.complete(DateTime.now().add(const Duration(minutes: 30)));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(SnackBar), findsOneWidget);
-    expect(
-      find.text('Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.'),
-      findsOneWidget,
-    );
-  });
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(
+        find.text('Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('tooltip boosting hiện HH:mm giờ ĐỊA PHƯƠNG của expiry', (
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(
-      () => locationService.captureAndPush(),
-    ).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
 
     // Expiry phải là UTC — mô phỏng đúng DateTime.parse('...Z') mà repo trả về
     // từ timestamptz. `expected` tính từ .toLocal() nên đúng ở mọi múi giờ;
@@ -289,24 +295,28 @@ void main() {
           entitlementsProvider.overrideWith((ref) async => <String>{'pro'}),
           activeBoostProvider.overrideWith((ref) => expiry),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
 
-    final boostBtn = tester.widget<IconButton>(
-      find.byKey(const Key('deck_boost_btn')),
+    final boostTooltip = tester.widget<Tooltip>(
+      find.descendant(
+        of: find.byKey(const Key('deck_boost_btn')),
+        matching: find.byType(Tooltip),
+      ),
     );
-    expect(boostBtn.tooltip, 'Đang boost đến $expected');
+    expect(boostTooltip.message, 'Đang boost đến $expected');
   });
 
   testWidgets('double-tap rewind chỉ gọi undo_last_swipe một lần', (
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(
-      () => locationService.captureAndPush(),
-    ).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
 
     final repo = _MockDiscoveryRepository();
     when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => false);
@@ -328,7 +338,10 @@ void main() {
           locationServiceProvider.overrideWithValue(locationService),
           entitlementsProvider.overrideWith((ref) async => <String>{'pro'}),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();

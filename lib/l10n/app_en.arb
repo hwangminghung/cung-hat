@@ -94,5 +94,11 @@
   },
   "authPhoneFallback": "your phone number",
   "authOtpHelp": "Didn't get a code? Go back and check your phone number.",
-  "authOtpError": "That OTP code isn't correct"
+  "authOtpError": "That OTP code isn't correct",
+  "discoveryDeckTitle": "Singing pairs",
+  "discoveryDeckSubtitle": "Music-compatible suggestions at a safe distance.",
+  "discoveryRewind": "Undo",
+  "discoveryPass": "Pass",
+  "discoverySuperLike": "Super like",
+  "discoveryLike": "Like"
 }

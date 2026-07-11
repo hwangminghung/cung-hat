@@ -243,4 +243,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authOtpError => 'That OTP code isn\'t correct';
+
+  @override
+  String get discoveryDeckTitle => 'Singing pairs';
+
+  @override
+  String get discoveryDeckSubtitle =>
+      'Music-compatible suggestions at a safe distance.';
+
+  @override
+  String get discoveryRewind => 'Undo';
+
+  @override
+  String get discoveryPass => 'Pass';
+
+  @override
+  String get discoverySuperLike => 'Super like';
+
+  @override
+  String get discoveryLike => 'Like';
 }

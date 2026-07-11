@@ -94,5 +94,11 @@
   },
   "authPhoneFallback": "số điện thoại của bạn",
   "authOtpHelp": "Không nhận được mã? Quay lại để kiểm tra số điện thoại.",
-  "authOtpError": "Mã OTP chưa đúng"
+  "authOtpError": "Mã OTP chưa đúng",
+  "discoveryDeckTitle": "Đôi hát",
+  "discoveryDeckSubtitle": "Gợi ý hợp gu nhạc và khoảng cách an toàn.",
+  "discoveryRewind": "Quay lại",
+  "discoveryPass": "Bỏ qua",
+  "discoverySuperLike": "Siêu thích",
+  "discoveryLike": "Thích"
 }

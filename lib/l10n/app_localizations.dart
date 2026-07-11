@@ -541,6 +541,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That OTP code isn\'t correct'**
   String get authOtpError;
+
+  /// No description provided for @discoveryDeckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Singing pairs'**
+  String get discoveryDeckTitle;
+
+  /// No description provided for @discoveryDeckSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Music-compatible suggestions at a safe distance.'**
+  String get discoveryDeckSubtitle;
+
+  /// No description provided for @discoveryRewind.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get discoveryRewind;
+
+  /// No description provided for @discoveryPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass'**
+  String get discoveryPass;
+
+  /// No description provided for @discoverySuperLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Super like'**
+  String get discoverySuperLike;
+
+  /// No description provided for @discoveryLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get discoveryLike;
 }
 
 class _AppLocalizationsDelegate

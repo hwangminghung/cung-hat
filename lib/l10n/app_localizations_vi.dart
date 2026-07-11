@@ -242,4 +242,23 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authOtpError => 'Mã OTP chưa đúng';
+
+  @override
+  String get discoveryDeckTitle => 'Đôi hát';
+
+  @override
+  String get discoveryDeckSubtitle =>
+      'Gợi ý hợp gu nhạc và khoảng cách an toàn.';
+
+  @override
+  String get discoveryRewind => 'Quay lại';
+
+  @override
+  String get discoveryPass => 'Bỏ qua';
+
+  @override
+  String get discoverySuperLike => 'Siêu thích';
+
+  @override
+  String get discoveryLike => 'Thích';
 }

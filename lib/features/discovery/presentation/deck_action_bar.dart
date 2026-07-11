@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Hàng nút hành động dưới deck. Thuần UI — mọi logic (gate Pro, quota,
 /// controller.swipe) do DoiDeckScreen quyết định qua callback.
@@ -34,65 +38,79 @@ class DeckActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final passEmphasis = (-hProgress).clamp(0.0, 1.0);
     final likeEmphasis = hProgress.clamp(0.0, 1.0);
     final superEmphasis = (-vProgress).clamp(0.0, 1.0);
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Opacity(
-          opacity: rewindEnabled ? 1 : 0.45,
-          child: _RoundButton(
-            key: const Key('deck_rewind_btn'),
-            icon: Icons.replay_rounded,
-            color: AppColors.warning,
-            size: 48,
-            onTap: onRewind,
+        Expanded(
+          child: Opacity(
+            opacity: rewindEnabled ? 1 : 0.45,
+            child: _ActionItem(
+              key: const Key('deck_rewind_btn'),
+              icon: Icons.fast_rewind_rounded,
+              label: l10n?.discoveryRewind ?? 'Quay lại',
+              accent: AppColors.secondary,
+              onTap: onRewind,
+            ),
           ),
         ),
-        _RoundButton(
-          key: const Key('deck_pass_btn'),
-          icon: Icons.close_rounded,
-          color: AppColors.error,
-          size: 62,
-          onTap: onPass,
-          emphasis: passEmphasis,
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _ActionItem(
+            key: const Key('deck_pass_btn'),
+            icon: Icons.close_rounded,
+            label: l10n?.discoveryPass ?? 'Bỏ qua',
+            accent: AppColors.surface,
+            onTap: onPass,
+            emphasis: passEmphasis,
+          ),
         ),
-        _RoundButton(
-          key: const Key('deck_super_btn'),
-          icon: Icons.star_rounded,
-          color: AppColors.tertiary,
-          size: 48,
-          onTap: onSuperLike,
-          emphasis: superEmphasis,
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _ActionItem(
+            key: const Key('deck_super_btn'),
+            icon: Icons.star_rounded,
+            label: l10n?.discoverySuperLike ?? 'Siêu thích',
+            accent: AppColors.teal,
+            onTap: onSuperLike,
+            emphasis: superEmphasis,
+          ),
         ),
-        _RoundButton(
-          key: const Key('deck_like_btn'),
-          icon: Icons.favorite_rounded,
-          color: AppColors.success,
-          size: 62,
-          onTap: onLike,
-          emphasis: likeEmphasis,
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _ActionItem(
+            key: const Key('deck_like_btn'),
+            icon: Icons.favorite_rounded,
+            label: l10n?.discoveryLike ?? 'Thích',
+            accent: AppColors.primary,
+            foreground: AppColors.onPrimary,
+            onTap: onLike,
+            emphasis: likeEmphasis,
+          ),
         ),
       ],
     );
   }
 }
 
-class _RoundButton extends StatelessWidget {
-  const _RoundButton({
+class _ActionItem extends StatelessWidget {
+  const _ActionItem({
     super.key,
     required this.icon,
-    required this.color,
-    required this.size,
+    required this.label,
+    required this.accent,
     required this.onTap,
+    this.foreground = AppColors.ink,
     this.emphasis = 0.0,
   });
 
   final IconData icon;
-  final Color color;
-  final double size;
+  final String label;
+  final Color accent;
+  final Color foreground;
   final VoidCallback onTap;
 
   /// 0..1 — mức kéo theo chiều nút này đại diện. 0 = bình thường; 1 = đang
@@ -101,30 +119,51 @@ class _RoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Transform.scale(
-      scale: 1 + 0.15 * emphasis,
-      child: Material(
-        color: Color.lerp(
-            AppColors.surface, color.withValues(alpha: 0.18), emphasis)!,
-        shape: CircleBorder(
-          side: BorderSide(
-              color: color.withValues(alpha: 0.35 + 0.65 * emphasis),
-              width: 1.5 + emphasis),
-        ),
-        elevation: 2,
-        shadowColor: AppColors.shadow.withValues(alpha: 0.2),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
-          child: SizedBox.square(
-            dimension: size,
-            child: Icon(icon, color: color, size: size * 0.5),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Transform.scale(
+          scale: 1 + 0.15 * emphasis,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Color.lerp(
+                accent,
+                accent.withValues(alpha: 0.72),
+                emphasis,
+              ),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+              border: Border.all(color: AppColors.ink, width: 2 + emphasis),
+              boxShadow: const [AppShadows.hard],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onTap();
+                },
+                child: SizedBox.square(
+                  dimension: 54,
+                  child: Icon(icon, color: foreground, size: 28),
+                ),
+              ),
+            ),
           ),
         ),
-      ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.ink,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
     );
   }
 }
