@@ -48,6 +48,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get onbConsentTitle => 'Quyền riêng tư';
 
   @override
+  String get onbConsentSubtitle => 'Bạn chọn cách Cùng Hát dùng dữ liệu';
+
+  @override
+  String get onbRequired => 'Bắt buộc';
+
+  @override
+  String get onbConsentContinue => 'Đồng ý & tiếp tục';
+
+  @override
   String get onbNameLabel => 'Tên hiển thị';
 
   @override
@@ -111,7 +120,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get consentLocation => 'Dùng vị trí để gợi ý người/kèo gần bạn';
 
   @override
-  String get consentPhotos => 'Lưu & hiển thị ảnh hồ sơ (tùy chọn)';
+  String get consentPhotos => 'Lưu và hiển thị ảnh hồ sơ';
 
   @override
   String get consentMatching => 'Dùng gu nhạc để ghép người';
@@ -121,7 +130,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get consentCrossBorder =>
-      'Dữ liệu lưu tại Singapore (chuyển xuyên biên giới)';
+      'Tôi đồng ý Chính sách bảo mật, Điều khoản và việc lưu dữ liệu tại Singapore';
 
   @override
   String get chatPromoteKeo => 'Lập kèo';

@@ -48,6 +48,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onbConsentTitle => 'Privacy';
 
   @override
+  String get onbConsentSubtitle => 'Choose how Cùng Hát uses your data';
+
+  @override
+  String get onbRequired => 'Required';
+
+  @override
+  String get onbConsentContinue => 'Agree & continue';
+
+  @override
   String get onbNameLabel => 'Display name';
 
   @override
@@ -112,7 +121,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use location to suggest people/outings near you';
 
   @override
-  String get consentPhotos => 'Store & show profile photos (optional)';
+  String get consentPhotos => 'Store and show profile photos';
 
   @override
   String get consentMatching => 'Use music taste to match people';
@@ -122,7 +131,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get consentCrossBorder =>
-      'Data stored in Singapore (cross-border transfer)';
+      'I agree to the Privacy Policy, Terms, and data storage in Singapore';
 
   @override
   String get chatPromoteKeo => 'Set up an outing';

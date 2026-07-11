@@ -208,13 +208,21 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     required bool loading,
   }) {
     final isLast = _step == _lastStep;
+    final isConsent = _step == _consentStepIndex;
     final primaryControl = GradientButton(
       key: isLast ? const Key('onb_finish') : const Key('onb_continue'),
       onPressed: loading
           ? null
           : isLast
           ? _onFinish
-          : () => setState(() => _step += 1),
+          : () => setState(() {
+              if (isConsent) {
+                for (final purpose in requiredConsents) {
+                  _consents[purpose] = true;
+                }
+              }
+              _step += 1;
+            }),
       child: loading && isLast
           ? const SizedBox(
               width: 18,
@@ -227,6 +235,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           : Text(
               isLast
                   ? l10n?.onbFinish ?? 'Hoàn tất'
+                  : isConsent
+                  ? l10n?.onbConsentContinue ?? 'Đồng ý & tiếp tục'
                   : l10n?.onbContinue ?? 'Tiếp tục',
             ),
     );

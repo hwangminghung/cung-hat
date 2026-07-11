@@ -55,4 +55,28 @@ void main() {
     expect(find.byKey(const Key('onb_continue')).hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('consent CTA keeps marketing off and advances', (tester) async {
+    await pumpFlow(tester);
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+
+    expect(find.text('Bước 2/4'), findsOneWidget);
+    expect(find.text('Quyền riêng tư'), findsOneWidget);
+    expect(find.text('Đồng ý & tiếp tục'), findsOneWidget);
+    expect(
+      tester
+          .widget<SwitchListTile>(find.byKey(const Key('consent_marketing')))
+          .value,
+      isFalse,
+    );
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+
+    expect(find.text('Bước 3/4'), findsOneWidget);
+    expect(find.text('Hồ sơ'), findsOneWidget);
+    expect(find.text('Quyền riêng tư'), findsNothing);
+  });
 }

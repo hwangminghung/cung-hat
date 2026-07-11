@@ -176,6 +176,24 @@ abstract class AppLocalizations {
   /// **'Privacy'**
   String get onbConsentTitle;
 
+  /// No description provided for @onbConsentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how Cùng Hát uses your data'**
+  String get onbConsentSubtitle;
+
+  /// No description provided for @onbRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get onbRequired;
+
+  /// No description provided for @onbConsentContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree & continue'**
+  String get onbConsentContinue;
+
   /// No description provided for @onbNameLabel.
   ///
   /// In en, this message translates to:
@@ -299,7 +317,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentPhotos.
   ///
   /// In en, this message translates to:
-  /// **'Store & show profile photos (optional)'**
+  /// **'Store and show profile photos'**
   String get consentPhotos;
 
   /// No description provided for @consentMatching.
@@ -317,7 +335,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentCrossBorder.
   ///
   /// In en, this message translates to:
-  /// **'Data stored in Singapore (cross-border transfer)'**
+  /// **'I agree to the Privacy Policy, Terms, and data storage in Singapore'**
   String get consentCrossBorder;
 
   /// No description provided for @chatPromoteKeo.
