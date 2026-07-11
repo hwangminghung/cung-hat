@@ -7,7 +7,10 @@ import 'package:cung_hat/features/onboarding/presentation/onboarding_flow.dart';
 import 'package:cung_hat/features/onboarding/application/reference_providers.dart';
 import 'package:cung_hat/shared/widgets/wave_divider.dart';
 
-Future<void> pumpFlow(WidgetTester tester) async {
+Future<void> pumpFlow(
+  WidgetTester tester, {
+  TextScaler textScaler = TextScaler.noScaling,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -20,6 +23,10 @@ Future<void> pumpFlow(WidgetTester tester) async {
         locale: const Locale('vi'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+          child: child!,
+        ),
         home: const OnboardingFlow(),
       ),
     ),
@@ -52,6 +59,43 @@ void main() {
 
     await pumpFlow(tester);
 
+    expect(find.byKey(const Key('onb_continue')).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('progress announces the current step when content changes', (
+    tester,
+  ) async {
+    await pumpFlow(tester);
+
+    Semantics progress() => tester.widget<Semantics>(
+      find.byKey(const Key('onb_progress_semantics')),
+    );
+
+    expect(progress().properties.liveRegion, isTrue);
+    expect(progress().properties.label, 'Bước 1/4');
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+
+    expect(progress().properties.liveRegion, isTrue);
+    expect(progress().properties.label, 'Bước 2/4');
+  });
+
+  testWidgets('back and primary controls stack at 200 percent text scale', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpFlow(tester, textScaler: const TextScaler.linear(2));
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+
+    final backTop = tester.getTopLeft(find.byKey(const Key('onb_back')));
+    final primaryTop = tester.getTopLeft(find.byKey(const Key('onb_continue')));
+    expect(backTop.dy, lessThan(primaryTop.dy));
+    expect(find.byKey(const Key('onb_back')).hitTestable(), findsOneWidget);
     expect(find.byKey(const Key('onb_continue')).hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -260,6 +260,14 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                   : l10n?.onbContinue ?? 'Tiếp tục',
             ),
     );
+    final backControl = _step > 0
+        ? TextButton.icon(
+            key: const Key('onb_back'),
+            onPressed: () => _moveToStep(_step - 1),
+            icon: const Icon(Icons.arrow_back),
+            label: Text(l10n?.onbBack ?? 'Quay lại'),
+          )
+        : null;
 
     return DecoratedBox(
       decoration: const BoxDecoration(
@@ -275,19 +283,33 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             AppSpacing.lg,
             AppSpacing.lg,
           ),
-          child: Row(
-            children: [
-              if (_step > 0) ...[
-                TextButton.icon(
-                  key: const Key('onb_back'),
-                  onPressed: () => _moveToStep(_step - 1),
-                  icon: const Icon(Icons.arrow_back),
-                  label: Text(l10n?.onbBack ?? 'Quay lại'),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              Expanded(child: primaryControl),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final shouldStack =
+                  backControl != null &&
+                  (constraints.maxWidth < 320 ||
+                      MediaQuery.textScalerOf(context).scale(1) > 1.3);
+              if (shouldStack) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    backControl,
+                    const SizedBox(height: AppSpacing.xs),
+                    primaryControl,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  if (backControl != null) ...[
+                    backControl,
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
+                  Expanded(child: primaryControl),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -361,41 +383,49 @@ class _OnboardingProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.xs,
-        AppSpacing.lg,
-        AppSpacing.md,
-      ),
-      child: Column(
-        children: [
-          Row(
+    return Semantics(
+      key: const Key('onb_progress_semantics'),
+      container: true,
+      liveRegion: true,
+      label: label,
+      child: ExcludeSemantics(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.xs,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
+          child: Column(
             children: [
-              for (var index = 0; index < 4; index++) ...[
-                if (index > 0) const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: WaveDivider(
-                    key: Key('onb_progress_segment_$index'),
-                    height: AppSpacing.xxl,
-                    strokeWidth: 2,
-                    color: index < currentStep
-                        ? AppColors.ink
-                        : index == currentStep
-                        ? AppColors.primary
-                        : AppColors.secondaryTint,
-                  ),
-                ),
-              ],
+              Row(
+                children: [
+                  for (var index = 0; index < 4; index++) ...[
+                    if (index > 0) const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: WaveDivider(
+                        key: Key('onb_progress_segment_$index'),
+                        height: AppSpacing.xxl,
+                        strokeWidth: 2,
+                        color: index < currentStep
+                            ? AppColors.ink
+                            : index == currentStep
+                            ? AppColors.primary
+                            : AppColors.secondaryTint,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                label,
+                key: const Key('onb_progress_label'),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            label,
-            key: const Key('onb_progress_label'),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ],
+        ),
       ),
     );
   }
