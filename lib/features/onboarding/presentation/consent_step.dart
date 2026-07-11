@@ -29,6 +29,12 @@ List<String> missingRequiredConsents(Map<String, bool> values) => [
     if (values[purpose] != true) purpose,
 ];
 
+void grantRequiredConsents(Map<String, bool> values) {
+  for (final purpose in requiredConsents) {
+    values[purpose] = true;
+  }
+}
+
 const consentLabelsVi = {
   'location': 'Dùng vị trí để gợi ý người/kèo gần bạn',
   'photos': 'Lưu và hiển thị ảnh hồ sơ',

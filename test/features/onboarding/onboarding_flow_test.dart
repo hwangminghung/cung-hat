@@ -56,6 +56,59 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('step changes reset a compact viewport to the top', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 520));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpFlow(tester);
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+    await tester.drag(
+      find.byKey(const Key('onboarding_scroll')),
+      const Offset(0, -500),
+    );
+    await tester.pump();
+
+    ScrollPosition position() => tester
+        .state<ScrollableState>(
+          find
+              .descendant(
+                of: find.byKey(const Key('onboarding_scroll')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        )
+        .position;
+
+    expect(position().pixels, greaterThan(0));
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+    expect(position().pixels, 0);
+    expect(
+      find.byKey(const Key('onb_profile_preview')).hitTestable(),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+    await tester.drag(
+      find.byKey(const Key('onboarding_scroll')),
+      const Offset(0, -500),
+    );
+    await tester.pump();
+    expect(position().pixels, greaterThan(0));
+
+    await tester.tap(find.byKey(const Key('onb_back')));
+    await tester.pump();
+    expect(position().pixels, 0);
+    expect(
+      find.byKey(const Key('onb_profile_preview')).hitTestable(),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('consent CTA keeps marketing off and advances', (tester) async {
     await pumpFlow(tester);
 

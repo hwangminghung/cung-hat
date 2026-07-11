@@ -40,6 +40,13 @@ void main() {
     expect(find.text('Tháng'), findsOneWidget);
     expect(find.text('Năm'), findsOneWidget);
     expect(find.text('Chọn ngày sinh'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('pick_dob_btn')),
+        matching: find.byType(Ink),
+      ),
+      findsNWidgets(3),
+    );
 
     await tester.tap(find.byKey(const Key('pick_dob_btn')));
     await tester.pumpAndSettle();

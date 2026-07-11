@@ -56,4 +56,30 @@ void main() {
       isEmpty,
     );
   });
+
+  test(
+    'grantRequiredConsents grants four required and keeps marketing off',
+    () {
+      final values = {for (final purpose in consentPurposes) purpose: false};
+
+      grantRequiredConsents(values);
+
+      expect(
+        {for (final purpose in requiredConsents) purpose: values[purpose]},
+        {for (final purpose in requiredConsents) purpose: true},
+      );
+      expect(values['marketing'], isFalse);
+    },
+  );
+
+  test('grantRequiredConsents preserves an enabled marketing choice', () {
+    final values = {
+      for (final purpose in consentPurposes) purpose: purpose == 'marketing',
+    };
+
+    grantRequiredConsents(values);
+
+    expect(values['marketing'], isTrue);
+    expect(missingRequiredConsents(values), isEmpty);
+  });
 }

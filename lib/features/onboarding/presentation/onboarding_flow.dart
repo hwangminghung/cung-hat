@@ -30,6 +30,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   };
   final _nameCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
+  final _scrollController = ScrollController();
   final Set<String> _genreSel = {};
   final Set<String> _artistSel = {};
   final Set<String> _songSel = {};
@@ -41,7 +42,16 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   void dispose() {
     _nameCtrl.dispose();
     _bioCtrl.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _moveToStep(int nextStep, {bool grantRequired = false}) {
+    setState(() {
+      if (grantRequired) grantRequiredConsents(_consents);
+      _step = nextStep;
+    });
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
   void _onFinish() {
@@ -54,9 +64,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     }
     final missing = missingRequiredConsents(_consents);
     if (missing.isNotEmpty) {
-      setState(
-        () => _step = _consentStepIndex,
-      ); // jump back to the consent step (DOB=0, consent=1)
+      _moveToStep(_consentStepIndex);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -234,14 +242,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           ? null
           : isLast
           ? _onFinish
-          : () => setState(() {
-              if (isConsent) {
-                for (final purpose in requiredConsents) {
-                  _consents[purpose] = true;
-                }
-              }
-              _step += 1;
-            }),
+          : () => _moveToStep(_step + 1, grantRequired: isConsent),
       child: loading && isLast
           ? const SizedBox(
               width: 18,
@@ -279,7 +280,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               if (_step > 0) ...[
                 TextButton.icon(
                   key: const Key('onb_back'),
-                  onPressed: () => setState(() => _step -= 1),
+                  onPressed: () => _moveToStep(_step - 1),
                   icon: const Icon(Icons.arrow_back),
                   label: Text(l10n?.onbBack ?? 'Quay lại'),
                 ),
@@ -329,6 +330,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             Expanded(
               child: SingleChildScrollView(
                 key: const Key('onboarding_scroll'),
+                controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg,
                   AppSpacing.sm,
