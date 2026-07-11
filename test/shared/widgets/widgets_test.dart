@@ -45,7 +45,7 @@ void main() {
     expect(done, '123456');
   });
 
-  testWidgets('OtpInput exposes one labelled editable semantics node', (
+  testWidgets('OtpInput exposes one labelled editable text field', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
@@ -54,7 +54,18 @@ void main() {
       _wrap(OtpInput(semanticLabel: 'Mã 6 số', onChanged: (_) {})),
     );
 
-    expect(find.bySemanticsLabel('Mã 6 số'), findsOneWidget);
+    final otpSemantics = find.bySemanticsLabel('Mã 6 số');
+    expect(otpSemantics, findsOneWidget);
+    expect(
+      tester.getSemantics(otpSemantics),
+      isSemantics(
+        label: 'Mã 6 số',
+        isTextField: true,
+        isFocusable: true,
+        hasFocusAction: true,
+        hasTapAction: true,
+      ),
+    );
     semantics.dispose();
   });
 }

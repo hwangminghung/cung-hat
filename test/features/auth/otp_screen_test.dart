@@ -181,6 +181,25 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('formatted phone uses accessible ink on a teal accent', (
+    tester,
+  ) async {
+    final repo = _MockRepo();
+    when(() => repo.sendOtp(any())).thenAnswer((_) async {});
+    await _pumpOtpScreen(tester, repo);
+
+    final phoneText = tester.widget<Text>(
+      find.byKey(const Key('otp_phone_text')),
+    );
+    final rootSpan = phoneText.textSpan! as TextSpan;
+    final phoneSpan = rootSpan.children!.last as TextSpan;
+
+    expect(phoneSpan.style?.color, AppColors.ink);
+    expect(phoneSpan.style?.backgroundColor, AppColors.teal);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('rapid resend taps start only one repository request', (
     tester,
   ) async {

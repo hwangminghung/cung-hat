@@ -170,6 +170,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         'Mã đã gửi tới $displayPhone',
                     child: ExcludeSemantics(
                       child: Text.rich(
+                        key: const Key('otp_phone_text'),
                         TextSpan(
                           children: [
                             TextSpan(
@@ -181,7 +182,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                               text: displayPhone,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: AppColors.teal,
+                                    color: AppColors.ink,
+                                    backgroundColor: AppColors.teal,
                                     fontWeight: FontWeight.w800,
                                   ),
                             ),
