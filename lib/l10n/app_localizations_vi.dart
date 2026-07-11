@@ -261,4 +261,22 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get discoveryLike => 'Thích';
+
+  @override
+  String get discoveryExploreTitle => 'Khám phá theo gu nhạc';
+
+  @override
+  String get discoveryExploreSubtitle =>
+      'Chọn một mood, gặp người cùng tần số.';
+
+  @override
+  String get discoveryExploreOpen => 'Đang mở';
+
+  @override
+  String discoveryExploreLiveCount(int count) {
+    return '$count người đang hát';
+  }
+
+  @override
+  String get discoveryExploreBrand => 'CÙNG HÁT';
 }

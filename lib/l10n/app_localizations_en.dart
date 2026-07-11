@@ -262,4 +262,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoveryLike => 'Like';
+
+  @override
+  String get discoveryExploreTitle => 'Explore by music taste';
+
+  @override
+  String get discoveryExploreSubtitle =>
+      'Pick a mood and meet someone on your wavelength.';
+
+  @override
+  String get discoveryExploreOpen => 'Open now';
+
+  @override
+  String discoveryExploreLiveCount(int count) {
+    return '$count people singing';
+  }
+
+  @override
+  String get discoveryExploreBrand => 'CÙNG HÁT';
 }

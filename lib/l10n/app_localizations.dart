@@ -577,6 +577,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Like'**
   String get discoveryLike;
+
+  /// No description provided for @discoveryExploreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore by music taste'**
+  String get discoveryExploreTitle;
+
+  /// No description provided for @discoveryExploreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a mood and meet someone on your wavelength.'**
+  String get discoveryExploreSubtitle;
+
+  /// No description provided for @discoveryExploreOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open now'**
+  String get discoveryExploreOpen;
+
+  /// No description provided for @discoveryExploreLiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people singing'**
+  String discoveryExploreLiveCount(int count);
+
+  /// No description provided for @discoveryExploreBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'CÙNG HÁT'**
+  String get discoveryExploreBrand;
 }
 
 class _AppLocalizationsDelegate

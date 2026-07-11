@@ -100,5 +100,17 @@
   "discoveryRewind": "Quay lại",
   "discoveryPass": "Bỏ qua",
   "discoverySuperLike": "Siêu thích",
-  "discoveryLike": "Thích"
+  "discoveryLike": "Thích",
+  "discoveryExploreTitle": "Khám phá theo gu nhạc",
+  "discoveryExploreSubtitle": "Chọn một mood, gặp người cùng tần số.",
+  "discoveryExploreOpen": "Đang mở",
+  "discoveryExploreLiveCount": "{count} người đang hát",
+  "@discoveryExploreLiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveryExploreBrand": "CÙNG HÁT"
 }

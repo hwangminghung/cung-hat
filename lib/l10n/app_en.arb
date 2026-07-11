@@ -100,5 +100,17 @@
   "discoveryRewind": "Undo",
   "discoveryPass": "Pass",
   "discoverySuperLike": "Super like",
-  "discoveryLike": "Like"
+  "discoveryLike": "Like",
+  "discoveryExploreTitle": "Explore by music taste",
+  "discoveryExploreSubtitle": "Pick a mood and meet someone on your wavelength.",
+  "discoveryExploreOpen": "Open now",
+  "discoveryExploreLiveCount": "{count} people singing",
+  "@discoveryExploreLiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveryExploreBrand": "CÙNG HÁT"
 }
