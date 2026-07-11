@@ -165,4 +165,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get entitlementNeeded => 'Upgrade to use this feature';
+
+  @override
+  String get authTagline => 'Connect through songs';
+
+  @override
+  String get authPhoneTitle => 'Sign in with your phone number';
+
+  @override
+  String get authPhoneBody =>
+      'Enter your number to receive an OTP. We only use it to keep your account safe.';
+
+  @override
+  String get authPhoneHint => '901 234 567';
+
+  @override
+  String get authResponsibility =>
+      'By continuing, you agree to use Cùng Hát responsibly and respect others.';
+
+  @override
+  String get authSendOtpError => 'We couldn\'t send the code';
 }

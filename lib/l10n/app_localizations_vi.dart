@@ -164,4 +164,24 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get entitlementNeeded => 'Cần nâng cấp để dùng tính năng này';
+
+  @override
+  String get authTagline => 'Kết bạn qua những bài hát';
+
+  @override
+  String get authPhoneTitle => 'Đăng nhập bằng số điện thoại';
+
+  @override
+  String get authPhoneBody =>
+      'Nhập số của bạn để nhận mã OTP. Tụi mình chỉ dùng để giữ tài khoản an toàn.';
+
+  @override
+  String get authPhoneHint => '901 234 567';
+
+  @override
+  String get authResponsibility =>
+      'Bằng việc tiếp tục, bạn đồng ý dùng Cùng Hát có trách nhiệm và tôn trọng người khác.';
+
+  @override
+  String get authSendOtpError => 'Không gửi được mã';
 }

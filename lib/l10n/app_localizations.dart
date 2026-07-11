@@ -403,6 +403,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upgrade to use this feature'**
   String get entitlementNeeded;
+
+  /// No description provided for @authTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect through songs'**
+  String get authTagline;
+
+  /// No description provided for @authPhoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your phone number'**
+  String get authPhoneTitle;
+
+  /// No description provided for @authPhoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your number to receive an OTP. We only use it to keep your account safe.'**
+  String get authPhoneBody;
+
+  /// No description provided for @authPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'901 234 567'**
+  String get authPhoneHint;
+
+  /// No description provided for @authResponsibility.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing, you agree to use Cùng Hát responsibly and respect others.'**
+  String get authResponsibility;
+
+  /// No description provided for @authSendOtpError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t send the code'**
+  String get authSendOtpError;
 }
 
 class _AppLocalizationsDelegate
