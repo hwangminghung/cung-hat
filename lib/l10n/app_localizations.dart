@@ -458,6 +458,12 @@ abstract class AppLocalizations {
   /// **'Check your messages'**
   String get authCheckMessages;
 
+  /// No description provided for @authOtpSentPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to '**
+  String get authOtpSentPrefix;
+
   /// No description provided for @authOtpSentTo.
   ///
   /// In en, this message translates to:

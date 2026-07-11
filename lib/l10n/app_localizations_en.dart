@@ -198,6 +198,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCheckMessages => 'Check your messages';
 
   @override
+  String get authOtpSentPrefix => 'Code sent to ';
+
+  @override
   String authOtpSentTo(String phone) {
     return 'Code sent to $phone';
   }

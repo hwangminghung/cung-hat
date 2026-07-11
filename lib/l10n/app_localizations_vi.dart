@@ -197,6 +197,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authCheckMessages => 'Kiểm tra tin nhắn';
 
   @override
+  String get authOtpSentPrefix => 'Mã đã gửi tới ';
+
+  @override
   String authOtpSentTo(String phone) {
     return 'Mã đã gửi tới $phone';
   }

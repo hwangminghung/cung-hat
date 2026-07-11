@@ -25,6 +25,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   static const _resendStartSeconds = 60;
   Timer? _resendTimer;
   int _secondsRemaining = _resendStartSeconds;
+  bool _resendInFlight = false;
 
   /// Prevents auto-submit and the manual button from sending the same code
   /// twice, which can make Supabase report a misleading expired OTP.
@@ -64,24 +65,38 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     });
   }
 
-  void _resendOtp(String? phone) {
-    if (phone == null) return;
+  Future<void> _resendOtp(String? phone) async {
+    if (phone == null || _resendInFlight || _submitted) return;
+    setState(() => _resendInFlight = true);
     _startResendCountdown();
-    ref.read(authControllerProvider.notifier).sendOtp(phone);
+    await ref.read(authControllerProvider.notifier).sendOtp(phone);
+    if (mounted) setState(() => _resendInFlight = false);
   }
 
   void _submit(String code) {
-    if (_submitted) return;
+    if (_submitted || _resendInFlight) return;
     _submitted = true;
     ref.read(authControllerProvider.notifier).verifyOtp(code);
+  }
+
+  String _displayPhone(String raw) {
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    if (digits.length == 11 && digits.startsWith('84')) {
+      final local = digits.substring(2);
+      return '+84 ${local.substring(0, 3)} ${local.substring(3, 6)} '
+          '${local.substring(6)}';
+    }
+    return raw;
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final rawPhone = state.phone;
     final phone =
         state.phone ?? l10n?.authPhoneFallback ?? 'số điện thoại của bạn';
+    final displayPhone = rawPhone == null ? phone : _displayPhone(rawPhone);
 
     ref.listen(authControllerProvider, (prev, next) {
       if (next.phase == AuthPhase.error) {
@@ -135,25 +150,50 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        l10n?.authCheckMessages ?? 'Kiểm tra tin nhắn',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.ink,
-                          fontWeight: FontWeight.w800,
+                      Flexible(
+                        child: Text(
+                          l10n?.authCheckMessages ?? 'Kiểm tra tin nhắn',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: AppColors.ink,
+                                fontWeight: FontWeight.w800,
+                              ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    l10n?.authOtpSentTo(phone) ?? 'Mã đã gửi tới $phone',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                  Semantics(
+                    label:
+                        l10n?.authOtpSentTo(displayPhone) ??
+                        'Mã đã gửi tới $displayPhone',
+                    child: ExcludeSemantics(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: l10n?.authOtpSentPrefix ?? 'Mã đã gửi tới ',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
+                            TextSpan(
+                              text: displayPhone,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.teal,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   OtpInput(
+                    semanticLabel: l10n?.otpLabel ?? 'Mã 6 số',
                     onChanged: (value) {
                       _ctrl.text = value;
                       _submitted = false;
@@ -173,7 +213,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   GradientButton(
                     key: const Key('verify_otp_btn'),
                     icon: Icons.check_rounded,
-                    onPressed: state.phase == AuthPhase.verifying
+                    onPressed:
+                        _resendInFlight ||
+                            state.phase == AuthPhase.verifying ||
+                            state.phase == AuthPhase.sending
                         ? null
                         : () => _submit(_ctrl.text),
                     child: state.phase == AuthPhase.verifying
@@ -187,28 +230,35 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         : Text(l10n?.verify ?? 'Xác nhận'),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  if (_secondsRemaining > 0)
-                    Text(
-                      l10n?.authResendCountdown(_secondsRemaining) ??
-                          'Gửi lại mã sau ${_secondsRemaining}s',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    )
-                  else
-                    Center(
-                      child: TextButton(
-                        key: const Key('resend_otp_btn'),
-                        onPressed:
-                            state.phone == null ||
-                                state.phase == AuthPhase.sending
-                            ? null
-                            : () => _resendOtp(state.phone),
-                        child: Text(l10n?.authResend ?? 'Gửi lại mã'),
-                      ),
+                  SizedBox(
+                    key: const Key('resend_slot'),
+                    height: AppSpacing.buttonHeight,
+                    child: Center(
+                      child: _secondsRemaining > 0
+                          ? Text(
+                              l10n?.authResendCountdown(_secondsRemaining) ??
+                                  'Gửi lại mã sau ${_secondsRemaining}s',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              textAlign: TextAlign.center,
+                            )
+                          : TextButton(
+                              key: const Key('resend_otp_btn'),
+                              onPressed:
+                                  state.phone == null ||
+                                      _resendInFlight ||
+                                      _submitted ||
+                                      state.phase == AuthPhase.sending ||
+                                      state.phase == AuthPhase.verifying
+                                  ? null
+                                  : () => _resendOtp(state.phone),
+                              child: Text(l10n?.authResend ?? 'Gửi lại mã'),
+                            ),
                     ),
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,51 +309,65 @@ class _BrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      key: const Key('otp_brand_header'),
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            border: Border.all(color: AppColors.ink, width: 2),
-            boxShadow: const [AppShadows.hard],
-          ),
-          child: const BackButton(color: AppColors.ink),
-        ),
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.auto_awesome_rounded,
-                color: AppColors.secondaryDark,
-                size: 18,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return Row(
+          key: const Key('otp_brand_header'),
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                border: Border.all(color: AppColors.ink, width: 2),
+                boxShadow: const [AppShadows.hard],
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                brand,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w900,
-                ),
+              child: const BackButton(color: AppColors.ink),
+            ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!compact) ...[
+                    const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: AppColors.secondaryDark,
+                      size: 18,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
+                  Flexible(
+                    child: Text(
+                      brand,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w900,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                  if (!compact) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    const SizedBox(
+                      width: 38,
+                      child: WaveDivider(
+                        height: AppSpacing.lg,
+                        color: AppColors.teal,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(width: AppSpacing.sm),
-              const SizedBox(
-                width: 38,
-                child: WaveDivider(
-                  height: AppSpacing.lg,
-                  color: AppColors.teal,
-                  strokeWidth: 2,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 48),
-      ],
+            ),
+            const SizedBox(width: 48),
+          ],
+        );
+      },
     );
   }
 }
