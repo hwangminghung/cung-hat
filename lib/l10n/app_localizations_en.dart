@@ -185,4 +185,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authSendOtpError => 'We couldn\'t send the code';
+
+  @override
+  String authResendCountdown(int seconds) {
+    return 'Resend code in ${seconds}s';
+  }
+
+  @override
+  String get authResend => 'Resend code';
+
+  @override
+  String get authCheckMessages => 'Check your messages';
+
+  @override
+  String authOtpSentTo(String phone) {
+    return 'Code sent to $phone';
+  }
+
+  @override
+  String get authPhoneFallback => 'your phone number';
+
+  @override
+  String get authOtpHelp =>
+      'Didn\'t get a code? Go back and check your phone number.';
+
+  @override
+  String get authOtpError => 'That OTP code isn\'t correct';
 }

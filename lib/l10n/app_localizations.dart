@@ -439,6 +439,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn\'t send the code'**
   String get authSendOtpError;
+
+  /// No description provided for @authResendCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {seconds}s'**
+  String authResendCountdown(int seconds);
+
+  /// No description provided for @authResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get authResend;
+
+  /// No description provided for @authCheckMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your messages'**
+  String get authCheckMessages;
+
+  /// No description provided for @authOtpSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to {phone}'**
+  String authOtpSentTo(String phone);
+
+  /// No description provided for @authPhoneFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'your phone number'**
+  String get authPhoneFallback;
+
+  /// No description provided for @authOtpHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t get a code? Go back and check your phone number.'**
+  String get authOtpHelp;
+
+  /// No description provided for @authOtpError.
+  ///
+  /// In en, this message translates to:
+  /// **'That OTP code isn\'t correct'**
+  String get authOtpError;
 }
 
 class _AppLocalizationsDelegate

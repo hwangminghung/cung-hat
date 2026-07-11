@@ -184,4 +184,30 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get authSendOtpError => 'Không gửi được mã';
+
+  @override
+  String authResendCountdown(int seconds) {
+    return 'Gửi lại mã sau ${seconds}s';
+  }
+
+  @override
+  String get authResend => 'Gửi lại mã';
+
+  @override
+  String get authCheckMessages => 'Kiểm tra tin nhắn';
+
+  @override
+  String authOtpSentTo(String phone) {
+    return 'Mã đã gửi tới $phone';
+  }
+
+  @override
+  String get authPhoneFallback => 'số điện thoại của bạn';
+
+  @override
+  String get authOtpHelp =>
+      'Không nhận được mã? Quay lại để kiểm tra số điện thoại.';
+
+  @override
+  String get authOtpError => 'Mã OTP chưa đúng';
 }
