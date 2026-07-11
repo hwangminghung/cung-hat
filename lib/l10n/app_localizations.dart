@@ -266,6 +266,12 @@ abstract class AppLocalizations {
   /// **'Music taste'**
   String get onbStepTaste;
 
+  /// No description provided for @onbTasteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a few things you listen to'**
+  String get onbTasteSubtitle;
+
   /// No description provided for @onbProgress.
   ///
   /// In en, this message translates to:

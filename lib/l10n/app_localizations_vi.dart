@@ -94,6 +94,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get onbStepTaste => 'Gu nhạc';
 
   @override
+  String get onbTasteSubtitle => 'Chọn vài thứ bạn hay nghe';
+
+  @override
   String onbProgress(int step) {
     return 'Bước $step/4';
   }

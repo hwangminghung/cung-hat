@@ -9,7 +9,6 @@ import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
-import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import 'consent_step.dart';
 import 'dob_step.dart';
@@ -94,7 +93,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(label),
+        _TasteSectionHeader(label),
         const SizedBox(height: 8),
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -190,6 +189,11 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           Text(
             l10n?.onbStepTaste ?? 'Gu nhạc',
             style: Theme.of(context).textTheme.displaySmall,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n?.onbTasteSubtitle ?? 'Chọn vài thứ bạn hay nghe',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: AppSpacing.lg),
           _tasteSection<Genre>(
@@ -480,6 +484,33 @@ class _ProfilePreview extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TasteSectionHeader extends StatelessWidget {
+  const _TasteSectionHeader(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: const BoxDecoration(
+              color: AppColors.secondary,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(label, style: Theme.of(context).textTheme.titleLarge),
         ],
       ),
     );

@@ -28,6 +28,7 @@
   "onbStepProfile": "Set up your profile",
   "onbProfileQuestion": "What would you like everyone to call you?",
   "onbStepTaste": "Music taste",
+  "onbTasteSubtitle": "Choose a few things you listen to",
   "onbProgress": "Step {step}/4",
   "@onbProgress": {
     "placeholders": {

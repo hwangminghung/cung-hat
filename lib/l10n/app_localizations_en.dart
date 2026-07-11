@@ -94,6 +94,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onbStepTaste => 'Music taste';
 
   @override
+  String get onbTasteSubtitle => 'Choose a few things you listen to';
+
+  @override
   String onbProgress(int step) {
     return 'Step $step/4';
   }

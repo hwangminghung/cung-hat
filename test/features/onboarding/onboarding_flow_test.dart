@@ -126,4 +126,24 @@ void main() {
       'Mê V-Pop.',
     );
   });
+
+  testWidgets('taste step shows hierarchy and preserved finish control', (
+    tester,
+  ) async {
+    await pumpFlow(tester);
+
+    for (var step = 0; step < 3; step++) {
+      await tester.tap(find.byKey(const Key('onb_continue')));
+      await tester.pump();
+    }
+
+    expect(find.text('Bước 4/4'), findsOneWidget);
+    expect(find.text('Gu nhạc'), findsOneWidget);
+    expect(find.text('Chọn vài thứ bạn hay nghe'), findsOneWidget);
+    expect(find.text('Thể loại'), findsOneWidget);
+    expect(find.text('Nghệ sĩ'), findsOneWidget);
+    expect(find.text('Bài tủ'), findsOneWidget);
+    expect(find.byKey(const Key('onb_finish')), findsOneWidget);
+    expect(find.text('Hoàn tất'), findsOneWidget);
+  });
 }

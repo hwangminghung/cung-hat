@@ -28,6 +28,7 @@
   "onbStepProfile": "Thiết lập hồ sơ",
   "onbProfileQuestion": "Bạn muốn mọi người gọi mình là gì?",
   "onbStepTaste": "Gu nhạc",
+  "onbTasteSubtitle": "Chọn vài thứ bạn hay nghe",
   "onbProgress": "Bước {step}/4",
   "@onbProgress": {
     "placeholders": {

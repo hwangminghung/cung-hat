@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cung_hat/core/theme/app_colors.dart';
 import 'package:cung_hat/features/onboarding/domain/music_ref.dart';
 import 'package:cung_hat/features/onboarding/presentation/taste_step.dart';
 
@@ -64,5 +65,44 @@ void main() {
     );
 
     expect(find.byKey(const Key('taste_empty')), findsOneWidget);
+  });
+
+  testWidgets('selected and unselected items keep retro FilterChip styling', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TasteChips(
+            items: const [
+              Genre(id: 'vpop', nameVi: 'V-Pop', nameEn: 'V-Pop'),
+              Genre(id: 'rap', nameVi: 'Rap Việt', nameEn: 'Vietnamese Rap'),
+            ],
+            labelOf: (genre) => genre.nameVi,
+            idOf: (genre) => genre.id,
+            selected: const {'vpop'},
+            onToggle: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(FilterChip), findsNWidgets(2));
+
+    final selected = tester.widget<FilterChip>(
+      find.byKey(const Key('chip_vpop')),
+    );
+    expect(selected.selected, isTrue);
+    expect(selected.selectedColor, AppColors.ink);
+    expect(selected.checkmarkColor, AppColors.secondary);
+    expect(selected.showCheckmark, isTrue);
+    expect(selected.side, const BorderSide(color: AppColors.ink, width: 2));
+
+    final unselected = tester.widget<FilterChip>(
+      find.byKey(const Key('chip_rap')),
+    );
+    expect(unselected.selected, isFalse);
+    expect(unselected.backgroundColor, AppColors.surface);
+    expect(unselected.side, const BorderSide(color: AppColors.ink, width: 2));
   });
 }
