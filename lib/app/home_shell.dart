@@ -13,6 +13,7 @@ import '../features/photos/presentation/photo_manager_sheet.dart';
 import '../features/profile/application/profile_providers.dart';
 import '../features/profile/domain/profile_completion.dart';
 import '../features/profile/presentation/prompt_editor_sheet.dart';
+import '../shared/widgets/stamp_chip.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
@@ -150,6 +151,7 @@ class _ProfileTab extends ConsumerWidget {
           _ProfileTile(
             icon: Icons.favorite_rounded,
             title: 'Ai đã thích bạn',
+            badgeLabel: 'PRO',
             subtitle: 'Mở danh sách người đã thả tim',
             onTap: () {
               final unlocked = ref.read(hasEntitlementProvider('see_likes'));
@@ -279,12 +281,14 @@ class _ProfileTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.badgeLabel,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final String? badgeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -311,7 +315,16 @@ class _ProfileTile extends StatelessWidget {
             ),
             child: Icon(icon, color: AppColors.primaryDark),
           ),
-          title: Text(title),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
+              if (badgeLabel != null) ...[
+                const SizedBox(width: AppSpacing.sm),
+                StampChip(label: badgeLabel!),
+              ],
+            ],
+          ),
           subtitle: Text(subtitle),
           trailing: const Icon(Icons.chevron_right_rounded),
           onTap: onTap,

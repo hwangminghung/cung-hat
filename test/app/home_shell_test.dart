@@ -10,6 +10,8 @@ import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/keo/application/keo_providers.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
+import 'package:cung_hat/features/profile/application/profile_providers.dart';
+import 'package:cung_hat/shared/widgets/stamp_chip.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
 
@@ -85,5 +87,30 @@ void main() {
     await tester.pumpAndSettle();
     // Không invalidate → provider giữ cache, vẫn 1. Có fix → refetch = 2.
     expect(inboxCalls, 2);
+  });
+
+  testWidgets(
+      "tab Hồ sơ: dòng 'Ai đã thích bạn' có badge PRO (tránh bait-click)",
+      (tester) async {
+    final fakeLoc = _FakeLocationService();
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null)
+              .overrideWith((ref) => Future.value(<Candidate>[])),
+          locationServiceProvider.overrideWithValue(fakeLoc),
+          openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
+          myProfileProvider.overrideWith((ref) => Future.value(null)),
+        ],
+        child: const MaterialApp(home: HomeShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Hồ sơ'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(StampChip, 'PRO'), findsOneWidget);
   });
 }
