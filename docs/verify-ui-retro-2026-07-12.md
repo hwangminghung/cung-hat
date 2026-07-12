@@ -47,3 +47,18 @@ Screenshots: `docs/verify-screenshots-ui-retro/` (deck, keo board sau fix, inbox
 - APK PHẢI build với `--dart-define-from-file=env/dev.emulator.json` (env bị gitignore — copy từ repo gốc vào worktree, đã copy sẵn).
 - Kèo seed hết hạn theo thời gian thực → muốn board có kèo: `update public.keo set time_window_start = now() + interval '7 hours', time_window_end = now() + interval '9 hours' where status='open';`
 - Debug màn trắng không exception: dump render tree qua VM service HTTP `http://127.0.0.1:<port>/<token>/ext.flutter.debugDumpRenderTree?isolateId=<id>` (adb forward) — tìm `geometry: null`/`size: MISSING`.
+
+## Polish đợt 2 (cùng ngày) — khớp bố cục mockup sau phản hồi user "nhiều chỗ chưa giống"
+
+Plan: `docs/superpowers/plans/2026-07-12-ui-retro-polish.md` (P1-P5, subagent-driven + 2-stage review).
+
+| Task | Nội dung | Commit | Review |
+|---|---|---|---|
+| P1 | Hồ sơ mockup 18: hero kem + avatar viền ink, **WaveProgress** meter waveform, gear header, icon ô ink | 5fa9e6be + c75f8110 | APPROVED (fix bug biên progress=0 + test 0.0/1.0) |
+| P2 | Inbox mockup 15: avatar vuông 64 viền ink, pill lime turn_pill, WaveDivider giữa hàng | 69895e99 | APPROVED (giữ Key turn_pill, off-by-one divider verified) |
+| P3 | Deck mockup 07: hàng "Online hôm nay" + chips #genre teal, monogram palette retro, waveform tiêu đề | 9939698d + 14587842 | APPROVED (fix contrast chữ trên tertiaryPop/pink → ink) |
+| P4 | Logo CH badge + WaveDivider keo board/settings/store | c8a05797 | APPROVED (deviation bỏ height cố định logo — verified hợp lý) |
+
+Gates cuối polish: **334/334 test + analyze 0**. Emulator: 4 screenshot mới `polish-*.png` — Hồ sơ/Inbox/Deck/Kèo board đều khớp bố cục mockup tương ứng.
+
+Deferred thêm: badge unread + timestamp cột phải inbox (MatchSummary chưa có field thời gian — cần backend); chips #genre trên deck chỉ hiện khi candidate có sharedGenres (QA seed phần lớn rỗng).
