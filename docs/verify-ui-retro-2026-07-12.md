@@ -62,3 +62,17 @@ Plan: `docs/superpowers/plans/2026-07-12-ui-retro-polish.md` (P1-P5, subagent-dr
 Gates cuối polish: **334/334 test + analyze 0**. Emulator: 4 screenshot mới `polish-*.png` — Hồ sơ/Inbox/Deck/Kèo board đều khớp bố cục mockup tương ứng.
 
 Deferred thêm: badge unread + timestamp cột phải inbox (MatchSummary chưa có field thời gian — cần backend); chips #genre trên deck chỉ hiện khi candidate có sharedGenres (QA seed phần lớn rỗng).
+
+## Demo đa tài khoản 2 emulator (2026-07-13)
+
+2 phiên đồng thời: **A = Minh** (cunghat_test3, emulator-5554) · **B = QA Linh Ballad** (cunghat_test2, emulator-5556, có Pro qua SQL). Screenshots `multiacc-*.png`.
+
+| Luồng | Kết quả |
+|---|---|
+| Match mới qua `record_swipe` (Minh ↔ QA Phúc Rock) | ✅ hiện trong inbox A với pill "Nhắn trước đi" |
+| Kèo mở: Minh join "Kèo demo tối nay" (host = B) qua UI | ✅ auto-approve, chip "Đã duyệt" teal, roster 2 người, detail TicketCard retro |
+| Chat 1-1 realtime B → A | ✅ B gửi "Toi nay hat Uoc Gi nhe"; inbox A tự cập nhật pill lime "Đến lượt bạn" + badge cam "1" KHÔNG cần refresh |
+| Chat 1-1 realtime A → B | ✅ A trả lời "Chot 20h nhe"; hiện trên màn B tức thì (B đang mở chat) |
+
+Giới hạn ghi nhận: B (host) không có đường UI vào kèo mình tạo (inbox "Kèo của bạn" cần RPC `get_my_keos` — deferred #1) nên chưa demo chat nhóm; nút "Đồng ý tham gia" trên A tap không thấy phản hồi UI (cần xem lại confirm flow — chưa chặn merge, kèo vẫn hoạt động).
+Gotcha thao tác: `adb shell input text` phải escape space bằng `%s`, không thì chuỗi bị cắt ở từ đầu tiên.
