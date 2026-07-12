@@ -139,4 +139,47 @@ void main() {
     expect(find.textContaining('Cách 1-3 km'), findsOneWidget);
     expect(find.text('#ballad'), findsOneWidget);
   });
+
+  testWidgets(
+      'panel: activeToday + sharedGenres → hiện "Online hôm nay" + chip #genre (mockup 07)',
+      (tester) async {
+    const candidate = Candidate(
+      id: 'x',
+      displayName: 'Linh',
+      activeToday: true,
+      sharedGenres: ['ballad', 'vpop'],
+    );
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('x').overrideWith((ref) async => const []),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: CandidateCard(candidate: candidate, onOpenDetail: () {}),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Online hôm nay'), findsOneWidget);
+    expect(find.text('#ballad'), findsOneWidget);
+  });
+
+  testWidgets(
+      'panel: không activeToday + sharedGenres rỗng → không hiện online/chip',
+      (tester) async {
+    const candidate = Candidate(id: 'y', displayName: 'Mai');
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        signedUrlsProvider('y').overrideWith((ref) async => const []),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: CandidateCard(candidate: candidate, onOpenDetail: () {}),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Online hôm nay'), findsNothing);
+    expect(find.text('#ballad'), findsNothing);
+  });
 }

@@ -11,6 +11,20 @@ import '../../photos/presentation/photo_carousel.dart';
 import '../domain/candidate.dart';
 import 'report_sheet.dart';
 
+/// Bảng màu nền monogram fallback (khi hồ sơ chưa có ảnh) — chọn ổn định
+/// theo hash id để mỗi ứng viên luôn ra cùng một màu qua các lần build, tạo
+/// cảm giác retro nhiều màu thay vì một màu cam lặp lại (mockup 07).
+const _monogramPalette = [
+  AppColors.primary,
+  AppColors.secondaryDark,
+  AppColors.tertiaryPop,
+  AppColors.pink,
+  AppColors.primaryDark,
+];
+
+Color _monogramColorFor(String id) =>
+    _monogramPalette[id.hashCode.abs() % _monogramPalette.length];
+
 /// Card ứng viên trong deck. Chip thông tin dưới tên XOAY theo ảnh đang xem
 /// (Tinder-parity mục 3c): ảnh 1 → khoảng cách + bài tủ chung; ảnh 2 → thể
 /// loại chung; ảnh ≥3 → giới thiệu (bio). Khi hồ sơ có <2 ảnh, không có gì để
@@ -76,6 +90,9 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   swipeable: false,
                   onPageChanged: (i) => setState(() => _photoIndex = i),
                   fallbackDecorations: [
+                    Positioned.fill(
+                      child: ColoredBox(color: _monogramColorFor(candidate.id)),
+                    ),
                     Positioned(
                       left: -36,
                       top: 34,
@@ -123,13 +140,17 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   ),
                 ),
                 if (candidate.activeToday)
-                  const Positioned(
+                  Positioned(
                     left: AppSpacing.md,
                     top: AppSpacing.md,
-                    child: StampChip(
-                      leadingIcon: Icons.circle,
-                      label: 'Online hôm nay',
-                      tone: StampChipTone.lime,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.ink, width: 2),
+                      ),
                     ),
                   ),
                 Positioned(
@@ -174,7 +195,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                ..._infoChips(context, candidate, photoCount),
+                _buildPanelBody(context, candidate, photoCount),
               ],
             ),
           ),
@@ -183,41 +204,89 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
     );
   }
 
-  /// Chip dưới tên: <2 ảnh → gộp như cũ (không có gì để xoay theo); ≥2 ảnh →
-  /// xoay theo [_photoIndex] — ảnh 1: khoảng cách + bài tủ; ảnh 2: thể loại
-  /// chung; ảnh ≥3: giới thiệu (bio).
-  List<Widget> _infoChips(
+  /// Panel dưới tên: <2 ảnh (không có gì để xoay theo) → khối "khoảng cách +
+  /// bài tủ" cố định, kèm hàng "Online hôm nay" bên trái (nếu activeToday)
+  /// và chip thể loại chung bên phải (mockup 07, Task P3); ≥2 ảnh → xoay
+  /// theo [_photoIndex] như cũ qua [_infoChips].
+  Widget _buildPanelBody(
     BuildContext context,
     Candidate candidate,
     int photoCount,
   ) {
-    if (photoCount < 2) {
-      return [
-        _InfoLine(
-          icon: Icons.place_rounded,
-          label: 'Cách ${candidate.distanceBand ?? '?'} km',
-          color: AppColors.primary,
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        _InfoLine(
-          icon: Icons.music_note_rounded,
-          label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
-          color: AppColors.teal,
-        ),
-        if (candidate.sharedGenres.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+    if (photoCount >= 2) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _infoChips(context, candidate),
+      );
+    }
+
+    final chips = candidate.sharedGenres.take(2).toList();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final genre in candidate.sharedGenres.take(3))
+              if (candidate.activeToday) ...[
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Flexible(
+                      child: Text(
+                        'Online hôm nay',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              _InfoLine(
+                icon: Icons.place_rounded,
+                label: 'Cách ${candidate.distanceBand ?? '?'} km',
+                color: AppColors.primary,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              _InfoLine(
+                icon: Icons.music_note_rounded,
+                label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
+                color: AppColors.teal,
+              ),
+            ],
+          ),
+        ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(width: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final genre in chips)
                 StampChip(label: '#$genre', tone: StampChipTone.teal),
             ],
           ),
         ],
-      ];
-    }
+      ],
+    );
+  }
 
+  /// Chip khi ≥2 ảnh: xoay theo [_photoIndex] — ảnh 1: khoảng cách + bài tủ;
+  /// ảnh 2: thể loại chung; ảnh ≥3: giới thiệu (bio).
+  List<Widget> _infoChips(BuildContext context, Candidate candidate) {
     if (_photoIndex == 0) {
       return [
         _InfoLine(

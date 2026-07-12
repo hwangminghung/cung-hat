@@ -428,13 +428,19 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         ),
         const SizedBox(height: AppSpacing.md),
         if (widget.genre == null)
-          Text(
-            l10n?.discoveryDeckTitle ?? 'Đôi hát',
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              color: AppColors.ink,
-              fontWeight: FontWeight.w900,
-              height: 0.95,
-            ),
+          Row(
+            children: [
+              Text(
+                l10n?.discoveryDeckTitle ?? 'Đôi hát',
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w900,
+                  height: 0.95,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              const Expanded(child: WaveDivider()),
+            ],
           ),
         if (widget.genre == null) const SizedBox(height: AppSpacing.xs),
         Text(
