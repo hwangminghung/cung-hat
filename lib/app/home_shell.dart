@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_shadows.dart';
 import '../core/theme/app_spacing.dart';
 import '../features/billing/application/billing_providers.dart';
 import '../features/chat/application/inbox_providers.dart';
@@ -14,6 +15,8 @@ import '../features/profile/application/profile_providers.dart';
 import '../features/profile/domain/profile_completion.dart';
 import '../features/profile/presentation/prompt_editor_sheet.dart';
 import '../shared/widgets/stamp_chip.dart';
+import '../shared/widgets/wave_divider.dart';
+import '../shared/widgets/wave_progress.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
@@ -96,54 +99,68 @@ class _ProfileTab extends ConsumerWidget {
           AppSpacing.xxxl,
         ),
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              gradient: AppColors.brandGradient,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.onPrimary.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Text(
-                    _monogram(name),
-                    style: Theme.of(context).textTheme.headlineSmall
-                        ?.copyWith(color: AppColors.onPrimary),
-                  ),
+          Row(
+            children: [
+              Text('Hồ sơ', style: Theme.of(context).textTheme.displaySmall),
+              const Spacer(),
+              IconButton.outlined(
+                key: const Key('profile_gear_btn'),
+                tooltip: 'Cài đặt',
+                onPressed: () => context.push('/settings'),
+                icon: const Icon(Icons.settings_outlined),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Container(
+                width: 96,
+                height: 96,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryTint,
+                  border: Border.all(color: AppColors.border, width: 2),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: const [AppShadows.hard],
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        (name?.isNotEmpty ?? false) ? name! : 'Hồ sơ',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(color: AppColors.onPrimary),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        (profile?.bio?.trim().isNotEmpty ?? false)
-                            ? profile!.bio!.trim()
-                            : 'Quản lý lượt thích, gói nâng cấp và cài đặt.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.onPrimary.withValues(alpha: 0.88),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: Text(
+                  _monogram(name),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.displaySmall?.copyWith(color: AppColors.ink),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      (name?.isNotEmpty ?? false) ? name! : 'Hồ sơ',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineMedium?.copyWith(color: AppColors.ink),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      (profile?.bio?.trim().isNotEmpty ?? false)
+                          ? profile!.bio!.trim()
+                          : 'Quản lý lượt thích, gói nâng cấp và cài đặt.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    const WaveDivider(),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
           const _CompletionCard(),
@@ -243,10 +260,7 @@ class _CompletionCard extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: AppSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-            child: LinearProgressIndicator(value: r.percent / 100, minHeight: 8),
-          ),
+          WaveProgress(progress: r.percent / 100),
           for (final step in r.nextSteps)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -310,10 +324,11 @@ class _ProfileTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primaryTint,
-              borderRadius: BorderRadius.circular(15),
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.ink, width: 2),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.primaryDark),
+            child: Icon(icon, color: AppColors.ink),
           ),
           title: Row(
             mainAxisSize: MainAxisSize.min,
