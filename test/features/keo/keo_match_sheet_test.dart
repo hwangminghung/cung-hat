@@ -5,6 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:cung_hat/features/keo/domain/keo_match_suggestion.dart';
 import 'package:cung_hat/features/keo/presentation/keo_match_sheet.dart';
+import 'package:cung_hat/shared/widgets/gradient_button.dart';
+import 'package:cung_hat/shared/widgets/stamp_chip.dart';
+import 'package:cung_hat/shared/widgets/ticket_card.dart';
+import 'package:cung_hat/shared/widgets/wave_divider.dart';
 
 void main() {
   testWidgets('existing keo sheet calls onJoin', (tester) async {
@@ -13,6 +17,7 @@ void main() {
       suggestionType: 'existing_keo',
       keoId: 'k1',
       title: 'V-Pop toi nay',
+      areaLabel: 'Thủ Đức',
       distanceBand: '1-3',
       sizeTarget: 4,
       slotsFilled: 2,
@@ -41,6 +46,14 @@ void main() {
     expect(find.text('2026-06-30 12:00 - 15:00 UTC'), findsOneWidget);
     expect(find.text('Hợp gu nhạc'), findsOneWidget);
     expect(find.text('Gần bạn'), findsOneWidget);
+    expect(find.text('Thủ Đức'), findsOneWidget);
+    expect(find.text('Mai'), findsOneWidget);
+    expect(find.byType(TicketCard), findsOneWidget);
+    expect(find.byType(WaveDivider), findsOneWidget);
+    expect(find.widgetWithText(StampChip, 'vpop'), findsOneWidget);
+    expect(find.byKey(const Key('keo_match_reason_grid')), findsOneWidget);
+    expect(find.byKey(const Key('keo_match_join_btn')), findsOneWidget);
+    expect(find.byType(GradientButton), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('keo_match_join_btn')));
     await tester.pumpAndSettle();
@@ -153,6 +166,38 @@ void main() {
     expect(find.text('ly_do_moi'), findsOneWidget);
   });
 
+  testWidgets('proposal actions stack safely at 320px with large text', (
+    tester,
+  ) async {
+    const suggestion = KeoMatchSuggestion(
+      suggestionType: 'new_keo_proposal',
+      title: 'Kèo gợi ý tối nay',
+      reasonLabels: ['evening_slot', 'available_slots'],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(320, 260),
+            textScaler: TextScaler.linear(2),
+          ),
+          child: Scaffold(
+            body: KeoMatchSheet(
+              suggestions: const [suggestion],
+              onJoin: (_) async {},
+              onCreate: (_) async {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('keo_match_later_btn')), findsOneWidget);
+    expect(find.byKey(const Key('keo_match_create_btn')), findsOneWidget);
+  });
+
   testWidgets('existing keo submit disables button and ignores repeat taps', (
     tester,
   ) async {
@@ -189,7 +234,7 @@ void main() {
 
     expect(joinCalls, 1);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    final joinButton = tester.widget<FilledButton>(
+    final joinButton = tester.widget<GradientButton>(
       find.byKey(const Key('keo_match_join_btn')),
     );
     expect(joinButton.onPressed, isNull);
@@ -201,7 +246,7 @@ void main() {
     completer.complete();
     await tester.pumpAndSettle();
 
-    final enabledJoinButton = tester.widget<FilledButton>(
+    final enabledJoinButton = tester.widget<GradientButton>(
       find.byKey(const Key('keo_match_join_btn')),
     );
     expect(enabledJoinButton.onPressed, isNotNull);
@@ -243,7 +288,7 @@ void main() {
 
     expect(createCalls, 1);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    final createButton = tester.widget<FilledButton>(
+    final createButton = tester.widget<GradientButton>(
       find.byKey(const Key('keo_match_create_btn')),
     );
     final laterButton = tester.widget<OutlinedButton>(
@@ -259,7 +304,7 @@ void main() {
     completer.complete();
     await tester.pumpAndSettle();
 
-    final enabledCreateButton = tester.widget<FilledButton>(
+    final enabledCreateButton = tester.widget<GradientButton>(
       find.byKey(const Key('keo_match_create_btn')),
     );
     final enabledLaterButton = tester.widget<OutlinedButton>(
