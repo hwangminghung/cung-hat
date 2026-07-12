@@ -5,13 +5,16 @@ import '../application/onboarding_controller.dart';
 import '../application/reference_providers.dart';
 import '../domain/music_ref.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
-import '../../../shared/widgets/section_header.dart';
+import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import 'consent_step.dart';
 import 'dob_step.dart';
 import 'taste_step.dart';
 
-/// Index of the consent step in the [Stepper] (DOB=0, consent=1).
+/// Index of the consent step in the flow (DOB=0, consent=1).
 const _consentStepIndex = 1;
 
 class OnboardingFlow extends ConsumerStatefulWidget {
@@ -27,6 +30,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   };
   final _nameCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
+  final _scrollController = ScrollController();
   final Set<String> _genreSel = {};
   final Set<String> _artistSel = {};
   final Set<String> _songSel = {};
@@ -38,7 +42,16 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   void dispose() {
     _nameCtrl.dispose();
     _bioCtrl.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _moveToStep(int nextStep, {bool grantRequired = false}) {
+    setState(() {
+      if (grantRequired) grantRequiredConsents(_consents);
+      _step = nextStep;
+    });
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
   void _onFinish() {
@@ -51,9 +64,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     }
     final missing = missingRequiredConsents(_consents);
     if (missing.isNotEmpty) {
-      setState(
-        () => _step = _consentStepIndex,
-      ); // jump back to the consent step (DOB=0, consent=1)
+      _moveToStep(_consentStepIndex);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -90,7 +101,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(label),
+        _TasteSectionHeader(label),
         const SizedBox(height: 8),
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -119,6 +130,192 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     );
   }
 
+  Widget _currentStep({
+    required AppLocalizations? l10n,
+    required AsyncValue<List<Genre>> genres,
+    required AsyncValue<List<Artist>> artists,
+    required AsyncValue<List<Song>> songs,
+  }) {
+    return switch (_step) {
+      0 => DobStep(dob: _dob, onPick: (date) => setState(() => _dob = date)),
+      1 => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n?.onbConsentTitle ?? 'Quyền riêng tư',
+            style: Theme.of(context).textTheme.displaySmall,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ConsentStep(
+            values: _consents,
+            onChanged: (key, value) => setState(() => _consents[key] = value),
+          ),
+        ],
+      ),
+      2 => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n?.onbStepProfile ?? 'Thiết lập hồ sơ',
+            style: Theme.of(context).textTheme.displaySmall,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _ProfilePreview(
+            key: const Key('onb_profile_preview'),
+            controller: _nameCtrl,
+            brand: l10n?.appTitle ?? 'Cùng Hát',
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            l10n?.onbProfileQuestion ?? 'Bạn muốn mọi người gọi mình là gì?',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            key: const Key('onb_name'),
+            controller: _nameCtrl,
+            decoration: InputDecoration(
+              labelText: l10n?.onbNameLabel ?? 'Tên hiển thị',
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            key: const Key('onb_bio'),
+            controller: _bioCtrl,
+            minLines: 3,
+            maxLines: 4,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              labelText: l10n?.onbBioLabel ?? 'Giới thiệu',
+            ),
+          ),
+        ],
+      ),
+      _ => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n?.onbStepTaste ?? 'Gu nhạc',
+            style: Theme.of(context).textTheme.displaySmall,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n?.onbTasteSubtitle ?? 'Chọn vài thứ bạn hay nghe',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _tasteSection<Genre>(
+            label: l10n?.onbTasteGenres ?? 'Thể loại',
+            async: genres,
+            labelOf: (genre) => genre.nameVi,
+            idOf: (genre) => genre.id,
+            selected: _genreSel,
+          ),
+          _tasteSection<Artist>(
+            label: l10n?.onbTasteArtists ?? 'Nghệ sĩ',
+            async: artists,
+            labelOf: (artist) => artist.name,
+            idOf: (artist) => artist.id,
+            selected: _artistSel,
+          ),
+          _tasteSection<Song>(
+            label: l10n?.onbBaitu ?? 'Bài tủ',
+            async: songs,
+            labelOf: (song) => song.title,
+            idOf: (song) => song.id,
+            selected: _songSel,
+          ),
+        ],
+      ),
+    };
+  }
+
+  Widget _bottomControls({
+    required AppLocalizations? l10n,
+    required bool loading,
+  }) {
+    final isLast = _step == _lastStep;
+    final isConsent = _step == _consentStepIndex;
+    final primaryControl = GradientButton(
+      key: isLast ? const Key('onb_finish') : const Key('onb_continue'),
+      onPressed: loading
+          ? null
+          : isLast
+          ? _onFinish
+          : () => _moveToStep(_step + 1, grantRequired: isConsent),
+      child: loading && isLast
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                color: AppColors.onPrimary,
+                strokeWidth: 2,
+              ),
+            )
+          : Text(
+              isLast
+                  ? l10n?.onbFinish ?? 'Hoàn tất'
+                  : isConsent
+                  ? l10n?.onbConsentContinue ?? 'Đồng ý & tiếp tục'
+                  : l10n?.onbContinue ?? 'Tiếp tục',
+            ),
+    );
+    final backControl = _step > 0
+        ? TextButton.icon(
+            key: const Key('onb_back'),
+            onPressed: () => _moveToStep(_step - 1),
+            icon: const Icon(Icons.arrow_back),
+            label: Text(l10n?.onbBack ?? 'Quay lại'),
+          )
+        : null;
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        border: Border(top: BorderSide(color: AppColors.ink, width: 2)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final shouldStack =
+                  backControl != null &&
+                  (constraints.maxWidth < 320 ||
+                      MediaQuery.textScalerOf(context).scale(1) > 1.3);
+              if (shouldStack) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    backControl,
+                    const SizedBox(height: AppSpacing.xs),
+                    primaryControl,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  if (backControl != null) ...[
+                    backControl,
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
+                  Expanded(child: primaryControl),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
@@ -143,136 +340,209 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     final songs = ref.watch(songsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n?.onbSetupTitle ?? 'Thiết lập hồ sơ'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(28),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16, bottom: 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Bước ${_step + 1}/4',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.primary),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(title: Text(l10n?.onbSetupTitle ?? 'Thiết lập hồ sơ')),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _OnboardingProgress(
+              currentStep: _step,
+              label: l10n?.onbProgress(_step + 1) ?? 'Bước ${_step + 1}/4',
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                key: const Key('onboarding_scroll'),
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.xxl,
+                ),
+                child: _currentStep(
+                  l10n: l10n,
+                  genres: genres,
+                  artists: artists,
+                  songs: songs,
+                ),
               ),
             ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _bottomControls(l10n: l10n, loading: loading),
+    );
+  }
+}
+
+class _OnboardingProgress extends StatelessWidget {
+  const _OnboardingProgress({required this.currentStep, required this.label});
+
+  final int currentStep;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      key: const Key('onb_progress_semantics'),
+      container: true,
+      liveRegion: true,
+      label: label,
+      child: ExcludeSemantics(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.xs,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  for (var index = 0; index < 4; index++) ...[
+                    if (index > 0) const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: WaveDivider(
+                        key: Key('onb_progress_segment_$index'),
+                        height: AppSpacing.xxl,
+                        strokeWidth: 2,
+                        color: index < currentStep
+                            ? AppColors.ink
+                            : index == currentStep
+                            ? AppColors.primary
+                            : AppColors.secondaryTint,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                label,
+                key: const Key('onb_progress_label'),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
           ),
         ),
       ),
-      body: Stepper(
-        type: StepperType.vertical,
-        currentStep: _step,
-        onStepContinue: () {
-          if (_step < _lastStep) setState(() => _step += 1);
-        },
-        onStepCancel: () {
-          if (_step > 0) setState(() => _step -= 1);
-        },
-        controlsBuilder: (context, details) {
-          final isLast = _step == _lastStep;
-          return Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Row(
-              children: [
-                if (!isLast)
-                  FilledButton(
-                    onPressed: details.onStepContinue,
-                    child: Text(l10n?.onbContinue ?? 'Tiếp tục'),
-                  ),
-                if (isLast)
-                  FilledButton(
-                    key: const Key('onb_finish'),
-                    onPressed: loading ? null : _onFinish,
-                    child: loading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n?.onbFinish ?? 'Hoàn tất'),
-                  ),
-                const SizedBox(width: 8),
-                if (_step > 0)
-                  TextButton(
-                    onPressed: details.onStepCancel,
-                    child: Text(l10n?.onbBack ?? 'Quay lại'),
-                  ),
-              ],
-            ),
-          );
-        },
-        steps: [
-          Step(
-            title: Text(l10n?.onbStepDob ?? 'Ngày sinh'),
-            isActive: _step >= 0,
-            content: DobStep(
-              dob: _dob,
-              onPick: (d) => setState(() => _dob = d),
-            ),
-          ),
-          Step(
-            title: Text(l10n?.onbConsentTitle ?? 'Quyền riêng tư'),
-            isActive: _step >= 1,
-            content: ConsentStep(
-              values: _consents,
-              onChanged: (k, v) => setState(() => _consents[k] = v),
-            ),
-          ),
-          Step(
-            title: Text(l10n?.onbStepProfile ?? 'Hồ sơ'),
-            isActive: _step >= 2,
-            content: Column(
-              children: [
-                TextField(
-                  key: const Key('onb_name'),
-                  controller: _nameCtrl,
-                  decoration: InputDecoration(
-                    labelText: l10n?.onbNameLabel ?? 'Tên hiển thị',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  key: const Key('onb_bio'),
-                  controller: _bioCtrl,
-                  decoration: InputDecoration(
-                    labelText: l10n?.onbBioLabel ?? 'Giới thiệu',
-                  ),
-                ),
-              ],
+    );
+  }
+}
+
+class _ProfilePreview extends StatelessWidget {
+  const _ProfilePreview({
+    super.key,
+    required this.controller,
+    required this.brand,
+  });
+
+  final TextEditingController controller;
+  final String brand;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 220,
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.ink, width: 2),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: const [AppShadows.hard],
+      ),
+      child: Column(
+        children: [
+          Expanded(
+            child: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                final trimmed = value.text.trim();
+                final monogram = trimmed.isEmpty
+                    ? 'M'
+                    : String.fromCharCode(trimmed.runes.first).toUpperCase();
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 128,
+                      height: 128,
+                      decoration: const BoxDecoration(
+                        color: AppColors.surfaceMuted,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    Text(
+                      monogram,
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        color: AppColors.ink,
+                        fontSize: 82,
+                        height: 1,
+                      ),
+                    ),
+                    const Positioned(
+                      left: AppSpacing.xl,
+                      top: AppSpacing.xs,
+                      child: Icon(
+                        Icons.auto_awesome,
+                        color: AppColors.secondaryDark,
+                        size: 30,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
-          Step(
-            title: Text(l10n?.onbStepTaste ?? 'Gu nhạc'),
-            isActive: _step >= 3,
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _tasteSection<Genre>(
-                  label: l10n?.onbTasteGenres ?? 'Thể loại',
-                  async: genres,
-                  labelOf: (g) => g.nameVi,
-                  idOf: (g) => g.id,
-                  selected: _genreSel,
+          Row(
+            children: [
+              const Expanded(
+                child: WaveDivider(
+                  height: AppSpacing.xxl,
+                  color: AppColors.ink,
+                  strokeWidth: 2,
                 ),
-                _tasteSection<Artist>(
-                  label: l10n?.onbTasteArtists ?? 'Nghệ sĩ',
-                  async: artists,
-                  labelOf: (a) => a.name,
-                  idOf: (a) => a.id,
-                  selected: _artistSel,
-                ),
-                _tasteSection<Song>(
-                  label: l10n?.onbBaitu ?? 'Bài tủ',
-                  async: songs,
-                  labelOf: (s) => s.title,
-                  idOf: (s) => s.id,
-                  selected: _songSel,
-                ),
-              ],
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              const Icon(Icons.language, color: AppColors.ink, size: 22),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                brand,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(color: AppColors.ink),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TasteSectionHeader extends StatelessWidget {
+  const _TasteSectionHeader(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: const BoxDecoration(
+              color: AppColors.secondary,
+              shape: BoxShape.circle,
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(label, style: Theme.of(context).textTheme.titleLarge),
         ],
       ),
     );

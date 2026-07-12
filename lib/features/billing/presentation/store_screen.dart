@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../application/billing_providers.dart';
 import '../application/iap_controller.dart';
 
@@ -123,6 +124,10 @@ class StoreScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: WaveDivider(),
             ),
             const SizedBox(height: AppSpacing.lg),
             ref

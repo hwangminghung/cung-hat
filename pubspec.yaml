@@ -111,7 +111,7 @@ flutter:
   assets:
     - assets/legal/
     - assets/icon/
-    # Bundled Quicksand/Inter TTFs: the google_fonts package picks these up
+    # Bundled app fonts: the google_fonts package picks these up
     # by filename, so text renders correctly with no network fetch (first
     # launch offline used to fall back to the system font).
     - google_fonts/

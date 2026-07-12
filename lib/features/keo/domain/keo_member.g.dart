@@ -12,6 +12,7 @@ _KeoMember _$KeoMemberFromJson(Map<String, dynamic> json) => _KeoMember(
   verified: json['verified'] as bool? ?? false,
   role: json['role'] as String? ?? 'member',
   joinStatus: json['join_status'] as String? ?? 'requested',
+  confirmed: json['confirmed'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$KeoMemberToJson(_KeoMember instance) =>
@@ -21,4 +22,5 @@ Map<String, dynamic> _$KeoMemberToJson(_KeoMember instance) =>
       'verified': instance.verified,
       'role': instance.role,
       'join_status': instance.joinStatus,
+      'confirmed': instance.confirmed,
     };

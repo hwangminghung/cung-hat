@@ -1,50 +1,55 @@
 # Cùng Hát — Design System (MASTER)
 
-Nguồn sự thật cho mọi quyết định UI. Cập nhật 2026-07-02 theo bộ giao diện Stitch export
-(Quicksand + Inter, palette coral/lime/tím). Token code tương ứng: `lib/core/theme/`
-(app_colors, app_typography, app_spacing, app_motion).
+Nguồn sự thật cho mọi quyết định UI. Cập nhật 2026-07-11 theo theme "retro mixtape" (giấy kem +
+cam citrus + ink xanh đậm). Token code tương ứng: `lib/core/theme/`
+(app_colors, app_typography, app_spacing, app_motion, app_shadows).
 
 ## Style
 
-**Warm Vibrant & Friendly** — năng lượng Gen-Z, thân thiện, không phải dating app.
-Light mode only (hiện tại). Tránh: neon lạnh, shadow phức tạp, low energy, giao diện "AI slop" generic.
+**Retro mixtape** — giấy kem ấm, viền/ink đậm 2px, shadow cứng (offset, không blur), cam citrus
+làm CTA. Light mode only (hiện tại). Tránh: neon lạnh, shadow mờ/blur, low energy, giao diện "AI
+slop" generic.
 
-## Colors (`AppColors`)
+## Design tokens (retro mixtape — 2026-07-11)
+| Token | Giá trị | Dùng cho |
+|---|---|---|
+| background | #F7EFD8 | nền app (giấy kem) |
+| surface | #FCF6E3 | card/sheet |
+| ink | #1E3A2F | chữ, viền 2px, icon |
+| primary | #E8501F | CTA cam (chữ trắng ≥16 bold) |
+| secondary | #C6E534 | lime nhấn/badge |
+| teal | #8FD8C8 | chip nhạc/trạng thái |
+| radius | 14 (pill 999 chỉ cho chip tròn cũ) | nút/card/input |
+| shadow | offset(3,3) blur 0 ink 20% | AppShadows.hard |
 
-| Role | Token | Hex |
-|------|-------|-----|
-| Primary (coral) | `primary` / `primaryDark` / `primaryTint` / `primarySoft` | `#FF6B4A` / `#AE3115` / `#FFDAD2` / `#FFB4A3` |
-| Secondary (lime) | `secondary` / `secondaryDark` / `secondaryTint` | `#C8F252` / `#4F6600` / `#F1FFD0` |
-| Tertiary (tím) | `tertiary` / `tertiaryPop` / `tertiaryTint` | `#674BB5` / `#A488F7` / `#E8DDFF` |
-| Accent pop | `pink` / `cyan` | `#F472B6` / `#65D6E8` |
-| Background / Surface / SurfaceAlt | | `#FAF9F6` / `#FFFFFF` / `#F4F3F1` |
-| Surface warm / muted | `surfaceWarm` / `surfaceMuted` | `#FFF4EF` / `#E9E8E5` |
-| Text primary / secondary / hint | | `#1A1C1A` / `#59413C` / `#8D716A` |
-| Border | | `#E1BFB8` |
-| Success / Warning / Error | | `#2E9E6B` / `#E8A33D` / `#BA1A1A` |
-| Brand gradient | `brandGradient` | coral `#FF6B4A` → pink `#F472B6`, cho CTA hero/upsell |
-| Warm gradient | `warmGradient` | coral → amber, dùng phụ |
-| Shadow tint | `shadow` | `#8C1900` ở alpha thấp (card dùng ~0.08–0.14) |
+Typography: display Oswald (headline/title, VN đủ dấu, bundle offline) · body Be Vietnam Pro.
+Component chuẩn: GradientButton (CTA), TicketCard (kèo/vé), StampChip (badge/trạng thái), WaveDivider (ngăn section).
+Nguồn chuẩn: docs/redesign-mockups/ (22 ảnh, bản 2026-07-11).
 
 Quy tắc:
-- Không hardcode hex trong widget — luôn qua `AppColors`/`ColorScheme`.
-- Coral là màu hành động chính. Lime là accent trạng thái/verified. Tím + pink là accent
-  trang trí (blob nền, illustration, badge) — không dùng làm màu hành động.
-- Text trên `primary` (#FF6B4A) dùng **trắng**, không dùng `#661000` (contrast không đủ).
+- Không hardcode hex trong widget — luôn qua `AppColors`.
+- Primary (cam) là màu hành động chính. Secondary (lime) là accent trạng thái/badge. Teal là chip
+  nhạc/trạng thái phụ — không dùng làm màu hành động.
+- Text trên `primary` (#E8501F) dùng **trắng** (`AppColors.onPrimary`), cỡ ≥16 bold.
+- Các token phụ (`primaryTint`, `primaryDark`, `surfaceWarm`, `errorTint`...) xem trực tiếp
+  `lib/core/theme/app_colors.dart` — bảng trên chỉ liệt kê token gốc.
 
 ## Typography (`AppTypography`)
 
-- **Display/Heading:** Quicksand (600/700) — playful, hỗ trợ tiếng Việt. displayLarge 40 ·
-  headlineLarge 32 · headlineMedium 28 (mobile headline) · titleLarge 22 · titleMedium 20/w600.
-- **Body:** Inter — bodyLarge 16/1.45 · bodyMedium 14/1.42 · bodySmall 13/1.35.
-- **Label:** labelLarge 15/w700 · labelMedium 12/w600 + letterSpacing 0.6 (label-bold).
+- **Display/Heading:** Oswald (w600/w700), condensed, hỗ trợ đủ dấu tiếng Việt, bundle offline
+  (không phụ thuộc mạng). displayLarge 44 · displayMedium 38 · displaySmall 32 · headlineLarge 30
+  · headlineMedium 26 · headlineSmall 22 · titleLarge 22 · titleMedium 18 · titleSmall 14.
+- **Body:** Be Vietnam Pro (w400) — bodyLarge 16/1.5 · bodyMedium 14/1.45 · bodySmall 13/1.4
+  (màu `textSecondary`).
+- **Label:** labelLarge 16/w700 · labelMedium 12/w600 + letterSpacing 0.4 · labelSmall 11/w500 +
+  letterSpacing 0.3.
 - Body tối thiểu 13px; không tracking âm trên body.
 
 ## Spacing & Shape (`AppSpacing`)
 
 Nhịp 4/8: xs 4 · sm 8 · md 12 · lg 16 · xl 20 · xxl 24 · xxxl 32.
-Radius: input 12 · button pill (999) · card 24 · sheet 28 · pill 999.
-Button cao 56, input 56, bottom nav 72. Touch target ≥44px.
+Radius: input/button/card/sheet 14 · pill 999 (chỉ chip tròn cũ).
+Button cao 52, input 56, bottom nav 72. Touch target ≥44px.
 
 ## Motion (`AppMotion`)
 
@@ -58,7 +63,11 @@ Button cao 56, input 56, bottom nav 72. Touch target ≥44px.
 - `Pressable` — wrapper scale-press cho card/tile tappable.
 - `Skeleton` / `SkeletonCard` — loading >300ms dùng skeleton, không dùng spinner giữa màn hình.
 - `EmptyState` — icon gradient tròn + title + subtitle + CTA; có entrance animation.
-- CTA hero (đăng nhập, ghép nhóm, nâng cấp): nền `brandGradient`, chữ trắng, pill, shadow coral nhẹ.
+- `GradientButton` — CTA hero (đăng nhập, ghép nhóm, nâng cấp): nền `brandGradient`, chữ trắng,
+  shadow `AppShadows.hard`.
+- `TicketCard` — thẻ kèo/vé phong cách vé giấy (viền ink 2px, shadow cứng).
+- `StampChip` — badge/trạng thái dạng con dấu (dùng `teal`/`secondary`).
+- `WaveDivider` — đường ngăn section dạng sóng.
 - Bottom nav: 4 tab (Đôi `group` · Kèo `mic_external_on` · Chat `chat_bubble` · Hồ sơ `person`);
   tab active = icon fill + dot dưới label, màu `primaryDark`.
 
@@ -67,13 +76,13 @@ Button cao 56, input 56, bottom nav 72. Touch target ≥44px.
 - Emoji làm icon UI (dùng Material Symbols, một style outline nhất quán; fill chỉ cho trạng thái active).
 - Spinner chặn toàn màn hình cho load danh sách.
 - Màu là tín hiệu duy nhất (kèm icon/text).
-- Shadow ngẫu nhiên ngoài scale card (elevation 2, shadow tint ấm `#8C1900`).
+- Shadow mờ/blur ngoài `AppShadows.hard` (offset(3,3) blur 0, ink alpha ~20%).
 - Layout shift khi press/load (reserve space, Transform-only).
-- Tím/pink làm màu button hành động (chỉ coral).
+- Secondary/teal làm màu button hành động chính (chỉ primary cam).
 
 ## Pre-delivery checklist (mỗi màn hình mới)
 
-- [ ] Contrast text ≥4.5:1 trên nền warm white (chú ý: chữ trên coral phải là trắng)
+- [ ] Contrast text ≥4.5:1 trên nền giấy kem (chú ý: chữ trên primary cam phải là trắng ≥16 bold)
 - [ ] Touch target ≥44px, có press feedback
 - [ ] Loading = skeleton, empty = EmptyState có CTA
 - [ ] Test 360px width + font scale lớn

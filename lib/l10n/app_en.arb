@@ -1,1 +1,116 @@
-{ "@@locale": "en", "appTitle": "Cùng Hát", "tabDoi": "Đôi", "tabKeo": "Kèo", "comingSoon": "Coming soon", "authTitle": "Sign in", "phoneLabel": "Phone number", "sendOtp": "Send OTP", "otpTitle": "Enter OTP", "otpLabel": "6-digit code", "verify": "Confirm", "onbDobTitle": "When were you born? (must be 18+)", "onbUnder18": "You must be 18 or older to use the app.", "onbConsentTitle": "Privacy", "onbNameLabel": "Display name", "onbBioLabel": "Bio", "onbTasteGenres": "Genres", "onbTasteArtists": "Artists", "onbBaitu": "Signature songs", "onbFinish": "Finish", "onbConsentRequired": "Please agree to the required permissions to continue.", "onbSetupTitle": "Set up your profile", "onbStepDob": "Date of birth", "onbStepProfile": "Profile", "onbStepTaste": "Music taste", "onbContinue": "Continue", "onbBack": "Back", "onbLoadError": "Couldn't load data.", "onbSubmitError": "Something went wrong. Please try again.", "consentLocation": "Use location to suggest people/outings near you", "consentPhotos": "Store & show profile photos (optional)", "consentMatching": "Use music taste to match people", "consentMarketing": "Receive promotional notifications", "consentCrossBorder": "Data stored in Singapore (cross-border transfer)", "chatPromoteKeo": "Set up an outing", "sendThisTitle": "Send this message?", "sendThisBody": "This looks like it may share financial or contact info. Send anyway?", "cancel": "Cancel", "send": "Send", "privacyTitle": "Privacy Policy", "tosTitle": "Terms of Service", "settingsTitle": "Settings", "exportData": "Download my data", "deleteAccount": "Delete account", "deleteConfirm": "This action cannot be undone. Your account and data will be deleted.", "storeTitle": "Upgrades", "boostTitle": "Boost your outing", "seeLikesTitle": "See who liked you", "filtersTitle": "Premium filters", "buy": "Buy", "bookVenue": "Book the venue", "entitlementNeeded": "Upgrade to use this feature" }
+{
+  "@@locale": "en",
+  "appTitle": "Cùng Hát",
+  "tabDoi": "Đôi",
+  "tabKeo": "Kèo",
+  "comingSoon": "Coming soon",
+  "authTitle": "Sign in",
+  "phoneLabel": "Phone number",
+  "sendOtp": "Send OTP",
+  "otpTitle": "Enter OTP",
+  "otpLabel": "6-digit code",
+  "verify": "Confirm",
+  "onbDobTitle": "When were you born?",
+  "onbUnder18": "You must be 18 or older to use the app.",
+  "onbConsentTitle": "Privacy",
+  "onbConsentSubtitle": "Choose how Cùng Hát uses your data",
+  "onbRequired": "Required",
+  "onbConsentContinue": "Agree & continue",
+  "onbNameLabel": "Display name",
+  "onbBioLabel": "Bio",
+  "onbTasteGenres": "Genres",
+  "onbTasteArtists": "Artists",
+  "onbBaitu": "Signature songs",
+  "onbFinish": "Finish",
+  "onbConsentRequired": "Please agree to the required permissions to continue.",
+  "onbSetupTitle": "Set up your profile",
+  "onbStepDob": "Date of birth",
+  "onbStepProfile": "Set up your profile",
+  "onbProfileQuestion": "What would you like everyone to call you?",
+  "onbStepTaste": "Music taste",
+  "onbTasteSubtitle": "Choose a few things you listen to",
+  "onbProgress": "Step {step}/4",
+  "@onbProgress": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "onbDobDay": "Day",
+  "onbDobMonth": "Month",
+  "onbDobYear": "Year",
+  "onbContinue": "Continue",
+  "onbBack": "Back",
+  "onbLoadError": "Couldn't load data.",
+  "onbSubmitError": "Something went wrong. Please try again.",
+  "consentLocation": "Use location to suggest people/outings near you",
+  "consentPhotos": "Store and show profile photos",
+  "consentMatching": "Use music taste to match people",
+  "consentMarketing": "Receive promotional notifications",
+  "consentCrossBorder": "I agree to the Privacy Policy, Terms, and data storage in Singapore",
+  "chatPromoteKeo": "Set up an outing",
+  "sendThisTitle": "Send this message?",
+  "sendThisBody": "This looks like it may share financial or contact info. Send anyway?",
+  "cancel": "Cancel",
+  "send": "Send",
+  "privacyTitle": "Privacy Policy",
+  "tosTitle": "Terms of Service",
+  "settingsTitle": "Settings",
+  "exportData": "Download my data",
+  "deleteAccount": "Delete account",
+  "deleteConfirm": "This action cannot be undone. Your account and data will be deleted.",
+  "storeTitle": "Upgrades",
+  "boostTitle": "Boost your outing",
+  "seeLikesTitle": "See who liked you",
+  "filtersTitle": "Premium filters",
+  "buy": "Buy",
+  "bookVenue": "Book the venue",
+  "entitlementNeeded": "Upgrade to use this feature",
+  "authTagline": "Connect through songs",
+  "authPhoneTitle": "Sign in with your phone number",
+  "authPhoneBody": "Enter your number to receive an OTP. We only use it to keep your account safe.",
+  "authPhoneHint": "901 234 567",
+  "authResponsibility": "By continuing, you agree to use Cùng Hát responsibly and respect others.",
+  "authSendOtpError": "We couldn't send the code",
+  "authResendCountdown": "Resend code in {seconds}s",
+  "@authResendCountdown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authResend": "Resend code",
+  "authCheckMessages": "Check your messages",
+  "authOtpSentPrefix": "Code sent to ",
+  "authOtpSentTo": "Code sent to {phone}",
+  "@authOtpSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "authPhoneFallback": "your phone number",
+  "authOtpHelp": "Didn't get a code? Go back and check your phone number.",
+  "authOtpError": "That OTP code isn't correct",
+  "discoveryDeckTitle": "Singing pairs",
+  "discoveryDeckSubtitle": "Music-compatible suggestions at a safe distance.",
+  "discoveryRewind": "Undo",
+  "discoveryPass": "Pass",
+  "discoverySuperLike": "Super like",
+  "discoveryLike": "Like",
+  "discoveryExploreTitle": "Explore by music taste",
+  "discoveryExploreSubtitle": "Pick a mood and meet someone on your wavelength.",
+  "discoveryExploreOpen": "Open now",
+  "discoveryExploreLiveCount": "{count} people singing",
+  "@discoveryExploreLiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveryExploreBrand": "CÙNG HÁT"
+}

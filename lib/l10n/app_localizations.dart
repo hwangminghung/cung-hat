@@ -161,7 +161,7 @@ abstract class AppLocalizations {
   /// No description provided for @onbDobTitle.
   ///
   /// In en, this message translates to:
-  /// **'When were you born? (must be 18+)'**
+  /// **'When were you born?'**
   String get onbDobTitle;
 
   /// No description provided for @onbUnder18.
@@ -175,6 +175,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Privacy'**
   String get onbConsentTitle;
+
+  /// No description provided for @onbConsentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how Cùng Hát uses your data'**
+  String get onbConsentSubtitle;
+
+  /// No description provided for @onbRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get onbRequired;
+
+  /// No description provided for @onbConsentContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree & continue'**
+  String get onbConsentContinue;
 
   /// No description provided for @onbNameLabel.
   ///
@@ -233,14 +251,50 @@ abstract class AppLocalizations {
   /// No description provided for @onbStepProfile.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Set up your profile'**
   String get onbStepProfile;
+
+  /// No description provided for @onbProfileQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like everyone to call you?'**
+  String get onbProfileQuestion;
 
   /// No description provided for @onbStepTaste.
   ///
   /// In en, this message translates to:
   /// **'Music taste'**
   String get onbStepTaste;
+
+  /// No description provided for @onbTasteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a few things you listen to'**
+  String get onbTasteSubtitle;
+
+  /// No description provided for @onbProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step}/4'**
+  String onbProgress(int step);
+
+  /// No description provided for @onbDobDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get onbDobDay;
+
+  /// No description provided for @onbDobMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get onbDobMonth;
+
+  /// No description provided for @onbDobYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get onbDobYear;
 
   /// No description provided for @onbContinue.
   ///
@@ -275,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentPhotos.
   ///
   /// In en, this message translates to:
-  /// **'Store & show profile photos (optional)'**
+  /// **'Store and show profile photos'**
   String get consentPhotos;
 
   /// No description provided for @consentMatching.
@@ -293,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentCrossBorder.
   ///
   /// In en, this message translates to:
-  /// **'Data stored in Singapore (cross-border transfer)'**
+  /// **'I agree to the Privacy Policy, Terms, and data storage in Singapore'**
   String get consentCrossBorder;
 
   /// No description provided for @chatPromoteKeo.
@@ -403,6 +457,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upgrade to use this feature'**
   String get entitlementNeeded;
+
+  /// No description provided for @authTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect through songs'**
+  String get authTagline;
+
+  /// No description provided for @authPhoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your phone number'**
+  String get authPhoneTitle;
+
+  /// No description provided for @authPhoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your number to receive an OTP. We only use it to keep your account safe.'**
+  String get authPhoneBody;
+
+  /// No description provided for @authPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'901 234 567'**
+  String get authPhoneHint;
+
+  /// No description provided for @authResponsibility.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing, you agree to use Cùng Hát responsibly and respect others.'**
+  String get authResponsibility;
+
+  /// No description provided for @authSendOtpError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t send the code'**
+  String get authSendOtpError;
+
+  /// No description provided for @authResendCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {seconds}s'**
+  String authResendCountdown(int seconds);
+
+  /// No description provided for @authResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get authResend;
+
+  /// No description provided for @authCheckMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your messages'**
+  String get authCheckMessages;
+
+  /// No description provided for @authOtpSentPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to '**
+  String get authOtpSentPrefix;
+
+  /// No description provided for @authOtpSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to {phone}'**
+  String authOtpSentTo(String phone);
+
+  /// No description provided for @authPhoneFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'your phone number'**
+  String get authPhoneFallback;
+
+  /// No description provided for @authOtpHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t get a code? Go back and check your phone number.'**
+  String get authOtpHelp;
+
+  /// No description provided for @authOtpError.
+  ///
+  /// In en, this message translates to:
+  /// **'That OTP code isn\'t correct'**
+  String get authOtpError;
+
+  /// No description provided for @discoveryDeckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Singing pairs'**
+  String get discoveryDeckTitle;
+
+  /// No description provided for @discoveryDeckSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Music-compatible suggestions at a safe distance.'**
+  String get discoveryDeckSubtitle;
+
+  /// No description provided for @discoveryRewind.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get discoveryRewind;
+
+  /// No description provided for @discoveryPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass'**
+  String get discoveryPass;
+
+  /// No description provided for @discoverySuperLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Super like'**
+  String get discoverySuperLike;
+
+  /// No description provided for @discoveryLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get discoveryLike;
+
+  /// No description provided for @discoveryExploreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore by music taste'**
+  String get discoveryExploreTitle;
+
+  /// No description provided for @discoveryExploreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a mood and meet someone on your wavelength.'**
+  String get discoveryExploreSubtitle;
+
+  /// No description provided for @discoveryExploreOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open now'**
+  String get discoveryExploreOpen;
+
+  /// No description provided for @discoveryExploreLiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people singing'**
+  String discoveryExploreLiveCount(int count);
+
+  /// No description provided for @discoveryExploreBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'CÙNG HÁT'**
+  String get discoveryExploreBrand;
 }
 
 class _AppLocalizationsDelegate

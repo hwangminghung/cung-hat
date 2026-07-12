@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/stamp_chip.dart';
+import '../../../shared/widgets/ticket_card.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../domain/keo_match_suggestion.dart';
 
 class KeoMatchSheet extends StatefulWidget {
@@ -86,9 +91,9 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xxl,
+            AppSpacing.lg,
             AppSpacing.md,
-            AppSpacing.xxl,
+            AppSpacing.lg,
             AppSpacing.xxxl,
           ),
           child: Column(
@@ -107,17 +112,21 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      gradient: AppColors.brandGradient,
-                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.secondary,
+                      border: Border.all(color: AppColors.ink, width: 2),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusPill,
+                      ),
                     ),
                     child: const Icon(
                       Icons.auto_awesome_rounded,
-                      color: AppColors.onPrimary,
+                      color: AppColors.ink,
                       size: 22,
                     ),
                   ),
@@ -125,10 +134,10 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                   Expanded(
                     child: Text(
                       title,
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: Theme.of(context).textTheme.headlineLarge,
                     ),
                   ),
-                  IconButton(
+                  IconButton.outlined(
                     tooltip: 'Đóng',
                     onPressed: _submitting
                         ? null
@@ -137,21 +146,42 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.xl),
-              Container(
-                width: double.infinity,
+              const SizedBox(height: AppSpacing.md),
+              const WaveDivider(),
+              const SizedBox(height: AppSpacing.md),
+              TicketCard(
+                showPerforation: false,
                 padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceWarm,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                  border: Border.all(color: AppColors.border),
-                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _displayTitle(suggestion.title),
-                      style: Theme.of(context).textTheme.titleLarge,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary,
+                            border: Border.all(color: AppColors.ink, width: 2),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusPill,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.mic_external_on_outlined,
+                            color: AppColors.ink,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            _displayTitle(suggestion.title),
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.md),
                     _SuggestionMeta(suggestion: suggestion),
@@ -162,7 +192,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                         runSpacing: AppSpacing.sm,
                         children: [
                           for (final genre in suggestion.genres)
-                            _SoftChip(label: genre),
+                            StampChip(label: genre, tone: StampChipTone.teal),
                         ],
                       ),
                     ],
@@ -171,65 +201,53 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
               ),
               if (suggestion.reasonLabels.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.lg),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    for (final reason in suggestion.reasonLabels)
-                      _ReasonChip(label: _reasonLabel(reason)),
-                  ],
+                SizedBox(
+                  key: const Key('keo_match_reason_grid'),
+                  width: double.infinity,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final itemWidth =
+                          (constraints.maxWidth - AppSpacing.sm) / 2;
+                      return Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: [
+                          for (final reason in suggestion.reasonLabels)
+                            SizedBox(
+                              width: itemWidth,
+                              child: _ReasonChip(label: _reasonLabel(reason)),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ],
               const SizedBox(height: AppSpacing.xl),
               if (isExisting)
                 SizedBox(
                   width: double.infinity,
-                  height: AppSpacing.buttonHeight,
-                  child: FilledButton.icon(
+                  child: GradientButton(
                     key: const Key('keo_match_join_btn'),
                     onPressed: _submitting
                         ? null
                         : () => _submit(widget.onJoin, suggestion),
-                    icon: const Icon(Icons.login_rounded),
-                    label: _PrimaryButtonChild(
+                    icon: Icons.login_rounded,
+                    child: _PrimaryButtonChild(
                       submitting: _submitting,
                       label: 'Tham gia',
                     ),
                   ),
                 )
               else
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: AppSpacing.buttonHeight,
-                        child: OutlinedButton(
-                          key: const Key('keo_match_later_btn'),
-                          onPressed: _submitting
-                              ? null
-                              : () => Navigator.of(context).maybePop(),
-                          child: const Text('Để sau'),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: SizedBox(
-                        height: AppSpacing.buttonHeight,
-                        child: FilledButton.icon(
-                          key: const Key('keo_match_create_btn'),
-                          onPressed: _submitting
-                              ? null
-                              : () => _submit(widget.onCreate, suggestion),
-                          icon: const Icon(Icons.group_add_rounded),
-                          label: _PrimaryButtonChild(
-                            submitting: _submitting,
-                            label: 'Tạo kèo',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                _ProposalActions(
+                  submitting: _submitting,
+                  onLater: _submitting
+                      ? null
+                      : () => Navigator.of(context).maybePop(),
+                  onCreate: _submitting
+                      ? null
+                      : () => _submit(widget.onCreate, suggestion),
                 ),
             ],
           ),
@@ -264,37 +282,40 @@ class _SuggestionMeta extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeWindow = _formatTimeWindow(suggestion);
     final details = <_MetaItem>[
+      if (timeWindow != null) _MetaItem(Icons.schedule_rounded, timeWindow),
+      if (suggestion.areaLabel != null)
+        _MetaItem(Icons.place_outlined, suggestion.areaLabel!),
+      if (suggestion.distanceBand != null)
+        _MetaItem(Icons.near_me_outlined, '${suggestion.distanceBand} km'),
       _MetaItem(
-        Icons.groups_rounded,
+        Icons.groups_outlined,
         '${suggestion.slotsFilled}/${suggestion.sizeTarget} người',
       ),
-      if (timeWindow != null) _MetaItem(Icons.schedule_rounded, timeWindow),
-      if (suggestion.distanceBand != null)
-        _MetaItem(Icons.place_rounded, '${suggestion.distanceBand} km'),
-      if (suggestion.areaLabel != null)
-        _MetaItem(Icons.map_rounded, suggestion.areaLabel!),
       if (suggestion.hostName != null)
-        _MetaItem(Icons.person_rounded, suggestion.hostName!),
+        _MetaItem(Icons.person_outline, suggestion.hostName!),
     ];
 
-    return Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.sm,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final detail in details)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(detail.icon, size: 16, color: AppColors.textHint),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                detail.label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: Row(
+              children: [
+                Icon(detail.icon, size: 18, color: AppColors.teal),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    detail.label,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
       ],
     );
@@ -309,14 +330,16 @@ class _SuggestionMeta extends StatelessWidget {
     if (start == null || end == null) return null;
 
     try {
-      final startUtc = DateTime.parse(start).toUtc();
-      final endUtc = DateTime.parse(end).toUtc();
+      final startLocal = DateTime.parse(start).toLocal();
+      final endLocal = DateTime.parse(end).toLocal();
       final sameDate =
-          startUtc.year == endUtc.year &&
-          startUtc.month == endUtc.month &&
-          startUtc.day == endUtc.day;
-      final endText = sameDate ? _time(endUtc) : _dateTime(endUtc);
-      return '${_dateTime(startUtc)} - $endText UTC';
+          startLocal.year == endLocal.year &&
+          startLocal.month == endLocal.month &&
+          startLocal.day == endLocal.day;
+      if (sameDate) {
+        return '${_time(startLocal)} - ${_time(endLocal)}';
+      }
+      return '${_dateTime(startLocal)} - ${_dateTime(endLocal)}';
     } on FormatException {
       return '$start - $end';
     }
@@ -350,49 +373,94 @@ class _ReasonChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.secondary.withValues(alpha: 0.62),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: AppColors.secondaryDark,
-          fontWeight: FontWeight.w800,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: AppSpacing.buttonHeight),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: AppColors.secondary,
+          border: Border.all(color: AppColors.ink, width: 2),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
+          boxShadow: const [AppShadows.hard],
+        ),
+        child: Row(
+          children: [
+            Icon(_iconFor(label), color: AppColors.ink, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  IconData _iconFor(String value) => switch (value) {
+    'Hợp gu nhạc' => Icons.music_note_rounded,
+    'Gần bạn' => Icons.place_outlined,
+    'Giờ đẹp' => Icons.schedule_outlined,
+    'Vào nhanh' => Icons.bolt_rounded,
+    'Còn chỗ' => Icons.groups_outlined,
+    'Chủ kèo đang online' => Icons.person_outline,
+    _ => Icons.auto_awesome_outlined,
+  };
 }
 
-class _SoftChip extends StatelessWidget {
-  const _SoftChip({required this.label});
+class _ProposalActions extends StatelessWidget {
+  const _ProposalActions({
+    required this.submitting,
+    required this.onLater,
+    required this.onCreate,
+  });
 
-  final String label;
+  final bool submitting;
+  final VoidCallback? onLater;
+  final VoidCallback? onCreate;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.tertiaryTint,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: AppColors.tertiary,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
+    final laterButton = OutlinedButton(
+      key: const Key('keo_match_later_btn'),
+      onPressed: onLater,
+      child: const Text('Để sau'),
+    );
+    final createButton = GradientButton(
+      key: const Key('keo_match_create_btn'),
+      onPressed: onCreate,
+      icon: Icons.group_add_outlined,
+      child: _PrimaryButtonChild(submitting: submitting, label: 'Tạo kèo'),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(12) / 12;
+        final stack = constraints.maxWidth < 320 || textScale > 1.35;
+        if (stack) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              laterButton,
+              const SizedBox(height: AppSpacing.sm),
+              createButton,
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: laterButton),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: createButton),
+          ],
+        );
+      },
     );
   }
 }

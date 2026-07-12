@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/pressable.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../billing/application/billing_providers.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../application/keo_providers.dart';
@@ -24,80 +28,100 @@ class KeoBoardScreen extends ConsumerWidget {
     final isPro = ref.watch(isProProvider);
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          if (isPro) {
-            context.push('/keo/create');
-          } else {
-            _showProSheet(context);
-          }
-        },
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Tạo kèo'),
-      ),
       body: SafeArea(
-        child: keosAsync.when(
-          loading: () => ListView(
-            padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: 104),
-            children: [
-              _boardHeader(context),
-              _matchBanner(context, ref),
-              const SkeletonCard(),
-              const SkeletonCard(),
-              const SkeletonCard(),
-            ],
-          ),
-          error: (err, _) => EmptyState(
-            icon: Icons.wifi_off_rounded,
-            title: 'Không tải được danh sách kèo',
-            subtitle: 'Kiểm tra kết nối rồi thử lại.',
-            actionLabel: 'Thử lại',
-            onAction: () => ref.invalidate(openKeosProvider),
-          ),
-          data: (keos) {
-            if (keos.isEmpty) {
-              return ListView(
-                padding: const EdgeInsets.only(bottom: 104, top: AppSpacing.lg),
-                children: [
-                  _boardHeader(context),
-                  _matchBanner(context, ref),
-                  EmptyState(
-                    icon: Icons.groups_rounded,
-                    title: 'Chưa có kèo quanh đây',
-                    subtitle:
-                        'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
-                    actionLabel: 'Tạo kèo đầu tiên',
-                    onAction: () {
-                      if (isPro) {
-                        context.push('/keo/create');
-                      } else {
-                        _showProSheet(context);
-                      }
-                    },
+        child: Column(
+          children: [
+            Expanded(
+              child: keosAsync.when(
+                loading: () => ListView(
+                  padding: const EdgeInsets.only(
+                    top: AppSpacing.lg,
+                    bottom: AppSpacing.lg,
                   ),
-                ],
-              );
-            }
+                  children: [
+                    _boardHeader(context),
+                    _matchBanner(context, ref),
+                    const SkeletonCard(),
+                    const SkeletonCard(),
+                    const SkeletonCard(),
+                  ],
+                ),
+                error: (err, _) => EmptyState(
+                  icon: Icons.wifi_off_rounded,
+                  title: 'Không tải được danh sách kèo',
+                  subtitle: 'Kiểm tra kết nối rồi thử lại.',
+                  actionLabel: 'Thử lại',
+                  onAction: () => ref.invalidate(openKeosProvider),
+                ),
+                data: (keos) {
+                  if (keos.isEmpty) {
+                    return ListView(
+                      padding: const EdgeInsets.only(
+                        bottom: AppSpacing.lg,
+                        top: AppSpacing.lg,
+                      ),
+                      children: [
+                        _boardHeader(context),
+                        _matchBanner(context, ref),
+                        const EmptyState(
+                          icon: Icons.groups_rounded,
+                          title: 'Chưa có kèo quanh đây',
+                          subtitle:
+                              'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
+                        ),
+                      ],
+                    );
+                  }
 
-            return ListView.builder(
-              padding: const EdgeInsets.only(bottom: 104, top: AppSpacing.lg),
-              itemCount: keos.length + 2,
-              itemBuilder: (context, index) {
-                if (index == 0) return _boardHeader(context);
-                if (index == 1) return _matchBanner(context, ref);
-                final keo = keos[index - 2];
-                return KeoCard(
-                  keo: keo,
-                  onTap: () => context.push(
-                    '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
-                  ),
-                );
-              },
-            );
-          },
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(
+                      bottom: AppSpacing.lg,
+                      top: AppSpacing.lg,
+                    ),
+                    itemCount: keos.length + 2,
+                    itemBuilder: (context, index) {
+                      if (index == 0) return _boardHeader(context);
+                      if (index == 1) return _matchBanner(context, ref);
+                      final keo = keos[index - 2];
+                      return KeoCard(
+                        keo: keo,
+                        onTap: () => context.push(
+                          '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.lg,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: GradientButton(
+                  onPressed: () => _openCreate(context, isPro),
+                  icon: Icons.add_box_outlined,
+                  child: const Text('Tạo kèo'),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  void _openCreate(BuildContext context, bool isPro) {
+    if (isPro) {
+      context.push('/keo/create');
+    } else {
+      _showProSheet(context);
+    }
   }
 
   void _showProSheet(BuildContext context) {
@@ -122,10 +146,10 @@ class KeoBoardScreen extends ConsumerWidget {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
-            IconButton.filledTonal(
+            IconButton.outlined(
               tooltip: 'Cửa hàng',
               onPressed: () => context.push('/store'),
-              icon: const Icon(Icons.local_fire_department_rounded),
+              icon: const Icon(Icons.storefront_outlined),
             ),
           ],
         ),
@@ -135,6 +159,10 @@ class KeoBoardScreen extends ConsumerWidget {
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: WaveDivider(),
         ),
       ],
     ),
@@ -147,70 +175,70 @@ class KeoBoardScreen extends ConsumerWidget {
       AppSpacing.lg,
       AppSpacing.md,
     ),
-    child: Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      clipBehavior: Clip.antiAlias,
-      child: Ink(
+    child: Pressable(
+      onTap: () => _runAutoMatch(context, ref),
+      child: Container(
         decoration: BoxDecoration(
-          gradient: AppColors.brandGradient,
+          color: AppColors.secondary,
+          border: Border.all(color: AppColors.ink, width: 2),
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow.withValues(alpha: 0.16),
-              blurRadius: 24,
-              offset: const Offset(0, 14),
-            ),
-          ],
+          boxShadow: const [AppShadows.hard],
         ),
-        child: InkWell(
-          onTap: () => _runAutoMatch(context, ref),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: AppColors.onPrimary.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome_rounded,
-                    color: AppColors.secondary,
-                    size: 26,
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: AppColors.ink,
+                  border: Border.all(color: AppColors.ink, width: 2),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Ghép nhóm cho tôi',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: AppColors.onPrimary,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Tự động gợi ý kèo hợp gu, gần bạn và đúng khung giờ.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.onPrimary.withValues(alpha: 0.88),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: AppColors.surface,
+                  size: 26,
                 ),
-                const Icon(
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ghép nhóm cho tôi',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Tự động gợi ý kèo hợp gu, gần bạn và đúng khung giờ.',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppColors.ink),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.ink, width: 2),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                ),
+                child: const Icon(
                   Icons.arrow_forward_rounded,
-                  color: AppColors.onPrimary,
+                  color: AppColors.ink,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

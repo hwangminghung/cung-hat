@@ -6,13 +6,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/stamp_chip.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../onboarding/application/reference_providers.dart';
 import '../../onboarding/domain/music_ref.dart';
 
-/// Màn hình chúc mừng "match" toàn màn hình — hai monogram bay vào từ hai
-/// bên, trái tim phóng to ở giữa, tiêu đề scale-in, và mưa nốt nhạc rơi nền.
+/// Màn hình chúc mừng "match" toàn màn hình — hai thẻ monogram bay vào từ hai
+/// bên, tiêu đề scale-in, và mưa confetti/nốt nhạc retro chạy nền.
 /// Tôn trọng reduced-motion: nếu bật, nhảy thẳng tới trạng thái cuối.
 ///
 /// [sharedBaitu] giữ SONG ID thô — resolve tên hiển thị qua songsProvider
@@ -61,10 +65,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
       parent: _controller,
       curve: const Interval(0.3, 0.6, curve: Curves.easeOutCubic),
     );
-    _rain = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.2, 1),
-    );
+    _rain = CurvedAnimation(parent: _controller, curve: const Interval(0.2, 1));
     HapticFeedback.mediumImpact();
   }
 
@@ -73,8 +74,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
     super.didChangeDependencies();
     if (_reducedMotionHandled) return;
     _reducedMotionHandled = true;
-    final reduceMotion =
-        MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     if (reduceMotion) {
       _controller.value = 1;
     } else {
@@ -99,8 +99,10 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
     final titleById = {for (final s in songs) s.id: s.title};
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+        key: const Key('match_cream_surface'),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Stack(
             children: [
@@ -114,124 +116,163 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
               ),
               Column(
                 children: [
-                  const Spacer(),
-                  AnimatedBuilder(
-                    animation: _slide,
-                    builder: (context, child) {
-                      final t = _slide.value.clamp(0.0, 1.0);
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.xl,
+                      ),
+                      child: Column(
                         children: [
-                          Transform.translate(
-                            offset: Offset(-160 * (1 - t), 0),
-                            child: _Monogram(letter: _monogram(widget.myName)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.lg),
-                            child: Transform.scale(
-                              scale: t,
-                              child: const Icon(
-                                Icons.favorite_rounded,
-                                color: AppColors.onPrimary,
-                                size: 40,
-                              ),
-                            ),
-                          ),
-                          Transform.translate(
-                            offset: Offset(160 * (1 - t), 0),
-                            child:
-                                _Monogram(letter: _monogram(widget.otherName)),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  ScaleTransition(
-                    scale: _titleIn,
-                    child: FadeTransition(
-                      opacity: _titleIn,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.xxl),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Hợp cạ rồi!',
-                              textAlign: TextAlign.center,
-                              style: AppTypography.display(
-                                fontSize: 34,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.onPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              'Bạn và ${widget.otherName} đã thích nhau',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: AppColors.onPrimary,
-                                fontSize: 15,
-                              ),
-                            ),
-                            if (widget.sharedBaitu.isNotEmpty) ...[
-                              const SizedBox(height: AppSpacing.lg),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.lg,
-                                  vertical: AppSpacing.sm,
+                          Text(
+                            'Cùng Hát',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  color: AppColors.ink,
+                                  fontWeight: FontWeight.w900,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.onPrimary
-                                      .withValues(alpha: 0.18),
-                                  borderRadius: BorderRadius.circular(
-                                      AppSpacing.radiusPill),
-                                ),
-                                child: Text(
-                                  'Cùng tủ: '
-                                  '${widget.sharedBaitu.take(2).map((id) => titleById[id] ?? id).join(' · ')}',
-                                  style: const TextStyle(
-                                    color: AppColors.onPrimary,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
+                          ),
+                          const WaveDivider(height: AppSpacing.xxl),
+                          ScaleTransition(
+                            scale: _titleIn,
+                            child: FadeTransition(
+                              opacity: _titleIn,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Hợp cạ rồi!',
+                                    textAlign: TextAlign.center,
+                                    style: AppTypography.display(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.ink,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    'Bạn và ${widget.otherName} đã thích nhau',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: AppColors.ink,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ],
-                        ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          AnimatedBuilder(
+                            animation: _slide,
+                            builder: (context, child) {
+                              final t = _slide.value.clamp(0.0, 1.0);
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Transform.translate(
+                                        offset: Offset(-160 * (1 - t), 0),
+                                        child: Transform.rotate(
+                                          angle: -0.07,
+                                          child: _IdentityCard(
+                                            cardKey: const Key(
+                                              'match_identity_my',
+                                            ),
+                                            letter: _monogram(widget.myName),
+                                            name: widget.myName,
+                                            accent: AppColors.secondary,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: AppSpacing.md),
+                                      Transform.translate(
+                                        offset: Offset(160 * (1 - t), 0),
+                                        child: Transform.rotate(
+                                          angle: 0.07,
+                                          child: _IdentityCard(
+                                            cardKey: const Key(
+                                              'match_identity_other',
+                                            ),
+                                            letter: _monogram(widget.otherName),
+                                            name: widget.otherName,
+                                            accent: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Transform.scale(
+                                    scale: t,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(
+                                        AppSpacing.xs,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.teal,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppColors.ink,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.favorite_rounded,
+                                        color: AppColors.ink,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          const WaveDivider(height: AppSpacing.xxl),
+                          if (widget.sharedBaitu.isNotEmpty)
+                            StampChip(
+                              leadingIcon: Icons.music_note_rounded,
+                              label:
+                                  'Cùng tủ: ${widget.sharedBaitu.take(2).map((id) => titleById[id] ?? id).join(' · ')}',
+                              tone: StampChipTone.teal,
+                            ),
+                        ],
                       ),
                     ),
                   ),
-                  const Spacer(),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.xxl,
-                      0,
-                      AppSpacing.xxl,
-                      AppSpacing.xxl,
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      AppSpacing.lg,
                     ),
                     child: Column(
                       children: [
                         SizedBox(
                           width: double.infinity,
-                          child: FilledButton.icon(
+                          child: GradientButton(
                             key: const Key('match_chat_btn'),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.onPrimary,
-                              foregroundColor: AppColors.primaryDark,
-                            ),
                             onPressed: widget.onChat,
-                            icon: const Icon(Icons.chat_bubble_rounded),
-                            label: const Text('Nhắn tin ngay'),
+                            icon: Icons.chat_bubble_rounded,
+                            child: const Text('Nhắn tin ngay'),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         TextButton(
                           key: const Key('match_continue_btn'),
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.onPrimary,
+                            foregroundColor: AppColors.ink,
+                            textStyle: const TextStyle(
+                              decoration: TextDecoration.underline,
+                              decorationColor: AppColors.secondaryDark,
+                              decorationThickness: 2,
+                            ),
                           ),
                           onPressed: widget.onContinue,
                           child: const Text('Tiếp tục khám phá'),
@@ -249,29 +290,65 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
   }
 }
 
-class _Monogram extends StatelessWidget {
-  const _Monogram({required this.letter});
+class _IdentityCard extends StatelessWidget {
+  const _IdentityCard({
+    required this.cardKey,
+    required this.letter,
+    required this.name,
+    required this.accent,
+  });
 
+  final Key cardKey;
   final String letter;
+  final String name;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 84,
-      height: 84,
-      alignment: Alignment.center,
+      key: cardKey,
+      width: 140,
+      height: 150,
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.onPrimary.withValues(alpha: 0.22),
-        border: Border.all(color: AppColors.onPrimary, width: 2),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.ink, width: 2),
+        boxShadow: const [AppShadows.hard],
       ),
-      child: Text(
-        letter,
-        style: AppTypography.display(
-          fontSize: 32,
-          fontWeight: FontWeight.w800,
-          color: AppColors.onPrimary,
-        ),
+      child: Column(
+        children: [
+          Expanded(
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard - 4),
+                border: Border.all(color: AppColors.ink, width: 2),
+              ),
+              child: Text(
+                letter,
+                style: AppTypography.display(
+                  fontSize: 48,
+                  fontWeight: FontWeight.w900,
+                  color: accent == AppColors.primary
+                      ? AppColors.onPrimary
+                      : AppColors.ink,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            name.trim().isEmpty ? '?' : name.trim(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -284,6 +361,11 @@ class _NoteRainPainter extends CustomPainter {
 
   final double progress;
   static const _count = 18;
+  static const _palette = [
+    AppColors.primary,
+    AppColors.secondary,
+    AppColors.teal,
+  ];
 
   /// Hằng số per-note + TextPainter đã layout, tính MỘT LẦN thay vì 18
   /// allocation + layout mỗi frame. xFrac lưu ở dạng 0..1 vì x thực = xFrac *
@@ -291,14 +373,28 @@ class _NoteRainPainter extends CustomPainter {
   /// paint cũ (seed → xFrac → alpha → fontSize) để mỗi note ra đúng giá trị cũ,
   /// giữ output byte-identical.
   static final List<
-      ({double xFrac, double seed, double alpha, double fontSize, TextPainter painter})>
+    ({
+      double xFrac,
+      double seed,
+      double alpha,
+      double fontSize,
+      TextPainter painter,
+    })
+  >
   _notes = _buildNotes();
 
   static List<
-      ({double xFrac, double seed, double alpha, double fontSize, TextPainter painter})>
+    ({
+      double xFrac,
+      double seed,
+      double alpha,
+      double fontSize,
+      TextPainter painter,
+    })
+  >
   _buildNotes() {
     final random = Random(42);
-    return List.generate(_count, (_) {
+    return List.generate(_count, (index) {
       final seed = random.nextDouble();
       final xFrac = random.nextDouble();
       final alpha = (0.15 + 0.55 * random.nextDouble()).clamp(0.0, 1.0);
@@ -307,7 +403,7 @@ class _NoteRainPainter extends CustomPainter {
         text: TextSpan(
           text: '♪',
           style: TextStyle(
-            color: AppColors.onPrimary.withValues(alpha: alpha),
+            color: _palette[index % _palette.length].withValues(alpha: alpha),
             fontSize: fontSize,
           ),
         ),
@@ -326,11 +422,23 @@ class _NoteRainPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (progress <= 0) return;
-    for (final note in _notes) {
+    for (final (index, note) in _notes.indexed) {
       final x = note.xFrac * size.width;
       final yFrac = (progress * (0.6 + note.seed)) % 1.2;
       final y = yFrac * size.height;
       note.painter.paint(canvas, Offset(x, y));
+      if (index.isEven) {
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(x + 12, y - 4, 13, 5),
+            const Radius.circular(2),
+          ),
+          Paint()
+            ..color = _palette[(index + 1) % _palette.length].withValues(
+              alpha: note.alpha,
+            ),
+        );
+      }
     }
   }
 

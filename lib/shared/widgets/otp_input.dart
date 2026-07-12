@@ -9,10 +9,12 @@ class OtpInput extends StatefulWidget {
   const OtpInput({
     super.key,
     this.length = 6,
+    this.semanticLabel,
     required this.onChanged,
     this.onCompleted,
   });
   final int length;
+  final String? semanticLabel;
   final ValueChanged<String> onChanged;
   final ValueChanged<String>? onCompleted;
 
@@ -50,6 +52,7 @@ class _OtpInputState extends State<OtpInput> {
               height: AppSpacing.inputHeight,
               child: Opacity(
                 opacity: 0,
+                alwaysIncludeSemantics: true,
                 child: TextField(
                   controller: _controller,
                   focusNode: _focus,
@@ -57,7 +60,8 @@ class _OtpInputState extends State<OtpInput> {
                   keyboardType: TextInputType.number,
                   maxLength: widget.length,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    labelText: widget.semanticLabel,
                     border: InputBorder.none,
                     counterText: '',
                     contentPadding: EdgeInsets.zero,
@@ -74,22 +78,24 @@ class _OtpInputState extends State<OtpInput> {
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: () => _focus.requestFocus(),
-              child: Row(
-                children: [
-                  for (var i = 0; i < widget.length; i++) ...[
-                    _DigitBox(
-                      width: boxWidth,
-                      value: i < _controller.text.length
-                          ? _controller.text[i]
-                          : '',
-                      isActive: i == _controller.text.length,
-                      isFilled: i < _controller.text.length,
-                    ),
-                    if (i != widget.length - 1) const SizedBox(width: gap),
+            ExcludeSemantics(
+              child: GestureDetector(
+                onTap: () => _focus.requestFocus(),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < widget.length; i++) ...[
+                      _DigitBox(
+                        width: boxWidth,
+                        value: i < _controller.text.length
+                            ? _controller.text[i]
+                            : '',
+                        isActive: i == _controller.text.length,
+                        isFilled: i < _controller.text.length,
+                      ),
+                      if (i != widget.length - 1) const SizedBox(width: gap),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ],

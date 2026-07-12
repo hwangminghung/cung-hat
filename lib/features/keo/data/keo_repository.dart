@@ -15,6 +15,15 @@ class KeoRepository {
         .toList();
   }
 
+  /// Header kèo cho màn chi tiết (giờ + khu vực) — null nếu server chặn
+  /// (người ngoài với kèo không còn 'open') hoặc kèo không tồn tại.
+  Future<Keo?> header(String keoId) async {
+    final rows = await _client.rpc('get_keo_header', params: {'p_keo': keoId});
+    final list = rows as List;
+    if (list.isEmpty) return null;
+    return Keo.fromJson(Map<String, dynamic>.from(list.first as Map));
+  }
+
   Future<List<KeoMember>> roster(String keoId) async {
     final rows = await _client.rpc('get_keo_roster', params: {'p_keo': keoId});
     return (rows as List)

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$KeoMember {
 
-@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'display_name') String? get displayName; bool get verified; String get role;@JsonKey(name: 'join_status') String get joinStatus;
+@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'display_name') String? get displayName; bool get verified; String get role;@JsonKey(name: 'join_status') String get joinStatus; bool get confirmed;
 /// Create a copy of KeoMember
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $KeoMemberCopyWith<KeoMember> get copyWith => _$KeoMemberCopyWithImpl<KeoMember>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KeoMember&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.role, role) || other.role == role)&&(identical(other.joinStatus, joinStatus) || other.joinStatus == joinStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KeoMember&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.role, role) || other.role == role)&&(identical(other.joinStatus, joinStatus) || other.joinStatus == joinStatus)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,displayName,verified,role,joinStatus);
+int get hashCode => Object.hash(runtimeType,userId,displayName,verified,role,joinStatus,confirmed);
 
 @override
 String toString() {
-  return 'KeoMember(userId: $userId, displayName: $displayName, verified: $verified, role: $role, joinStatus: $joinStatus)';
+  return 'KeoMember(userId: $userId, displayName: $displayName, verified: $verified, role: $role, joinStatus: $joinStatus, confirmed: $confirmed)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $KeoMemberCopyWith<$Res>  {
   factory $KeoMemberCopyWith(KeoMember value, $Res Function(KeoMember) _then) = _$KeoMemberCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'display_name') String? displayName, bool verified, String role,@JsonKey(name: 'join_status') String joinStatus
+@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'display_name') String? displayName, bool verified, String role,@JsonKey(name: 'join_status') String joinStatus, bool confirmed
 });
 
 
@@ -65,14 +65,15 @@ class _$KeoMemberCopyWithImpl<$Res>
 
 /// Create a copy of KeoMember
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? displayName = freezed,Object? verified = null,Object? role = null,Object? joinStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? displayName = freezed,Object? verified = null,Object? role = null,Object? joinStatus = null,Object? confirmed = null,}) {
   return _then(_self.copyWith(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String?,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
 as bool,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as String,joinStatus: null == joinStatus ? _self.joinStatus : joinStatus // ignore: cast_nullable_to_non_nullable
-as String,
+as String,confirmed: null == confirmed ? _self.confirmed : confirmed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -157,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'display_name')  String? displayName,  bool verified,  String role, @JsonKey(name: 'join_status')  String joinStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'display_name')  String? displayName,  bool verified,  String role, @JsonKey(name: 'join_status')  String joinStatus,  bool confirmed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KeoMember() when $default != null:
-return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.joinStatus);case _:
+return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.joinStatus,_that.confirmed);case _:
   return orElse();
 
 }
@@ -178,10 +179,10 @@ return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.j
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'display_name')  String? displayName,  bool verified,  String role, @JsonKey(name: 'join_status')  String joinStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'display_name')  String? displayName,  bool verified,  String role, @JsonKey(name: 'join_status')  String joinStatus,  bool confirmed)  $default,) {final _that = this;
 switch (_that) {
 case _KeoMember():
-return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.joinStatus);case _:
+return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.joinStatus,_that.confirmed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +199,10 @@ return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.j
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'display_name')  String? displayName,  bool verified,  String role, @JsonKey(name: 'join_status')  String joinStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'display_name')  String? displayName,  bool verified,  String role, @JsonKey(name: 'join_status')  String joinStatus,  bool confirmed)?  $default,) {final _that = this;
 switch (_that) {
 case _KeoMember() when $default != null:
-return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.joinStatus);case _:
+return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.joinStatus,_that.confirmed);case _:
   return null;
 
 }
@@ -213,7 +214,7 @@ return $default(_that.userId,_that.displayName,_that.verified,_that.role,_that.j
 @JsonSerializable()
 
 class _KeoMember implements KeoMember {
-  const _KeoMember({@JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'display_name') this.displayName, this.verified = false, this.role = 'member', @JsonKey(name: 'join_status') this.joinStatus = 'requested'});
+  const _KeoMember({@JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'display_name') this.displayName, this.verified = false, this.role = 'member', @JsonKey(name: 'join_status') this.joinStatus = 'requested', this.confirmed = false});
   factory _KeoMember.fromJson(Map<String, dynamic> json) => _$KeoMemberFromJson(json);
 
 @override@JsonKey(name: 'user_id') final  String userId;
@@ -221,6 +222,7 @@ class _KeoMember implements KeoMember {
 @override@JsonKey() final  bool verified;
 @override@JsonKey() final  String role;
 @override@JsonKey(name: 'join_status') final  String joinStatus;
+@override@JsonKey() final  bool confirmed;
 
 /// Create a copy of KeoMember
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KeoMember&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.role, role) || other.role == role)&&(identical(other.joinStatus, joinStatus) || other.joinStatus == joinStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KeoMember&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.role, role) || other.role == role)&&(identical(other.joinStatus, joinStatus) || other.joinStatus == joinStatus)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,displayName,verified,role,joinStatus);
+int get hashCode => Object.hash(runtimeType,userId,displayName,verified,role,joinStatus,confirmed);
 
 @override
 String toString() {
-  return 'KeoMember(userId: $userId, displayName: $displayName, verified: $verified, role: $role, joinStatus: $joinStatus)';
+  return 'KeoMember(userId: $userId, displayName: $displayName, verified: $verified, role: $role, joinStatus: $joinStatus, confirmed: $confirmed)';
 }
 
 
@@ -255,7 +257,7 @@ abstract mixin class _$KeoMemberCopyWith<$Res> implements $KeoMemberCopyWith<$Re
   factory _$KeoMemberCopyWith(_KeoMember value, $Res Function(_KeoMember) _then) = __$KeoMemberCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'display_name') String? displayName, bool verified, String role,@JsonKey(name: 'join_status') String joinStatus
+@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'display_name') String? displayName, bool verified, String role,@JsonKey(name: 'join_status') String joinStatus, bool confirmed
 });
 
 
@@ -272,14 +274,15 @@ class __$KeoMemberCopyWithImpl<$Res>
 
 /// Create a copy of KeoMember
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? displayName = freezed,Object? verified = null,Object? role = null,Object? joinStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? displayName = freezed,Object? verified = null,Object? role = null,Object? joinStatus = null,Object? confirmed = null,}) {
   return _then(_KeoMember(
 userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String?,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
 as bool,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as String,joinStatus: null == joinStatus ? _self.joinStatus : joinStatus // ignore: cast_nullable_to_non_nullable
-as String,
+as String,confirmed: null == confirmed ? _self.confirmed : confirmed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -39,13 +39,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verify => 'Confirm';
 
   @override
-  String get onbDobTitle => 'When were you born? (must be 18+)';
+  String get onbDobTitle => 'When were you born?';
 
   @override
   String get onbUnder18 => 'You must be 18 or older to use the app.';
 
   @override
   String get onbConsentTitle => 'Privacy';
+
+  @override
+  String get onbConsentSubtitle => 'Choose how Cùng Hát uses your data';
+
+  @override
+  String get onbRequired => 'Required';
+
+  @override
+  String get onbConsentContinue => 'Agree & continue';
 
   @override
   String get onbNameLabel => 'Display name';
@@ -76,10 +85,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onbStepDob => 'Date of birth';
 
   @override
-  String get onbStepProfile => 'Profile';
+  String get onbStepProfile => 'Set up your profile';
+
+  @override
+  String get onbProfileQuestion => 'What would you like everyone to call you?';
 
   @override
   String get onbStepTaste => 'Music taste';
+
+  @override
+  String get onbTasteSubtitle => 'Choose a few things you listen to';
+
+  @override
+  String onbProgress(int step) {
+    return 'Step $step/4';
+  }
+
+  @override
+  String get onbDobDay => 'Day';
+
+  @override
+  String get onbDobMonth => 'Month';
+
+  @override
+  String get onbDobYear => 'Year';
 
   @override
   String get onbContinue => 'Continue';
@@ -98,7 +127,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use location to suggest people/outings near you';
 
   @override
-  String get consentPhotos => 'Store & show profile photos (optional)';
+  String get consentPhotos => 'Store and show profile photos';
 
   @override
   String get consentMatching => 'Use music taste to match people';
@@ -108,7 +137,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get consentCrossBorder =>
-      'Data stored in Singapore (cross-border transfer)';
+      'I agree to the Privacy Policy, Terms, and data storage in Singapore';
 
   @override
   String get chatPromoteKeo => 'Set up an outing';
@@ -165,4 +194,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get entitlementNeeded => 'Upgrade to use this feature';
+
+  @override
+  String get authTagline => 'Connect through songs';
+
+  @override
+  String get authPhoneTitle => 'Sign in with your phone number';
+
+  @override
+  String get authPhoneBody =>
+      'Enter your number to receive an OTP. We only use it to keep your account safe.';
+
+  @override
+  String get authPhoneHint => '901 234 567';
+
+  @override
+  String get authResponsibility =>
+      'By continuing, you agree to use Cùng Hát responsibly and respect others.';
+
+  @override
+  String get authSendOtpError => 'We couldn\'t send the code';
+
+  @override
+  String authResendCountdown(int seconds) {
+    return 'Resend code in ${seconds}s';
+  }
+
+  @override
+  String get authResend => 'Resend code';
+
+  @override
+  String get authCheckMessages => 'Check your messages';
+
+  @override
+  String get authOtpSentPrefix => 'Code sent to ';
+
+  @override
+  String authOtpSentTo(String phone) {
+    return 'Code sent to $phone';
+  }
+
+  @override
+  String get authPhoneFallback => 'your phone number';
+
+  @override
+  String get authOtpHelp =>
+      'Didn\'t get a code? Go back and check your phone number.';
+
+  @override
+  String get authOtpError => 'That OTP code isn\'t correct';
+
+  @override
+  String get discoveryDeckTitle => 'Singing pairs';
+
+  @override
+  String get discoveryDeckSubtitle =>
+      'Music-compatible suggestions at a safe distance.';
+
+  @override
+  String get discoveryRewind => 'Undo';
+
+  @override
+  String get discoveryPass => 'Pass';
+
+  @override
+  String get discoverySuperLike => 'Super like';
+
+  @override
+  String get discoveryLike => 'Like';
+
+  @override
+  String get discoveryExploreTitle => 'Explore by music taste';
+
+  @override
+  String get discoveryExploreSubtitle =>
+      'Pick a mood and meet someone on your wavelength.';
+
+  @override
+  String get discoveryExploreOpen => 'Open now';
+
+  @override
+  String discoveryExploreLiveCount(int count) {
+    return '$count people singing';
+  }
+
+  @override
+  String get discoveryExploreBrand => 'CÙNG HÁT';
 }

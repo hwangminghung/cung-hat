@@ -10,6 +10,11 @@ import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/keo/application/keo_providers.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
+import 'package:cung_hat/features/profile/application/profile_providers.dart';
+import 'package:cung_hat/features/profile/domain/profile.dart';
+import 'package:cung_hat/features/profile/domain/profile_completion.dart';
+import 'package:cung_hat/shared/widgets/stamp_chip.dart';
+import 'package:cung_hat/shared/widgets/wave_progress.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
 
@@ -85,5 +90,60 @@ void main() {
     await tester.pumpAndSettle();
     // Không invalidate → provider giữ cache, vẫn 1. Có fix → refetch = 2.
     expect(inboxCalls, 2);
+  });
+
+  testWidgets(
+      "tab Hồ sơ: dòng 'Ai đã thích bạn' có badge PRO (tránh bait-click)",
+      (tester) async {
+    final fakeLoc = _FakeLocationService();
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null)
+              .overrideWith((ref) => Future.value(<Candidate>[])),
+          locationServiceProvider.overrideWithValue(fakeLoc),
+          openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
+          myProfileProvider.overrideWith((ref) => Future.value(null)),
+        ],
+        child: const MaterialApp(home: HomeShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Hồ sơ'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(StampChip, 'PRO'), findsOneWidget);
+  });
+
+  testWidgets('tab Hồ sơ: có WaveProgress (thẻ hoàn thiện) + nút bánh răng',
+      (tester) async {
+    final fakeLoc = _FakeLocationService();
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null)
+              .overrideWith((ref) => Future.value(<Candidate>[])),
+          locationServiceProvider.overrideWithValue(fakeLoc),
+          openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
+          // _CompletionCard chỉ render khi profile + taste non-null và
+          // percent < 100 → hồ sơ trống (0%) cho WaveProgress xuất hiện.
+          myProfileProvider
+              .overrideWith((ref) => Future.value(const Profile(id: 'u1'))),
+          myTasteCountsProvider
+              .overrideWith((ref) => Future.value(const TasteCounts(0, 0, 0))),
+        ],
+        child: const MaterialApp(home: HomeShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Hồ sơ'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WaveProgress), findsOneWidget);
+    expect(find.byKey(const Key('profile_gear_btn')), findsOneWidget);
   });
 }

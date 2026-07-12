@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/stamp_chip.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../onboarding/application/reference_providers.dart';
 import '../../onboarding/domain/music_ref.dart';
 import '../../photos/presentation/photo_carousel.dart';
@@ -14,13 +18,10 @@ import 'report_sheet.dart';
 /// get_discovery_candidates đã trả (sanitized, band-only) — không gọi thêm RPC.
 ///
 /// Chế độ kép:
-///  * Chế độ deck (mặc định, [onQuote] null): [onPass]/[onLike] bắt buộc về ý
-///    nghĩa (deck luôn truyền cả 2), 2 nút THÍCH/BỎ QUA hiện; không có nút
-///    "Trả lời" nào (giữ nguyên hành vi cũ 100%).
-///  * Chế độ icebreaker (mở từ ChatScreen sau match, [onQuote] khác null):
-///    ẩn 2 nút THÍCH/BỎ QUA (candidate đã match rồi, không cần swipe lại);
-///    mỗi bài tủ chung / mỗi prompt / carousel ảnh có nút "Trả lời" gọi
-///    [onQuote] với câu mồi rồi đóng sheet.
+///  * [onPass] và [onLike] điều khiển độc lập từng hành động deck.
+///  * [onQuote] điều khiển độc lập các nút icebreaker trên ảnh, bài tủ, prompt.
+/// Caller có thể truyền bất kỳ tổ hợp callback nào; [show] luôn đóng sheet
+/// trước rồi mới gọi callback tương ứng.
 class CandidateDetailSheet extends ConsumerWidget {
   const CandidateDetailSheet({
     super.key,
@@ -91,6 +92,10 @@ class CandidateDetailSheet extends ConsumerWidget {
     // → fallback hiện raw id, KHÔNG chặn render.
     final songs = ref.watch(songsProvider).value ?? const <Song>[];
     final titleById = {for (final s in songs) s.id: s.title};
+    final knownPrompts = candidate.prompts.where(
+      (prompt) =>
+          karaokePromptQuestion(prompt['prompt_id'] as String? ?? '') != null,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -98,146 +103,239 @@ class CandidateDetailSheet extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            height: 280,
-            child: PhotoCarousel(
-              userId: candidate.id,
-              monogram: monogram,
-              radius: BorderRadius.circular(AppSpacing.radiusCard),
-              swipeable: true,
+          Center(
+            child: Container(
+              key: const Key('detail_sheet_handle'),
+              width: 72,
+              height: 6,
+              decoration: BoxDecoration(
+                color: AppColors.ink,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+              ),
             ),
           ),
-          if (onQuote != null)
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                key: const Key('quote_photo'),
-                onPressed: () => onQuote!('Ảnh này xịn quá! '),
-                child: const Text('Trả lời ảnh này'),
-              ),
-            ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  gradient: AppColors.brandGradient,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(monogram,
-                    style: AppTypography.display(
-                        fontSize: 28, color: AppColors.onPrimary)),
-              ),
-              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      Flexible(
-                        child: Text(title,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleLarge),
-                      ),
-                      if (candidate.verified) ...[
-                        const SizedBox(width: AppSpacing.xs),
-                        const Icon(Icons.verified_rounded,
-                            size: 20, color: AppColors.tertiary),
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(
+                                  color: AppColors.ink,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                          ),
+                        ),
+                        if (candidate.verified) ...[
+                          const SizedBox(width: AppSpacing.xs),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 22,
+                            color: AppColors.teal,
+                          ),
+                        ],
                       ],
-                    ]),
-                    Text('Cách ${candidate.distanceBand ?? '?'} km',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: AppColors.textSecondary)),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.place_rounded,
+                          size: 20,
+                          color: AppColors.teal,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Flexible(
+                          child: Text(
+                            'Cách ${candidate.distanceBand ?? '?'} km',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: AppColors.ink,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
+              if (onQuote != null) ...[
+                const SizedBox(width: AppSpacing.md),
+                OutlinedButton.icon(
+                  key: const Key('quote_photo'),
+                  onPressed: () => onQuote!('Ảnh này xịn quá! '),
+                  icon: const Icon(Icons.photo_camera_outlined),
+                  label: const Text('Trả lời ảnh này'),
+                ),
+              ],
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-          Text('Gu nhạc chung',
-              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.lg),
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: AppColors.ink,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              boxShadow: const [AppShadows.hard],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCard - 2),
+              child: SizedBox(
+                height: 280,
+                child: PhotoCarousel(
+                  userId: candidate.id,
+                  monogram: monogram,
+                  radius: BorderRadius.zero,
+                  swipeable: true,
+                ),
+              ),
+            ),
+          ),
+          const WaveDivider(height: AppSpacing.xxl),
+          Text(
+            'Gu nhạc chung',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
           if (candidate.sharedGenres.isEmpty)
-            Text('Chưa trùng thể loại nào.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary))
+            Text(
+              'Chưa trùng thể loại nào.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            )
           else
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
               children: [
                 for (final g in candidate.sharedGenres)
-                  Chip(label: Text('#$g')),
+                  StampChip(label: '#$g', tone: StampChipTone.teal),
               ],
             ),
-          const SizedBox(height: AppSpacing.xl),
-          Text('Bài tủ chung',
-              style: Theme.of(context).textTheme.titleMedium),
+          const WaveDivider(height: AppSpacing.xxl),
+          Text(
+            'Bài tủ chung',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
           if (candidate.sharedBaitu.isEmpty)
-            Text('Chưa có bài tủ chung — cơ hội khám phá!',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary))
+            Text(
+              'Chưa có bài tủ chung — cơ hội khám phá!',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            )
           else
             for (final (i, song) in candidate.sharedBaitu.indexed)
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.music_note_rounded,
-                    color: AppColors.primary),
-                title: Text(titleById[song] ?? song),
-                trailing: onQuote == null
-                    ? null
-                    : TextButton(
-                        key: Key('quote_baitu_$i'),
-                        onPressed: () => onQuote!(
-                            'Về bài "${titleById[song] ?? song}" của bạn: '),
-                        child: const Text('Trả lời'),
-                      ),
-              ),
-          for (final p in candidate.prompts)
-            if (karaokePromptQuestion(p['prompt_id'] as String? ?? '') != null)
               Container(
-                margin: const EdgeInsets.only(top: AppSpacing.md),
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryTint,
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.ink, width: 2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(
-                      karaokePromptQuestion(p['prompt_id'] as String)!,
-                      style: Theme.of(context).textTheme.labelMedium
-                          ?.copyWith(color: AppColors.primaryDark),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text('${p['answer']}',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    if (onQuote != null)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          key: Key('quote_prompt_${p['prompt_id']}'),
-                          onPressed: () => onQuote!(
-                              'Bạn nói "${p['answer']}" — kể thêm đi: '),
-                          child: const Text('Trả lời'),
+                    Container(
+                      width: 48,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        color: AppColors.teal,
+                        border: Border(
+                          right: BorderSide(color: AppColors.ink, width: 2),
                         ),
                       ),
+                      child: const Icon(
+                        Icons.music_note_rounded,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        titleById[song] ?? song,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: AppColors.ink,
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                    ),
+                    if (onQuote != null)
+                      TextButton(
+                        key: Key('quote_baitu_$i'),
+                        onPressed: () => onQuote!(
+                          'Về bài "${titleById[song] ?? song}" của bạn: ',
+                        ),
+                        child: const Text('Trả lời'),
+                      ),
+                    const SizedBox(width: AppSpacing.xs),
                   ],
                 ),
               ),
-          const SizedBox(height: AppSpacing.xl),
+          for (final prompt in knownPrompts)
+            Container(
+              margin: const EdgeInsets.only(top: AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.primaryTint,
+                border: Border.all(color: AppColors.ink, width: 2),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                boxShadow: const [AppShadows.hard],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    karaokePromptQuestion(prompt['prompt_id'] as String)!,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.primaryDark,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${prompt['answer']}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  if (onQuote != null)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        key: Key('quote_prompt_${prompt['prompt_id']}'),
+                        onPressed: () => onQuote!(
+                          'Bạn nói "${prompt['answer']}" — kể thêm đi: ',
+                        ),
+                        child: const Text('Trả lời'),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          const WaveDivider(height: AppSpacing.xxl),
           if (onPass != null || onLike != null)
             Row(
               children: [
@@ -254,24 +352,25 @@ class CandidateDetailSheet extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.md),
                 if (onLike != null)
                   Expanded(
-                    child: FilledButton.icon(
+                    child: GradientButton(
                       key: const Key('detail_like_btn'),
                       onPressed: onLike,
-                      icon: const Icon(Icons.favorite_rounded),
-                      label: const Text('Thích'),
+                      icon: Icons.favorite_rounded,
+                      child: const Text('Thích'),
                     ),
                   ),
               ],
             ),
           const SizedBox(height: AppSpacing.sm),
           Center(
-            child: TextButton(
+            child: TextButton.icon(
               key: const Key('detail_report_btn'),
               onPressed: () => showModalBottomSheet(
                 context: context,
                 builder: (_) => ReportSheet(targetId: candidate.id),
               ),
-              child: const Text('Báo cáo / Chặn'),
+              icon: const Icon(Icons.shield_outlined),
+              label: const Text('Báo cáo / Chặn'),
             ),
           ),
         ],

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/pressable.dart';
+import '../../../shared/widgets/stamp_chip.dart';
+import '../../../shared/widgets/ticket_card.dart';
 import '../domain/keo.dart';
 
 class KeoCard extends StatelessWidget {
@@ -14,185 +16,52 @@ class KeoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final place =
-        keo.areaLabel ??
-        (keo.distanceBand == null ? null : 'cách ${keo.distanceBand} km');
     final time = _formatTime(keo.timeWindowStart, keo.timeWindowEnd);
+    final textScale = MediaQuery.textScalerOf(context).scale(12) / 12;
+    final stackTime = textScale > 1.35;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+        AppSpacing.md,
         AppSpacing.sm,
-        AppSpacing.lg,
+        AppSpacing.md,
         AppSpacing.sm,
       ),
       child: Pressable(
         onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadow.withValues(alpha: 0.06),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: AppColors.brandGradient,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.mic_external_on_rounded,
-                        color: AppColors.onPrimary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            keo.title,
-                            style: text.titleMedium,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          _modeChip(context),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: AppColors.textHint.withValues(alpha: 0.72),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Wrap(
-                  spacing: AppSpacing.md,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    if (place != null)
-                      _meta(context, Icons.place_rounded, place),
-                    if (time != null)
-                      _meta(context, Icons.schedule_rounded, time),
-                    _meta(
-                      context,
-                      Icons.groups_rounded,
-                      '${keo.slotsFilled}/${keo.sizeTarget} người',
-                    ),
-                    if (keo.hostName != null)
-                      _meta(context, Icons.person_rounded, keo.hostName!),
-                  ],
-                ),
-                if (keo.genres.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
+        child: TicketCard(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          showPerforation: time != null && !stackTime,
+          perforationPosition: 0.25,
+          child: time != null && !stackTime
+              ? IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      for (final genre in keo.genres)
-                        _genreChip(context, genre),
+                      SizedBox(width: 58, child: _TimeStub(time: time)),
+                      const SizedBox(width: AppSpacing.lg),
+                      Expanded(
+                        child: _KeoDetails(keo: keo, text: text),
+                      ),
                     ],
                   ),
-                ],
-              ],
-            ),
-          ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (time != null) ...[
+                      _CompactTime(time: time),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    _KeoDetails(keo: keo, text: text),
+                  ],
+                ),
         ),
       ),
     );
   }
 
-  Widget _meta(BuildContext context, IconData icon, String label) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 16, color: AppColors.textHint),
-      const SizedBox(width: AppSpacing.xs),
-      Text(
-        label,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    ],
-  );
-
-  Widget _modeChip(BuildContext context) {
-    final open = keo.joinMode == 'open';
-    final label = open ? 'Mở · vào là tham gia' : 'Cần duyệt';
-    final bg = open
-        ? AppColors.secondary.withValues(alpha: 0.62)
-        : AppColors.tertiaryTint;
-    final fg = open ? AppColors.secondaryDark : AppColors.tertiary;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            open ? Icons.lock_open_rounded : Icons.verified_user_rounded,
-            size: 13,
-            color: fg,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _genreChip(BuildContext context, String genre) => Container(
-    padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.md,
-      vertical: AppSpacing.xs,
-    ),
-    decoration: BoxDecoration(
-      color: AppColors.primaryTint,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-    ),
-    child: Text(
-      genre,
-      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        color: AppColors.primaryDark,
-        fontWeight: FontWeight.w800,
-      ),
-    ),
-  );
-
-  String? _formatTime(String? start, String? end) {
+  ({String start, String end})? _formatTime(String? start, String? end) {
     if (start == null || end == null) return null;
     final startAt = DateTime.tryParse(start);
     final endAt = DateTime.tryParse(end);
@@ -200,8 +69,155 @@ class KeoCard extends StatelessWidget {
 
     final localStart = startAt.toLocal();
     final localEnd = endAt.toLocal();
-    return '${_two(localStart.hour)}:${_two(localStart.minute)}-${_two(localEnd.hour)}:${_two(localEnd.minute)}';
+    return (
+      start: '${_two(localStart.hour)}:${_two(localStart.minute)}',
+      end: '${_two(localEnd.hour)}:${_two(localEnd.minute)}',
+    );
   }
 
   String _two(int value) => value.toString().padLeft(2, '0');
+}
+
+class _TimeStub extends StatelessWidget {
+  const _TimeStub({required this.time});
+
+  final ({String start, String end}) time;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.schedule_outlined, color: AppColors.ink, size: 26),
+        const SizedBox(height: AppSpacing.sm),
+        Text(time.start, style: Theme.of(context).textTheme.titleMedium),
+        Text('—', style: Theme.of(context).textTheme.titleSmall),
+        Text(time.end, style: Theme.of(context).textTheme.titleMedium),
+      ],
+    );
+  }
+}
+
+class _CompactTime extends StatelessWidget {
+  const _CompactTime({required this.time});
+
+  final ({String start, String end}) time;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.schedule_outlined, color: AppColors.ink),
+        const SizedBox(width: AppSpacing.sm),
+        Text(time.start, style: Theme.of(context).textTheme.titleMedium),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          child: Text('—'),
+        ),
+        Text(time.end, style: Theme.of(context).textTheme.titleMedium),
+      ],
+    );
+  }
+}
+
+class _KeoDetails extends StatelessWidget {
+  const _KeoDetails({required this.keo, required this.text});
+
+  final Keo keo;
+  final TextTheme text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                keo.title,
+                style: text.titleLarge,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            const Icon(Icons.arrow_forward_rounded, color: AppColors.ink),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            StampChip(
+              label: keo.joinMode == 'open'
+                  ? 'Mở · vào là tham gia'
+                  : 'Cần duyệt',
+              tone: keo.joinMode == 'open'
+                  ? StampChipTone.lime
+                  : StampChipTone.teal,
+              leadingIcon: keo.joinMode == 'open'
+                  ? Icons.lock_open_rounded
+                  : Icons.verified_user_outlined,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
+          children: [
+            if (keo.areaLabel != null)
+              _Meta(Icons.place_outlined, keo.areaLabel!),
+            if (keo.distanceBand != null)
+              _Meta(Icons.near_me_outlined, 'cách ${keo.distanceBand} km'),
+            _Meta(
+              Icons.groups_outlined,
+              '${keo.slotsFilled}/${keo.sizeTarget} người',
+            ),
+            if (keo.hostName != null)
+              _Meta(Icons.person_outline, keo.hostName!),
+          ],
+        ),
+        if (keo.genres.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final genre in keo.genres)
+                StampChip(label: genre, tone: StampChipTone.teal),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _Meta extends StatelessWidget {
+  const _Meta(this.icon, this.label);
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 17, color: AppColors.teal),
+        const SizedBox(width: AppSpacing.xs),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.ink,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
 }

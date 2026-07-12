@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/inbox_providers.dart';
 
@@ -53,7 +54,21 @@ class InboxScreen extends ConsumerWidget {
             ),
             itemCount: matches.length + 1,
             itemBuilder: (context, index) {
-              if (index == 0) return const _InboxHeader();
+              if (index == 0) {
+                return const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _InboxHeader(),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        top: AppSpacing.lg,
+                        bottom: AppSpacing.sm,
+                      ),
+                      child: _SectionLabel('Tin nhắn đôi'),
+                    ),
+                  ],
+                );
+              }
               final match = matches[index - 1];
               final monogram = match.otherName.isEmpty
                   ? '?'
@@ -64,7 +79,7 @@ class InboxScreen extends ConsumerWidget {
               } else if (myId != null && match.lastSenderId != myId) {
                 turnLabel = 'Đến lượt bạn';
               }
-              return _InboxTile(
+              final tile = _InboxTile(
                 monogram: monogram,
                 name: match.otherName,
                 unread: match.unread,
@@ -75,6 +90,19 @@ class InboxScreen extends ConsumerWidget {
                   );
                   if (context.mounted) ref.invalidate(inboxProvider);
                 },
+              );
+              final isLast = index == matches.length;
+              if (isLast) return tile;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  tile,
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    child: WaveDivider(),
+                  ),
+                ],
               );
             },
           );
@@ -125,65 +153,109 @@ class _InboxTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+    final textTheme = Theme.of(context).textTheme;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.border),
-      ),
-      // ListTile paints its background/ink splashes on the nearest Material
-      // ancestor; without this, the outer Container's opaque background
-      // would hide them (Flutter debug assertion otherwise).
-      child: Material(
-        type: MaterialType.transparency,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        clipBehavior: Clip.antiAlias,
-        child: ListTile(
-          onTap: onTap,
-          leading: Container(
-            width: 46,
-            height: 46,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: AppColors.brandGradient,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              monogram,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: AppColors.onPrimary),
-            ),
-          ),
-          title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-          subtitle: turnLabel != null
-              ? Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    key: const Key('turn_pill'),
-                    margin: const EdgeInsets.only(top: 2),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusPill),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryTint,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border, width: 2),
+                ),
+                child: Text(
+                  monogram,
+                  style: textTheme.titleLarge?.copyWith(color: AppColors.ink),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleLarge?.copyWith(
+                        color: AppColors.ink,
+                      ),
                     ),
-                    child: Text(turnLabel!,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(
-                                color: AppColors.secondaryDark,
-                                fontWeight: FontWeight.w800)),
-                  ),
-                )
-              : const Text('Sẵn sàng rủ đi hát'),
-          trailing: unread > 0
-              ? _UnreadBadge(count: unread)
-              : const Icon(Icons.chevron_right_rounded),
+                    const SizedBox(height: AppSpacing.xs),
+                    if (turnLabel != null)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          key: const Key('turn_pill'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary,
+                            border: Border.all(
+                              color: AppColors.ink,
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            turnLabel!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.labelMedium?.copyWith(
+                              color: AppColors.ink,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        'Sẵn sàng rủ đi hát',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (unread > 0) ...[
+                const SizedBox(width: AppSpacing.sm),
+                _UnreadBadge(count: unread),
+              ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        color: AppColors.ink,
+        fontWeight: FontWeight.w800,
       ),
     );
   }

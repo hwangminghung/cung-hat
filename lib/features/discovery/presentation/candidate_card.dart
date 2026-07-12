@@ -2,11 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/stamp_chip.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../photos/application/photo_providers.dart';
 import '../../photos/presentation/photo_carousel.dart';
 import '../domain/candidate.dart';
 import 'report_sheet.dart';
+
+/// Bảng màu nền monogram fallback (khi hồ sơ chưa có ảnh) — chọn ổn định
+/// theo hash id để mỗi ứng viên luôn ra cùng một màu qua các lần build, tạo
+/// cảm giác retro nhiều màu thay vì một màu cam lặp lại (mockup 07).
+const _monogramPalette = [
+  AppColors.primary,
+  AppColors.secondaryDark,
+  AppColors.tertiaryPop,
+  AppColors.pink,
+  AppColors.primaryDark,
+];
+
+Color _monogramColorFor(String id) =>
+    _monogramPalette[id.hashCode.abs() % _monogramPalette.length];
+
+/// Màu chữ monogram theo nền trong [_monogramPalette]: hai nền NHẠT
+/// (tertiaryPop ~2.2:1, pink ~2.5:1 với chữ trắng — dưới chuẩn 3:1
+/// large-text) → chữ ink; ba nền đậm còn lại giữ trắng như cũ.
+/// Public để test mapping contrast trực tiếp.
+Color monogramTextColorOn(Color background) =>
+    background == AppColors.tertiaryPop || background == AppColors.pink
+    ? AppColors.ink
+    : AppColors.onPrimary;
 
 /// Card ứng viên trong deck. Chip thông tin dưới tên XOAY theo ảnh đang xem
 /// (Tinder-parity mục 3c): ảnh 1 → khoảng cách + bài tủ chung; ảnh 2 → thể
@@ -49,22 +75,16 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
     final monogram = name.isEmpty ? '?' : name.characters.first.toUpperCase();
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
     final photoCount =
-        (ref.watch(signedUrlsProvider(candidate.id)).value ?? const [])
-            .length;
+        (ref.watch(signedUrlsProvider(candidate.id)).value ?? const []).length;
+    final monogramBackground = _monogramColorFor(candidate.id);
 
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.12),
-            blurRadius: 28,
-            offset: const Offset(0, 18),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: Border.all(color: AppColors.ink, width: 2),
+        boxShadow: const [AppShadows.hard],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,7 +99,11 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   monogram: monogram,
                   swipeable: false,
                   onPageChanged: (i) => setState(() => _photoIndex = i),
+                  fallbackTextColor: monogramTextColorOn(monogramBackground),
                   fallbackDecorations: [
+                    Positioned.fill(
+                      child: ColoredBox(color: monogramBackground),
+                    ),
                     Positioned(
                       left: -36,
                       top: 34,
@@ -104,8 +128,9 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                           width: 142,
                           height: 44,
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.tertiaryTint.withValues(alpha: 0.70),
+                            color: AppColors.tertiaryTint.withValues(
+                              alpha: 0.70,
+                            ),
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
@@ -116,9 +141,9 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                 Positioned(
                   top: AppSpacing.md,
                   right: AppSpacing.md,
-                  child: IconButton.filledTonal(
+                  child: _CardIconButton(
                     tooltip: 'Báo cáo',
-                    onPressed: () => showModalBottomSheet(
+                    onTap: () => showModalBottomSheet(
                       context: context,
                       builder: (_) => ReportSheet(targetId: candidate.id),
                     ),
@@ -126,31 +151,40 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   ),
                 ),
                 if (candidate.activeToday)
-                  const Positioned(
-                    left: AppSpacing.lg,
-                    top: AppSpacing.lg,
-                    child: _Badge(
-                      icon: Icons.bolt_rounded,
-                      label: 'Online hôm nay',
-                      background: AppColors.secondary,
-                      foreground: AppColors.secondaryDark,
+                  Positioned(
+                    left: AppSpacing.md,
+                    top: AppSpacing.md,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.ink, width: 2),
+                      ),
                     ),
                   ),
                 Positioned(
                   right: AppSpacing.md,
                   bottom: AppSpacing.md,
-                  child: IconButton.filledTonal(
+                  child: _CardIconButton(
                     key: const Key('card_detail_btn'),
                     tooltip: 'Xem hồ sơ',
-                    onPressed: widget.onOpenDetail,
+                    onTap: widget.onOpenDetail,
                     icon: const Icon(Icons.info_outline_rounded),
                   ),
                 ),
               ],
             ),
           ),
+          const WaveDivider(height: AppSpacing.md),
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.xs,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -160,7 +194,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                       child: Text(
                         title,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ),
                     if (candidate.verified)
@@ -172,7 +206,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                ..._infoChips(context, candidate, photoCount),
+                _buildPanelBody(context, candidate, photoCount),
               ],
             ),
           ),
@@ -181,64 +215,101 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
     );
   }
 
-  /// Chip dưới tên: <2 ảnh → gộp như cũ (không có gì để xoay theo); ≥2 ảnh →
-  /// xoay theo [_photoIndex] — ảnh 1: khoảng cách + bài tủ; ảnh 2: thể loại
-  /// chung; ảnh ≥3: giới thiệu (bio).
-  List<Widget> _infoChips(
-      BuildContext context, Candidate candidate, int photoCount) {
-    if (photoCount < 2) {
-      return [
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            _Badge(
-              icon: Icons.place_rounded,
-              label: 'Cách ${candidate.distanceBand ?? '?'} km',
-              background: AppColors.primaryTint,
-              foreground: AppColors.primaryDark,
-            ),
-            _Badge(
-              icon: Icons.music_note_rounded,
-              label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
-              background: AppColors.tertiaryTint,
-              foreground: AppColors.tertiary,
-            ),
-          ],
-        ),
-        if (candidate.sharedGenres.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+  /// Panel dưới tên: <2 ảnh (không có gì để xoay theo) → khối "khoảng cách +
+  /// bài tủ" cố định, kèm hàng "Online hôm nay" bên trái (nếu activeToday)
+  /// và chip thể loại chung bên phải (mockup 07, Task P3); ≥2 ảnh → xoay
+  /// theo [_photoIndex] như cũ qua [_infoChips].
+  Widget _buildPanelBody(
+    BuildContext context,
+    Candidate candidate,
+    int photoCount,
+  ) {
+    if (photoCount >= 2) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _infoChips(context, candidate),
+      );
+    }
+
+    final chips = candidate.sharedGenres.take(2).toList();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final genre in candidate.sharedGenres.take(3))
-                _GenreChip(label: genre),
+              if (candidate.activeToday) ...[
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Flexible(
+                      child: Text(
+                        'Online hôm nay',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              _InfoLine(
+                icon: Icons.place_rounded,
+                label: 'Cách ${candidate.distanceBand ?? '?'} km',
+                color: AppColors.primary,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              _InfoLine(
+                icon: Icons.music_note_rounded,
+                label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
+                color: AppColors.teal,
+              ),
+            ],
+          ),
+        ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(width: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final genre in chips)
+                StampChip(label: '#$genre', tone: StampChipTone.teal),
             ],
           ),
         ],
-      ];
-    }
+      ],
+    );
+  }
 
+  /// Chip khi ≥2 ảnh: xoay theo [_photoIndex] — ảnh 1: khoảng cách + bài tủ;
+  /// ảnh 2: thể loại chung; ảnh ≥3: giới thiệu (bio).
+  List<Widget> _infoChips(BuildContext context, Candidate candidate) {
     if (_photoIndex == 0) {
       return [
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            _Badge(
-              icon: Icons.place_rounded,
-              label: 'Cách ${candidate.distanceBand ?? '?'} km',
-              background: AppColors.primaryTint,
-              foreground: AppColors.primaryDark,
-            ),
-            _Badge(
-              icon: Icons.music_note_rounded,
-              label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
-              background: AppColors.tertiaryTint,
-              foreground: AppColors.tertiary,
-            ),
-          ],
+        _InfoLine(
+          icon: Icons.place_rounded,
+          label: 'Cách ${candidate.distanceBand ?? '?'} km',
+          color: AppColors.primary,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        _InfoLine(
+          icon: Icons.music_note_rounded,
+          label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
+          color: AppColors.teal,
         ),
       ];
     }
@@ -248,10 +319,9 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
         return [
           Text(
             'Chưa chung thể loại nào',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
         ];
       }
@@ -261,7 +331,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
           runSpacing: AppSpacing.sm,
           children: [
             for (final genre in candidate.sharedGenres.take(5))
-              _GenreChip(label: genre),
+              StampChip(label: '#$genre', tone: StampChipTone.teal),
           ],
         ),
       ];
@@ -274,69 +344,86 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
             : 'Chưa có giới thiệu — hỏi thử khi match nhé!',
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: Theme.of(context)
-            .textTheme
-            .bodyMedium
-            ?.copyWith(color: AppColors.textSecondary),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
       ),
     ];
   }
 }
 
-class _Badge extends StatelessWidget {
-  const _Badge({
+class _InfoLine extends StatelessWidget {
+  const _InfoLine({
     required this.icon,
     required this.label,
-    required this.background,
-    required this.foreground,
+    required this.color,
   });
 
   final IconData icon;
   final String label;
-  final Color background;
-  final Color foreground;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: foreground),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
             label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w800,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w700,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _GenreChip extends StatelessWidget {
-  const _GenreChip({required this.label});
+class _CardIconButton extends StatelessWidget {
+  const _CardIconButton({
+    super.key,
+    required this.tooltip,
+    required this.onTap,
+    required this.icon,
+  });
 
-  final String label;
+  final String tooltip;
+  final VoidCallback onTap;
+  final Widget icon;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      '#$label',
-      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        color: AppColors.textSecondary,
-        fontWeight: FontWeight.w800,
+    return Tooltip(
+      message: tooltip,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.ink, width: 2),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+          boxShadow: const [AppShadows.hard],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox.square(
+              dimension: 44,
+              child: IconTheme(
+                data: const IconThemeData(color: AppColors.ink, size: 24),
+                child: icon,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
