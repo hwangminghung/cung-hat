@@ -34,15 +34,17 @@ class KeoCard extends StatelessWidget {
           showPerforation: time != null && !stackTime,
           perforationPosition: 0.25,
           child: time != null && !stackTime
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(width: 58, child: _TimeStub(time: time)),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(
-                      child: _KeoDetails(keo: keo, text: text),
-                    ),
-                  ],
+              ? IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(width: 58, child: _TimeStub(time: time)),
+                      const SizedBox(width: AppSpacing.lg),
+                      Expanded(
+                        child: _KeoDetails(keo: keo, text: text),
+                      ),
+                    ],
+                  ),
                 )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -119,4 +119,31 @@ void main() {
     expect(find.text('20:00'), findsOneWidget);
     expect(find.text('22:00'), findsOneWidget);
   });
+
+  testWidgets(
+    'KeoCard có time window render được trong ListView (regression stretch/unbounded)',
+    (tester) async {
+      const keoCoGio = Keo(
+        id: '5',
+        title: 'Kèo có giờ trong ListView',
+        timeWindowStart: '2026-07-17T13:00:00Z',
+        timeWindowEnd: '2026-07-17T15:00:00Z',
+        sizeTarget: 4,
+        slotsFilled: 2,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: ListView(children: const [KeoCard(keo: keoCoGio)]),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining(':'), findsWidgets); // giờ hiển thị
+      expect(find.text(keoCoGio.title), findsOneWidget);
+    },
+  );
 }
