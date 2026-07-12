@@ -4,10 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../../shared/widgets/stamp_chip.dart';
+import '../../../shared/widgets/ticket_card.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/keo_providers.dart';
 import '../data/keo_errors.dart';
@@ -62,7 +67,7 @@ class KeoDetailScreen extends ConsumerWidget {
         title: const Text('Chi tiết kèo'),
         actions: [
           if (canShare)
-            IconButton(
+            IconButton.outlined(
               key: const Key('keo_share_btn'),
               tooltip: 'Chia sẻ kèo',
               icon: const Icon(Icons.share_rounded),
@@ -89,15 +94,20 @@ class KeoDetailScreen extends ConsumerWidget {
 
   Future<void> _shareKeo(BuildContext context, WidgetRef ref) async {
     try {
-      final token =
-          await ref.read(keoRepositoryProvider).createKeoShareLink(keoId);
-      await SharePlus.instance.share(ShareParams(
+      final token = await ref
+          .read(keoRepositoryProvider)
+          .createKeoShareLink(keoId);
+      await SharePlus.instance.share(
+        ShareParams(
           text:
-              'Kèo "$title" đang tuyển giọng ca — vào Cùng Hát xin một chỗ: cunghat://keo/shared/$token'));
+              'Kèo "$title" đang tuyển giọng ca — vào Cùng Hát xin một chỗ: cunghat://keo/shared/$token',
+        ),
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Không tạo được link, thử lại.')));
+          const SnackBar(content: Text('Không tạo được link, thử lại.')),
+        );
       }
     }
   }
@@ -121,9 +131,18 @@ class KeoDetailScreen extends ConsumerWidget {
       ),
       children: [
         _Header(title: title, count: roster.length),
-        const SizedBox(height: AppSpacing.lg),
-        Text('Thành viên', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.xl),
+        Row(
+          children: [
+            Text(
+              'Thành viên',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            const Expanded(child: WaveDivider()),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
         for (final member in roster)
           _RosterTile(
             key: ValueKey(member.userId),
@@ -217,48 +236,48 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: AppColors.brandGradient,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      ),
-      child: Row(
+    return TicketCard(
+      showPerforation: false,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.onPrimary.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.groups_rounded,
-              color: AppColors.secondary,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
                   title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.onPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              const Icon(Icons.auto_awesome_outlined, color: AppColors.ink),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const WaveDivider(),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary,
+                  border: Border.all(color: AppColors.ink, width: 2),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                ),
+                child: const Icon(Icons.groups_outlined, color: AppColors.ink),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
                   '$count người trong kèo',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.onPrimary.withValues(alpha: 0.88),
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -286,85 +305,118 @@ class _RosterTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayName = member.displayName ?? 'Ẩn danh';
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
+    final isHost = member.role == 'host';
+    final stampLabel = isHost ? 'Chủ kèo' : statusText;
+    final stampTone = isHost || member.joinStatus == 'requested'
+        ? StampChipTone.lime
+        : StampChipTone.teal;
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
-        border: Border.all(color: AppColors.border),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.ink, width: 2)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: member.role == 'host'
-                  ? AppColors.primaryTint
-                  : AppColors.tertiaryTint,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              initial,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: member.role == 'host'
-                    ? AppColors.primaryDark
-                    : AppColors.tertiary,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isHost ? AppColors.secondary : AppColors.teal,
+                  border: Border.all(color: AppColors.ink, width: 2),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
+                  boxShadow: const [AppShadows.hard],
+                ),
+                child: Text(
+                  initial,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(color: AppColors.ink),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
-                      child: Text(
-                        displayName,
-                        style: Theme.of(context).textTheme.titleSmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            displayName,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (member.verified) ...[
+                          const SizedBox(width: AppSpacing.xs),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 18,
+                            color: AppColors.ink,
+                          ),
+                        ],
+                      ],
                     ),
-                    if (member.verified) ...[
-                      const SizedBox(width: AppSpacing.xs),
-                      const Icon(
-                        Icons.verified_rounded,
-                        size: 16,
-                        color: AppColors.tertiary,
-                      ),
-                    ],
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      children: [
+                        StampChip(
+                          label: stampLabel,
+                          tone: stampTone,
+                          leadingIcon: isHost
+                              ? Icons.auto_awesome_outlined
+                              : member.joinStatus == 'requested'
+                              ? Icons.schedule_outlined
+                              : Icons.check_rounded,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  member.role == 'host' ? 'Chủ kèo' : statusText,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+              ),
+            ],
+          ),
+          if (isHostViewer && member.joinStatus == 'requested') ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: Tooltip(
+                    message: 'Duyệt',
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: AppColors.teal,
+                        foregroundColor: AppColors.ink,
+                      ),
+                      onPressed: onApprove,
+                      icon: const Icon(Icons.check_rounded),
+                      label: const Text('Duyệt'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Tooltip(
+                    message: 'Từ chối',
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: AppColors.surface,
+                        foregroundColor: AppColors.error,
+                      ),
+                      onPressed: onDecline,
+                      icon: const Icon(Icons.close_rounded),
+                      label: const Text('Từ chối'),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          if (isHostViewer && member.joinStatus == 'requested')
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  tooltip: 'Duyệt',
-                  onPressed: onApprove,
-                  icon: const Icon(Icons.check_rounded),
-                ),
-                IconButton(
-                  tooltip: 'Từ chối',
-                  onPressed: onDecline,
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
-            ),
+          ],
         ],
       ),
     );
@@ -398,25 +450,31 @@ class _ActionPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (notMember)
-          FilledButton.icon(
+          GradientButton(
             key: const Key('request_join_btn'),
             onPressed: onRequestJoin,
-            icon: const Icon(Icons.login_rounded),
-            label: const Text('Xin vào kèo'),
+            icon: Icons.login_rounded,
+            child: const Text('Xin vào kèo'),
           ),
-        if (isApproved && !isHost)
-          FilledButton.icon(
+        if (isApproved && !isHost) ...[
+          OutlinedButton.icon(
             key: const Key('confirm_keo_btn'),
             onPressed: onConfirm,
+            style: OutlinedButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.ink,
+            ),
             icon: const Icon(Icons.check_circle_rounded),
             label: const Text('Đồng ý tham gia'),
           ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
         if (isApproved) ...[
-          OutlinedButton.icon(
+          GradientButton(
             key: const Key('open_keo_chat_btn'),
             onPressed: onOpenChat,
-            icon: const Icon(Icons.chat_bubble_rounded),
-            label: const Text('Mở chat nhóm'),
+            icon: Icons.chat_bubble_outline_rounded,
+            child: const Text('Mở chat nhóm'),
           ),
           const SizedBox(height: AppSpacing.sm),
         ],
@@ -424,14 +482,14 @@ class _ActionPanel extends StatelessWidget {
           OutlinedButton.icon(
             key: const Key('host_pick_venue_btn'),
             onPressed: onPlan,
-            icon: const Icon(Icons.place_rounded),
+            icon: const Icon(Icons.place_outlined),
             label: const Text('Chốt quán'),
           )
         else if (isApproved)
           OutlinedButton.icon(
             key: const Key('view_plan_btn'),
             onPressed: onPlan,
-            icon: const Icon(Icons.map_rounded),
+            icon: const Icon(Icons.map_outlined),
             label: const Text('Xem kế hoạch'),
           ),
         if (isApproved && !isHost) ...[
