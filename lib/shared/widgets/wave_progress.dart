@@ -42,7 +42,13 @@ class WaveProgressPainter extends CustomPainter {
 
   final double progress;
 
-  static final _barCount = _kWaveProgressBarHeights.length;
+  /// Number of bars in the fixed waveform pattern.
+  static final barCount = _kWaveProgressBarHeights.length;
+
+  /// Whether bar [index] is painted as "done": only when its WHOLE slice
+  /// fits inside [progress] — so 0.0 tints no bar (fresh profile) and 1.0
+  /// tints every bar. `index / barCount` would mark bar 0 done even at 0.0.
+  bool isBarDone(int index) => (index + 1) / barCount <= progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -59,17 +65,16 @@ class WaveProgressPainter extends CustomPainter {
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
 
-    final slot = size.width / _barCount;
-    for (var i = 0; i < _barCount; i++) {
+    final slot = size.width / barCount;
+    for (var i = 0; i < barCount; i++) {
       final x = slot * i + slot / 2;
       final barHeight = size.height * _kWaveProgressBarHeights[i];
       final top = (size.height - barHeight) / 2;
       final bottom = top + barHeight;
-      final isDone = (i / _barCount) <= progress;
       canvas.drawLine(
         Offset(x, top),
         Offset(x, bottom),
-        isDone ? donePaint : todoPaint,
+        isBarDone(i) ? donePaint : todoPaint,
       );
     }
   }
