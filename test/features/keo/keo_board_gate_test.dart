@@ -12,6 +12,7 @@ import 'package:cung_hat/features/keo/data/keo_repository.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/keo/domain/keo_match_suggestion.dart';
 import 'package:cung_hat/features/keo/presentation/keo_board_screen.dart';
+import 'package:cung_hat/shared/widgets/gradient_button.dart';
 
 class _FakeKeoRepository implements KeoRepository {
   _FakeKeoRepository({this.suggestions = const [], this.openKeos = const []});
@@ -99,6 +100,23 @@ GoRouter _boardRouter() => GoRouter(
 );
 
 void main() {
+  testWidgets('board presents one retro create CTA without a FAB duplicate', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        MaterialApp(theme: AppTheme.light(), home: const KeoBoardScreen()),
+        entitlements: const <String>{'pro'},
+        repo: _FakeKeoRepository(openKeos: [_openKeo()]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tạo kèo'), findsOneWidget);
+    expect(find.byType(GradientButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
   testWidgets('FREE user: tapping Tao keo shows the upgrade sheet', (
     tester,
   ) async {
