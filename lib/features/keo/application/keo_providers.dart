@@ -20,5 +20,8 @@ final keoMatchSuggestionsProvider =
 final keoRosterProvider = FutureProvider.family<List<KeoMember>, String>(
     (ref, keoId) => ref.watch(keoRepositoryProvider).roster(keoId));
 
+final keoHeaderProvider = FutureProvider.family<Keo?, String>(
+    (ref, keoId) => ref.watch(keoRepositoryProvider).header(keoId));
+
 final sharedKeoProvider = FutureProvider.family<SharedKeo?, String>(
     (ref, token) => ref.watch(keoRepositoryProvider).resolveSharedKeo(token));

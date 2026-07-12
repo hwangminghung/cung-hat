@@ -16,6 +16,7 @@ import '../../../shared/widgets/wave_divider.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/keo_providers.dart';
 import '../data/keo_errors.dart';
+import '../domain/keo.dart';
 import '../domain/keo_member.dart';
 
 class KeoDetailScreen extends ConsumerWidget {
@@ -24,8 +25,11 @@ class KeoDetailScreen extends ConsumerWidget {
   final String keoId;
   final String title;
 
-  String _statusText(String status) {
-    switch (status) {
+  String _statusText(KeoMember member) {
+    if (member.joinStatus == 'approved' && member.confirmed) {
+      return 'Đã xác nhận';
+    }
+    switch (member.joinStatus) {
       case 'approved':
         return 'Đã duyệt';
       case 'requested':
@@ -37,7 +41,7 @@ class KeoDetailScreen extends ConsumerWidget {
       case 'declined':
         return 'Bị từ chối';
       default:
-        return status;
+        return member.joinStatus;
     }
   }
 
@@ -120,10 +124,12 @@ class KeoDetailScreen extends ConsumerWidget {
     final myRow = _myRow(ref, roster);
     final isHost = myRow?.role == 'host';
     final isApproved = myRow?.joinStatus == 'approved';
+    final isConfirmed = myRow?.confirmed ?? false;
     final notMember = myRow == null || myRow.joinStatus == 'left';
     final approvedCount = roster
         .where((member) => member.joinStatus == 'approved')
         .length;
+    final headerInfo = ref.watch(keoHeaderProvider(keoId)).value;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -133,7 +139,7 @@ class KeoDetailScreen extends ConsumerWidget {
         AppSpacing.xxxl,
       ),
       children: [
-        _Header(title: title, count: approvedCount),
+        _Header(title: title, count: approvedCount, info: headerInfo),
         const SizedBox(height: AppSpacing.xl),
         Row(
           children: [
@@ -150,7 +156,7 @@ class KeoDetailScreen extends ConsumerWidget {
           _RosterTile(
             key: ValueKey(member.userId),
             member: member,
-            statusText: _statusText(member.joinStatus),
+            statusText: _statusText(member),
             isHostViewer: isHost,
             onApprove: () => _approve(context, ref, member),
             onDecline: () => _decline(context, ref, member),
@@ -159,6 +165,7 @@ class KeoDetailScreen extends ConsumerWidget {
         _ActionPanel(
           notMember: notMember,
           isApproved: isApproved,
+          isConfirmed: isConfirmed,
           isHost: isHost,
           onRequestJoin: () => _requestJoin(context, ref),
           onConfirm: () => _confirm(context, ref),
@@ -232,13 +239,31 @@ class KeoDetailScreen extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.title, required this.count});
+  const _Header({required this.title, required this.count, this.info});
 
   final String title;
   final int count;
 
+  /// Giờ + khu vực từ get_keo_header (mockup 14) — null (đang tải/bị chặn)
+  /// thì giữ layout cũ chỉ có tiêu đề + số người.
+  final Keo? info;
+
+  /// 'HH:mm – HH:mm · d/M' giờ máy — cùng cách quy đổi toLocal như KeoCard.
+  static String? _timeLabel(Keo info) {
+    final start = DateTime.tryParse(info.timeWindowStart ?? '');
+    final end = DateTime.tryParse(info.timeWindowEnd ?? '');
+    if (start == null || end == null) return null;
+    final s = start.toLocal();
+    final e = end.toLocal();
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${two(s.hour)}:${two(s.minute)} – ${two(e.hour)}:${two(e.minute)}'
+        ' · ${s.day}/${s.month}';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final timeLabel = info == null ? null : _timeLabel(info!);
+    final areaLabel = info?.areaLabel;
     return TicketCard(
       showPerforation: false,
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -260,6 +285,22 @@ class _Header extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           const WaveDivider(),
+          if (timeLabel != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            _InfoRow(
+              key: const Key('keo_header_time'),
+              icon: Icons.schedule_outlined,
+              label: timeLabel,
+            ),
+          ],
+          if (areaLabel != null && areaLabel.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _InfoRow(
+              key: const Key('keo_header_area'),
+              icon: Icons.place_outlined,
+              label: areaLabel,
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -284,6 +325,31 @@ class _Header extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({super.key, required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: AppColors.ink),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.titleSmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -445,6 +511,7 @@ class _ActionPanel extends StatelessWidget {
   const _ActionPanel({
     required this.notMember,
     required this.isApproved,
+    required this.isConfirmed,
     required this.isHost,
     required this.onRequestJoin,
     required this.onConfirm,
@@ -455,6 +522,7 @@ class _ActionPanel extends StatelessWidget {
 
   final bool notMember;
   final bool isApproved;
+  final bool isConfirmed;
   final bool isHost;
   final VoidCallback onRequestJoin;
   final VoidCallback onConfirm;
@@ -474,7 +542,7 @@ class _ActionPanel extends StatelessWidget {
             icon: Icons.login_rounded,
             child: const Text('Xin vào kèo'),
           ),
-        if (isApproved && !isHost) ...[
+        if (isApproved && !isHost && !isConfirmed) ...[
           OutlinedButton.icon(
             key: const Key('confirm_keo_btn'),
             onPressed: onConfirm,
@@ -484,6 +552,19 @@ class _ActionPanel extends StatelessWidget {
             ),
             icon: const Icon(Icons.check_circle_rounded),
             label: const Text('Đồng ý tham gia'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        if (isApproved && !isHost && isConfirmed) ...[
+          OutlinedButton.icon(
+            key: const Key('confirmed_state_btn'),
+            onPressed: null,
+            style: OutlinedButton.styleFrom(
+              disabledBackgroundColor: AppColors.teal,
+              disabledForegroundColor: AppColors.ink,
+            ),
+            icon: const Icon(Icons.check_rounded),
+            label: const Text('Đã xác nhận tham gia'),
           ),
           const SizedBox(height: AppSpacing.sm),
         ],

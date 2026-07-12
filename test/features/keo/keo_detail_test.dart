@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/keo/application/keo_providers.dart';
 import 'package:cung_hat/features/keo/data/keo_repository.dart';
+import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/keo/domain/keo_member.dart';
 import 'package:cung_hat/features/keo/presentation/keo_detail_screen.dart';
 import 'package:cung_hat/features/profile/application/profile_providers.dart';
@@ -196,6 +197,99 @@ void main() {
     expect(approveTop.dy, lessThan(declineTop.dy));
     expect(tester.takeException(), isNull);
     expect(find.byType(ListView), findsOneWidget);
+  });
+
+  testWidgets(
+    'confirmed member sees state chip and no confirm button (mockup 14)',
+    (tester) async {
+      final repo = _MockRepo();
+      when(() => repo.roster('k1')).thenAnswer(
+        (_) async => const [
+          KeoMember(
+            userId: 'host',
+            displayName: 'Mai',
+            role: 'host',
+            joinStatus: 'approved',
+            confirmed: true,
+          ),
+          KeoMember(
+            userId: 'me',
+            displayName: 'An',
+            joinStatus: 'approved',
+            confirmed: true,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            keoRepositoryProvider.overrideWithValue(repo),
+            myProfileProvider.overrideWith(
+              (ref) => Future<Profile?>.value(const Profile(id: 'me')),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const KeoDetailScreen(keoId: 'k1', title: 'Hát tối T7'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('confirm_keo_btn')), findsNothing);
+      expect(find.byKey(const Key('confirmed_state_btn')), findsOneWidget);
+      expect(find.widgetWithText(StampChip, 'Đã xác nhận'), findsOneWidget);
+      // Host giữ chip 'Chủ kèo' — không bị đè bởi trạng thái confirmed.
+      expect(find.widgetWithText(StampChip, 'Chủ kèo'), findsOneWidget);
+      expect(find.byKey(const Key('open_keo_chat_btn')), findsOneWidget);
+    },
+  );
+
+  testWidgets('header shows time window and area from get_keo_header', (
+    tester,
+  ) async {
+    final repo = _MockRepo();
+    when(() => repo.roster('k1')).thenAnswer((_) async => const []);
+    when(() => repo.header('k1')).thenAnswer(
+      (_) async => const Keo(
+        id: 'k1',
+        title: 'Hát tối T7',
+        areaLabel: 'Hoàn Kiếm, Hà Nội',
+        timeWindowStart: '2026-06-30T12:00:00Z',
+        timeWindowEnd: '2026-06-30T14:00:00Z',
+        status: 'planning',
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          keoRepositoryProvider.overrideWithValue(repo),
+          myProfileProvider.overrideWith((ref) => Future<Profile?>.value(null)),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const KeoDetailScreen(keoId: 'k1', title: 'Hát tối T7'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('keo_header_time')), findsOneWidget);
+    expect(find.byKey(const Key('keo_header_area')), findsOneWidget);
+    expect(find.text('Hoàn Kiếm, Hà Nội'), findsOneWidget);
+    // Giờ hiển thị theo TZ máy chạy test — kiểm tra động, không hardcode.
+    final s = DateTime.parse('2026-06-30T12:00:00Z').toLocal();
+    final e = DateTime.parse('2026-06-30T14:00:00Z').toLocal();
+    String two(int v) => v.toString().padLeft(2, '0');
+    expect(
+      find.text(
+        '${two(s.hour)}:${two(s.minute)} – ${two(e.hour)}:${two(e.minute)}'
+        ' · ${s.day}/${s.month}',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('free_join_limit error shows the upgrade sheet', (tester) async {

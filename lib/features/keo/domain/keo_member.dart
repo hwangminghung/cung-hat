@@ -10,6 +10,7 @@ abstract class KeoMember with _$KeoMember {
     @Default(false) bool verified,
     @Default('member') String role,
     @JsonKey(name: 'join_status') @Default('requested') String joinStatus,
+    @Default(false) bool confirmed,
   }) = _KeoMember;
   factory KeoMember.fromJson(Map<String, dynamic> j) => _$KeoMemberFromJson(j);
 }
