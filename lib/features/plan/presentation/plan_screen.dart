@@ -191,9 +191,17 @@ class PlanScreen extends ConsumerWidget {
                     'https://www.google.com/maps/search/?api=1&query=$query',
                   );
                   try {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                    final ok = await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!ok && context.mounted) {
+                      _snack(context, 'Không mở được bản đồ');
+                    }
                   } catch (_) {
-                    if (context.mounted) _snack(context, 'Không mở được bản đồ');
+                    if (context.mounted) {
+                      _snack(context, 'Không mở được bản đồ');
+                    }
                   }
                 },
                 child: const Text('Chỉ đường'),
