@@ -318,7 +318,13 @@ class _ProfileTile extends StatelessWidget {
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               if (badgeLabel != null) ...[
                 const SizedBox(width: AppSpacing.sm),
                 StampChip(label: badgeLabel!),
