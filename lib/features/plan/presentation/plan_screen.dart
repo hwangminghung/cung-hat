@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../application/plan_providers.dart';
 import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/gradient_button.dart';
 import 'booking_button.dart';
 import 'plan_time_picker_sheet.dart';
 import 'safety_toolkit.dart';
 import 'venue_map_surface.dart';
+
+/// Cổng đặt cọc chỉ bật khi build với --dart-define=BOOKING_ENABLED=true
+/// (quyết định payments-v1 2026-07-10: v1 không thanh toán).
+const bookingEnabled = bool.fromEnvironment('BOOKING_ENABLED');
 
 class PlanScreen extends ConsumerWidget {
   const PlanScreen({
@@ -43,6 +49,13 @@ class PlanScreen extends ConsumerWidget {
       if (v.id == venueId) return v.name;
     }
     return 'Quán đã chọn';
+  }
+
+  String _venueAddress(List<VenueSuggestion> venues, String? venueId) {
+    for (final v in venues) {
+      if (v.id == venueId) return v.address;
+    }
+    return '';
   }
 
   @override
@@ -163,7 +176,28 @@ class PlanScreen extends ConsumerWidget {
                 },
               )
             else ...[
-              BookingButton(planId: plan.id, venueId: plan.venueId),
+              if (bookingEnabled) ...[
+                BookingButton(planId: plan.id, venueId: plan.venueId),
+                const SizedBox(height: 12),
+              ],
+              GradientButton(
+                key: const Key('directions_btn'),
+                icon: Icons.place_rounded,
+                onPressed: () async {
+                  final query = Uri.encodeComponent(
+                    '$name ${_venueAddress(venues, plan.venueId)}'.trim(),
+                  );
+                  final url = Uri.parse(
+                    'https://www.google.com/maps/search/?api=1&query=$query',
+                  );
+                  try {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } catch (_) {
+                    if (context.mounted) _snack(context, 'Không mở được bản đồ');
+                  }
+                },
+                child: const Text('Chỉ đường'),
+              ),
               const SizedBox(height: 12),
               SafetyToolkit(planId: plan.id),
             ],
