@@ -10,6 +10,7 @@ import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/pressable.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../billing/application/billing_providers.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../application/keo_providers.dart';
@@ -158,6 +159,10 @@ class KeoBoardScreen extends ConsumerWidget {
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: WaveDivider(),
         ),
       ],
     ),

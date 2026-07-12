@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/wave_divider.dart';
 import '../../onboarding/presentation/consent_step.dart';
 import '../application/settings_providers.dart';
 
@@ -29,6 +30,10 @@ class SettingsScreen extends ConsumerWidget {
           AppSpacing.xxxl,
         ),
         children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: WaveDivider(),
+          ),
           _Section(
             title: 'Quyền riêng tư',
             child: consentsAsync.isLoading
