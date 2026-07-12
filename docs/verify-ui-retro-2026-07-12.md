@@ -74,5 +74,35 @@ Deferred thêm: badge unread + timestamp cột phải inbox (MatchSummary chưa 
 | Chat 1-1 realtime B → A | ✅ B gửi "Toi nay hat Uoc Gi nhe"; inbox A tự cập nhật pill lime "Đến lượt bạn" + badge cam "1" KHÔNG cần refresh |
 | Chat 1-1 realtime A → B | ✅ A trả lời "Chot 20h nhe"; hiện trên màn B tức thì (B đang mở chat) |
 
-Giới hạn ghi nhận: B (host) không có đường UI vào kèo mình tạo (inbox "Kèo của bạn" cần RPC `get_my_keos` — deferred #1) nên chưa demo chat nhóm; nút "Đồng ý tham gia" trên A tap không thấy phản hồi UI (cần xem lại confirm flow — chưa chặn merge, kèo vẫn hoạt động).
+Giới hạn ghi nhận: B (host) không có đường UI vào kèo mình tạo (inbox "Kèo của bạn" cần RPC `get_my_keos` — deferred #1) nên chưa demo chat nhóm; ~~nút "Đồng ý tham gia" trên A tap không thấy phản hồi UI~~ **ĐÍNH CHÍNH 2026-07-13: nút hoạt động ĐÚNG** (keo_members.confirmed=t, kèo chuyển status planning) — vấn đề thật là nút không đổi trạng thái hiển thị sau confirm (xem mục so khớp mockup bên dưới).
 Gotcha thao tác: `adb shell input text` phải escape space bằng `%s`, không thì chuỗi bị cắt ở từ đầu tiên.
+
+## So khớp mockup toàn diện (2026-07-13, walkthrough 2 emulator)
+
+Đối chiếu từng màn live với 22 mockup. Screenshots `cmp_*.png` (scratchpad phiên làm việc; các màn chính đã có bản commit ở `polish-*.png`/`multiacc-*.png`).
+
+| Mockup | Màn | Verdict |
+|---|---|---|
+| 07 deck | Đôi hát | ✅ khớp — Online hôm nay + chip #vpop #ballad + "cùng 2 bài tủ" (số liệu xác minh đúng theo DB), 4 nút có nhãn |
+| 08 detail sheet | Sheet ứng viên | ✅ khớp cấu trúc (Gu nhạc chung/Bài tủ chung/Bỏ qua-Thích/Báo cáo-Chặn); thiếu tính năng photo-prompt "Trả lời ảnh này"/"Trả lời" (ngoài phạm vi v1) |
+| 09 match | Hợp cạ rồi! | ✅ khớp (2 card + chip "Cùng tủ: …" + CTA); thiếu cụm mic+waveform giữa màn (cosmetic) |
+| 10 explore | Khám phá theo gu nhạc | ✅ khớp copy từng chữ + 5 theme card; decor emoji thay line-art |
+| 11 board | Kèo quanh bạn | ✅ khớp bố cục ticket; thiếu dải avatar thành viên + tên quán trên card (quán vốn chốt sau ở Kế hoạch) |
+| 12 auto-match | Kèo hợp với bạn | ✅ khớp + 4 chip lý do; **🐛 giờ hiện raw UTC** thay vì định dạng +7 như board |
+| 13 create | Tạo kèo (B, Pro) | ✅ khớp (header, card "Chọn quán sau", 8 chip thể loại, Cần duyệt/Mở); free user thấy Pro-gate sheet (đúng nghiệp vụ) |
+| 14 kèo detail | Chi tiết kèo | ⚠️ **thiếu hàng giờ + địa điểm trong ticket header** (mockup có 3 cột giờ/quán/số người); **🐛 nút "Đồng ý tham gia" không đổi trạng thái sau confirm** (mockup dùng chip "Đã xác nhận") |
+| 15 inbox | Tin nhắn | ✅ rows khớp (avatar vuông, pill, wave, badge unread cam); thiếu section "Kèo của bạn" (get_my_keos) + timestamp cột phải (backend) — deferred đã ghi |
+| 16 chat 1-1 | Chat | ✅ bubble cam/kem + Lập kèo; thiếu avatar+chấm online trên header và card share bài hát (thuộc khối chat-media chưa merge) |
+| 17 group chat | Chat nhóm | ✅ khung + banner Luật nhóm; thiếu subtitle tên kèo + nút thành viên góc phải |
+| 18 profile | Hồ sơ | ✅ khớp (5 tile đúng thứ tự, PRO badge, WaveProgress, gear) |
+| 19 plan | Kế hoạch | ✅ cấu trúc (map pins + venue card + dòng "Gợi ý vì gần điểm cân bằng…"); tile map chờ Maps billing; "Chọn quán này" chỉ host (đúng); chưa thấy chip "Điểm giữa nhóm" |
+| 20 booking | — | ✅ ẨN đúng chủ đích (BOOKING_ENABLED=false, quyết định v1) |
+| 21 store | Nâng cấp | ✅ nội dung khớp 100% (4 gói + giá 199k/49k/99k/79k + mô tả); hero style khác nhẹ |
+| 22 settings | Cài đặt | ✅ khớp 4 section + toggle lime; thêm toggle PDPL Singapore (bắt buộc pháp lý) |
+| 01-06 auth/onboarding | — | Theme đã verify phiên trước; onboarding live vẫn deferred (cần tài khoản mới) |
+
+**Phát hiện sự cố UX xuyên suốt (nặng nhất):** kèo đã join/đã chuyển `planning` biến mất khỏi board (board chỉ hiện kèo `open` chưa tham gia) → cả host lẫn member mất mọi lối vào kèo của mình. Cần ưu tiên `get_my_keos` + section "Kèo của bạn" (mockup 15) ngay đợt sau.
+
+**Đính chính điều tra cũ:** nghi vấn "Bài tủ chung hiển thị sai" là BÁO ĐỘNG NHẦM — tôi tra nhầm ID QA seed (007 = Hân, không phải 003); RPC `get_discovery_candidates` tính giao bài tủ/genre ĐÚNG (xác minh bằng gọi RPC trực tiếp dưới JWT Minh).
+
+**Data demo bổ sung hôm nay (DB local):** Minh thêm `user_genres` {ballad,vpop} + bài tủ s1 (trước đó Minh 0 genre → chip #genre không bao giờ hiện); xoá 4 swipe ma 15:44 UTC; kèo demo set lại `open` + gia hạn window.
