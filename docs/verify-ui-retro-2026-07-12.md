@@ -88,9 +88,9 @@ Gotcha thao tác: `adb shell input text` phải escape space bằng `%s`, không
 | 09 match | Hợp cạ rồi! | ✅ khớp (2 card + chip "Cùng tủ: …" + CTA); thiếu cụm mic+waveform giữa màn (cosmetic) |
 | 10 explore | Khám phá theo gu nhạc | ✅ khớp copy từng chữ + 5 theme card; decor emoji thay line-art |
 | 11 board | Kèo quanh bạn | ✅ khớp bố cục ticket; thiếu dải avatar thành viên + tên quán trên card (quán vốn chốt sau ở Kế hoạch) |
-| 12 auto-match | Kèo hợp với bạn | ✅ khớp + 4 chip lý do; **🐛 giờ hiện raw UTC** thay vì định dạng +7 như board |
+| 12 auto-match | Kèo hợp với bạn | ✅ khớp + 4 chip lý do; ~~🐛 giờ raw UTC~~ **ĐÃ FIX** (giờ local, `fix-automatch-local-time.png`) |
 | 13 create | Tạo kèo (B, Pro) | ✅ khớp (header, card "Chọn quán sau", 8 chip thể loại, Cần duyệt/Mở); free user thấy Pro-gate sheet (đúng nghiệp vụ) |
-| 14 kèo detail | Chi tiết kèo | ⚠️ **thiếu hàng giờ + địa điểm trong ticket header** (mockup có 3 cột giờ/quán/số người); **🐛 nút "Đồng ý tham gia" không đổi trạng thái sau confirm** (mockup dùng chip "Đã xác nhận") |
+| 14 kèo detail | Chi tiết kèo | ✅ **ĐÃ FIX cả 2** (2026-07-13): ticket header thêm giờ (toLocal) + khu vực qua RPC mới `get_keo_header`; roster chip "Đã xác nhận" + nút teal disabled "Đã xác nhận tham gia" khi confirmed (`fix-keo-detail-header-confirmed.png`) |
 | 15 inbox | Tin nhắn | ✅ rows khớp (avatar vuông, pill, wave, badge unread cam); thiếu section "Kèo của bạn" (get_my_keos) + timestamp cột phải (backend) — deferred đã ghi |
 | 16 chat 1-1 | Chat | ✅ bubble cam/kem + Lập kèo; thiếu avatar+chấm online trên header và card share bài hát (thuộc khối chat-media chưa merge) |
 | 17 group chat | Chat nhóm | ✅ khung + banner Luật nhóm; thiếu subtitle tên kèo + nút thành viên góc phải |
@@ -106,3 +106,12 @@ Gotcha thao tác: `adb shell input text` phải escape space bằng `%s`, không
 **Đính chính điều tra cũ:** nghi vấn "Bài tủ chung hiển thị sai" là BÁO ĐỘNG NHẦM — tôi tra nhầm ID QA seed (007 = Hân, không phải 003); RPC `get_discovery_candidates` tính giao bài tủ/genre ĐÚNG (xác minh bằng gọi RPC trực tiếp dưới JWT Minh).
 
 **Data demo bổ sung hôm nay (DB local):** Minh thêm `user_genres` {ballad,vpop} + bài tủ s1 (trước đó Minh 0 genre → chip #genre không bao giờ hiện); xoá 4 swipe ma 15:44 UTC; kèo demo set lại `open` + gia hạn window.
+
+## Đợt fix pre-merge (2026-07-13) — plan `2026-07-13-fix-mockup-gaps.md`
+
+3 lỗi từ bảng so khớp đã fix và verify live trên emulator:
+1. **F1** commit `match sheet gio local`: `_formatTimeWindow` toLocal, bỏ hậu tố UTC; test expected tính động theo TZ máy (không hardcode — CI khác TZ).
+2. **F2+F3** commit `chi tiet keo hien gio+khu vuc, nut confirm doi trang thai`: migration `20260713120000` (roster + confirmed, RPC `get_keo_header`), model/repo/provider, UI header + trạng thái confirm, pgTAP `keo_header_test.sql`.
+
+Gates: **analyze 0 · Flutter 336/336 · pgTAP 206/206** (41 file, +6 case mới). Migration đã áp vào DB local đang chạy (drop/alter type/recreate OK). Emulator: header kèo demo hiện `08:01 – 10:01 · 13/7` + `Hoàn Kiếm, Hà Nội`; Minh chip "Đã xác nhận" + nút teal disabled; sheet auto-match hiện `07:58 - 09:58` khớp board.
+Gotcha build ghi lại: `build_runner --build-filter` + `--delete-conflicting-outputs` XOÁ generated files ngoài filter (khôi phục bằng `git checkout --`); build APK từ shell phải export `JAVA_TOOL_OPTIONS` unixdomain workaround như memory.
