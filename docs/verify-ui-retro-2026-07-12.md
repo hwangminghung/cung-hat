@@ -115,3 +115,7 @@ Gotcha thao tác: `adb shell input text` phải escape space bằng `%s`, không
 
 Gates: **analyze 0 · Flutter 336/336 · pgTAP 206/206** (41 file, +6 case mới). Migration đã áp vào DB local đang chạy (drop/alter type/recreate OK). Emulator: header kèo demo hiện `08:01 – 10:01 · 13/7` + `Hoàn Kiếm, Hà Nội`; Minh chip "Đã xác nhận" + nút teal disabled; sheet auto-match hiện `07:58 - 09:58` khớp board.
 Gotcha build ghi lại: `build_runner --build-filter` + `--delete-conflicting-outputs` XOÁ generated files ngoài filter (khôi phục bằng `git checkout --`); build APK từ shell phải export `JAVA_TOOL_OPTIONS` unixdomain workaround như memory.
+
+## Đợt "Kèo của bạn" (2026-07-13, nhánh feat/my-keos-inbox) — plan `2026-07-13-my-keos-inbox.md`
+
+Vá gap UX nặng nhất: RPC `get_my_keos` (migration `20260713150000`) + section "Kèo của bạn" đầu tab Chat (mockup 15). Gates: **analyze 0 · Flutter 339/339 · pgTAP 212/212** (42 file, +6 case `my_keos_test.sql`). Emulator: B (host QA Linh) thấy kèo mình tạo + chip "Chủ kèo" + tap vào detail đầy đủ (`mykeos-host-inbox.png`); A (Minh) thấy kèo joined "Đang mở · 2/4" + 2 kèo planning cũ mình host trước đây "mất tích" nay hiện lại (`mykeos-member-inbox.png`). Test cũ không stub provider mới vẫn pass nhờ degrade AsyncError→ẩn section.
