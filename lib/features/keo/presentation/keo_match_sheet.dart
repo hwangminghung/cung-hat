@@ -330,14 +330,16 @@ class _SuggestionMeta extends StatelessWidget {
     if (start == null || end == null) return null;
 
     try {
-      final startUtc = DateTime.parse(start).toUtc();
-      final endUtc = DateTime.parse(end).toUtc();
+      final startLocal = DateTime.parse(start).toLocal();
+      final endLocal = DateTime.parse(end).toLocal();
       final sameDate =
-          startUtc.year == endUtc.year &&
-          startUtc.month == endUtc.month &&
-          startUtc.day == endUtc.day;
-      final endText = sameDate ? _time(endUtc) : _dateTime(endUtc);
-      return '${_dateTime(startUtc)} - $endText UTC';
+          startLocal.year == endLocal.year &&
+          startLocal.month == endLocal.month &&
+          startLocal.day == endLocal.day;
+      if (sameDate) {
+        return '${_time(startLocal)} - ${_time(endLocal)}';
+      }
+      return '${_dateTime(startLocal)} - ${_dateTime(endLocal)}';
     } on FormatException {
       return '$start - $end';
     }

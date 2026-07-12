@@ -10,6 +10,21 @@ import 'package:cung_hat/shared/widgets/stamp_chip.dart';
 import 'package:cung_hat/shared/widgets/ticket_card.dart';
 import 'package:cung_hat/shared/widgets/wave_divider.dart';
 
+/// Expected hiển thị giờ local tính động theo TZ máy chạy test — hardcode
+/// chuỗi sẽ flaky khi CI chạy ở timezone khác.
+String expectedLocalWindow(String startIso, String endIso) {
+  final start = DateTime.parse(startIso).toLocal();
+  final end = DateTime.parse(endIso).toLocal();
+  String two(int v) => v.toString().padLeft(2, '0');
+  String time(DateTime v) => '${two(v.hour)}:${two(v.minute)}';
+  String dateTime(DateTime v) =>
+      '${v.year.toString().padLeft(4, '0')}-${two(v.month)}-${two(v.day)} ${time(v)}';
+  final sameDate =
+      start.year == end.year && start.month == end.month && start.day == end.day;
+  if (sameDate) return '${time(start)} - ${time(end)}';
+  return '${dateTime(start)} - ${dateTime(end)}';
+}
+
 void main() {
   testWidgets('existing keo sheet calls onJoin', (tester) async {
     var joined = false;
@@ -43,7 +58,8 @@ void main() {
 
     expect(find.text('Kèo hợp với bạn'), findsOneWidget);
     expect(find.text('V-Pop toi nay'), findsOneWidget);
-    expect(find.text('2026-06-30 12:00 - 15:00 UTC'), findsOneWidget);
+    expect(find.text(expectedLocalWindow(suggestion.timeWindowStart!, suggestion.timeWindowEnd!)), findsOneWidget);
+    expect(find.textContaining('UTC'), findsNothing);
     expect(find.text('Hợp gu nhạc'), findsOneWidget);
     expect(find.text('Gần bạn'), findsOneWidget);
     expect(find.text('Thủ Đức'), findsOneWidget);
@@ -94,7 +110,7 @@ void main() {
     expect(created, isFalse);
     expect(find.text('Đã tìm thấy nhóm phù hợp'), findsOneWidget);
     expect(find.text('Kèo gợi ý tối nay'), findsOneWidget);
-    expect(find.text('2026-06-30 12:00 - 15:00 UTC'), findsOneWidget);
+    expect(find.text(expectedLocalWindow(suggestion.proposedStart!, suggestion.proposedEnd!)), findsOneWidget);
     expect(find.text('Giờ đẹp'), findsOneWidget);
     expect(find.text('Vào nhanh'), findsOneWidget);
 
