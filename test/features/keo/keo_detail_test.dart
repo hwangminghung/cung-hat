@@ -137,6 +137,8 @@ void main() {
     expect(find.byKey(const ValueKey('pending')), findsOneWidget);
     expect(find.byTooltip('Duyệt'), findsOneWidget);
     expect(find.byTooltip('Từ chối'), findsOneWidget);
+    expect(find.text('1 người trong kèo'), findsOneWidget);
+    expect(find.text('2 người trong kèo'), findsNothing);
     expect(find.byKey(const Key('open_keo_chat_btn')), findsOneWidget);
     expect(find.byKey(const Key('host_pick_venue_btn')), findsOneWidget);
     expect(find.byKey(const Key('confirm_keo_btn')), findsNothing);
@@ -151,10 +153,15 @@ void main() {
     when(() => repo.roster('k1')).thenAnswer(
       (_) async => const [
         KeoMember(
-          userId: 'host',
+          userId: 'me',
           displayName: 'Mai',
           role: 'host',
           joinStatus: 'approved',
+        ),
+        KeoMember(
+          userId: 'pending',
+          displayName: 'Nguyễn Hoàng An',
+          joinStatus: 'requested',
         ),
       ],
     );
@@ -163,7 +170,9 @@ void main() {
       ProviderScope(
         overrides: [
           keoRepositoryProvider.overrideWithValue(repo),
-          myProfileProvider.overrideWith((ref) => Future<Profile?>.value(null)),
+          myProfileProvider.overrideWith(
+            (ref) => Future<Profile?>.value(const Profile(id: 'me')),
+          ),
         ],
         child: MaterialApp(
           theme: AppTheme.light(),
@@ -179,6 +188,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.byTooltip('Duyệt'));
+    await tester.pumpAndSettle();
+
+    final approveTop = tester.getTopLeft(find.byTooltip('Duyệt'));
+    final declineTop = tester.getTopLeft(find.byTooltip('Từ chối'));
+    expect(approveTop.dy, lessThan(declineTop.dy));
     expect(tester.takeException(), isNull);
     expect(find.byType(ListView), findsOneWidget);
   });

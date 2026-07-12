@@ -121,6 +121,9 @@ class KeoDetailScreen extends ConsumerWidget {
     final isHost = myRow?.role == 'host';
     final isApproved = myRow?.joinStatus == 'approved';
     final notMember = myRow == null || myRow.joinStatus == 'left';
+    final approvedCount = roster
+        .where((member) => member.joinStatus == 'approved')
+        .length;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -130,7 +133,7 @@ class KeoDetailScreen extends ConsumerWidget {
         AppSpacing.xxxl,
       ),
       children: [
-        _Header(title: title, count: roster.length),
+        _Header(title: title, count: approvedCount),
         const SizedBox(height: AppSpacing.xl),
         Row(
           children: [
@@ -383,38 +386,53 @@ class _RosterTile extends StatelessWidget {
           ),
           if (isHostViewer && member.joinStatus == 'requested') ...[
             const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: Tooltip(
-                    message: 'Duyệt',
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: AppColors.teal,
-                        foregroundColor: AppColors.ink,
-                      ),
-                      onPressed: onApprove,
-                      icon: const Icon(Icons.check_rounded),
-                      label: const Text('Duyệt'),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stackActions =
+                    constraints.maxWidth < 360 ||
+                    MediaQuery.textScalerOf(context).scale(1) > 1.3;
+                final approve = Tooltip(
+                  message: 'Duyệt',
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.teal,
+                      foregroundColor: AppColors.ink,
                     ),
+                    onPressed: onApprove,
+                    icon: const Icon(Icons.check_rounded),
+                    label: const Text('Duyệt'),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Tooltip(
-                    message: 'Từ chối',
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: AppColors.surface,
-                        foregroundColor: AppColors.error,
-                      ),
-                      onPressed: onDecline,
-                      icon: const Icon(Icons.close_rounded),
-                      label: const Text('Từ chối'),
+                );
+                final decline = Tooltip(
+                  message: 'Từ chối',
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.surface,
+                      foregroundColor: AppColors.error,
                     ),
+                    onPressed: onDecline,
+                    icon: const Icon(Icons.close_rounded),
+                    label: const Text('Từ chối'),
                   ),
-                ),
-              ],
+                );
+                if (stackActions) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      approve,
+                      const SizedBox(height: AppSpacing.xs),
+                      decline,
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: approve),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: decline),
+                  ],
+                );
+              },
             ),
           ],
         ],
