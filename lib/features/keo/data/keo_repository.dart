@@ -15,6 +15,15 @@ class KeoRepository {
         .toList();
   }
 
+  /// Kèo caller đang dính líu (host / đã duyệt / đang xin vào) cho section
+  /// "Kèo của bạn" — lối vào duy nhất khi kèo đã rời trạng thái 'open'.
+  Future<List<Keo>> myKeos() async {
+    final rows = await _client.rpc('get_my_keos');
+    return (rows as List)
+        .map((e) => Keo.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
   /// Header kèo cho màn chi tiết (giờ + khu vực) — null nếu server chặn
   /// (người ngoài với kèo không còn 'open') hoặc kèo không tồn tại.
   Future<Keo?> header(String keoId) async {
