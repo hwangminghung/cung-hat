@@ -25,6 +25,7 @@ class PhotoCarousel extends ConsumerWidget {
     this.radius,
     this.swipeable = true,
     this.fallbackDecorations = const [],
+    this.fallbackTextColor,
     this.onPageChanged,
   });
 
@@ -37,6 +38,14 @@ class PhotoCarousel extends ConsumerWidget {
 
   /// Widget trang trí chỉ hiện trong fallback KHÔNG-ẢNH (card truyền 2 blob).
   final List<Widget> fallbackDecorations;
+
+  /// Màu chữ monogram trong fallback KHÔNG-ẢNH. Null → trắng như cũ (đủ
+  /// tương phản trên brandGradient mặc định). Card truyền màu khớp nền
+  /// palette mà nó phủ qua [fallbackDecorations] — hai nền nhạt (tertiaryPop,
+  /// pink) cần chữ ink mới đạt 3:1. Fallback LỖI-ẢNH trong [_Pager] cố ý
+  /// KHÔNG nhận màu này: nền ở đó luôn là brandGradient (không decorations)
+  /// nên trắng vẫn đúng.
+  final Color? fallbackTextColor;
 
   /// Báo trang hiện tại (0-based) mỗi khi đổi trang, dù bằng cuộn hay tap.
   final ValueChanged<int>? onPageChanged;
@@ -51,6 +60,7 @@ class PhotoCarousel extends ConsumerWidget {
         monogram: monogram,
         decorations: fallbackDecorations,
         radius: radius,
+        textColor: fallbackTextColor,
       );
     }
 
@@ -67,10 +77,13 @@ class PhotoCarousel extends ConsumerWidget {
 }
 
 /// Nền gradient + monogram — dùng cho fallback và cho [Image.errorBuilder].
+/// [textColor] null → trắng như cũ (nền brandGradient); caller phủ nền khác
+/// qua [decorations] thì truyền màu chữ tương phản tương ứng.
 Widget _fallback({
   required String monogram,
   List<Widget> decorations = const [],
   BorderRadius? radius,
+  Color? textColor,
 }) {
   final content = Stack(
     fit: StackFit.expand,
@@ -85,7 +98,7 @@ Widget _fallback({
           style: AppTypography.display(
             fontSize: 104,
             fontWeight: FontWeight.w800,
-            color: AppColors.onPrimary.withValues(alpha: 0.92),
+            color: textColor ?? AppColors.onPrimary.withValues(alpha: 0.92),
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cung_hat/core/theme/app_colors.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/discovery/presentation/candidate_card.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
@@ -181,5 +182,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Online hôm nay'), findsNothing);
     expect(find.text('#ballad'), findsNothing);
+  });
+
+  test('monogramTextColorOn: ink trên nền nhạt (tertiaryPop/pink), trắng trên nền đậm',
+      () {
+    expect(monogramTextColorOn(AppColors.tertiaryPop), AppColors.ink);
+    expect(monogramTextColorOn(AppColors.pink), AppColors.ink);
+    expect(monogramTextColorOn(AppColors.primary), AppColors.onPrimary);
   });
 }

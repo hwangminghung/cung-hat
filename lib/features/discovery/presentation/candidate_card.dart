@@ -25,6 +25,15 @@ const _monogramPalette = [
 Color _monogramColorFor(String id) =>
     _monogramPalette[id.hashCode.abs() % _monogramPalette.length];
 
+/// Màu chữ monogram theo nền trong [_monogramPalette]: hai nền NHẠT
+/// (tertiaryPop ~2.2:1, pink ~2.5:1 với chữ trắng — dưới chuẩn 3:1
+/// large-text) → chữ ink; ba nền đậm còn lại giữ trắng như cũ.
+/// Public để test mapping contrast trực tiếp.
+Color monogramTextColorOn(Color background) =>
+    background == AppColors.tertiaryPop || background == AppColors.pink
+    ? AppColors.ink
+    : AppColors.onPrimary;
+
 /// Card ứng viên trong deck. Chip thông tin dưới tên XOAY theo ảnh đang xem
 /// (Tinder-parity mục 3c): ảnh 1 → khoảng cách + bài tủ chung; ảnh 2 → thể
 /// loại chung; ảnh ≥3 → giới thiệu (bio). Khi hồ sơ có <2 ảnh, không có gì để
@@ -67,6 +76,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
     final photoCount =
         (ref.watch(signedUrlsProvider(candidate.id)).value ?? const []).length;
+    final monogramBackground = _monogramColorFor(candidate.id);
 
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -89,9 +99,10 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   monogram: monogram,
                   swipeable: false,
                   onPageChanged: (i) => setState(() => _photoIndex = i),
+                  fallbackTextColor: monogramTextColorOn(monogramBackground),
                   fallbackDecorations: [
                     Positioned.fill(
-                      child: ColoredBox(color: _monogramColorFor(candidate.id)),
+                      child: ColoredBox(color: monogramBackground),
                     ),
                     Positioned(
                       left: -36,
