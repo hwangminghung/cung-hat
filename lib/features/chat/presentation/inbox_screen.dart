@@ -53,7 +53,21 @@ class InboxScreen extends ConsumerWidget {
             ),
             itemCount: matches.length + 1,
             itemBuilder: (context, index) {
-              if (index == 0) return const _InboxHeader();
+              if (index == 0) {
+                return const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _InboxHeader(),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        top: AppSpacing.lg,
+                        bottom: AppSpacing.sm,
+                      ),
+                      child: _SectionLabel('Tin nhắn đôi'),
+                    ),
+                  ],
+                );
+              }
               final match = matches[index - 1];
               final monogram = match.otherName.isEmpty
                   ? '?'
@@ -184,6 +198,22 @@ class _InboxTile extends StatelessWidget {
               ? _UnreadBadge(count: unread)
               : const Icon(Icons.chevron_right_rounded),
         ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        color: AppColors.ink,
+        fontWeight: FontWeight.w800,
       ),
     );
   }

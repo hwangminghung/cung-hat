@@ -86,4 +86,22 @@ void main() {
       expect(find.byKey(const Key('turn_pill')), findsNothing);
     },
   );
+
+  testWidgets(
+    'inbox hiện tiêu đề section Tin nhắn đôi khi có match',
+    (tester) async {
+      await tester.pumpWidget(host(
+        match: MatchSummary(
+          matchId: 't4',
+          otherId: 'other-id',
+          otherName: 'Linh',
+          unread: 0,
+          lastSenderId: 'me',
+        ),
+      ));
+      await tester.pump();
+
+      expect(find.text('Tin nhắn đôi'), findsOneWidget);
+    },
+  );
 }
