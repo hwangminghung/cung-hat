@@ -8,6 +8,7 @@ import 'package:cung_hat/features/chat/presentation/inbox_screen.dart';
 import 'package:cung_hat/features/profile/application/profile_providers.dart';
 import 'package:cung_hat/features/profile/domain/profile.dart';
 import 'package:cung_hat/shared/widgets/empty_state.dart';
+import 'package:cung_hat/shared/widgets/wave_divider.dart';
 
 void main() {
   testWidgets(
@@ -61,6 +62,46 @@ void main() {
       await tester.pump();
 
       expect(find.text('Tin nhắn đôi'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'inbox hiển thị WaveDivider giữa các hàng khi có nhiều match',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            inboxProvider.overrideWith(
+              (ref) async => [
+                MatchSummary(
+                  matchId: 't5',
+                  otherId: 'other-id-1',
+                  otherName: 'Linh',
+                  unread: 1,
+                  lastSenderId: 'other-id-1',
+                ),
+                MatchSummary(
+                  matchId: 't6',
+                  otherId: 'other-id-2',
+                  otherName: 'An',
+                  unread: 0,
+                  lastSenderId: 'me',
+                ),
+              ],
+            ),
+            myProfileProvider.overrideWith(
+              (ref) => Future.value(const Profile(id: 'me')),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const Scaffold(body: InboxScreen()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(WaveDivider), findsWidgets);
     },
   );
 }
