@@ -119,3 +119,11 @@ Gotcha build ghi lại: `build_runner --build-filter` + `--delete-conflicting-ou
 ## Đợt "Kèo của bạn" (2026-07-13, nhánh feat/my-keos-inbox) — plan `2026-07-13-my-keos-inbox.md`
 
 Vá gap UX nặng nhất: RPC `get_my_keos` (migration `20260713150000`) + section "Kèo của bạn" đầu tab Chat (mockup 15). Gates: **analyze 0 · Flutter 339/339 · pgTAP 212/212** (42 file, +6 case `my_keos_test.sql`). Emulator: B (host QA Linh) thấy kèo mình tạo + chip "Chủ kèo" + tap vào detail đầy đủ (`mykeos-host-inbox.png`); A (Minh) thấy kèo joined "Đang mở · 2/4" + 2 kèo planning cũ mình host trước đây "mất tích" nay hiện lại (`mykeos-member-inbox.png`). Test cũ không stub provider mới vẫn pass nhờ degrade AsyncError→ẩn section.
+
+## Kết luận điều tra ghost-swipe (2026-07-13, đóng chip task_d22edf1e)
+
+**Không phải bug app/DB.** Bằng chứng: (1) bảng `swipes` RLS bật + **0 policy** → client không thể insert trực tiếp kể cả khi có grant; đường ghi duy nhất là `record_swipe` SECURITY DEFINER (tức swipe ma là UI swipe THẬT bị bơm input) hoặc psql/service_role; (2) giả thuyết cũ "không qua record_swipe vì không tạo match" SAI — timeline cho thấy lúc batch 15:44 UTC chạy thì reciprocal like của Phúc CHƯA tồn tại (tôi tạo tay 15:51) nên record_swipe không tạo match là ĐÚNG hành vi; (3) sau khi tắt tooling: **28h+ dùng nặng emulator, 0 swipe lạ** (row duy nhất 17:55 là cú Thích demo có chủ đích).
+
+**Nguồn:** input bơm từ tooling test trên AVD cunghat_test3 — nghi phạm chính là **DroidRun portal a11y service** (chỉ cài trên máy A — trùng account bị ma; 2 batch đều quét NGUYÊN deck với nhịp ~1.2s = đúng tốc độ animation CardSwiper; account B máy không có portal thì chưa từng bị); phụ: `monkey` launcher (đã bỏ, dùng `am start`). Lưu ý: lần tắt a11y đầu bị MẤT khi emulator reboot → lần này set cả 2 khoá (`enabled_accessibility_services=""` + `accessibility_enabled=0`) **và uninstall com.mobilerun.portal** khỏi AVD.
+
+**Việc còn theo dõi:** không — nếu tái phát khi không có tooling nào chạy thì mở lại với nghi phạm mới.
