@@ -127,3 +127,41 @@ Vá gap UX nặng nhất: RPC `get_my_keos` (migration `20260713150000`) + secti
 **Nguồn:** input bơm từ tooling test trên AVD cunghat_test3 — nghi phạm chính là **DroidRun portal a11y service** (chỉ cài trên máy A — trùng account bị ma; 2 batch đều quét NGUYÊN deck với nhịp ~1.2s = đúng tốc độ animation CardSwiper; account B máy không có portal thì chưa từng bị); phụ: `monkey` launcher (đã bỏ, dùng `am start`). Lưu ý: lần tắt a11y đầu bị MẤT khi emulator reboot → lần này set cả 2 khoá (`enabled_accessibility_services=""` + `accessibility_enabled=0`) **và uninstall com.mobilerun.portal** khỏi AVD.
 
 **Việc còn theo dõi:** không — nếu tái phát khi không có tooling nào chạy thì mở lại với nghi phạm mới.
+
+## Fix CI pgTAP — baseline grants (2026-07-13, nhánh fix/ci-pgtap-grants, chip task_82689167)
+
+**Root cause thật (bug prod, không phải bug test):** DB dựng tươi từ migrations KHÔNG có table grant nào cho `authenticated`/`service_role` — local che khuất vì grants drift từ state cũ. Hậu quả trên deploy tươi: app đọc bảng trực tiếp (messages/plans/consents/reference) sập, edge functions cũng sập (service_role BYPASSRLS vẫn cần GRANT). 5 file pgTAP fail trên CI chỉ là triệu chứng.
+
+**Fix:** migration `20260713170000_baseline_grants.sql` — grant SIUD all tables + sequences + default privileges cho `authenticated` + `service_role`; **anon chủ đích KHÔNG grant** (chưa đăng nhập không đọc bảng trực tiếp; RPC pre-login đều SECURITY DEFINER). RLS vẫn là lớp kiểm soát (bảng RLS-0-policy như `swipes` vẫn deny-all dù có grant).
+
+**Bằng chứng:** repro local revoke 4 bảng → 5 file fail y hệt CI; áp migration → 212/212. CI run `29214175532` (nhánh fix/ci-pgtap-grants): **job db XANH lần đầu tiên từ merge audit-hardening** (1m51s) + job flutter xanh.
+
+## Polish chat + board (2026-07-13, nhánh feat/chat-board-polish, stack trên fix/ci-pgtap-grants)
+
+3 gap nhỏ từ bảng so khớp mockup 11/16/17:
+1. **Chat nhóm (17):** subtitle tên kèo dưới "Chat nhóm" (RPC `get_keo_header` tái dùng, degrade ẩn khi lỗi) + tên người gửi màu tertiaryPop trên bubble người khác (map từ roster).
+2. **Share bài tủ (16):** quy ước v1 body text prefix `'♪ '` (`♪ Title · Artist`) — không đổi schema, client cũ degrade thành text thường. Sheet "Gửi bài tủ" liệt kê đúng bài TỦ CỦA MÌNH (`get_my_taste`.baitu × songs), bubble render card nốt nhạc (`SongShareContent`) ở cả chat 1-1 lẫn nhóm.
+3. **Board (11):** `keo_card` thêm `member_names text[]` (host trước, giới hạn 5) → card kèo hiện dải avatar monogram thành viên + số slot trống.
+
+Fix kèm: `_GroupRulesBanner` đổi DecoratedBox → `Material` wrapper (assertion ink-splash do widget test đầu tiên của KeoChatScreen bắt được).
+
+**Verify live 2 emulator:** board hiện strip Q+M+2 vòng trống (`polish3-board-member-strip.png`); Minh gửi "♪ Ước Gì · Mỹ Tâm" từ sheet → Linh nhận realtime card nốt nhạc + tên người gửi + subtitle tên kèo (`polish3-song-share-sent/received.png`, `polish3-groupchat-subtitle-sender.png`).
+
+## Walkthrough onboarding live (2026-07-13, user tươi 84900000099 trên emulator B)
+
+Mục 01-06 cuối cùng còn deferred — nay đã đi live đủ 4 bước bằng tài khoản mới hoàn toàn (test OTP tạm thời, đã revert config về 001-only sau khi xong):
+
+| Bước | Mockup | Kết quả |
+|---|---|---|
+| Login + OTP | 01, 02 | ✅ khớp (đã verify từ phiên trước, lặp lại OK với số mới) |
+| 1/4 Ngày sinh | 03 | ✅ khớp (wave progress, banner 18+, 3 ô Ngày/Tháng/Năm, date picker Material default 1/1/2000) — `ob-01`, `ob-02` |
+| 2/4 Quyền riêng tư | 04 | ✅ khớp (5 mục, chip "Bắt buộc", toggle khuyến mãi OFF mặc định); consent lưu đúng — xem lại ở Cài đặt sau khi hoàn tất | 
+| 3/4 Thiết lập hồ sơ | 05 | ✅ khớp (card monogram + preview chữ cái theo tên gõ vào, 2 field) — `ob-04` |
+| 4/4 Gu nhạc | 06 | ✅ khớp (3 nhóm chip Thể loại/Nghệ sĩ/Bài tủ, chip chọn đổi nền đậm + check lime) — `ob-05` |
+| Hoàn tất | — | ✅ vào deck, empty state đúng "Chưa có bạn hát quanh đây" + nút mở rộng 100km (user chưa có location) — `ob-06`; Hồ sơ hiện Trang 25% + 2 gợi ý (`ob-07`) |
+
+**DB sau hoàn tất:** profiles row (Trang / bio / 2000-01-01 / vi), user_genres 2, user_artists 1, user_baitu 1 — đúng từng lựa chọn trên UI.
+
+**🐛 Bug MỚI tìm được (warm-path, chưa fix — ngoài phạm vi đợt này):** ngay sau verify OTP của user TƯƠI trên app đang chạy ấm (vừa logout user CÓ profile), router cho vào thẳng deck thay vì /onboarding và KHÔNG tự sửa (đứng deck 2+ phút, còn thấy deck cache của user trước). Cold restart thì gate chạy đúng (`ob-01` chính là cold start vào 1/4). Nghi cơ chế: `myProfileProvider` bị invalidate khi SIGNED_IN nhưng redirect đọc `profile.hasValue` — Riverpod giữ previous value (profile user cũ, non-null) trong lúc refresh → `hasProfile=true` → cho qua '/'; sau khi refetch trả null, notifyListeners có chạy nhưng màn không đổi (cần điều tra thêm ở `router.dart:60-66` + `GoRouterRefreshStream`). Tần suất prod thấp (đổi tài khoản trên cùng máy sang số chưa có hồ sơ) nhưng UX sai rõ — đã mở chip task riêng.
+
+**Khôi phục sau walkthrough:** B đăng xuất 099 → đăng nhập lại QA Linh (002) OK; `supabase/config.toml` test_otp đã revert về chỉ 84900000001 (diff so HEAD = rỗng); runtime Supabase vẫn giữ các số test tới lần stop/start kế — không ảnh hưởng gì ngoài local.
