@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
+import 'package:cung_hat/core/theme/app_colors.dart';
+import 'package:cung_hat/core/theme/app_shadows.dart';
 import 'package:cung_hat/shared/widgets/app_logo.dart';
+import 'package:cung_hat/shared/widgets/hard_card.dart';
 import 'package:cung_hat/shared/widgets/empty_state.dart';
 import 'package:cung_hat/shared/widgets/otp_input.dart';
 
@@ -67,5 +70,30 @@ void main() {
       ),
     );
     semantics.dispose();
+  });
+
+  testWidgets('HardCard ve vien ink + bong cung offset(3,3) quanh child', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(const HardCard(child: SizedBox(width: 80, height: 40))),
+    );
+
+    final container = tester.widget<Container>(
+      find
+          .ancestor(
+            of: find.byType(Material).last,
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+    final deco = container.decoration! as BoxDecoration;
+    expect(deco.boxShadow, const [AppShadows.hard]);
+
+    final material = tester.widget<Material>(find.byType(Material).last);
+    final shape = material.shape! as RoundedRectangleBorder;
+    expect(shape.side.color, AppColors.border);
+    expect(shape.side.width, 2);
+    expect(material.clipBehavior, Clip.antiAlias);
   });
 }

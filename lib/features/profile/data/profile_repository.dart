@@ -10,17 +10,25 @@ class ProfileRepository {
     final res = await _client.rpc('get_my_profile');
     if (res == null) return null;
     final map = res is List ? (res.isEmpty ? null : res.first) : res;
-    return map == null ? null : Profile.fromJson(Map<String, dynamic>.from(map as Map));
+    if (map == null) return null;
+    final json = Map<String, dynamic>.from(map as Map);
+    // User chưa có hồ sơ: PostgREST expand composite NULL của get_my_profile
+    // thành map toàn null — id null nghĩa là "không có row", không phải data hỏng.
+    if (json['id'] == null) return null;
+    return Profile.fromJson(json);
   }
 
   Future<Profile> upsertMyProfile(Profile p) async {
-    final res = await _client.rpc('upsert_my_profile', params: {
-      'p_display_name': p.displayName,
-      'p_full_name': p.fullName,
-      'p_dob': p.dob,
-      'p_bio': p.bio,
-      'p_language': p.language,
-    });
+    final res = await _client.rpc(
+      'upsert_my_profile',
+      params: {
+        'p_display_name': p.displayName,
+        'p_full_name': p.fullName,
+        'p_dob': p.dob,
+        'p_bio': p.bio,
+        'p_language': p.language,
+      },
+    );
     final map = res is List ? res.first : res;
     return Profile.fromJson(Map<String, dynamic>.from(map as Map));
   }

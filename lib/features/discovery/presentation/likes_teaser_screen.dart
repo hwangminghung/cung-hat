@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../application/discovery_providers.dart';
@@ -113,27 +114,22 @@ class _TeaserCard extends StatelessWidget {
 
   /// Fallback khi không có ảnh (liker chưa up ảnh) hoặc ảnh mosaic tải lỗi.
   Widget _personFallback() => Container(
-        decoration: const BoxDecoration(gradient: AppColors.brandGradient),
-        child: const Icon(
-          Icons.person_rounded,
-          size: 56,
-          color: AppColors.onPrimary,
-        ),
-      );
+    decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+    child: const Icon(
+      Icons.person_rounded,
+      size: 56,
+      color: AppColors.onPrimary,
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final labelStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: AppColors.onPrimary,
-          fontWeight: FontWeight.w800,
-        );
-    return Card(
+      color: AppColors.onPrimary,
+      fontWeight: FontWeight.w800,
+    );
+    return HardCard(
       key: Key('teaser_card_$index'),
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-      ),
       child: Stack(
         fit: StackFit.expand,
         children: [

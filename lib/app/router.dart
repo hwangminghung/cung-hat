@@ -20,8 +20,22 @@ import '../features/keo/presentation/shared_keo_screen.dart';
 import '../features/plan/presentation/plan_screen.dart';
 import '../features/plan/presentation/shared_plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
+import '../features/profile/domain/profile.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import 'home_shell.dart';
+
+/// Maps the profile fetch state to the tri-state [authRedirect] input.
+///
+/// Order matters: a refresh (after invalidate on account switch) KEEPS the
+/// previous user's value via Riverpod's copyWithPrevious, so while loading
+/// the answer is "unknown" — the stale identity must never decide routing.
+/// A resolved error also refuses the stale value: /onboarding is the safer
+/// wrong answer and self-corrects on the next successful fetch.
+bool? hasProfileOf(AsyncValue<Profile?> profile) {
+  if (profile.isLoading) return null;
+  if (profile.hasError) return false;
+  return profile.value != null;
+}
 
 /// Pure redirect decision — unit-tested in isolation.
 ///
@@ -35,7 +49,8 @@ String? authRedirect({
   required String location,
 }) {
   final authArea = location == '/auth' || location == '/otp';
-  final publicArea = authArea ||
+  final publicArea =
+      authArea ||
       location.startsWith('/plan/shared') ||
       location.startsWith('/keo/shared');
   if (!signedIn) return publicArea ? null : '/auth';
@@ -55,14 +70,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Read the session straight from Supabase: it is set BEFORE the auth
       // event fires, while derived providers may still hold a stale value
       // when this runs synchronously inside the refresh notification.
-      final signedIn =
-          ref.read(authRepositoryProvider).currentSession != null;
-      final profile = ref.read(myProfileProvider);
-      final bool? hasProfile = profile.hasValue
-          ? profile.value != null
-          : (profile.hasError ? false : null);
+      final signedIn = ref.read(authRepositoryProvider).currentSession != null;
       return authRedirect(
-        signedIn: signedIn, hasProfile: hasProfile, location: state.uri.path,
+        signedIn: signedIn,
+        hasProfile: hasProfileOf(ref.read(myProfileProvider)),
+        location: state.uri.path,
       );
     },
     routes: [
@@ -75,19 +87,42 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),
       GoRoute(path: '/likes', builder: (_, _) => const LikesScreen()),
       GoRoute(
-          path: '/likes-teaser', builder: (_, _) => const LikesTeaserScreen()),
+        path: '/likes-teaser',
+        builder: (_, _) => const LikesTeaserScreen(),
+      ),
       GoRoute(path: '/explore', builder: (_, _) => const ThemeBoardScreen()),
       GoRoute(
         path: '/explore/:genre',
         // DoiDeckScreen tự dựng Scaffold riêng — không bọc thêm Scaffold ở đây.
         builder: (_, s) => DoiDeckScreen(genre: s.pathParameters['genre']),
       ),
-      GoRoute(path: '/legal/privacy', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/privacy_vi.md', title: 'Chính sách bảo mật')),
-      GoRoute(path: '/legal/tos', builder: (_, _) => const LegalScreen(assetPath: 'assets/legal/tos_vi.md', title: 'Điều khoản sử dụng')),
-      GoRoute(path: '/plan/shared/:token', builder: (_, s) => SharedPlanScreen(token: s.pathParameters['token']!)),
+      GoRoute(
+        path: '/legal/privacy',
+        builder: (_, _) => const LegalScreen(
+          assetPath: 'assets/legal/privacy_vi.md',
+          title: 'Chính sách bảo mật',
+        ),
+      ),
+      GoRoute(
+        path: '/legal/tos',
+        builder: (_, _) => const LegalScreen(
+          assetPath: 'assets/legal/tos_vi.md',
+          title: 'Điều khoản sử dụng',
+        ),
+      ),
+      GoRoute(
+        path: '/plan/shared/:token',
+        builder: (_, s) => SharedPlanScreen(token: s.pathParameters['token']!),
+      ),
       GoRoute(path: '/keo/create', builder: (_, _) => const CreateKeoScreen()),
-      GoRoute(path: '/keo/shared/:token', builder: (_, s) => SharedKeoScreen(token: s.pathParameters['token']!)),
-      GoRoute(path: '/keo/chat/:id', builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!)),
+      GoRoute(
+        path: '/keo/shared/:token',
+        builder: (_, s) => SharedKeoScreen(token: s.pathParameters['token']!),
+      ),
+      GoRoute(
+        path: '/keo/chat/:id',
+        builder: (_, s) => KeoChatScreen(keoId: s.pathParameters['id']!),
+      ),
       GoRoute(
         path: '/keo/plan/:id',
         builder: (_, s) => PlanScreen(

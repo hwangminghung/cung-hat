@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/hard_card.dart';
 import '../application/admin_providers.dart';
 
 class ModerationScreen extends ConsumerWidget {
@@ -16,8 +18,9 @@ class ModerationScreen extends ConsumerWidget {
       ref.invalidate(openReportsProvider);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Thao tác thất bại')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Thao tác thất bại')));
       }
     }
   }
@@ -35,8 +38,12 @@ class ModerationScreen extends ConsumerWidget {
           return ListView(
             children: [
               for (final r in reports)
-                Card(
+                HardCard(
                   key: ValueKey(r.id),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.sm,
+                  ),
                   child: ListTile(
                     title: Text('${r.targetType} · ${r.reason ?? ''}'),
                     subtitle: Text(r.targetId),

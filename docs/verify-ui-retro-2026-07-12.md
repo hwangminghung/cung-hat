@@ -165,3 +165,39 @@ Mục 01-06 cuối cùng còn deferred — nay đã đi live đủ 4 bước b�
 **🐛 Bug MỚI tìm được (warm-path, chưa fix — ngoài phạm vi đợt này):** ngay sau verify OTP của user TƯƠI trên app đang chạy ấm (vừa logout user CÓ profile), router cho vào thẳng deck thay vì /onboarding và KHÔNG tự sửa (đứng deck 2+ phút, còn thấy deck cache của user trước). Cold restart thì gate chạy đúng (`ob-01` chính là cold start vào 1/4). Nghi cơ chế: `myProfileProvider` bị invalidate khi SIGNED_IN nhưng redirect đọc `profile.hasValue` — Riverpod giữ previous value (profile user cũ, non-null) trong lúc refresh → `hasProfile=true` → cho qua '/'; sau khi refetch trả null, notifyListeners có chạy nhưng màn không đổi (cần điều tra thêm ở `router.dart:60-66` + `GoRouterRefreshStream`). Tần suất prod thấp (đổi tài khoản trên cùng máy sang số chưa có hồ sơ) nhưng UX sai rõ — đã mở chip task riêng.
 
 **Khôi phục sau walkthrough:** B đăng xuất 099 → đăng nhập lại QA Linh (002) OK; `supabase/config.toml` test_otp đã revert về chỉ 84900000001 (diff so HEAD = rỗng); runtime Supabase vẫn giữ các số test tới lần stop/start kế — không ảnh hưởng gì ngoài local.
+
+## Fix warm-gate onboarding + hard-shadow sweep (2026-07-13, nhánh fix/warm-gate-shadow-sweep, chip task_7196af60)
+
+### Bug warm-gate — root cause THẬT (khác giả thuyết ban đầu), tìm bằng instrumentation 4 ranh giới
+
+Repro có kiểm soát trên emulator B (xoá profile row của 099 trong DB local → 099 "tươi" lại, test OTP runtime vẫn còn): logout Linh → login 099 → deck kẹt. Logcat TEMP-DEBUG cho thấy chuỗi 2 tầng:
+
+1. **Tầng parse (thủ phạm chính):** RPC `get_my_profile` với user CHƯA có profile trả **composite NULL** — PostgREST expand thành `{"id": null, ...}` (không phải `null`/`[]`). `ProfileRepository.getMyProfile` parse map này → `type 'Null' is not a subtype of type 'String' in type cast`. TypeError là `Error` (không phải `Exception`) nên Riverpod 3 KHÔNG retry → provider đứng ở `AsyncError` **kèm previous value** (profile Linh, do copyWithPrevious).
+2. **Tầng redirect:** logic cũ check `profile.hasValue` TRƯỚC — error/refresh-kèm-previous có `hasValue=true, value=<profile Linh>` → `hasProfile=true` → cho vào `/` và kẹt vĩnh viễn. **Cold start "đúng" chỉ là ăn may**: cùng TypeError nhưng không có previous value → nhánh `hasError→false` → /onboarding.
+
+### Fix (TDD, 2 lớp)
+
+- `ProfileRepository.getMyProfile`: map có `id == null` = "không có row" → trả `null` sạch (test: composite toàn NULL → null).
+- `router.dart` thêm pure fn **`hasProfileOf(AsyncValue<Profile?>)`**: `isLoading → null` (giữ vị trí — identity cũ KHÔNG được quyết routing trong lúc refresh), `hasError → false` (từ chối previous value; /onboarding là câu trả lời sai an toàn, tự sửa ở fetch thành công kế), còn lại `value != null`. 6 unit test mới — 2 case load-bearing dựng state THẬT qua `ProviderContainer` (data → invalidate → chứng minh Riverpod giữ previous value) thay vì gọi API internal `copyWithPrevious` (analyze cấm).
+
+### Verify live (emulator B, screenshots gatefix-01..03)
+
+| Kịch bản | Kết quả |
+|---|---|
+| Cold start 099 (session giữ) | ✅ /onboarding (giờ qua đường null sạch, hết "ăn may") |
+| pm clear → warm login Linh | ✅ deck (đường có-profile không đổi) |
+| **Warm switch Linh → logout → login 099** | ✅ **/onboarding NGAY** — hết kẹt deck (trước fix: kẹt vĩnh viễn, xem log 13:38 trong điều tra) |
+
+### Hard-shadow sweep (deferred #3 của đợt ui-retro)
+
+Widget chung mới `lib/shared/widgets/hard_card.dart` — **HardCard**: nền surface trên `Material` (ink/splash ListTile vẽ đúng lớp — bài học _GroupRulesBanner), viền ink 2px qua shape, clip antiAlias (ảnh full-bleed an toàn), bóng `AppShadows.hard` offset(3,3) trên Container ngoài. Thay 7 chỗ `Card` Material thô (elevation không tạo được bóng lệch góc): moderation, likes-teaser (`_TeaserCard`), shared-keo, shared-plan, plan (`_buildPlanCard` + `_buildVenueCard`), `SkeletonCard` (cùng silhouette với card thật — hết "nhảy style" khi skeleton nhường chỗ). Giữ nguyên key + margin từng chỗ. Verify sống: màn Kế hoạch — 3 venue card viền ink + bóng cứng (`shadow-01-plan-venue-hardcards.png`); trước đây flat.
+
+**Ghi chú vận hành:** kèo demo của Linh flip `planning` tạm để vào màn Kế hoạch rồi trả về `open` (window đã gia hạn tương lai); B kết thúc đăng nhập QA Linh; user 099 còn auth row + KHÔNG profile (lần sau login sẽ vào onboarding — đúng hành vi; muốn user tươi khác dùng 098 + thêm test OTP).
+
+**Còn mở (ngoài phạm vi):** đổi tài khoản giữa 2 user ĐỀU có profile vẫn thấy deck cache của user cũ vài giây (provider user-scoped như candidates không invalidate theo session) — bug riêng, nhỏ hơn, chưa mở chip.
+
+## Fix chat ngược + timestamp tin nhắn (2026-07-13, user phát hiện khi dùng thật)
+
+**Bug "chat ngược" (cả 1-1 lẫn nhóm):** `history()`/`keoHistory()` dùng `.order('created_at')` — SDK Dart của Supabase **mặc định `ascending: false`** (ngược trực giác SQL) → lịch sử trả mới-nhất-trước, UI vẽ từ trên xuống → đảo ngược đúng từng tin (đối chiếu DB: 6 tin Minh↔Linh khớp thứ tự ngược 100%). Không lộ sớm vì demo toàn tin realtime (append đúng chiều, không qua history) và lịch sử ngắn. Fix: `ascending: true` cả 2 chỗ + 2 regression test mock chuỗi builder PostgREST (verify tham số order + thứ tự kết quả).
+
+**Timestamp:** helper mới `chat_timeline.dart` — `bubbleTime` (HH:mm local), `dayLabelBetween` ('Hôm nay'/'d/M' khi đổi ngày local, null khi cùng ngày), widget `DayDivider` dùng chung 2 màn chat. Bubble hiện giờ nhỏ mờ dưới nội dung (cả card share bài hát). 5 unit test (kỳ vọng tính động theo TZ máy — CI khác TZ) + 2 widget test divider/giờ cho chat 1-1 và chat nhóm.
