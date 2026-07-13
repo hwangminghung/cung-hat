@@ -7,6 +7,10 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/message_safety.dart';
 import '../../chat/application/chat_providers.dart';
 import '../../chat/domain/message.dart';
+import '../../chat/domain/song_share.dart';
+import '../../chat/presentation/song_share_widgets.dart';
+import '../application/keo_providers.dart';
+import '../domain/keo_member.dart';
 
 /// Kèo group chat: history + realtime bubbles, composer with outbound safety,
 /// and a collapsible group-rules banner.
@@ -147,8 +151,35 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
       if (seen.add(message.id)) messages.add(message);
     }
 
+    // Tên kèo (subtitle AppBar) + tên người gửi trên bubble (mockup 17) —
+    // cả hai degrade êm khi provider lỗi: subtitle ẩn, bubble không tên.
+    final keoTitle = ref.watch(keoHeaderProvider(widget.keoId)).value?.title;
+    final roster =
+        ref.watch(keoRosterProvider(widget.keoId)).value ?? const <KeoMember>[];
+    final nameById = {
+      for (final member in roster) member.userId: member.displayName,
+    };
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat nhóm')),
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Chat nhóm'),
+            if (keoTitle != null)
+              Text(
+                keoTitle,
+                key: const Key('keo_chat_subtitle'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           const _GroupRulesBanner(),
@@ -177,17 +208,36 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
+                      final mine = message.senderId == myUid;
                       return _MessageBubble(
                         message: message,
-                        mine: message.senderId == myUid,
+                        mine: mine,
+                        senderName: mine ? null : nameById[message.senderId],
                       );
                     },
                   ),
           ),
-          _Composer(controller: _controller, sending: _sending, onSend: _send),
+          _Composer(
+            controller: _controller,
+            sending: _sending,
+            onSend: _send,
+            onShareSong: _shareSong,
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _shareSong() async {
+    if (_sending) return;
+    final body = await showSongShareSheet(context);
+    if (body == null || !mounted) return;
+    setState(() => _sending = true);
+    try {
+      await _doSend(body);
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
   }
 }
 
@@ -196,46 +246,57 @@ class _GroupRulesBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      decoration: BoxDecoration(
+      // Màu nền đặt trên Material (không phải DecoratedBox) để ink/splash của
+      // ListTile bên trong ExpansionTile vẽ đúng lớp.
+      child: Material(
         color: AppColors.secondary.withValues(alpha: 0.36),
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
-      ),
-      child: const ExpansionTile(
-        leading: Icon(Icons.info_rounded, color: AppColors.secondaryDark),
-        iconColor: AppColors.secondaryDark,
-        collapsedIconColor: AppColors.secondaryDark,
-        title: Text('Luật nhóm'),
-        childrenPadding: EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.md,
-        ),
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Không quay/chụp khi chưa đồng ý · Chia tiền rõ ràng · Tôn trọng riêng tư',
-            ),
+        clipBehavior: Clip.antiAlias,
+        child: const ExpansionTile(
+          leading: Icon(Icons.info_rounded, color: AppColors.secondaryDark),
+          iconColor: AppColors.secondaryDark,
+          collapsedIconColor: AppColors.secondaryDark,
+          title: Text('Luật nhóm'),
+          childrenPadding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            AppSpacing.md,
           ),
-        ],
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Không quay/chụp khi chưa đồng ý · Chia tiền rõ ràng · Tôn trọng riêng tư',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message, required this.mine});
+  const _MessageBubble({
+    required this.message,
+    required this.mine,
+    this.senderName,
+  });
 
   final Message message;
   final bool mine;
+
+  /// Tên người gửi hiện trên bubble của NGƯỜI KHÁC (mockup 17) — null với
+  /// bubble của mình hoặc khi roster chưa tải.
+  final String? senderName;
 
   @override
   Widget build(BuildContext context) {
@@ -258,11 +319,32 @@ class _MessageBubble extends StatelessWidget {
           ),
           border: mine ? null : Border.all(color: AppColors.border),
         ),
-        child: Text(
-          message.body,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: mine ? AppColors.onPrimary : AppColors.textPrimary,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (senderName != null && senderName!.isNotEmpty) ...[
+              Text(
+                senderName!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.tertiaryPop,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+            ],
+            if (isSongShare(message.body))
+              SongShareContent(body: message.body, mine: mine)
+            else
+              Text(
+                message.body,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: mine ? AppColors.onPrimary : AppColors.textPrimary,
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -274,11 +356,13 @@ class _Composer extends StatelessWidget {
     required this.controller,
     required this.sending,
     required this.onSend,
+    required this.onShareSong,
   });
 
   final TextEditingController controller;
   final bool sending;
   final VoidCallback onSend;
+  final VoidCallback onShareSong;
 
   @override
   Widget build(BuildContext context) {
@@ -294,6 +378,13 @@ class _Composer extends StatelessWidget {
         decoration: const BoxDecoration(color: AppColors.background),
         child: Row(
           children: [
+            IconButton.outlined(
+              key: const Key('share_song_btn'),
+              tooltip: 'Gửi bài tủ',
+              onPressed: sending ? null : onShareSong,
+              icon: const Icon(Icons.music_note_outlined),
+            ),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: TextField(
                 controller: controller,

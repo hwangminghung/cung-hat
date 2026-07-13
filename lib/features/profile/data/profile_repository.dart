@@ -35,4 +35,11 @@ class ProfileRepository {
     int count(String key) => (map[key] as List?)?.length ?? 0;
     return TasteCounts(count('genres'), count('artists'), count('baitu'));
   }
+
+  /// SONG ID bài tủ của chính mình ('s1'..) — cho sheet "Gửi bài tủ" trong chat.
+  Future<List<String>> getMyBaituIds() async {
+    final res = await _client.rpc('get_my_taste');
+    final map = Map<String, dynamic>.from(res as Map);
+    return ((map['baitu'] as List?) ?? const []).cast<String>();
+  }
 }

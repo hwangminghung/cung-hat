@@ -22,6 +22,11 @@ _Keo _$KeoFromJson(Map<String, dynamic> json) => _Keo(
   status: json['status'] as String? ?? 'open',
   joinMode: json['join_mode'] as String? ?? 'approval',
   isMine: json['is_mine'] as bool? ?? false,
+  memberNames:
+      (json['member_names'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$KeoToJson(_Keo instance) => <String, dynamic>{
@@ -38,4 +43,5 @@ Map<String, dynamic> _$KeoToJson(_Keo instance) => <String, dynamic>{
   'status': instance.status,
   'join_mode': instance.joinMode,
   'is_mine': instance.isMine,
+  'member_names': instance.memberNames,
 };

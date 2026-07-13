@@ -34,6 +34,42 @@ void main() {
     expect(find.widgetWithText(StampChip, 'K-Pop'), findsOneWidget);
   });
 
+  testWidgets('KeoCard hien dai avatar thanh vien + cho trong (mockup 11)', (
+    tester,
+  ) async {
+    const keo = Keo(
+      id: 'strip',
+      title: 'Keo co thanh vien',
+      sizeTarget: 4,
+      slotsFilled: 2,
+      memberNames: ['Mai Host', 'An'],
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: const Scaffold(body: KeoCard(keo: keo)),
+      ),
+    );
+    expect(find.byKey(const Key('keo_member_strip')), findsOneWidget);
+    expect(find.text('M'), findsOneWidget);
+    expect(find.text('A'), findsOneWidget);
+    // 4 cho - 2 nguoi = 2 vong trong "+".
+    expect(find.byIcon(Icons.add_rounded), findsNWidgets(2));
+  });
+
+  testWidgets('KeoCard khong co memberNames thi khong render strip', (
+    tester,
+  ) async {
+    const keo = Keo(id: 'nostrip', title: 'Keo cu', sizeTarget: 4);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: const Scaffold(body: KeoCard(keo: keo)),
+      ),
+    );
+    expect(find.byKey(const Key('keo_member_strip')), findsNothing);
+  });
+
   testWidgets('KeoCard shows the open join-mode chip', (tester) async {
     const keo = Keo(
       id: '2',
