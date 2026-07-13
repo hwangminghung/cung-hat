@@ -15,3 +15,7 @@ final myProfileProvider = FutureProvider<Profile?>(
 final myTasteCountsProvider = FutureProvider<TasteCounts>(
   (ref) => ref.watch(profileRepositoryProvider).getMyTasteCounts(),
 );
+
+final myBaituProvider = FutureProvider<List<String>>(
+  (ref) => ref.watch(profileRepositoryProvider).getMyBaituIds(),
+);

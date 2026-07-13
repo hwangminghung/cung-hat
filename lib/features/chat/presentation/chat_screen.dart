@@ -12,6 +12,8 @@ import '../../discovery/presentation/candidate_detail_sheet.dart';
 import '../application/chat_providers.dart';
 import '../application/inbox_providers.dart';
 import '../domain/message.dart';
+import '../domain/song_share.dart';
+import 'song_share_widgets.dart';
 
 /// 1-1 chat thread: history + realtime bubbles, composer with outbound safety.
 class ChatScreen extends ConsumerStatefulWidget {
@@ -298,10 +300,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     },
                   ),
           ),
-          _Composer(controller: _controller, sending: _sending, onSend: _send),
+          _Composer(
+            controller: _controller,
+            sending: _sending,
+            onSend: _send,
+            onShareSong: _shareSong,
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _shareSong() async {
+    if (_sending) return;
+    final body = await showSongShareSheet(context);
+    if (body == null || !mounted) return;
+    setState(() => _sending = true);
+    try {
+      await _doSend(body);
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
   }
 }
 
@@ -332,12 +351,14 @@ class _MessageBubble extends StatelessWidget {
           ),
           border: mine ? null : Border.all(color: AppColors.border),
         ),
-        child: Text(
-          message.body,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: mine ? AppColors.onPrimary : AppColors.textPrimary,
-          ),
-        ),
+        child: isSongShare(message.body)
+            ? SongShareContent(body: message.body, mine: mine)
+            : Text(
+                message.body,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: mine ? AppColors.onPrimary : AppColors.textPrimary,
+                ),
+              ),
       ),
     );
   }
@@ -348,11 +369,13 @@ class _Composer extends StatelessWidget {
     required this.controller,
     required this.sending,
     required this.onSend,
+    required this.onShareSong,
   });
 
   final TextEditingController controller;
   final bool sending;
   final VoidCallback onSend;
+  final VoidCallback onShareSong;
 
   @override
   Widget build(BuildContext context) {
@@ -368,6 +391,13 @@ class _Composer extends StatelessWidget {
         decoration: const BoxDecoration(color: AppColors.background),
         child: Row(
           children: [
+            IconButton.outlined(
+              key: const Key('share_song_btn'),
+              tooltip: 'Gửi bài tủ',
+              onPressed: sending ? null : onShareSong,
+              icon: const Icon(Icons.music_note_outlined),
+            ),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: TextField(
                 controller: controller,

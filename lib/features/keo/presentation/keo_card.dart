@@ -192,6 +192,72 @@ class _KeoDetails extends StatelessWidget {
             ],
           ),
         ],
+        if (keo.memberNames.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          _MemberStrip(
+            names: keo.memberNames,
+            sizeTarget: keo.sizeTarget,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Dải avatar thành viên (mockup 11): monogram tròn cho người đã vào +
+/// vòng "+" nhạt cho chỗ trống còn lại (tối đa 5 vòng tổng).
+class _MemberStrip extends StatelessWidget {
+  const _MemberStrip({required this.names, required this.sizeTarget});
+
+  final List<String> names;
+  final int sizeTarget;
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = names.take(5).toList();
+    final empty = (sizeTarget - names.length).clamp(0, 5 - shown.length);
+    return Row(
+      key: const Key('keo_member_strip'),
+      children: [
+        for (final name in shown)
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.xs),
+            child: Container(
+              width: 30,
+              height: 30,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.teal,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.ink, width: 1.5),
+              ),
+              child: Text(
+                name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        for (var i = 0; i < empty; i++)
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.xs),
+            child: Container(
+              width: 30,
+              height: 30,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.textHint, width: 1.5),
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                size: 16,
+                color: AppColors.textHint,
+              ),
+            ),
+          ),
       ],
     );
   }
