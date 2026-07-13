@@ -17,12 +17,17 @@ class _MockChatRepo extends Mock implements ChatRepository {}
 void main() {
   test('sendKeoMessage calls send_keo_message RPC', () async {
     final client = MockSupabaseClient();
-    when(() => client.rpc('send_keo_message', params: any(named: 'params')))
-        .thenAnswer((_) => rpcOk('m1'));
+    when(
+      () => client.rpc('send_keo_message', params: any(named: 'params')),
+    ).thenAnswer((_) => rpcOk('m1'));
     final id = await ChatRepository(client).sendKeoMessage('k1', 'hi nhóm');
     expect(id, 'm1');
-    verify(() => client.rpc('send_keo_message',
-        params: {'p_keo': 'k1', 'p_body': 'hi nhóm'})).called(1);
+    verify(
+      () => client.rpc(
+        'send_keo_message',
+        params: {'p_keo': 'k1', 'p_body': 'hi nhóm'},
+      ),
+    ).called(1);
   });
 
   testWidgets(
@@ -46,9 +51,9 @@ void main() {
                 ),
               ],
             ),
-            keoLiveMessagesProvider('k1').overrideWith(
-              (ref) => const Stream<Message>.empty(),
-            ),
+            keoLiveMessagesProvider(
+              'k1',
+            ).overrideWith((ref) => const Stream<Message>.empty()),
             keoHeaderProvider('k1').overrideWith(
               (ref) async => const Keo(
                 id: 'k1',
@@ -84,4 +89,60 @@ void main() {
       expect(find.text('Toi nay hat nhe'), findsOneWidget);
     },
   );
+
+  testWidgets('chat nhóm chèn divider ngày + giờ HH:mm trên bubble', (
+    tester,
+  ) async {
+    final repo = _MockChatRepo();
+    when(() => repo.markKeoRead('k1')).thenAnswer((_) async {});
+    // 2 tin khác ngày, đều quá khứ (né nhãn 'Hôm nay' phụ thuộc ngày chạy);
+    // giờ khác nhau để find.text từng HH:mm là duy nhất.
+    const isoA = '2026-07-05T10:00:00Z';
+    const isoB = '2026-07-06T11:30:00Z';
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          chatRepositoryProvider.overrideWithValue(repo),
+          keoMessageHistoryProvider('k1').overrideWith(
+            (ref) async => const [
+              Message(
+                id: 'm1',
+                threadId: 'k1',
+                senderId: 'linh-id',
+                body: 'hom qua',
+                createdAt: isoA,
+              ),
+              Message(
+                id: 'm2',
+                threadId: 'k1',
+                senderId: 'linh-id',
+                body: 'hom nay',
+                createdAt: isoB,
+              ),
+            ],
+          ),
+          keoLiveMessagesProvider(
+            'k1',
+          ).overrideWith((ref) => const Stream<Message>.empty()),
+          keoHeaderProvider('k1').overrideWith((ref) async => null),
+          keoRosterProvider('k1').overrideWith((ref) async => const []),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const KeoChatScreen(keoId: 'k1'),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    String two(int v) => v.toString().padLeft(2, '0');
+    final a = DateTime.parse(isoA).toLocal();
+    final b = DateTime.parse(isoB).toLocal();
+    expect(find.text('${a.day}/${a.month}'), findsOneWidget);
+    expect(find.text('${b.day}/${b.month}'), findsOneWidget);
+    expect(find.text('${two(a.hour)}:${two(a.minute)}'), findsOneWidget);
+    expect(find.text('${two(b.hour)}:${two(b.minute)}'), findsOneWidget);
+  });
 }

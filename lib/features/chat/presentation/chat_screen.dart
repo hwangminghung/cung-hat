@@ -11,6 +11,7 @@ import '../../discovery/domain/candidate.dart';
 import '../../discovery/presentation/candidate_detail_sheet.dart';
 import '../application/chat_providers.dart';
 import '../application/inbox_providers.dart';
+import 'chat_timeline.dart';
 import '../domain/message.dart';
 import '../domain/song_share.dart';
 import 'song_share_widgets.dart';
@@ -136,9 +137,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     if (!mounted) return;
     if (candidate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hồ sơ không còn.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Hồ sơ không còn.')));
       return;
     }
     CandidateDetailSheet.show(
@@ -191,8 +192,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Không huỷ ghép được, thử lại sau')),
+          const SnackBar(content: Text('Không huỷ ghép được, thử lại sau')),
         );
       }
     } finally {
@@ -293,9 +293,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      return _MessageBubble(
+                      final dayLabel = dayLabelBetween(
+                        index == 0 ? null : messages[index - 1].createdAt,
+                        message.createdAt,
+                        DateTime.now(),
+                      );
+                      final bubble = _MessageBubble(
                         message: message,
                         mine: message.senderId == myUid,
+                      );
+                      if (dayLabel == null) return bubble;
+                      return Column(
+                        children: [
+                          DayDivider(label: dayLabel),
+                          bubble,
+                        ],
                       );
                     },
                   ),
@@ -351,14 +363,31 @@ class _MessageBubble extends StatelessWidget {
           ),
           border: mine ? null : Border.all(color: AppColors.border),
         ),
-        child: isSongShare(message.body)
-            ? SongShareContent(body: message.body, mine: mine)
-            : Text(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSongShare(message.body))
+              SongShareContent(body: message.body, mine: mine)
+            else
+              Text(
                 message.body,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: mine ? AppColors.onPrimary : AppColors.textPrimary,
                 ),
               ),
+            const SizedBox(height: 2),
+            Text(
+              bubbleTime(message.createdAt),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontSize: 10.5,
+                color: mine
+                    ? AppColors.onPrimary.withValues(alpha: 0.72)
+                    : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

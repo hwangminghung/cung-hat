@@ -195,3 +195,9 @@ Widget chung mới `lib/shared/widgets/hard_card.dart` — **HardCard**: nền s
 **Ghi chú vận hành:** kèo demo của Linh flip `planning` tạm để vào màn Kế hoạch rồi trả về `open` (window đã gia hạn tương lai); B kết thúc đăng nhập QA Linh; user 099 còn auth row + KHÔNG profile (lần sau login sẽ vào onboarding — đúng hành vi; muốn user tươi khác dùng 098 + thêm test OTP).
 
 **Còn mở (ngoài phạm vi):** đổi tài khoản giữa 2 user ĐỀU có profile vẫn thấy deck cache của user cũ vài giây (provider user-scoped như candidates không invalidate theo session) — bug riêng, nhỏ hơn, chưa mở chip.
+
+## Fix chat ngược + timestamp tin nhắn (2026-07-13, user phát hiện khi dùng thật)
+
+**Bug "chat ngược" (cả 1-1 lẫn nhóm):** `history()`/`keoHistory()` dùng `.order('created_at')` — SDK Dart của Supabase **mặc định `ascending: false`** (ngược trực giác SQL) → lịch sử trả mới-nhất-trước, UI vẽ từ trên xuống → đảo ngược đúng từng tin (đối chiếu DB: 6 tin Minh↔Linh khớp thứ tự ngược 100%). Không lộ sớm vì demo toàn tin realtime (append đúng chiều, không qua history) và lịch sử ngắn. Fix: `ascending: true` cả 2 chỗ + 2 regression test mock chuỗi builder PostgREST (verify tham số order + thứ tự kết quả).
+
+**Timestamp:** helper mới `chat_timeline.dart` — `bubbleTime` (HH:mm local), `dayLabelBetween` ('Hôm nay'/'d/M' khi đổi ngày local, null khi cùng ngày), widget `DayDivider` dùng chung 2 màn chat. Bubble hiện giờ nhỏ mờ dưới nội dung (cả card share bài hát). 5 unit test (kỳ vọng tính động theo TZ máy — CI khác TZ) + 2 widget test divider/giờ cho chat 1-1 và chat nhóm.

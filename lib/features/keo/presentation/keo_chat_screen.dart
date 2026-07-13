@@ -8,6 +8,7 @@ import '../../../core/utils/message_safety.dart';
 import '../../chat/application/chat_providers.dart';
 import '../../chat/domain/message.dart';
 import '../../chat/domain/song_share.dart';
+import '../../chat/presentation/chat_timeline.dart';
 import '../../chat/presentation/song_share_widgets.dart';
 import '../application/keo_providers.dart';
 import '../domain/keo_member.dart';
@@ -209,10 +210,22 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
                     itemBuilder: (context, index) {
                       final message = messages[index];
                       final mine = message.senderId == myUid;
-                      return _MessageBubble(
+                      final dayLabel = dayLabelBetween(
+                        index == 0 ? null : messages[index - 1].createdAt,
+                        message.createdAt,
+                        DateTime.now(),
+                      );
+                      final bubble = _MessageBubble(
                         message: message,
                         mine: mine,
                         senderName: mine ? null : nameById[message.senderId],
+                      );
+                      if (dayLabel == null) return bubble;
+                      return Column(
+                        children: [
+                          DayDivider(label: dayLabel),
+                          bubble,
+                        ],
                       );
                     },
                   ),
@@ -344,6 +357,16 @@ class _MessageBubble extends StatelessWidget {
                   color: mine ? AppColors.onPrimary : AppColors.textPrimary,
                 ),
               ),
+            const SizedBox(height: 2),
+            Text(
+              bubbleTime(message.createdAt),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontSize: 10.5,
+                color: mine
+                    ? AppColors.onPrimary.withValues(alpha: 0.72)
+                    : AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
       ),

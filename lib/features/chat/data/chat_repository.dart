@@ -14,8 +14,10 @@ class ChatRepository {
   final SupabaseClient _client;
 
   Future<String> sendMessage(String threadId, String body) async {
-    final id = await _client.rpc('send_message',
-        params: {'p_thread': threadId, 'p_body': body});
+    final id = await _client.rpc(
+      'send_message',
+      params: {'p_thread': threadId, 'p_body': body},
+    );
     return id as String;
   }
 
@@ -35,7 +37,7 @@ class ChatRepository {
         .select()
         .eq('thread_type', 'match')
         .eq('thread_id', threadId)
-        .order('created_at');
+        .order('created_at', ascending: true);
     return (rows as List)
         .map((e) => Message.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
@@ -43,23 +45,34 @@ class ChatRepository {
 
   /// Live messages on the private topic match:{threadId}.
   Stream<Message> subscribe(String threadId) {
-    final ch = _client.channel('match:$threadId',
-        opts: const RealtimeChannelConfig(private: true));
+    final ch = _client.channel(
+      'match:$threadId',
+      opts: const RealtimeChannelConfig(private: true),
+    );
     final controller = StreamController<Message>();
-    ch.onBroadcast(event: 'new_message', callback: (payload) {
-      try {
-        controller.add(messageFromBroadcast(Map<String, dynamic>.from(payload)));
-      } catch (e, st) {
-        controller.addError(e, st);
-      }
-    }).subscribe();
+    ch
+        .onBroadcast(
+          event: 'new_message',
+          callback: (payload) {
+            try {
+              controller.add(
+                messageFromBroadcast(Map<String, dynamic>.from(payload)),
+              );
+            } catch (e, st) {
+              controller.addError(e, st);
+            }
+          },
+        )
+        .subscribe();
     controller.onCancel = () => _client.removeChannel(ch);
     return controller.stream;
   }
 
   Future<String> sendKeoMessage(String keoId, String body) async {
-    final id = await _client
-        .rpc('send_keo_message', params: {'p_keo': keoId, 'p_body': body});
+    final id = await _client.rpc(
+      'send_keo_message',
+      params: {'p_keo': keoId, 'p_body': body},
+    );
     return id as String;
   }
 
@@ -73,7 +86,7 @@ class ChatRepository {
         .select()
         .eq('thread_type', 'keo')
         .eq('thread_id', keoId)
-        .order('created_at');
+        .order('created_at', ascending: true);
     return (rows as List)
         .map((e) => Message.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
@@ -81,16 +94,25 @@ class ChatRepository {
 
   /// Live messages on the private topic keo:{keoId}.
   Stream<Message> subscribeKeo(String keoId) {
-    final ch = _client.channel('keo:$keoId',
-        opts: const RealtimeChannelConfig(private: true));
+    final ch = _client.channel(
+      'keo:$keoId',
+      opts: const RealtimeChannelConfig(private: true),
+    );
     final controller = StreamController<Message>();
-    ch.onBroadcast(event: 'new_message', callback: (payload) {
-      try {
-        controller.add(messageFromBroadcast(Map<String, dynamic>.from(payload)));
-      } catch (e, st) {
-        controller.addError(e, st);
-      }
-    }).subscribe();
+    ch
+        .onBroadcast(
+          event: 'new_message',
+          callback: (payload) {
+            try {
+              controller.add(
+                messageFromBroadcast(Map<String, dynamic>.from(payload)),
+              );
+            } catch (e, st) {
+              controller.addError(e, st);
+            }
+          },
+        )
+        .subscribe();
     controller.onCancel = () => _client.removeChannel(ch);
     return controller.stream;
   }
