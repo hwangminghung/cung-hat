@@ -6,25 +6,46 @@ import '../../support/supabase_mocks.dart';
 void main() {
   test('getMyProfile calls the get_my_profile RPC and maps result', () async {
     final client = MockSupabaseClient();
-    when(() => client.rpc('get_my_profile')).thenAnswer((_) => rpcOk({
-          'id': 'u1',
-          'display_name': 'Mai',
-          'age_verified': true,
-          'language': 'vi',
-        }));
+    when(() => client.rpc('get_my_profile')).thenAnswer(
+      (_) => rpcOk({
+        'id': 'u1',
+        'display_name': 'Mai',
+        'age_verified': true,
+        'language': 'vi',
+      }),
+    );
     final repo = ProfileRepository(client);
     final p = await repo.getMyProfile();
     expect(p!.displayName, 'Mai');
     verify(() => client.rpc('get_my_profile')).called(1);
   });
 
+  test('getMyProfile trả null khi RPC trả composite toàn NULL '
+      '(user chưa có hồ sơ)', () async {
+    final client = MockSupabaseClient();
+    // PostgREST expand composite NULL của get_my_profile thành map toàn null
+    // (bug warm-gate: parse map này từng nổ TypeError thay vì trả null).
+    when(() => client.rpc('get_my_profile')).thenAnswer(
+      (_) => rpcOk({
+        'id': null,
+        'display_name': null,
+        'age_verified': null,
+        'language': null,
+      }),
+    );
+    final repo = ProfileRepository(client);
+    expect(await repo.getMyProfile(), isNull);
+  });
+
   test('getMyTasteCounts maps jsonb lists to counts', () async {
     final client = MockSupabaseClient();
-    when(() => client.rpc('get_my_taste')).thenAnswer((_) => rpcOk({
-          'genres': ['pop', 'rock', 'ballad'],
-          'artists': ['son_tung'],
-          'baitu': ['s1', 's2', 's3'],
-        }));
+    when(() => client.rpc('get_my_taste')).thenAnswer(
+      (_) => rpcOk({
+        'genres': ['pop', 'rock', 'ballad'],
+        'artists': ['son_tung'],
+        'baitu': ['s1', 's2', 's3'],
+      }),
+    );
     final repo = ProfileRepository(client);
     final taste = await repo.getMyTasteCounts();
     expect(taste.genres, 3);
@@ -35,11 +56,9 @@ void main() {
 
   test('getMyTasteCounts treats null lists as 0', () async {
     final client = MockSupabaseClient();
-    when(() => client.rpc('get_my_taste')).thenAnswer((_) => rpcOk({
-          'genres': null,
-          'artists': null,
-          'baitu': null,
-        }));
+    when(() => client.rpc('get_my_taste')).thenAnswer(
+      (_) => rpcOk({'genres': null, 'artists': null, 'baitu': null}),
+    );
     final repo = ProfileRepository(client);
     final taste = await repo.getMyTasteCounts();
     expect(taste.genres, 0);
