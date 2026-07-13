@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../auth/application/auth_providers.dart';
 import '../application/keo_providers.dart';
@@ -83,26 +84,33 @@ class _SharedKeoBody extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Card(
+          HardCard(
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(keo.title, style: Theme.of(context).textTheme.headlineSmall),
+                  Text(
+                    keo.title,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     '🕗 ${formatTime(keo.timeWindowStart)} · ${keo.areaLabel ?? ''}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     '${keo.slotsFilled}/${keo.sizeTarget} chỗ',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Container(
@@ -114,16 +122,18 @@ class _SharedKeoBody extends ConsumerWidget {
                       color: open
                           ? AppColors.secondary.withValues(alpha: 0.62)
                           : AppColors.tertiaryTint,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusPill,
+                      ),
                     ),
                     child: Text(
                       modeLabel,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: open
-                                ? AppColors.secondaryDark
-                                : AppColors.tertiary,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: open
+                            ? AppColors.secondaryDark
+                            : AppColors.tertiary,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   if (keo.genres.isNotEmpty) ...[
@@ -140,16 +150,17 @@ class _SharedKeoBody extends ConsumerWidget {
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.primaryTint,
-                              borderRadius:
-                                  BorderRadius.circular(AppSpacing.radiusPill),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusPill,
+                              ),
                             ),
                             child: Text(
                               genre,
-                              style:
-                                  Theme.of(context).textTheme.labelMedium?.copyWith(
-                                        color: AppColors.primaryDark,
-                                        fontWeight: FontWeight.w800,
-                                      ),
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: AppColors.primaryDark,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                             ),
                           ),
                       ],
@@ -159,8 +170,8 @@ class _SharedKeoBody extends ConsumerWidget {
                   Text(
                     'Host: ${keo.hostName ?? 'Ẩn danh'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),

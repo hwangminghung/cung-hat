@@ -6,6 +6,7 @@ import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/hard_card.dart';
 import 'booking_button.dart';
 import 'plan_time_picker_sheet.dart';
 import 'safety_toolkit.dart';
@@ -144,7 +145,7 @@ class PlanScreen extends ConsumerWidget {
     List<VenueSuggestion> venues,
   ) {
     final name = _venueName(venues, plan.venueId);
-    return Card(
+    return HardCard(
       margin: const EdgeInsets.all(12),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -221,7 +222,7 @@ class PlanScreen extends ConsumerWidget {
     VenueSuggestion v,
   ) {
     final band = v.distanceBand ?? '?';
-    return Card(
+    return HardCard(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Padding(
         padding: const EdgeInsets.all(16),

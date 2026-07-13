@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import 'hard_card.dart';
 
 /// Shimmering placeholder block for loading states.
 /// Prefer these over spinners for content that takes >300ms to load.
@@ -105,7 +106,13 @@ class SkeletonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    // HardCard cùng silhouette với KeoCard thật — tránh "nhảy style" khi
+    // skeleton nhường chỗ cho card có bóng cứng.
+    return const HardCard(
+      margin: EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/hard_card.dart';
 import '../application/plan_providers.dart';
 
 class SharedPlanScreen extends ConsumerWidget {
@@ -24,15 +26,21 @@ class SharedPlanScreen extends ConsumerWidget {
           }
           return Padding(
             padding: const EdgeInsets.all(16),
-            child: Card(
+            child: HardCard(
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${data['venue_name'] ?? ''}',
-                        style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      '${data['venue_name'] ?? ''}',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 8),
                     Text('${data['address'] ?? ''}'),
                     const SizedBox(height: 8),
