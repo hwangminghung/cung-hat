@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:cung_hat/app/home_shell.dart';
 import 'package:cung_hat/features/chat/application/inbox_providers.dart';
 import 'package:cung_hat/features/chat/data/match_inbox.dart';
+import 'package:cung_hat/features/chat/presentation/inbox_screen.dart';
 import 'package:cung_hat/features/discovery/application/discovery_providers.dart';
 import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
@@ -90,6 +91,34 @@ void main() {
     await tester.pumpAndSettle();
     // Không invalidate → provider giữ cache, vẫn 1. Có fix → refetch = 2.
     expect(inboxCalls, 2);
+  });
+
+  testWidgets('tab đã thăm giữ state khi chuyển đi (IndexedStack, audit M7)',
+      (tester) async {
+    final fakeLoc = _FakeLocationService();
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null)
+              .overrideWith((ref) => Future.value(<Candidate>[])),
+          locationServiceProvider.overrideWithValue(fakeLoc),
+          openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
+          inboxProvider.overrideWith((ref) => Future.value(<MatchSummary>[])),
+        ],
+        child: const MaterialApp(home: HomeShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Đôi'));
+    await tester.pumpAndSettle();
+
+    // Trước fix: switch remount → InboxScreen bị dispose khi rời tab (mất
+    // scroll/state). IndexedStack giữ tab đã thăm sống offstage.
+    expect(find.byType(InboxScreen, skipOffstage: false), findsOneWidget);
   });
 
   testWidgets(
