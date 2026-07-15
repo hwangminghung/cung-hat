@@ -423,4 +423,254 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get onbTasteEmptySub =>
       'Kiểm tra dữ liệu mẫu hoặc thử tải lại sau ít phút.';
+
+  @override
+  String get commonRetry => 'Thử lại';
+
+  @override
+  String get commonBack => 'Quay lại';
+
+  @override
+  String get commonCheckConnection => 'Kiểm tra kết nối rồi thử lại.';
+
+  @override
+  String get commonSaveError => 'Không lưu được cài đặt, thử lại.';
+
+  @override
+  String get deckErrorLikeLimit =>
+      'Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.';
+
+  @override
+  String get deckErrorSuperLimit => 'Bạn đã hết lượt Siêu thích hôm nay.';
+
+  @override
+  String get deckErrorProRequired => 'Tính năng này dành cho thành viên Pro.';
+
+  @override
+  String get deckErrorBoostActive => 'Bạn đang trong một lượt boost.';
+
+  @override
+  String get deckErrorBoostLimit =>
+      'Bạn đã dùng hết lượt boost hôm nay. Thử lại vào ngày mai.';
+
+  @override
+  String get deckErrorUnknown => 'Không lưu được lượt vuốt. Thử lại sau.';
+
+  @override
+  String get candidateFallbackName => 'Bạn hát mới';
+
+  @override
+  String get commonReport => 'Báo cáo';
+
+  @override
+  String get candidateViewProfile => 'Xem hồ sơ';
+
+  @override
+  String get candidateOnlineToday => 'Online hôm nay';
+
+  @override
+  String candidateDistanceKm(String band) {
+    return 'Cách $band km';
+  }
+
+  @override
+  String candidateSharedBaitu(int count) {
+    return 'cùng $count bài tủ';
+  }
+
+  @override
+  String get candidateNoSharedGenres => 'Chưa chung thể loại nào';
+
+  @override
+  String get candidateNoBio => 'Chưa có giới thiệu — hỏi thử khi match nhé!';
+
+  @override
+  String get candidatePhotoQuote => 'Ảnh này xịn quá! ';
+
+  @override
+  String get candidateReplyPhoto => 'Trả lời ảnh này';
+
+  @override
+  String get candidateSharedGenresTitle => 'Gu nhạc chung';
+
+  @override
+  String get candidateNoSharedGenresDot => 'Chưa trùng thể loại nào.';
+
+  @override
+  String get candidateSharedBaituTitle => 'Bài tủ chung';
+
+  @override
+  String get candidateNoSharedBaitu =>
+      'Chưa có bài tủ chung — cơ hội khám phá!';
+
+  @override
+  String candidateSongQuote(String title) {
+    return 'Về bài \"$title\" của bạn: ';
+  }
+
+  @override
+  String get candidateReply => 'Trả lời';
+
+  @override
+  String candidatePromptQuote(String answer) {
+    return 'Bạn nói \"$answer\" — kể thêm đi: ';
+  }
+
+  @override
+  String get candidateReportBlock => 'Báo cáo / Chặn';
+
+  @override
+  String get exploreFallbackTitle => 'Khám Phá';
+
+  @override
+  String get deckLoadErrorTitle => 'Không tải được gợi ý';
+
+  @override
+  String get deckPromoSeeKeo => 'XEM KÈO';
+
+  @override
+  String get deckExploreTooltip => 'Khám Phá theo gu nhạc';
+
+  @override
+  String get deckRefreshTooltip => 'Làm mới';
+
+  @override
+  String get deckSearching100 => 'Đang tìm trong 100 km';
+
+  @override
+  String deckBoostingUntil(String time) {
+    return 'Đang boost đến $time';
+  }
+
+  @override
+  String get deckBoostTooltip => 'Boost hồ sơ';
+
+  @override
+  String get deckBoostStarted =>
+      'Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.';
+
+  @override
+  String get celebrateYouFallback => 'Bạn';
+
+  @override
+  String get deckExhausted100 => 'Đã tìm hết trong 100 km';
+
+  @override
+  String get deckEmptyNearby => 'Chưa có bạn hát quanh đây';
+
+  @override
+  String get deckExpand100 => 'Mở rộng tìm quanh 100 km';
+
+  @override
+  String get deckRefreshSuggestions => 'Làm mới gợi ý';
+
+  @override
+  String get deckAutoExpandTitle => 'Tự mở rộng khi hết người';
+
+  @override
+  String get deckAutoExpandSub => 'Tự động tìm quanh 100 km khi 50 km đã hết';
+
+  @override
+  String get filterApplied => 'Đã áp dụng bộ lọc.';
+
+  @override
+  String get filterSaveError => 'Không lưu được, thử lại.';
+
+  @override
+  String get filterTitle => 'Bộ lọc';
+
+  @override
+  String get filterRadius => 'Bán kính tìm quanh';
+
+  @override
+  String get filterAutoExpandSub => 'Tự tìm quanh 100 km khi hết gợi ý';
+
+  @override
+  String get filterApply => 'Áp dụng';
+
+  @override
+  String get promoKeoNearby => '🎤 Kèo gần bạn';
+
+  @override
+  String promoSeats(int filled, int target) {
+    return '$filled/$target chỗ';
+  }
+
+  @override
+  String promoDistanceKm(String band) {
+    return 'cách $band km';
+  }
+
+  @override
+  String get promoSwipeRight => 'Vuốt phải để xem kèo →';
+
+  @override
+  String get likesEmptyTitle => 'Chưa có ai thích bạn';
+
+  @override
+  String get likesEmptySub => 'Cứ hát hết mình, người hợp gu sẽ tới.';
+
+  @override
+  String get likesAnonymous => 'Ẩn danh';
+
+  @override
+  String get likesLockedTitle => 'Mở khóa để xem ai đã thích bạn';
+
+  @override
+  String get teaserLoadError => 'Không tải được danh sách';
+
+  @override
+  String get teaserEmptySub => 'Hoàn thiện hồ sơ để được thấy nhiều hơn nhé.';
+
+  @override
+  String teaserCount(int count) {
+    return '$count người đã thích bạn';
+  }
+
+  @override
+  String get teaserUnlockCta => 'Mở khoá với Pro — xem ai thích bạn';
+
+  @override
+  String get celebrateTitle => 'Hợp cạ rồi!';
+
+  @override
+  String celebrateBody(String name) {
+    return 'Bạn và $name đã thích nhau';
+  }
+
+  @override
+  String celebrateSharedBaitu(String songs) {
+    return 'Cùng tủ: $songs';
+  }
+
+  @override
+  String get celebrateChatNow => 'Nhắn tin ngay';
+
+  @override
+  String get celebrateContinue => 'Tiếp tục khám phá';
+
+  @override
+  String reportTitle(String reason) {
+    return 'Báo cáo: $reason';
+  }
+
+  @override
+  String get reportBlockUser => 'Chặn người này';
+
+  @override
+  String get reportSent => 'Đã gửi báo cáo.';
+
+  @override
+  String get reportSendError => 'Không gửi được báo cáo.';
+
+  @override
+  String get reportBlocked => 'Đã chặn.';
+
+  @override
+  String get reportBlockError => 'Không chặn được.';
+
+  @override
+  String exploreOpenSemantics(String title) {
+    return 'Mở $title';
+  }
 }

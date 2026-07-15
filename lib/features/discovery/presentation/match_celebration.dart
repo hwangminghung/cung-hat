@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/wave_divider.dart';
@@ -93,6 +94,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     // Đang loading/lỗi → map rỗng → fallback raw id, KHÔNG chặn màn ăn mừng;
     // watch nên khi songs resolve xong widget tự rebuild ra tên bài.
     final songs = ref.watch(songsProvider).value ?? const <Song>[];
@@ -127,7 +129,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                       child: Column(
                         children: [
                           Text(
-                            'Cùng Hát',
+                            l10n?.appTitle ?? 'Cùng Hát',
                             style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(
                                   color: AppColors.ink,
@@ -142,7 +144,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                               child: Column(
                                 children: [
                                   Text(
-                                    'Hợp cạ rồi!',
+                                    l10n?.celebrateTitle ?? 'Hợp cạ rồi!',
                                     textAlign: TextAlign.center,
                                     style: AppTypography.display(
                                       fontSize: 48,
@@ -152,7 +154,8 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
                                   Text(
-                                    'Bạn và ${widget.otherName} đã thích nhau',
+                                    l10n?.celebrateBody(widget.otherName) ??
+                                        'Bạn và ${widget.otherName} đã thích nhau',
                                     textAlign: TextAlign.center,
                                     style: Theme.of(context)
                                         .textTheme
@@ -237,7 +240,12 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                           if (widget.sharedBaitu.isNotEmpty)
                             StampChip(
                               leadingIcon: Icons.music_note_rounded,
-                              label:
+                              label: l10n?.celebrateSharedBaitu(
+                                    widget.sharedBaitu
+                                        .take(2)
+                                        .map((id) => titleById[id] ?? id)
+                                        .join(' · '),
+                                  ) ??
                                   'Cùng tủ: ${widget.sharedBaitu.take(2).map((id) => titleById[id] ?? id).join(' · ')}',
                               tone: StampChipTone.teal,
                             ),
@@ -260,7 +268,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                             key: const Key('match_chat_btn'),
                             onPressed: widget.onChat,
                             icon: Icons.chat_bubble_rounded,
-                            child: const Text('Nhắn tin ngay'),
+                            child: Text(l10n?.celebrateChatNow ?? 'Nhắn tin ngay'),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
@@ -275,7 +283,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                             ),
                           ),
                           onPressed: widget.onContinue,
-                          child: const Text('Tiếp tục khám phá'),
+                          child: Text(l10n?.celebrateContinue ?? 'Tiếp tục khám phá'),
                         ),
                       ],
                     ),

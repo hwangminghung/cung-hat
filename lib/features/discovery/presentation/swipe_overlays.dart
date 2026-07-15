@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Bọc ngoài CandidateCard (hoặc KeoPromoCard) trong CardSwiper.cardBuilder.
 /// Stamp mờ dần theo tiến độ kéo — đúng cơ chế deck app hẹn hò: người dùng
@@ -20,16 +21,18 @@ class SwipeOverlays extends StatelessWidget {
     required this.hProgress, // -1..1, dương = kéo phải (thích)
     required this.vProgress, // -1..1, âm = kéo lên (siêu thích)
     required this.child,
-    this.likeLabel = 'THÍCH',
-    this.nopeLabel = 'BỎ QUA',
+    this.likeLabel,
+    this.nopeLabel,
     this.showSuper = true,
   });
 
   final double hProgress;
   final double vProgress;
   final Widget child;
-  final String likeLabel;
-  final String nopeLabel;
+
+  /// null = nhãn mặc định theo l10n (THÍCH/BỎ QUA uppercase).
+  final String? likeLabel;
+  final String? nopeLabel;
   final bool showSuper;
 
   static final Map<String, Widget> _stampCache = {};
@@ -54,6 +57,10 @@ class SwipeOverlays extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final likeText = likeLabel ?? l10n?.discoveryLike.toUpperCase() ?? 'THÍCH';
+    final nopeText = nopeLabel ?? l10n?.discoveryPass.toUpperCase() ?? 'BỎ QUA';
+    final superText = l10n?.discoverySuperLike.toUpperCase() ?? 'SIÊU THÍCH';
     final like = hProgress.clamp(0.0, 1.0);
     final nope = (-hProgress).clamp(0.0, 1.0);
     // Kéo chéo: ưu tiên hướng ngang — siêu thích chỉ rõ khi kéo thẳng lên.
@@ -72,7 +79,7 @@ class SwipeOverlays extends StatelessWidget {
             opacity: like,
             alignment: Alignment.topLeft,
             angle: -0.25,
-            child: _stamp(likeLabel, AppColors.success),
+            child: _stamp(likeText, AppColors.success),
           ),
         if (nope > 0)
           _Stamp(
@@ -80,7 +87,7 @@ class SwipeOverlays extends StatelessWidget {
             opacity: nope,
             alignment: Alignment.topRight,
             angle: 0.25,
-            child: _stamp(nopeLabel, AppColors.error),
+            child: _stamp(nopeText, AppColors.error),
           ),
         if (superLike > 0)
           _Stamp(
@@ -88,7 +95,7 @@ class SwipeOverlays extends StatelessWidget {
             opacity: superLike,
             alignment: Alignment.bottomCenter,
             angle: -0.12,
-            child: _stamp('SIÊU THÍCH', AppColors.tertiary),
+            child: _stamp(superText, AppColors.tertiary),
           ),
       ],
     );

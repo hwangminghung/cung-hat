@@ -883,6 +883,450 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check the seed data or try reloading in a few minutes.'**
   String get onbTasteEmptySub;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get commonRetry;
+
+  /// No description provided for @commonBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get commonBack;
+
+  /// No description provided for @commonCheckConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get commonCheckConnection;
+
+  /// No description provided for @commonSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the setting, try again.'**
+  String get commonSaveError;
+
+  /// No description provided for @deckErrorLikeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re out of likes for today. Upgrade to Pro for unlimited likes.'**
+  String get deckErrorLikeLimit;
+
+  /// No description provided for @deckErrorSuperLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re out of Super Likes for today.'**
+  String get deckErrorSuperLimit;
+
+  /// No description provided for @deckErrorProRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is for Pro members.'**
+  String get deckErrorProRequired;
+
+  /// No description provided for @deckErrorBoostActive.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a boost running.'**
+  String get deckErrorBoostActive;
+
+  /// No description provided for @deckErrorBoostLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used today\'s boost. Try again tomorrow.'**
+  String get deckErrorBoostLimit;
+
+  /// No description provided for @deckErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your swipe. Try again later.'**
+  String get deckErrorUnknown;
+
+  /// No description provided for @candidateFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'New singer'**
+  String get candidateFallbackName;
+
+  /// No description provided for @commonReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get commonReport;
+
+  /// No description provided for @candidateViewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get candidateViewProfile;
+
+  /// No description provided for @candidateOnlineToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Online today'**
+  String get candidateOnlineToday;
+
+  /// No description provided for @candidateDistanceKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} km away'**
+  String candidateDistanceKm(String band);
+
+  /// No description provided for @candidateSharedBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} shared go-to songs'**
+  String candidateSharedBaitu(int count);
+
+  /// No description provided for @candidateNoSharedGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared genres yet'**
+  String get candidateNoSharedGenres;
+
+  /// No description provided for @candidateNoBio.
+  ///
+  /// In en, this message translates to:
+  /// **'No bio yet — ask them when you match!'**
+  String get candidateNoBio;
+
+  /// No description provided for @candidatePhotoQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo is so cool! '**
+  String get candidatePhotoQuote;
+
+  /// No description provided for @candidateReplyPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply to this photo'**
+  String get candidateReplyPhoto;
+
+  /// No description provided for @candidateSharedGenresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared music taste'**
+  String get candidateSharedGenresTitle;
+
+  /// No description provided for @candidateNoSharedGenresDot.
+  ///
+  /// In en, this message translates to:
+  /// **'No overlapping genres yet.'**
+  String get candidateNoSharedGenresDot;
+
+  /// No description provided for @candidateSharedBaituTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared go-to songs'**
+  String get candidateSharedBaituTitle;
+
+  /// No description provided for @candidateNoSharedBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared songs yet — room to explore!'**
+  String get candidateNoSharedBaitu;
+
+  /// No description provided for @candidateSongQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'About your song \"{title}\": '**
+  String candidateSongQuote(String title);
+
+  /// No description provided for @candidateReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get candidateReply;
+
+  /// No description provided for @candidatePromptQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'You said \"{answer}\" — tell me more: '**
+  String candidatePromptQuote(String answer);
+
+  /// No description provided for @candidateReportBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Report / Block'**
+  String get candidateReportBlock;
+
+  /// No description provided for @exploreFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get exploreFallbackTitle;
+
+  /// No description provided for @deckLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load suggestions'**
+  String get deckLoadErrorTitle;
+
+  /// No description provided for @deckPromoSeeKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'SEE KEO'**
+  String get deckPromoSeeKeo;
+
+  /// No description provided for @deckExploreTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore by music taste'**
+  String get deckExploreTooltip;
+
+  /// No description provided for @deckRefreshTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get deckRefreshTooltip;
+
+  /// No description provided for @deckSearching100.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching within 100 km'**
+  String get deckSearching100;
+
+  /// No description provided for @deckBoostingUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Boosting until {time}'**
+  String deckBoostingUntil(String time);
+
+  /// No description provided for @deckBoostTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost profile'**
+  String get deckBoostTooltip;
+
+  /// No description provided for @deckBoostStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Boosting for 30 minutes — your profile is prioritized nearby.'**
+  String get deckBoostStarted;
+
+  /// No description provided for @celebrateYouFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get celebrateYouFallback;
+
+  /// No description provided for @deckExhausted100.
+  ///
+  /// In en, this message translates to:
+  /// **'Searched everything within 100 km'**
+  String get deckExhausted100;
+
+  /// No description provided for @deckEmptyNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'No singers nearby yet'**
+  String get deckEmptyNearby;
+
+  /// No description provided for @deckExpand100.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand search to 100 km'**
+  String get deckExpand100;
+
+  /// No description provided for @deckRefreshSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh suggestions'**
+  String get deckRefreshSuggestions;
+
+  /// No description provided for @deckAutoExpandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-expand when you run out'**
+  String get deckAutoExpandTitle;
+
+  /// No description provided for @deckAutoExpandSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically search 100 km once 50 km is empty'**
+  String get deckAutoExpandSub;
+
+  /// No description provided for @filterApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters applied.'**
+  String get filterApplied;
+
+  /// No description provided for @filterSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save, try again.'**
+  String get filterSaveError;
+
+  /// No description provided for @filterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filterTitle;
+
+  /// No description provided for @filterRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Search radius'**
+  String get filterRadius;
+
+  /// No description provided for @filterAutoExpandSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Search 100 km when suggestions run out'**
+  String get filterAutoExpandSub;
+
+  /// No description provided for @filterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get filterApply;
+
+  /// No description provided for @promoKeoNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'🎤 Keo near you'**
+  String get promoKeoNearby;
+
+  /// No description provided for @promoSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'{filled}/{target} seats'**
+  String promoSeats(int filled, int target);
+
+  /// No description provided for @promoDistanceKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} km away'**
+  String promoDistanceKm(String band);
+
+  /// No description provided for @promoSwipeRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right to view the keo →'**
+  String get promoSwipeRight;
+
+  /// No description provided for @likesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No likes yet'**
+  String get likesEmptyTitle;
+
+  /// No description provided for @likesEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep singing your heart out — the right people will come.'**
+  String get likesEmptySub;
+
+  /// No description provided for @likesAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get likesAnonymous;
+
+  /// No description provided for @likesLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock to see who liked you'**
+  String get likesLockedTitle;
+
+  /// No description provided for @teaserLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the list'**
+  String get teaserLoadError;
+
+  /// No description provided for @teaserEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile to get seen more.'**
+  String get teaserEmptySub;
+
+  /// No description provided for @teaserCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people liked you'**
+  String teaserCount(int count);
+
+  /// No description provided for @teaserUnlockCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with Pro — see who likes you'**
+  String get teaserUnlockCta;
+
+  /// No description provided for @celebrateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a match!'**
+  String get celebrateTitle;
+
+  /// No description provided for @celebrateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You and {name} liked each other'**
+  String celebrateBody(String name);
+
+  /// No description provided for @celebrateSharedBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared songs: {songs}'**
+  String celebrateSharedBaitu(String songs);
+
+  /// No description provided for @celebrateChatNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat now'**
+  String get celebrateChatNow;
+
+  /// No description provided for @celebrateContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep exploring'**
+  String get celebrateContinue;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: {reason}'**
+  String reportTitle(String reason);
+
+  /// No description provided for @reportBlockUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Block this user'**
+  String get reportBlockUser;
+
+  /// No description provided for @reportSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent.'**
+  String get reportSent;
+
+  /// No description provided for @reportSendError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the report.'**
+  String get reportSendError;
+
+  /// No description provided for @reportBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked.'**
+  String get reportBlocked;
+
+  /// No description provided for @reportBlockError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t block.'**
+  String get reportBlockError;
+
+  /// No description provided for @exploreOpenSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {title}'**
+  String exploreOpenSemantics(String title);
 }
 
 class _AppLocalizationsDelegate

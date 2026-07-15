@@ -423,4 +423,255 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onbTasteEmptySub =>
       'Check the seed data or try reloading in a few minutes.';
+
+  @override
+  String get commonRetry => 'Retry';
+
+  @override
+  String get commonBack => 'Back';
+
+  @override
+  String get commonCheckConnection => 'Check your connection and try again.';
+
+  @override
+  String get commonSaveError => 'Couldn\'t save the setting, try again.';
+
+  @override
+  String get deckErrorLikeLimit =>
+      'You\'re out of likes for today. Upgrade to Pro for unlimited likes.';
+
+  @override
+  String get deckErrorSuperLimit => 'You\'re out of Super Likes for today.';
+
+  @override
+  String get deckErrorProRequired => 'This feature is for Pro members.';
+
+  @override
+  String get deckErrorBoostActive => 'You already have a boost running.';
+
+  @override
+  String get deckErrorBoostLimit =>
+      'You\'ve used today\'s boost. Try again tomorrow.';
+
+  @override
+  String get deckErrorUnknown => 'Couldn\'t save your swipe. Try again later.';
+
+  @override
+  String get candidateFallbackName => 'New singer';
+
+  @override
+  String get commonReport => 'Report';
+
+  @override
+  String get candidateViewProfile => 'View profile';
+
+  @override
+  String get candidateOnlineToday => 'Online today';
+
+  @override
+  String candidateDistanceKm(String band) {
+    return '$band km away';
+  }
+
+  @override
+  String candidateSharedBaitu(int count) {
+    return '$count shared go-to songs';
+  }
+
+  @override
+  String get candidateNoSharedGenres => 'No shared genres yet';
+
+  @override
+  String get candidateNoBio => 'No bio yet — ask them when you match!';
+
+  @override
+  String get candidatePhotoQuote => 'This photo is so cool! ';
+
+  @override
+  String get candidateReplyPhoto => 'Reply to this photo';
+
+  @override
+  String get candidateSharedGenresTitle => 'Shared music taste';
+
+  @override
+  String get candidateNoSharedGenresDot => 'No overlapping genres yet.';
+
+  @override
+  String get candidateSharedBaituTitle => 'Shared go-to songs';
+
+  @override
+  String get candidateNoSharedBaitu => 'No shared songs yet — room to explore!';
+
+  @override
+  String candidateSongQuote(String title) {
+    return 'About your song \"$title\": ';
+  }
+
+  @override
+  String get candidateReply => 'Reply';
+
+  @override
+  String candidatePromptQuote(String answer) {
+    return 'You said \"$answer\" — tell me more: ';
+  }
+
+  @override
+  String get candidateReportBlock => 'Report / Block';
+
+  @override
+  String get exploreFallbackTitle => 'Explore';
+
+  @override
+  String get deckLoadErrorTitle => 'Couldn\'t load suggestions';
+
+  @override
+  String get deckPromoSeeKeo => 'SEE KEO';
+
+  @override
+  String get deckExploreTooltip => 'Explore by music taste';
+
+  @override
+  String get deckRefreshTooltip => 'Refresh';
+
+  @override
+  String get deckSearching100 => 'Searching within 100 km';
+
+  @override
+  String deckBoostingUntil(String time) {
+    return 'Boosting until $time';
+  }
+
+  @override
+  String get deckBoostTooltip => 'Boost profile';
+
+  @override
+  String get deckBoostStarted =>
+      'Boosting for 30 minutes — your profile is prioritized nearby.';
+
+  @override
+  String get celebrateYouFallback => 'You';
+
+  @override
+  String get deckExhausted100 => 'Searched everything within 100 km';
+
+  @override
+  String get deckEmptyNearby => 'No singers nearby yet';
+
+  @override
+  String get deckExpand100 => 'Expand search to 100 km';
+
+  @override
+  String get deckRefreshSuggestions => 'Refresh suggestions';
+
+  @override
+  String get deckAutoExpandTitle => 'Auto-expand when you run out';
+
+  @override
+  String get deckAutoExpandSub =>
+      'Automatically search 100 km once 50 km is empty';
+
+  @override
+  String get filterApplied => 'Filters applied.';
+
+  @override
+  String get filterSaveError => 'Couldn\'t save, try again.';
+
+  @override
+  String get filterTitle => 'Filters';
+
+  @override
+  String get filterRadius => 'Search radius';
+
+  @override
+  String get filterAutoExpandSub => 'Search 100 km when suggestions run out';
+
+  @override
+  String get filterApply => 'Apply';
+
+  @override
+  String get promoKeoNearby => '🎤 Keo near you';
+
+  @override
+  String promoSeats(int filled, int target) {
+    return '$filled/$target seats';
+  }
+
+  @override
+  String promoDistanceKm(String band) {
+    return '$band km away';
+  }
+
+  @override
+  String get promoSwipeRight => 'Swipe right to view the keo →';
+
+  @override
+  String get likesEmptyTitle => 'No likes yet';
+
+  @override
+  String get likesEmptySub =>
+      'Keep singing your heart out — the right people will come.';
+
+  @override
+  String get likesAnonymous => 'Anonymous';
+
+  @override
+  String get likesLockedTitle => 'Unlock to see who liked you';
+
+  @override
+  String get teaserLoadError => 'Couldn\'t load the list';
+
+  @override
+  String get teaserEmptySub => 'Complete your profile to get seen more.';
+
+  @override
+  String teaserCount(int count) {
+    return '$count people liked you';
+  }
+
+  @override
+  String get teaserUnlockCta => 'Unlock with Pro — see who likes you';
+
+  @override
+  String get celebrateTitle => 'It\'s a match!';
+
+  @override
+  String celebrateBody(String name) {
+    return 'You and $name liked each other';
+  }
+
+  @override
+  String celebrateSharedBaitu(String songs) {
+    return 'Shared songs: $songs';
+  }
+
+  @override
+  String get celebrateChatNow => 'Chat now';
+
+  @override
+  String get celebrateContinue => 'Keep exploring';
+
+  @override
+  String reportTitle(String reason) {
+    return 'Report: $reason';
+  }
+
+  @override
+  String get reportBlockUser => 'Block this user';
+
+  @override
+  String get reportSent => 'Report sent.';
+
+  @override
+  String get reportSendError => 'Couldn\'t send the report.';
+
+  @override
+  String get reportBlocked => 'Blocked.';
+
+  @override
+  String get reportBlockError => 'Couldn\'t block.';
+
+  @override
+  String exploreOpenSemantics(String title) {
+    return 'Open $title';
+  }
 }

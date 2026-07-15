@@ -182,7 +182,7 @@ class _ThemeCard extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Mở ${theme.title}',
+      label: l10n?.exploreOpenSemantics(theme.title) ?? 'Mở ${theme.title}',
       child: Pressable(
         key: Key('theme_card_${theme.genreId}'),
         onTap: onTap,
@@ -300,9 +300,10 @@ class _RetroBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Semantics(
       button: true,
-      label: 'Quay lại',
+      label: l10n?.commonBack ?? 'Quay lại',
       child: Pressable(
         onTap: onTap,
         child: Container(

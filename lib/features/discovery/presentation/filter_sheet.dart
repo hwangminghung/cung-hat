@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/discovery_providers.dart';
 
 /// Bộ lọc bán kính kiểu Tinder — slider 5-100km lưu server + toggle tự mở
@@ -47,15 +48,19 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
       ref.read(deckRadiusProvider.notifier).state = null;
       ref.invalidate(candidatesProvider(null));
       if (mounted) {
+        final l10n =
+            Localizations.of<AppLocalizations>(context, AppLocalizations);
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã áp dụng bộ lọc.')),
+          SnackBar(content: Text(l10n?.filterApplied ?? 'Đã áp dụng bộ lọc.')),
         );
       }
     } catch (_) {
       if (mounted) {
+        final l10n =
+            Localizations.of<AppLocalizations>(context, AppLocalizations);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không lưu được, thử lại.')),
+          SnackBar(content: Text(l10n?.filterSaveError ?? 'Không lưu được, thử lại.')),
         );
       }
     } finally {
@@ -65,6 +70,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     _seedFrom(ref.watch(discoveryPrefsProvider));
     return SafeArea(
       child: SingleChildScrollView(
@@ -90,10 +96,11 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Bộ lọc', style: Theme.of(context).textTheme.headlineSmall),
+              Text(l10n?.filterTitle ?? 'Bộ lọc',
+                  style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Bán kính tìm quanh',
+                l10n?.filterRadius ?? 'Bán kính tìm quanh',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
@@ -118,8 +125,9 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               SwitchListTile(
                 key: const Key('filter_auto_expand_switch'),
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Tự mở rộng khi hết người'),
-                subtitle: const Text('Tự tìm quanh 100 km khi hết gợi ý'),
+                title: Text(l10n?.deckAutoExpandTitle ?? 'Tự mở rộng khi hết người'),
+                subtitle:
+                    Text(l10n?.filterAutoExpandSub ?? 'Tự tìm quanh 100 km khi hết gợi ý'),
                 value: _autoExpand,
                 onChanged: !_seeded
                     ? null
@@ -141,7 +149,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                             color: AppColors.onPrimary,
                           ),
                         )
-                      : const Text('Áp dụng'),
+                      : Text(l10n?.filterApply ?? 'Áp dụng'),
                 ),
               ),
             ],
