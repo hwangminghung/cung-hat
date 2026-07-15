@@ -5,10 +5,11 @@ import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/message_safety.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../chat/application/chat_providers.dart';
 import '../../chat/domain/message.dart';
-import '../../chat/domain/song_share.dart';
 import '../../chat/presentation/chat_timeline.dart';
+import '../../chat/presentation/chat_widgets.dart';
 import '../../chat/presentation/song_share_widgets.dart';
 import '../application/keo_providers.dart';
 import '../domain/keo_member.dart';
@@ -80,26 +81,8 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
 
   Future<void> _doSend(String text) async {
     if (messageLooksUnsafe(text)) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Gửi tin này?'),
-          content: const Text(
-            'Tin nhắn có vẻ liên quan tới tiền bạc hoặc thông tin nhạy cảm. Hãy kiểm tra kỹ trước khi gửi.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Hủy'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Gửi'),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true) return;
+      if (!await confirmUnsafeMessage(context)) return;
+      if (!mounted) return;
     }
 
     try {
@@ -185,7 +168,19 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
         children: [
           const _GroupRulesBanner(),
           Expanded(
-            child: messages.isEmpty
+            // [AUDIT M3] Lỗi tải history phải khác "thread trống": có nút
+            // Thử lại; tin realtime đã tới thì ưu tiên hiển thị tin.
+            child: historyAsync.hasError && messages.isEmpty
+                ? EmptyState(
+                    icon: Icons.wifi_off_rounded,
+                    title: 'Không tải được tin nhắn',
+                    subtitle: 'Kiểm tra kết nối rồi thử lại.',
+                    actionLabel: 'Thử lại',
+                    onAction: () => ref.invalidate(
+                      keoMessageHistoryProvider(widget.keoId),
+                    ),
+                  )
+                : messages.isEmpty
                 ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -215,7 +210,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
                         message.createdAt,
                         DateTime.now(),
                       );
-                      final bubble = _MessageBubble(
+                      final bubble = MessageBubble(
                         message: message,
                         mine: mine,
                         senderName: mine ? null : nameById[message.senderId],
@@ -230,7 +225,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
                     },
                   ),
           ),
-          _Composer(
+          ChatComposer(
             controller: _controller,
             sending: _sending,
             onSend: _send,
@@ -297,145 +292,3 @@ class _GroupRulesBanner extends StatelessWidget {
   }
 }
 
-class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({
-    required this.message,
-    required this.mine,
-    this.senderName,
-  });
-
-  final Message message;
-  final bool mine;
-
-  /// Tên người gửi hiện trên bubble của NGƯỜI KHÁC (mockup 17) — null với
-  /// bubble của mình hoặc khi roster chưa tải.
-  final String? senderName;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        constraints: const BoxConstraints(maxWidth: 292),
-        decoration: BoxDecoration(
-          color: mine ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(mine ? 18 : 6),
-            bottomRight: Radius.circular(mine ? 6 : 18),
-          ),
-          border: mine ? null : Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (senderName != null && senderName!.isNotEmpty) ...[
-              Text(
-                senderName!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.tertiaryPop,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-            ],
-            if (isSongShare(message.body))
-              SongShareContent(body: message.body, mine: mine)
-            else
-              Text(
-                message.body,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: mine ? AppColors.onPrimary : AppColors.textPrimary,
-                ),
-              ),
-            const SizedBox(height: 2),
-            Text(
-              bubbleTime(message.createdAt),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: 10.5,
-                color: mine
-                    ? AppColors.onPrimary.withValues(alpha: 0.72)
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Composer extends StatelessWidget {
-  const _Composer({
-    required this.controller,
-    required this.sending,
-    required this.onSend,
-    required this.onShareSong,
-  });
-
-  final TextEditingController controller;
-  final bool sending;
-  final VoidCallback onSend;
-  final VoidCallback onShareSong;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          AppSpacing.lg,
-        ),
-        decoration: const BoxDecoration(color: AppColors.background),
-        child: Row(
-          children: [
-            IconButton.outlined(
-              key: const Key('share_song_btn'),
-              tooltip: 'Gửi bài tủ',
-              onPressed: sending ? null : onShareSong,
-              icon: const Icon(Icons.music_note_outlined),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: TextField(
-                controller: controller,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
-                decoration: const InputDecoration(
-                  hintText: 'Nhắn gì đó...',
-                  isDense: true,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              key: const Key('send_btn'),
-              onPressed: sending ? null : onSend,
-              icon: sending
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.onPrimary,
-                      ),
-                    )
-                  : const Icon(Icons.send_rounded),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

@@ -1,12 +1,23 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { safeEqual } from "../_shared/hmac.ts";
 
 // Ops-only: invoked manually per city. Secret-gated; NEVER exposed to the app.
 Deno.serve(async (req) => {
   const secret = Deno.env.get("PLACES_INGEST_SECRET");
   if (!secret) return new Response(JSON.stringify({ error: "ingest_not_configured" }), { status: 503, headers: { "Content-Type": "application/json" } });
-  if (req.headers.get("x-ingest-secret") !== secret) return new Response("forbidden", { status: 403 });
+  const got = req.headers.get("x-ingest-secret");
+  if (!got || !safeEqual(got, secret)) return new Response("forbidden", { status: 403 });
   const { city, lat, lng, radius_m = 5000, style_tag = "k_style", text_query } =
     await req.json();
+  // [AUDIT L7] lat/lng/radius khong hop le lam haversine tra NaN -> filter
+  // chet lang (kept=0) kho hieu; chan som voi 400 ro rang.
+  if (typeof lat !== "number" || !Number.isFinite(lat) ||
+      typeof lng !== "number" || !Number.isFinite(lng) ||
+      typeof radius_m !== "number" || !(radius_m > 0 && radius_m <= 50000)) {
+    return new Response(JSON.stringify({ error: "bad_geo_input" }), {
+      status: 400, headers: { "Content-Type": "application/json" },
+    });
+  }
   let res: Response;
   if (text_query) {
     // searchText: bat "music box"/"phong hat mini" ma searchNearby type=karaoke bo sot.

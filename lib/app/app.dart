@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../core/theme/app_theme.dart';
+import '../features/billing/application/iap_controller.dart';
 import 'deep_link.dart';
 import 'router.dart';
 
@@ -20,6 +21,11 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
   void initState() {
     super.initState();
     _initDeepLinks();
+    // [AUDIT C1] purchaseStream phải có listener TRƯỚC khi user mua và ngay
+    // khi app mở lại (store replay transaction treo) — không init thì user
+    // trả tiền mà entitlement không bao giờ được cấp. init() tự nuốt lỗi
+    // platform channel nên an toàn trên dev/test.
+    unawaited(ref.read(iapControllerProvider).init());
   }
 
   Future<void> _initDeepLinks() async {

@@ -1,5 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { hmacSha256Hex, json } from "../_shared/hmac.ts";
+import { hmacSha256Hex, json, safeEqual } from "../_shared/hmac.ts";
 
 // IPN/callback gateway. verify_jwt=false (config.toml) vi gateway khong co JWT Supabase —
 // chu ky HMAC cua gateway CHINH LA lop xac thuc. Fail-closed khi thieu secret.
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       `&requestId=${body.requestId}&responseTime=${body.responseTime}` +
       `&resultCode=${body.resultCode}&transId=${body.transId}`;
     const expected = await hmacSha256Hex(secretKey, raw);
-    if (!body.signature || expected !== body.signature) {
+    if (typeof body.signature !== "string" || !safeEqual(expected, body.signature)) {
       return new Response("bad signature", { status: 401 });
     }
     const outcome = await settle(String(body.orderId), body.resultCode === 0, Number(body.amount));
@@ -85,7 +85,9 @@ Deno.serve(async (req) => {
     const { data, mac } = body;
     if (typeof data !== "string" || !mac) return json(200, { return_code: -1, return_message: "bad request" });
     const expected = await hmacSha256Hex(key2, data);
-    if (expected !== mac) return json(200, { return_code: -1, return_message: "mac not equal" });
+    if (typeof mac !== "string" || !safeEqual(expected, mac)) {
+      return json(200, { return_code: -1, return_message: "mac not equal" });
+    }
     let payload: Record<string, unknown>;
     try { payload = JSON.parse(data); } catch { return json(200, { return_code: -1, return_message: "bad data" }); }
     // ZaloPay chi callback khi thanh toan THANH CONG.

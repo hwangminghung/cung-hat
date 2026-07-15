@@ -28,6 +28,12 @@ class HomeShell extends ConsumerStatefulWidget {
 class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
 
+  /// [AUDIT M7] Tab đã thăm được giữ sống trong IndexedStack (giữ scroll/
+  /// deck state khi chuyển tab); tab CHƯA thăm là SizedBox để giữ lazy-init
+  /// như switch cũ — không fetch inbox/kèo trước khi user vào tab
+  /// (home_shell_test khẳng định inboxCalls == 0 trước lần thăm đầu).
+  final Set<int> _visited = {0};
+
   // Icon set follows design-system/MASTER.md: Đôi group · Kèo mic ·
   // Chat chat_bubble · Hồ sơ person.
   static const _labels = ['Đôi', 'Kèo', 'Chat', 'Hồ sơ'];
@@ -44,27 +50,38 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     Icons.person_rounded,
   ];
 
+  void _select(int i) {
+    // inboxProvider là FutureProvider one-shot: không refetch khi vào
+    // tab Chat thì pill 'Đến lượt bạn'/badge unread trễ tới khi user mở
+    // 1 chat hoặc restart. Invalidate mỗi lần CHỌN tab 2 (NavigationBar
+    // fire cả khi re-tap tab hiện tại — refetch thừa vô hại, coi như
+    // pull-to-refresh). Realtime subscription: ngoài scope, không làm.
+    if (i == 2) ref.invalidate(inboxProvider);
+    setState(() {
+      _index = i;
+      _visited.add(i);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final tabs = <Widget Function()>[
+      () => const DoiDeckScreen(),
+      () => const KeoBoardScreen(),
+      () => InboxScreen(onFindKeo: () => _select(1)),
+      () => const _ProfileTab(),
+    ];
     return Scaffold(
-      body: switch (_index) {
-        0 => const DoiDeckScreen(),
-        1 => const KeoBoardScreen(),
-        2 => InboxScreen(onFindKeo: () => setState(() => _index = 1)),
-        3 => const _ProfileTab(),
-        _ => Center(child: Text(_labels[_index])),
-      },
+      body: IndexedStack(
+        index: _index,
+        children: [
+          for (var i = 0; i < tabs.length; i++)
+            _visited.contains(i) ? tabs[i]() : const SizedBox.shrink(),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        onDestinationSelected: (i) {
-          // inboxProvider là FutureProvider one-shot: không refetch khi vào
-          // tab Chat thì pill 'Đến lượt bạn'/badge unread trễ tới khi user mở
-          // 1 chat hoặc restart. Invalidate mỗi lần CHỌN tab 2 (NavigationBar
-          // fire cả khi re-tap tab hiện tại — refetch thừa vô hại, coi như
-          // pull-to-refresh). Realtime subscription: ngoài scope, không làm.
-          if (i == 2) ref.invalidate(inboxProvider);
-          setState(() => _index = i);
-        },
+        onDestinationSelected: _select,
         destinations: [
           for (var i = 0; i < _labels.length; i++)
             NavigationDestination(

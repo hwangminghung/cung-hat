@@ -22,3 +22,13 @@ jobs:
         with: { version: 2.109.1 }
       - run: supabase db start
       - run: supabase test db
+
+  # [AUDIT M5] Edge functions (payments/IAP) truoc day khong co check nao trong
+  # CI — deno check bat loi type/import truoc khi len prod.
+  edge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.x }
+      - run: deno check supabase/functions/*/index.ts supabase/functions/_shared/*.ts

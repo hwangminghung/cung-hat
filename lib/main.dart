@@ -13,6 +13,13 @@ import 'app/app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final cfg = AppConfig.fromEnv();
+  // [AUDIT L3] Thiếu dart-define thì Supabase.initialize nổ FormatException
+  // khó hiểu — assert sớm với message chỉ thẳng cách chạy đúng (debug-only).
+  assert(
+    cfg.isConfigured,
+    'Thiếu SUPABASE_URL/SUPABASE_ANON_KEY — chạy với '
+    '--dart-define-from-file=env/dev.json (hoặc env/dev.emulator.json).',
+  );
   await Supabase.initialize(url: cfg.supabaseUrl, anonKey: cfg.supabaseAnonKey); // ignore: deprecated_member_use
   unawaited(_initPush(Supabase.instance.client));
   runApp(

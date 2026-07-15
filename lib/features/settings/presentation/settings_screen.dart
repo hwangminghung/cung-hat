@@ -12,11 +12,19 @@ import '../../../shared/widgets/wave_divider.dart';
 import '../../onboarding/presentation/consent_step.dart';
 import '../application/settings_providers.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  /// [AUDIT M1] Chặn double-tap trong lúc RPC xoá tài khoản đang bay.
+  bool _deleting = false;
+
+  @override
+  Widget build(BuildContext context) {
     final consentsAsync = ref.watch(myConsentsProvider);
     final consents = consentsAsync.value ?? const <String, bool>{};
 
@@ -49,7 +57,7 @@ class SettingsScreen extends ConsumerWidget {
                           title: Text(consentLabelsVi[purpose] ?? purpose),
                           value: consents[purpose] ?? false,
                           onChanged: (value) =>
-                              _handleToggleConsent(context, ref, purpose, value),
+                              _handleToggleConsent(purpose, value),
                         ),
                     ],
                   ),
@@ -60,7 +68,7 @@ class SettingsScreen extends ConsumerWidget {
             child: _SettingsTile(
               icon: Icons.download_rounded,
               title: 'Tải dữ liệu của tôi',
-              onTap: () => _exportData(context, ref),
+              onTap: _exportData,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -71,13 +79,13 @@ class SettingsScreen extends ConsumerWidget {
                 _SettingsTile(
                   icon: Icons.logout_rounded,
                   title: 'Đăng xuất',
-                  onTap: () => _signOut(ref),
+                  onTap: _signOut,
                 ),
                 _SettingsTile(
                   icon: Icons.delete_forever_rounded,
                   title: 'Xóa tài khoản',
                   danger: true,
-                  onTap: () => _deleteAccount(context, ref),
+                  onTap: _deleting ? null : _deleteAccount,
                 ),
               ],
             ),
@@ -110,12 +118,7 @@ class SettingsScreen extends ConsumerWidget {
   /// convention try/catch + mounted như _handleToggleAutoExpand
   /// (doi_deck_screen.dart) — nếu không, RPC lỗi sẽ leak unhandled async
   /// exception và switch tự nhảy lại vị trí cũ mà không có phản hồi gì.
-  Future<void> _handleToggleConsent(
-    BuildContext context,
-    WidgetRef ref,
-    String purpose,
-    bool value,
-  ) async {
+  Future<void> _handleToggleConsent(String purpose, bool value) async {
     try {
       final repo = ref.read(settingsRepositoryProvider);
       if (value) {
@@ -125,19 +128,19 @@ class SettingsScreen extends ConsumerWidget {
       }
       ref.invalidate(myConsentsProvider);
     } catch (_) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Không lưu được cài đặt, thử lại.')));
       }
     }
   }
 
-  Future<void> _exportData(BuildContext context, WidgetRef ref) async {
+  Future<void> _exportData() async {
     try {
       final data = await ref.read(settingsRepositoryProvider).exportMyData();
       await SharePlus.instance.share(ShareParams(text: jsonEncode(data)));
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Không thể tải dữ liệu. Vui lòng thử lại.'),
@@ -146,12 +149,12 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _signOut(WidgetRef ref) async {
+  Future<void> _signOut() async {
     // Router redirects to /auth on the resulting auth-state change.
     await ref.read(supabaseClientProvider).auth.signOut();
   }
 
-  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+  Future<void> _deleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -171,11 +174,23 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmed != true) return;
-    await ref.read(settingsRepositoryProvider).deleteAccount();
-    await ref.read(supabaseClientProvider).auth.signOut();
-    if (!context.mounted) return;
-    context.go('/auth');
+    if (confirmed != true || !mounted || _deleting) return;
+    setState(() => _deleting = true);
+    try {
+      await ref.read(settingsRepositoryProvider).deleteAccount();
+      await ref.read(supabaseClientProvider).auth.signOut();
+      if (mounted) context.go('/auth');
+    } catch (_) {
+      // [AUDIT M1] offline/RPC lỗi: trước đây exception thoát không bắt —
+      // user không biết đã xoá hay chưa.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không xoá được tài khoản, thử lại.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 }
 
@@ -227,28 +242,36 @@ class _SettingsTile extends StatelessWidget {
 
   final IconData icon;
   final String title;
-  final VoidCallback onTap;
+
+  /// null = tile disabled (đang có thao tác in-flight).
+  final VoidCallback? onTap;
   final bool danger;
 
   @override
   Widget build(BuildContext context) {
     final color = danger ? AppColors.error : AppColors.primaryDark;
-    return ListTile(
-      leading: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: danger ? AppColors.errorTint : AppColors.primaryTint,
-          borderRadius: BorderRadius.circular(14),
+    // Mirror _ProfileTile (home_shell.dart): ListTile vẽ ink trên Material
+    // gần nhất — thiếu lớp Material transparency thì assertion "ink splashes
+    // may be invisible" nổ trên mọi lần pump màn này trong widget test.
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        leading: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: danger ? AppColors.errorTint : AppColors.primaryTint,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: color),
         ),
-        child: Icon(icon, color: color),
+        title: Text(
+          title,
+          style: danger ? const TextStyle(color: AppColors.error) : null,
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: onTap,
       ),
-      title: Text(
-        title,
-        style: danger ? const TextStyle(color: AppColors.error) : null,
-      ),
-      trailing: const Icon(Icons.chevron_right_rounded),
-      onTap: onTap,
     );
   }
 }
