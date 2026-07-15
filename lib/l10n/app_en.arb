@@ -461,5 +461,7 @@
   "adminHide": "Hide",
   "adminRemove": "Remove",
   "adminDismiss": "Dismiss",
-  "adminLoadError": "Couldn't load reports"
+  "adminLoadError": "Couldn't load reports",
+  "settingsLanguage": "Ngôn ngữ",
+  "settingsLangSystem": "System default"
 }

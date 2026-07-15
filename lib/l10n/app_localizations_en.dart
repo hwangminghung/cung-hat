@@ -1313,4 +1313,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminLoadError => 'Couldn\'t load reports';
+
+  @override
+  String get settingsLanguage => 'Ngôn ngữ';
+
+  @override
+  String get settingsLangSystem => 'System default';
 }

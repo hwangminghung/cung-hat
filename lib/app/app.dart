@@ -3,6 +3,7 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import '../core/l10n/locale_controller.dart';
 import '../core/theme/app_theme.dart';
 import '../features/billing/application/iap_controller.dart';
 import 'deep_link.dart';
@@ -59,6 +60,8 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
       theme: AppTheme.light(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      // [LANG] User chọn ngôn ngữ trong Cài đặt → override; null = theo máy.
+      locale: ref.watch(localeControllerProvider),
       // [L10N] Song ngữ: theo ngôn ngữ máy; máy đặt thứ tiếng ngoài
       // supportedLocales → rơi về tiếng Việt (thị trường chính).
       localeResolutionCallback: (device, supported) {

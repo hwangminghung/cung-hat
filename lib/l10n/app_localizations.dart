@@ -2491,6 +2491,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t load reports'**
   String get adminLoadError;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Ngôn ngữ'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsLangSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get settingsLangSystem;
 }
 
 class _AppLocalizationsDelegate

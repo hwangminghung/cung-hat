@@ -461,5 +461,7 @@
   "adminHide": "Ẩn",
   "adminRemove": "Gỡ",
   "adminDismiss": "Bỏ qua",
-  "adminLoadError": "Không tải được báo cáo"
+  "adminLoadError": "Không tải được báo cáo",
+  "settingsLanguage": "Ngôn ngữ",
+  "settingsLangSystem": "Theo hệ thống"
 }

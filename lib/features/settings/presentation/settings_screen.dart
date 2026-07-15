@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/l10n/locale_controller.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -65,6 +66,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                     ],
                   ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _Section(
+            title: _l10n?.settingsLanguage ?? 'Ngôn ngữ',
+            child: Column(
+              children: [
+                _LanguageTile(
+                  key: const Key('lang_system'),
+                  label: _l10n?.settingsLangSystem ?? 'Theo hệ thống',
+                  selected: ref.watch(localeControllerProvider) == null,
+                  onTap: () =>
+                      ref.read(localeControllerProvider.notifier).set(null),
+                ),
+                _LanguageTile(
+                  key: const Key('lang_vi'),
+                  // Tên ngôn ngữ hiển thị bằng chính ngôn ngữ đó — không l10n.
+                  label: 'Tiếng Việt',
+                  selected:
+                      ref.watch(localeControllerProvider) == const Locale('vi'),
+                  onTap: () => ref
+                      .read(localeControllerProvider.notifier)
+                      .set(const Locale('vi')),
+                ),
+                _LanguageTile(
+                  key: const Key('lang_en'),
+                  label: 'English',
+                  selected:
+                      ref.watch(localeControllerProvider) == const Locale('en'),
+                  onTap: () => ref
+                      .read(localeControllerProvider.notifier)
+                      .set(const Locale('en')),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           _Section(
@@ -282,6 +317,34 @@ class _SettingsTile extends StatelessWidget {
           style: danger ? const TextStyle(color: AppColors.error) : null,
         ),
         trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // Mirror _SettingsTile: Material transparency de ink cua ListTile ve dung.
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        title: Text(label),
+        trailing: selected
+            ? const Icon(Icons.check_rounded, color: AppColors.primaryDark)
+            : null,
         onTap: onTap,
       ),
     );
