@@ -6,6 +6,7 @@ import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/message_safety.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../discovery/domain/candidate.dart';
 import '../../discovery/presentation/candidate_detail_sheet.dart';
@@ -251,7 +252,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: messages.isEmpty
+            // [AUDIT M3] Lỗi tải history phải khác "thread trống": có nút
+            // Thử lại; tin realtime đã tới (messages non-empty) thì ưu tiên
+            // hiển thị tin thay vì che bằng error.
+            child: historyAsync.hasError && messages.isEmpty
+                ? EmptyState(
+                    icon: Icons.wifi_off_rounded,
+                    title: 'Không tải được tin nhắn',
+                    subtitle: 'Kiểm tra kết nối rồi thử lại.',
+                    actionLabel: 'Thử lại',
+                    onAction: () => ref.invalidate(
+                      messageHistoryProvider(widget.matchId),
+                    ),
+                  )
+                : messages.isEmpty
                 ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.xxl),
