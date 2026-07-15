@@ -31,15 +31,23 @@ class ChatRepository {
     await _client.rpc('unmatch', params: {'p_match': matchId});
   }
 
+  /// Số tin tối đa tải mỗi lần mở thread. PostgREST `max_rows=1000` cắt ÂM
+  /// THẦM: nếu order tăng dần, thread dài hơn limit sẽ mất TIN MỚI NHẤT.
+  /// Lấy trang mới nhất (desc + limit) rồi đảo lại cho UI cũ→mới (audit H2).
+  static const historyPageSize = 100;
+
   Future<List<Message>> history(String threadId) async {
     final rows = await _client
         .from('messages')
         .select()
         .eq('thread_type', 'match')
         .eq('thread_id', threadId)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: false)
+        .limit(historyPageSize);
     return (rows as List)
         .map((e) => Message.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList()
+        .reversed
         .toList();
   }
 
@@ -86,9 +94,12 @@ class ChatRepository {
         .select()
         .eq('thread_type', 'keo')
         .eq('thread_id', keoId)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: false)
+        .limit(historyPageSize);
     return (rows as List)
         .map((e) => Message.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList()
+        .reversed
         .toList();
   }
 

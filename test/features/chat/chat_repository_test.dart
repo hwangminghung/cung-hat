@@ -12,16 +12,17 @@ class _MockListFilter extends Mock
 class _MockListOrdered extends Mock
     implements PostgrestTransformBuilder<PostgrestList> {}
 
-/// Stub chuỗi from(table).select().eq()*.order() trả [rows]; trả filter
-/// builder để verify tham số `order`.
-PostgrestFilterBuilder<PostgrestList> stubTableSelect(
-  MockSupabaseClient client,
-  String table,
-  PostgrestList rows,
-) {
+/// Stub chuỗi from(table).select().eq()*.order().limit() trả [rows]; trả
+/// (filter, ordered) để verify tham số `order` và `limit`.
+({
+  PostgrestFilterBuilder<PostgrestList> fb,
+  PostgrestTransformBuilder<PostgrestList> ob,
+})
+stubTableSelect(MockSupabaseClient client, String table, PostgrestList rows) {
   final qb = _MockQueryBuilder();
   final fb = _MockListFilter();
   final ob = _MockListOrdered();
+  final lb = _MockListOrdered();
   when(() => client.from(table)).thenAnswer((_) => qb);
   when(() => qb.select(any())).thenAnswer((_) => fb);
   when(() => fb.eq(any(), any())).thenAnswer((_) => fb);
@@ -34,12 +35,15 @@ PostgrestFilterBuilder<PostgrestList> stubTableSelect(
     ),
   ).thenAnswer((_) => ob);
   when(
-    () => ob.then<dynamic>(any(), onError: any(named: 'onError')),
+    () => ob.limit(any(), referencedTable: any(named: 'referencedTable')),
+  ).thenAnswer((_) => lb);
+  when(
+    () => lb.then<dynamic>(any(), onError: any(named: 'onError')),
   ).thenAnswer((invocation) {
     final onValue = invocation.positionalArguments.first as Function;
     return Future<dynamic>.value(rows).then<dynamic>((v) => onValue(v));
   });
-  return fb;
+  return (fb: fb, ob: ob);
 }
 
 PostgrestList get _twoDayRows => [
@@ -87,37 +91,58 @@ void main() {
     verify(() => client.rpc('unmatch', params: {'p_match': 't1'})).called(1);
   });
 
-  // BUG "chat ngược": SDK Dart .order() MẶC ĐỊNH ascending:false — history
-  // phải xin tăng dần tường minh, nếu không tin mới nhất nằm ĐẦU danh sách.
-  test('history xin created_at TĂNG dần (cũ trước, mới sau)', () async {
+  // BUG audit H2: PostgREST max_rows=1000 cắt ÂM THẦM; order tăng dần làm
+  // thread >1000 tin MẤT SẠCH tin mới nhất. Hành vi đúng: lấy trang MỚI nhất
+  // (desc + limit) rồi đảo lại cho UI cũ→mới.
+  test('history lấy trang MỚI nhất (desc+limit) rồi đảo về cũ→mới', () async {
     final client = MockSupabaseClient();
-    final fb = stubTableSelect(client, 'messages', _twoDayRows);
+    // Server trả DESC: tin mới trước.
+    final stubs = stubTableSelect(client, 'messages', [
+      _twoDayRows[1],
+      _twoDayRows[0],
+    ]);
 
     final msgs = await ChatRepository(client).history('t1');
 
     expect(msgs.map((m) => m.id).toList(), ['m-cu', 'm-moi']);
     verify(
-      () => fb.order(
+      () => stubs.fb.order(
         'created_at',
-        ascending: true,
+        ascending: false,
         nullsFirst: any(named: 'nullsFirst'),
+        referencedTable: any(named: 'referencedTable'),
+      ),
+    ).called(1);
+    verify(
+      () => stubs.ob.limit(
+        ChatRepository.historyPageSize,
         referencedTable: any(named: 'referencedTable'),
       ),
     ).called(1);
   });
 
-  test('keoHistory xin created_at TĂNG dần (cũ trước, mới sau)', () async {
+  test('keoHistory lấy trang MỚI nhất (desc+limit) rồi đảo về cũ→mới',
+      () async {
     final client = MockSupabaseClient();
-    final fb = stubTableSelect(client, 'messages', _twoDayRows);
+    final stubs = stubTableSelect(client, 'messages', [
+      _twoDayRows[1],
+      _twoDayRows[0],
+    ]);
 
     final msgs = await ChatRepository(client).keoHistory('k1');
 
     expect(msgs.map((m) => m.id).toList(), ['m-cu', 'm-moi']);
     verify(
-      () => fb.order(
+      () => stubs.fb.order(
         'created_at',
-        ascending: true,
+        ascending: false,
         nullsFirst: any(named: 'nullsFirst'),
+        referencedTable: any(named: 'referencedTable'),
+      ),
+    ).called(1);
+    verify(
+      () => stubs.ob.limit(
+        ChatRepository.historyPageSize,
         referencedTable: any(named: 'referencedTable'),
       ),
     ).called(1);
