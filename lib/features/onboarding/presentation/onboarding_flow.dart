@@ -110,7 +110,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             return EmptyState(
               icon: Icons.wifi_off,
               title: l10n?.onbLoadError ?? 'Không tải được dữ liệu.',
-              subtitle: 'Thử lại sau ít phút.',
+              subtitle: l10n?.onbLoadRetrySub ?? 'Thử lại sau ít phút.',
             );
           },
           data: (items) => TasteChips<T>(

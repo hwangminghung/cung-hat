@@ -162,5 +162,8 @@
   "upsellLikeQuotaB2": "5 Siêu thích mỗi ngày",
   "upsellSuperQuotaTitle": "Hết lượt Siêu thích hôm nay",
   "upsellSuperQuotaB1": "Pro có 5 Siêu thích mỗi ngày",
-  "upsellSuperQuotaB2": "Siêu thích giúp bạn nổi bật gấp 3 lần"
+  "upsellSuperQuotaB2": "Siêu thích giúp bạn nổi bật gấp 3 lần",
+  "onbLoadRetrySub": "Thử lại sau ít phút.",
+  "onbTasteEmptyTitle": "Chưa có dữ liệu gu nhạc",
+  "onbTasteEmptySub": "Kiểm tra dữ liệu mẫu hoặc thử tải lại sau ít phút."
 }

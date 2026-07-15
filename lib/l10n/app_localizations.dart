@@ -865,6 +865,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Super Likes make you 3x more visible'**
   String get upsellSuperQuotaB2;
+
+  /// No description provided for @onbLoadRetrySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again in a few minutes.'**
+  String get onbLoadRetrySub;
+
+  /// No description provided for @onbTasteEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No music data yet'**
+  String get onbTasteEmptyTitle;
+
+  /// No description provided for @onbTasteEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the seed data or try reloading in a few minutes.'**
+  String get onbTasteEmptySub;
 }
 
 class _AppLocalizationsDelegate

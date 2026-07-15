@@ -162,5 +162,8 @@
   "upsellLikeQuotaB2": "5 Super Likes every day",
   "upsellSuperQuotaTitle": "Out of Super Likes for today",
   "upsellSuperQuotaB1": "Pro gets 5 Super Likes a day",
-  "upsellSuperQuotaB2": "Super Likes make you 3x more visible"
+  "upsellSuperQuotaB2": "Super Likes make you 3x more visible",
+  "onbLoadRetrySub": "Try again in a few minutes.",
+  "onbTasteEmptyTitle": "No music data yet",
+  "onbTasteEmptySub": "Check the seed data or try reloading in a few minutes."
 }

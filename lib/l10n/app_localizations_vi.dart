@@ -413,4 +413,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get upsellSuperQuotaB2 => 'Siêu thích giúp bạn nổi bật gấp 3 lần';
+
+  @override
+  String get onbLoadRetrySub => 'Thử lại sau ít phút.';
+
+  @override
+  String get onbTasteEmptyTitle => 'Chưa có dữ liệu gu nhạc';
+
+  @override
+  String get onbTasteEmptySub =>
+      'Kiểm tra dữ liệu mẫu hoặc thử tải lại sau ít phút.';
 }

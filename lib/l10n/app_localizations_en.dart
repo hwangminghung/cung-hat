@@ -413,4 +413,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upsellSuperQuotaB2 => 'Super Likes make you 3x more visible';
+
+  @override
+  String get onbLoadRetrySub => 'Try again in a few minutes.';
+
+  @override
+  String get onbTasteEmptyTitle => 'No music data yet';
+
+  @override
+  String get onbTasteEmptySub =>
+      'Check the seed data or try reloading in a few minutes.';
 }
