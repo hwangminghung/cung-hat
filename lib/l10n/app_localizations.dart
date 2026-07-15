@@ -2077,6 +2077,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirmed'**
   String get keoStateConfirmed;
+
+  /// No description provided for @bookingPickGateway.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a payment gateway'**
+  String get bookingPickGateway;
+
+  /// No description provided for @bookingNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment gateway not configured yet'**
+  String get bookingNotConfigured;
+
+  /// No description provided for @bookingCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the payment'**
+  String get bookingCreateError;
+
+  /// No description provided for @planStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get planStatusConfirmed;
+
+  /// No description provided for @planStatusProposed.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting approval'**
+  String get planStatusProposed;
+
+  /// No description provided for @planVenuePicked.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen venue'**
+  String get planVenuePicked;
+
+  /// No description provided for @planTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get planTitle;
+
+  /// No description provided for @planLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the plan'**
+  String get planLoadError;
+
+  /// No description provided for @planNoVenuesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No venue suggestions yet'**
+  String get planNoVenuesTitle;
+
+  /// No description provided for @planNoVenuesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Once venue data arrives from Places or seed, the map will show markers to pick a meeting spot.'**
+  String get planNoVenuesSub;
+
+  /// No description provided for @planReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get planReload;
+
+  /// No description provided for @planVenuesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the venue list'**
+  String get planVenuesLoadError;
+
+  /// No description provided for @planTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time: {time}'**
+  String planTime(String time);
+
+  /// No description provided for @planStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String planStatus(String status);
+
+  /// No description provided for @planConfirmCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the plan'**
+  String get planConfirmCta;
+
+  /// No description provided for @planConfirmError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t approve'**
+  String get planConfirmError;
+
+  /// No description provided for @planMapError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the map'**
+  String get planMapError;
+
+  /// No description provided for @planDirections.
+  ///
+  /// In en, this message translates to:
+  /// **'Directions'**
+  String get planDirections;
+
+  /// No description provided for @planSuggestReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested for being near the group midpoint · {band} km away'**
+  String planSuggestReason(String band);
+
+  /// No description provided for @planPickVenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick this venue'**
+  String get planPickVenue;
+
+  /// No description provided for @planProposed.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan proposed'**
+  String get planProposed;
+
+  /// No description provided for @planProposeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t propose'**
+  String get planProposeError;
+
+  /// No description provided for @planPickSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a singing time'**
+  String get planPickSchedule;
+
+  /// No description provided for @planOtherTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Another time'**
+  String get planOtherTime;
+
+  /// No description provided for @planProposeCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose the plan'**
+  String get planProposeCta;
+
+  /// No description provided for @safetyShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with friends'**
+  String get safetyShare;
+
+  /// No description provided for @safetyShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m going karaoke, here\'s the plan: {link}'**
+  String safetyShareMessage(String link);
+
+  /// No description provided for @safetyShareError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the share link'**
+  String get safetyShareError;
+
+  /// No description provided for @safetyArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve arrived'**
+  String get safetyArrived;
+
+  /// No description provided for @safetyArrivedOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrival recorded'**
+  String get safetyArrivedOk;
+
+  /// No description provided for @safetyArrivedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t record it'**
+  String get safetyArrivedError;
+
+  /// No description provided for @planSharedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared plan'**
+  String get planSharedTitle;
+
+  /// No description provided for @planSharedNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan not found'**
+  String get planSharedNotFound;
+
+  /// No description provided for @planMidpointMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'Group midpoint'**
+  String get planMidpointMarker;
+
+  /// No description provided for @planTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tmrw'**
+  String get planTomorrow;
+
+  /// No description provided for @planWeekdaysShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon,Tue,Wed,Thu,Fri,Sat,Sun'**
+  String get planWeekdaysShort;
 }
 
 class _AppLocalizationsDelegate

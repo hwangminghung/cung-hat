@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../application/plan_providers.dart';
 
@@ -11,18 +12,25 @@ class SharedPlanScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final async = ref.watch(resolveShareProvider(token));
     return Scaffold(
-      appBar: AppBar(title: const Text('Kế hoạch được chia sẻ')),
+      appBar: AppBar(title: Text(l10n?.planSharedTitle ?? 'Kế hoạch được chia sẻ')),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(child: Text('Không tìm thấy kế hoạch')),
+        error: (_, _) => Center(
+          child: Text(l10n?.planSharedNotFound ?? 'Không tìm thấy kế hoạch'),
+        ),
         data: (data) {
           if (data['venue_name'] == null) {
-            return const Center(child: Text('Không tìm thấy kế hoạch'));
+            return Center(
+              child: Text(l10n?.planSharedNotFound ?? 'Không tìm thấy kế hoạch'),
+            );
           }
           if (data['expired'] == true) {
-            return const Center(child: Text('Link đã hết hạn'));
+            return Center(
+              child: Text(l10n?.keoSharedExpired ?? 'Link đã hết hạn'),
+            );
           }
           return Padding(
             padding: const EdgeInsets.all(16),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/plan_providers.dart';
 
 class SafetyToolkit extends ConsumerWidget {
@@ -10,25 +11,33 @@ class SafetyToolkit extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Row(
       children: [
         Expanded(
           child: FilledButton.tonalIcon(
             icon: const Icon(Icons.ios_share),
-            label: const Text('Chia sẻ cho bạn bè'),
+            label: Text(l10n?.safetyShare ?? 'Chia sẻ cho bạn bè'),
             onPressed: () async {
               try {
                 final token = await ref
                     .read(planRepositoryProvider)
                     .createShareLink(planId);
+                final link = 'cunghat://plan/$token';
                 await SharePlus.instance.share(
                   ShareParams(
-                      text: 'Mình đi hát, đây là kế hoạch: cunghat://plan/$token'),
+                    text: l10n?.safetyShareMessage(link) ??
+                        'Mình đi hát, đây là kế hoạch: $link',
+                  ),
                 );
               } catch (_) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Không tạo được link chia sẻ')),
+                    SnackBar(
+                      content: Text(
+                        l10n?.safetyShareError ?? 'Không tạo được link chia sẻ',
+                      ),
+                    ),
                   );
                 }
               }
@@ -40,19 +49,27 @@ class SafetyToolkit extends ConsumerWidget {
           child: FilledButton.icon(
             key: const Key('checkin_btn'),
             icon: const Icon(Icons.place),
-            label: const Text('Tôi đã tới'),
+            label: Text(l10n?.safetyArrived ?? 'Tôi đã tới'),
             onPressed: () async {
               try {
                 await ref.read(planRepositoryProvider).checkInArrived(planId);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã ghi nhận bạn đã tới')),
+                    SnackBar(
+                      content: Text(
+                        l10n?.safetyArrivedOk ?? 'Đã ghi nhận bạn đã tới',
+                      ),
+                    ),
                   );
                 }
               } catch (_) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Không ghi nhận được')),
+                    SnackBar(
+                      content: Text(
+                        l10n?.safetyArrivedError ?? 'Không ghi nhận được',
+                      ),
+                    ),
                   );
                 }
               }

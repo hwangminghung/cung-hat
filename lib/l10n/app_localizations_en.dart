@@ -1085,4 +1085,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keoStateConfirmed => 'Confirmed';
+
+  @override
+  String get bookingPickGateway => 'Pick a payment gateway';
+
+  @override
+  String get bookingNotConfigured => 'Payment gateway not configured yet';
+
+  @override
+  String get bookingCreateError => 'Couldn\'t create the payment';
+
+  @override
+  String get planStatusConfirmed => 'Confirmed';
+
+  @override
+  String get planStatusProposed => 'Awaiting approval';
+
+  @override
+  String get planVenuePicked => 'Chosen venue';
+
+  @override
+  String get planTitle => 'Plan';
+
+  @override
+  String get planLoadError => 'Couldn\'t load the plan';
+
+  @override
+  String get planNoVenuesTitle => 'No venue suggestions yet';
+
+  @override
+  String get planNoVenuesSub =>
+      'Once venue data arrives from Places or seed, the map will show markers to pick a meeting spot.';
+
+  @override
+  String get planReload => 'Reload';
+
+  @override
+  String get planVenuesLoadError => 'Couldn\'t load the venue list';
+
+  @override
+  String planTime(String time) {
+    return 'Time: $time';
+  }
+
+  @override
+  String planStatus(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String get planConfirmCta => 'Approve the plan';
+
+  @override
+  String get planConfirmError => 'Couldn\'t approve';
+
+  @override
+  String get planMapError => 'Couldn\'t open the map';
+
+  @override
+  String get planDirections => 'Directions';
+
+  @override
+  String planSuggestReason(String band) {
+    return 'Suggested for being near the group midpoint · $band km away';
+  }
+
+  @override
+  String get planPickVenue => 'Pick this venue';
+
+  @override
+  String get planProposed => 'Plan proposed';
+
+  @override
+  String get planProposeError => 'Couldn\'t propose';
+
+  @override
+  String get planPickSchedule => 'Pick a singing time';
+
+  @override
+  String get planOtherTime => 'Another time';
+
+  @override
+  String get planProposeCta => 'Propose the plan';
+
+  @override
+  String get safetyShare => 'Share with friends';
+
+  @override
+  String safetyShareMessage(String link) {
+    return 'I\'m going karaoke, here\'s the plan: $link';
+  }
+
+  @override
+  String get safetyShareError => 'Couldn\'t create the share link';
+
+  @override
+  String get safetyArrived => 'I\'ve arrived';
+
+  @override
+  String get safetyArrivedOk => 'Arrival recorded';
+
+  @override
+  String get safetyArrivedError => 'Couldn\'t record it';
+
+  @override
+  String get planSharedTitle => 'Shared plan';
+
+  @override
+  String get planSharedNotFound => 'Plan not found';
+
+  @override
+  String get planMidpointMarker => 'Group midpoint';
+
+  @override
+  String get planTomorrow => 'Tmrw';
+
+  @override
+  String get planWeekdaysShort => 'Mon,Tue,Wed,Thu,Fri,Sat,Sun';
 }

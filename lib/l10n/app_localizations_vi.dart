@@ -1080,4 +1080,121 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get keoStateConfirmed => 'Đã chốt';
+
+  @override
+  String get bookingPickGateway => 'Chọn cổng thanh toán';
+
+  @override
+  String get bookingNotConfigured => 'Cổng thanh toán chưa được cấu hình';
+
+  @override
+  String get bookingCreateError => 'Không tạo được thanh toán';
+
+  @override
+  String get planStatusConfirmed => 'Đã chốt';
+
+  @override
+  String get planStatusProposed => 'Chờ đồng ý';
+
+  @override
+  String get planVenuePicked => 'Quán đã chọn';
+
+  @override
+  String get planTitle => 'Kế hoạch';
+
+  @override
+  String get planLoadError => 'Không tải được kế hoạch';
+
+  @override
+  String get planNoVenuesTitle => 'Chưa có quán gợi ý';
+
+  @override
+  String get planNoVenuesSub =>
+      'Khi có dữ liệu quán từ Places hoặc seed, bản đồ sẽ hiển thị marker để chọn điểm hẹn.';
+
+  @override
+  String get planReload => 'Tải lại';
+
+  @override
+  String get planVenuesLoadError => 'Không tải được danh sách quán';
+
+  @override
+  String planTime(String time) {
+    return 'Thời gian: $time';
+  }
+
+  @override
+  String planStatus(String status) {
+    return 'Trạng thái: $status';
+  }
+
+  @override
+  String get planConfirmCta => 'Đồng ý kế hoạch';
+
+  @override
+  String get planConfirmError => 'Không đồng ý được';
+
+  @override
+  String get planMapError => 'Không mở được bản đồ';
+
+  @override
+  String get planDirections => 'Chỉ đường';
+
+  @override
+  String planSuggestReason(String band) {
+    return 'Gợi ý vì gần điểm cân bằng cả nhóm · cách $band km';
+  }
+
+  @override
+  String get planPickVenue => 'Chọn quán này';
+
+  @override
+  String get planProposed => 'Đã đề xuất kế hoạch';
+
+  @override
+  String get planProposeError => 'Không đề xuất được';
+
+  @override
+  String get planPickSchedule => 'Chọn lịch hát';
+
+  @override
+  String get planOtherTime => 'Giờ khác';
+
+  @override
+  String get planProposeCta => 'Đề xuất kế hoạch';
+
+  @override
+  String get safetyShare => 'Chia sẻ cho bạn bè';
+
+  @override
+  String safetyShareMessage(String link) {
+    return 'Mình đi hát, đây là kế hoạch: $link';
+  }
+
+  @override
+  String get safetyShareError => 'Không tạo được link chia sẻ';
+
+  @override
+  String get safetyArrived => 'Tôi đã tới';
+
+  @override
+  String get safetyArrivedOk => 'Đã ghi nhận bạn đã tới';
+
+  @override
+  String get safetyArrivedError => 'Không ghi nhận được';
+
+  @override
+  String get planSharedTitle => 'Kế hoạch được chia sẻ';
+
+  @override
+  String get planSharedNotFound => 'Không tìm thấy kế hoạch';
+
+  @override
+  String get planMidpointMarker => 'Điểm giữa nhóm';
+
+  @override
+  String get planTomorrow => 'Mai';
+
+  @override
+  String get planWeekdaysShort => 'T2,T3,T4,T5,T6,T7,CN';
 }
