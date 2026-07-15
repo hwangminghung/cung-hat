@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cung_hat/core/l10n/locale_controller.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 import 'package:cung_hat/features/settings/application/settings_providers.dart';
 import 'package:cung_hat/features/settings/data/settings_repository.dart';
 import 'package:cung_hat/features/settings/presentation/settings_screen.dart';
@@ -85,6 +86,35 @@ void main() {
       await tester.tap(find.byKey(const Key('lang_system')));
       await tester.pumpAndSettle();
       expect(container.read(localeControllerProvider), isNull);
+    });
+  });
+
+  // [LIVE-FIX] Emulator test bắt: khi app EN, tiêu đề mục ngôn ngữ phải là
+  // 'Language' (không phải 'Ngôn ngữ') và nhãn consent phải theo l10n EN.
+  testWidgets('locale EN → mục Ngôn ngữ hiện "Language" + consent EN',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final repo = _MockSettingsRepo();
+    when(() => repo.myConsents()).thenAnswer((_) async => {});
+
+    await _expectNoUnexpectedErrors(tester, () async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [settingsRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Ngôn ngữ'), findsNothing);
+      // Nhãn consent 'location' theo l10n EN, không còn hardcode VI.
+      expect(find.text('Dùng vị trí để gợi ý người/kèo gần bạn'), findsNothing);
     });
   });
 }

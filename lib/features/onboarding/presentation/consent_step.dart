@@ -44,6 +44,20 @@ const consentLabelsVi = {
       'Tôi đồng ý Chính sách bảo mật, Điều khoản và việc lưu dữ liệu tại Singapore',
 };
 
+/// Nhãn consent theo l10n (fallback map VI). Dùng chung onboarding + Cài đặt
+/// để cả 2 nơi đổi ngôn ngữ nhất quán.
+String consentLabel(String purpose, AppLocalizations? l10n) {
+  final localized = switch (purpose) {
+    'location' => l10n?.consentLocation,
+    'photos' => l10n?.consentPhotos,
+    'matching' => l10n?.consentMatching,
+    'marketing' => l10n?.consentMarketing,
+    'cross_border' => l10n?.consentCrossBorder,
+    _ => null,
+  };
+  return localized ?? consentLabelsVi[purpose] ?? purpose;
+}
+
 class ConsentStep extends StatelessWidget {
   const ConsentStep({super.key, required this.values, required this.onChanged});
 
@@ -54,17 +68,7 @@ class ConsentStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
 
-    String labelFor(String purpose) {
-      final localized = switch (purpose) {
-        'location' => l10n?.consentLocation,
-        'photos' => l10n?.consentPhotos,
-        'matching' => l10n?.consentMatching,
-        'marketing' => l10n?.consentMarketing,
-        'cross_border' => l10n?.consentCrossBorder,
-        _ => null,
-      };
-      return localized ?? consentLabelsVi[purpose] ?? purpose;
-    }
+    String labelFor(String purpose) => consentLabel(purpose, l10n);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
