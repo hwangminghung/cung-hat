@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../data/plan_repository.dart' show MapPoint;
 import '../domain/venue_suggestion.dart';
 
@@ -122,7 +123,11 @@ class _NativeVenueMap extends StatelessWidget {
             markerId: const MarkerId('midpoint'),
             position: LatLng(midpoint!.lat, midpoint!.lng),
             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
-            infoWindow: const InfoWindow(title: 'Điểm giữa nhóm'),
+            infoWindow: InfoWindow(
+          title: Localizations.of<AppLocalizations>(context, AppLocalizations)
+                  ?.planMidpointMarker ??
+              'Điểm giữa nhóm',
+        ),
           ),
       },
     );

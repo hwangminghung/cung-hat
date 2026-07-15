@@ -1,5 +1,8 @@
+import '../../../l10n/app_localizations.dart';
+
 /// Maps raw Supabase error text to a stable code / Vietnamese message.
 /// The server raises bare codes like 'pro_required' as the exception message.
+/// [L10N] Map VI giữ làm fallback; UI truyền l10n vào [keoErrorMessage].
 const _messages = <String, String>{
   'pro_required': 'Cần gói Pro để tạo kèo.',
   'free_join_limit':
@@ -16,6 +19,21 @@ const _messages = <String, String>{
   'invalid_group_size': 'Số người trong kèo không hợp lệ.',
 };
 
+String? _localized(String? code, AppLocalizations? l10n) => switch (code) {
+      'pro_required' => l10n?.keoErrorProRequired,
+      'free_join_limit' => l10n?.keoErrorFreeJoinLimit,
+      'keo_full' => l10n?.keoErrorFull,
+      'already_declined' => l10n?.keoErrorAlreadyDeclined,
+      'keo_not_open' => l10n?.keoErrorNotOpen,
+      'blocked' => l10n?.keoErrorBlocked,
+      'location_required' => l10n?.keoErrorNoLocation,
+      'age_not_verified' => l10n?.keoErrorAgeNotVerified,
+      'no_matchable_keo' => l10n?.keoErrorNoMatchableKeo,
+      'invalid_time_window' => l10n?.keoErrorInvalidTimeWindow,
+      'invalid_group_size' => l10n?.keoErrorInvalidGroupSize,
+      _ => null,
+    };
+
 String? keoErrorCode(Object error) {
   final text = error.toString();
   for (final code in _messages.keys) {
@@ -24,7 +42,9 @@ String? keoErrorCode(Object error) {
   return null;
 }
 
-String keoErrorMessage(Object error) {
+String keoErrorMessage(Object error, [AppLocalizations? l10n]) {
   final code = keoErrorCode(error);
-  return _messages[code] ?? 'Có lỗi xảy ra, thử lại.';
+  return _localized(code, l10n) ??
+      _messages[code] ??
+      (l10n?.keoErrorGeneric ?? 'Có lỗi xảy ra, thử lại.');
 }

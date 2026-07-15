@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/ticket_card.dart';
@@ -73,7 +74,9 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Chưa tìm được kèo phù hợp. Thử lại sau.',
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.keoMatchNoneFound ??
+                    'Chưa tìm được kèo phù hợp. Thử lại sau.',
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
@@ -83,9 +86,12 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
       );
     }
 
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final suggestion = widget.suggestions.first;
     final isExisting = suggestion.suggestionType == 'existing_keo';
-    final title = isExisting ? 'Kèo hợp với bạn' : 'Đã tìm thấy nhóm phù hợp';
+    final title = isExisting
+        ? (l10n?.keoMatchExistingTitle ?? 'Kèo hợp với bạn')
+        : (l10n?.keoMatchNewTitle ?? 'Đã tìm thấy nhóm phù hợp');
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -138,7 +144,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                     ),
                   ),
                   IconButton.outlined(
-                    tooltip: 'Đóng',
+                    tooltip: l10n?.commonClose ?? 'Đóng',
                     onPressed: _submitting
                         ? null
                         : () => Navigator.of(context).maybePop(),
@@ -215,7 +221,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                           for (final reason in suggestion.reasonLabels)
                             SizedBox(
                               width: itemWidth,
-                              child: _ReasonChip(label: _reasonLabel(reason)),
+                              child: _ReasonChip(code: reason),
                             ),
                         ],
                       );
@@ -259,18 +265,6 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
   // Titles come from the DB with proper diacritics ('Kèo gợi ý tối nay');
   // no display-side rewriting needed.
   String _displayTitle(String raw) => raw;
-
-  String _reasonLabel(String reason) {
-    return switch (reason) {
-      'shared_genres' => 'Hợp gu nhạc',
-      'near_you' => 'Gần bạn',
-      'evening_slot' => 'Giờ đẹp',
-      'open_join' => 'Vào nhanh',
-      'available_slots' => 'Còn chỗ',
-      'active_host' => 'Chủ kèo đang online',
-      _ => reason,
-    };
-  }
 }
 
 class _SuggestionMeta extends StatelessWidget {
@@ -289,7 +283,9 @@ class _SuggestionMeta extends StatelessWidget {
         _MetaItem(Icons.near_me_outlined, '${suggestion.distanceBand} km'),
       _MetaItem(
         Icons.groups_outlined,
-        '${suggestion.slotsFilled}/${suggestion.sizeTarget} người',
+        Localizations.of<AppLocalizations>(context, AppLocalizations)
+                ?.keoCardPeople(suggestion.slotsFilled, suggestion.sizeTarget) ??
+            '${suggestion.slotsFilled}/${suggestion.sizeTarget} người',
       ),
       if (suggestion.hostName != null)
         _MetaItem(Icons.person_outline, suggestion.hostName!),
@@ -367,12 +363,28 @@ class _MetaItem {
 }
 
 class _ReasonChip extends StatelessWidget {
-  const _ReasonChip({required this.label});
+  const _ReasonChip({required this.code});
 
-  final String label;
+  /// Mã lý do từ server ('shared_genres'…) — label + icon đều suy từ CODE,
+  /// không từ chuỗi hiển thị (trước đây icon lookup theo chuỗi VI, l10n xong
+  /// sẽ vỡ).
+  final String code;
+
+  String _labelFor(AppLocalizations? l10n) => switch (code) {
+        'shared_genres' => l10n?.keoMatchReasonSharedGenres ?? 'Hợp gu nhạc',
+        'near_you' => l10n?.keoMatchReasonNearYou ?? 'Gần bạn',
+        'evening_slot' => l10n?.keoMatchReasonEveningSlot ?? 'Giờ đẹp',
+        'open_join' => l10n?.keoMatchReasonOpenJoin ?? 'Vào nhanh',
+        'available_slots' => l10n?.keoMatchReasonAvailableSlots ?? 'Còn chỗ',
+        'active_host' => l10n?.keoMatchReasonActiveHost ?? 'Chủ kèo đang online',
+        _ => code,
+      };
 
   @override
   Widget build(BuildContext context) {
+    final label = _labelFor(
+      Localizations.of<AppLocalizations>(context, AppLocalizations),
+    );
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: AppSpacing.buttonHeight),
       child: Container(
@@ -385,7 +397,7 @@ class _ReasonChip extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(_iconFor(label), color: AppColors.ink, size: 20),
+            Icon(_iconFor(code), color: AppColors.ink, size: 20),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
@@ -403,12 +415,12 @@ class _ReasonChip extends StatelessWidget {
   }
 
   IconData _iconFor(String value) => switch (value) {
-    'Hợp gu nhạc' => Icons.music_note_rounded,
-    'Gần bạn' => Icons.place_outlined,
-    'Giờ đẹp' => Icons.schedule_outlined,
-    'Vào nhanh' => Icons.bolt_rounded,
-    'Còn chỗ' => Icons.groups_outlined,
-    'Chủ kèo đang online' => Icons.person_outline,
+    'shared_genres' => Icons.music_note_rounded,
+    'near_you' => Icons.place_outlined,
+    'evening_slot' => Icons.schedule_outlined,
+    'open_join' => Icons.bolt_rounded,
+    'available_slots' => Icons.groups_outlined,
+    'active_host' => Icons.person_outline,
     _ => Icons.auto_awesome_outlined,
   };
 }
@@ -426,16 +438,20 @@ class _ProposalActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final laterButton = OutlinedButton(
       key: const Key('keo_match_later_btn'),
       onPressed: onLater,
-      child: const Text('Để sau'),
+      child: Text(l10n?.upsellLater ?? 'Để sau'),
     );
     final createButton = GradientButton(
       key: const Key('keo_match_create_btn'),
       onPressed: onCreate,
       icon: Icons.group_add_outlined,
-      child: _PrimaryButtonChild(submitting: submitting, label: 'Tạo kèo'),
+      child: _PrimaryButtonChild(
+        submitting: submitting,
+        label: l10n?.keoCreateCta ?? 'Tạo kèo',
+      ),
     );
 
     return LayoutBuilder(

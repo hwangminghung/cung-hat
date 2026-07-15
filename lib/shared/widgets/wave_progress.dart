@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Fixed waveform silhouette (0..1 of the available height) for
 /// [WaveProgress]. A constant list keeps the bar pattern stable across
@@ -25,8 +26,9 @@ class WaveProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final percent = (progress * 100).round();
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Semantics(
-      label: 'Hồ sơ hoàn thiện $percent%',
+      label: l10n?.completionPercent(percent) ?? 'Hồ sơ hoàn thiện $percent%',
       child: SizedBox(
         width: double.infinity,
         height: 36,

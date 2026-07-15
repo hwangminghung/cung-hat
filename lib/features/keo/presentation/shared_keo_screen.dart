@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/skeleton.dart';
@@ -31,9 +32,10 @@ class SharedKeoScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final async = ref.watch(sharedKeoProvider(token));
     return Scaffold(
-      appBar: AppBar(title: const Text('Kèo được chia sẻ')),
+      appBar: AppBar(title: Text(l10n?.keoSharedTitle ?? 'Kèo được chia sẻ')),
       body: async.when(
         loading: () => ListView(
           padding: const EdgeInsets.only(top: AppSpacing.lg),
@@ -41,23 +43,23 @@ class SharedKeoScreen extends ConsumerWidget {
         ),
         error: (e, _) => EmptyState(
           icon: Icons.wifi_off_rounded,
-          title: 'Không tải được kèo',
-          subtitle: 'Kiểm tra kết nối rồi thử lại.',
-          actionLabel: 'Thử lại',
+          title: l10n?.keoSharedLoadError ?? 'Không tải được kèo',
+          subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+          actionLabel: l10n?.commonRetry ?? 'Thử lại',
           onAction: () => ref.invalidate(sharedKeoProvider(token)),
         ),
         data: (keo) {
           if (keo == null) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.link_off_rounded,
-              title: 'Không tìm thấy kèo',
-              subtitle: 'Link không đúng hoặc kèo đã bị xoá.',
+              title: l10n?.keoSharedNotFound ?? 'Không tìm thấy kèo',
+              subtitle: l10n?.keoSharedNotFoundSub ?? 'Link không đúng hoặc kèo đã bị xoá.',
             );
           }
           if (keo.expired) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.schedule_rounded,
-              title: 'Link đã hết hạn',
+              title: l10n?.keoSharedExpired ?? 'Link đã hết hạn',
             );
           }
           return _SharedKeoBody(keo: keo, formatTime: _formatTime);
@@ -75,9 +77,12 @@ class _SharedKeoBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final signedIn = ref.watch(isSignedInProvider);
     final open = keo.joinMode == 'open';
-    final modeLabel = open ? 'Mở · vào là tham gia' : 'Cần duyệt';
+    final modeLabel = open
+        ? (l10n?.keoModeOpen ?? 'Mở · vào là tham gia')
+        : (l10n?.keoModeApproval ?? 'Cần duyệt');
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -107,7 +112,8 @@ class _SharedKeoBody extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    '${keo.slotsFilled}/${keo.sizeTarget} chỗ',
+                    l10n?.keoSharedSeats(keo.slotsFilled, keo.sizeTarget) ??
+                        '${keo.slotsFilled}/${keo.sizeTarget} chỗ',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -168,7 +174,10 @@ class _SharedKeoBody extends ConsumerWidget {
                   ],
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Host: ${keo.hostName ?? 'Ẩn danh'}',
+                    l10n != null
+                        ? l10n.keoSharedHost(
+                            keo.hostName ?? l10n.keoSharedAnonymous)
+                        : 'Host: ${keo.hostName ?? 'Ẩn danh'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -182,13 +191,13 @@ class _SharedKeoBody extends ConsumerWidget {
             FilledButton(
               key: const Key('shared_keo_open_btn'),
               onPressed: () => context.push('/keo/${keo.keoId}'),
-              child: const Text('Xem kèo & xin vào'),
+              child: Text(l10n?.keoSharedJoinCta ?? 'Xem kèo & xin vào'),
             )
           else
             FilledButton(
               key: const Key('shared_keo_login_btn'),
               onPressed: () => context.push('/auth'),
-              child: const Text('Đăng nhập để xin vào'),
+              child: Text(l10n?.keoSharedLoginCta ?? 'Đăng nhập để xin vào'),
             ),
         ],
       ),

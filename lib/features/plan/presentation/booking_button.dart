@@ -42,7 +42,9 @@ class _BookingButtonState extends ConsumerState<BookingButton> {
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: Text(
-                  'Chọn cổng thanh toán',
+                  Localizations.of<AppLocalizations>(ctx, AppLocalizations)
+                          ?.bookingPickGateway ??
+                      'Chọn cổng thanh toán',
                   style: Theme.of(ctx).textTheme.titleMedium,
                 ),
               ),
@@ -74,9 +76,11 @@ class _BookingButtonState extends ConsumerState<BookingButton> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n =
+            Localizations.of<AppLocalizations>(context, AppLocalizations);
         final msg = e.toString().contains('not_configured')
-            ? 'Cổng thanh toán chưa được cấu hình'
-            : 'Không tạo được thanh toán';
+            ? (l10n?.bookingNotConfigured ?? 'Cổng thanh toán chưa được cấu hình')
+            : (l10n?.bookingCreateError ?? 'Không tạo được thanh toán');
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg)));
       }

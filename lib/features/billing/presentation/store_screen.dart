@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../application/billing_providers.dart';
 import '../application/iap_controller.dart';
@@ -26,36 +27,41 @@ class _Upgrade {
 }
 
 /// Copy + icon tinh theo type (khong doi thuong xuyen); gia lay tu catalog.
+/// [L10N] title/description qua l10n (fallback VI); icon/highlight tinh.
 ///
 /// GIA DINH: 1 row/type/platform trong products. Neu them SKU thu 2 cung type
 /// (vd pro lifetime), PHAI chuyen key sang sku/storeProductId — xem audit AH-T9.
-const _copy =
-    <String, ({String title, String description, IconData icon, bool highlight})>{
-  'pro': (
-    title: 'Nâng cấp Pro',
-    description:
+({String title, String description, IconData icon, bool highlight})? _copyFor(
+  String type,
+  AppLocalizations? l10n,
+) => switch (type) {
+  'pro' => (
+    title: l10n?.upsellCta ?? 'Nâng cấp Pro',
+    description: l10n?.storeProDesc ??
         'Tạo kèo, tham gia không giới hạn và mở mọi tính năng trả phí.',
     icon: Icons.workspace_premium_rounded,
     highlight: true,
   ),
-  'boost': (
-    title: 'Đẩy kèo lên top',
-    description: 'Đưa kèo của bạn lên đầu bảng trong 24 giờ.',
+  'boost' => (
+    title: l10n?.boostTitle ?? 'Đẩy kèo lên top',
+    description: l10n?.storeBoostDesc ?? 'Đưa kèo của bạn lên đầu bảng trong 24 giờ.',
     icon: Icons.local_fire_department_rounded,
     highlight: false,
   ),
-  'see_likes': (
-    title: 'Xem ai đã thích bạn',
-    description: 'Mở khóa danh sách người đã thả tim bạn.',
+  'see_likes' => (
+    title: l10n?.seeLikesTitle ?? 'Xem ai đã thích bạn',
+    description: l10n?.storeSeeLikesDesc ?? 'Mở khóa danh sách người đã thả tim bạn.',
     icon: Icons.favorite_rounded,
     highlight: false,
   ),
-  'premium_filters': (
-    title: 'Bộ lọc nâng cao',
-    description: 'Lọc theo gu nhạc, độ tuổi, khu vực và trạng thái hoạt động.',
+  'premium_filters' => (
+    title: l10n?.filtersTitle ?? 'Bộ lọc nâng cao',
+    description: l10n?.storeFiltersDesc ??
+        'Lọc theo gu nhạc, độ tuổi, khu vực và trạng thái hoạt động.',
     icon: Icons.tune_rounded,
     highlight: false,
   ),
+  _ => null,
 };
 
 const _order = ['pro', 'boost', 'see_likes', 'premium_filters'];
@@ -67,8 +73,9 @@ class StoreScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Scaffold(
-      appBar: AppBar(title: const Text('Nâng cấp')),
+      appBar: AppBar(title: Text(l10n?.storeTitle ?? 'Nâng cấp')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
@@ -105,13 +112,14 @@ class StoreScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Cùng Hát Pro',
+                          '${l10n?.appTitle ?? 'Cùng Hát'} Pro',
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(color: AppColors.onPrimary),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          'Mở khóa các công cụ giúp kèo lên nhanh và đúng người.',
+                          l10n?.storeHeroSub ??
+                              'Mở khóa các công cụ giúp kèo lên nhanh và đúng người.',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: AppColors.onPrimary.withValues(
@@ -147,13 +155,15 @@ class StoreScreen extends ConsumerWidget {
                           _UpgradeTile(
                             upgrade: _Upgrade(
                               feature: product.type,
-                              title: _copy[product.type]?.title ?? product.type,
+                              title: _copyFor(product.type, l10n)?.title ??
+                                  product.type,
                               description:
-                                  _copy[product.type]?.description ?? '',
+                                  _copyFor(product.type, l10n)?.description ?? '',
                               price: formatPriceK(product.priceMinor),
-                              icon: _copy[product.type]?.icon ?? Icons.star,
+                              icon: _copyFor(product.type, l10n)?.icon ??
+                                  Icons.star,
                               highlight:
-                                  _copy[product.type]?.highlight ?? false,
+                                  _copyFor(product.type, l10n)?.highlight ?? false,
                             ),
                             onBuy: () async {
                               final ok = await ref
@@ -164,9 +174,10 @@ class StoreScreen extends ConsumerWidget {
                               // xảy ra.
                               if (!ok && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text(
-                                      'Không mở được cửa hàng. Thử lại sau.',
+                                      l10n?.storeOpenError ??
+                                          'Không mở được cửa hàng. Thử lại sau.',
                                     ),
                                   ),
                                 );
@@ -180,12 +191,12 @@ class StoreScreen extends ConsumerWidget {
                       const Center(child: CircularProgressIndicator()),
                   error: (error, stackTrace) => Column(
                     children: [
-                      const Text('Không tải được cửa hàng'),
+                      Text(l10n?.storeLoadError ?? 'Không tải được cửa hàng'),
                       const SizedBox(height: AppSpacing.sm),
                       TextButton(
                         onPressed: () =>
                             ref.invalidate(storeProductsProvider),
-                        child: const Text('Thử lại'),
+                        child: Text(l10n?.commonRetry ?? 'Thử lại'),
                       ),
                     ],
                   ),

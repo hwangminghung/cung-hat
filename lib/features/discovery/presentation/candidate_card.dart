@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../photos/application/photo_providers.dart';
@@ -68,10 +69,14 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
     if (oldWidget.candidate.id != widget.candidate.id) _photoIndex = 0;
   }
 
+  AppLocalizations? get _l10n =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations);
+
   @override
   Widget build(BuildContext context) {
     final candidate = widget.candidate;
-    final name = candidate.displayName ?? 'Bạn hát mới';
+    final name =
+        candidate.displayName ?? (_l10n?.candidateFallbackName ?? 'Bạn hát mới');
     final monogram = name.isEmpty ? '?' : name.characters.first.toUpperCase();
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
     final photoCount =
@@ -142,7 +147,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   top: AppSpacing.md,
                   right: AppSpacing.md,
                   child: _CardIconButton(
-                    tooltip: 'Báo cáo',
+                    tooltip: _l10n?.commonReport ?? 'Báo cáo',
                     onTap: () => showModalBottomSheet(
                       context: context,
                       builder: (_) => ReportSheet(targetId: candidate.id),
@@ -169,7 +174,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                   bottom: AppSpacing.md,
                   child: _CardIconButton(
                     key: const Key('card_detail_btn'),
-                    tooltip: 'Xem hồ sơ',
+                    tooltip: _l10n?.candidateViewProfile ?? 'Xem hồ sơ',
                     onTap: widget.onOpenDetail,
                     icon: const Icon(Icons.info_outline_rounded),
                   ),
@@ -253,7 +258,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                     const SizedBox(width: AppSpacing.xs),
                     Flexible(
                       child: Text(
-                        'Online hôm nay',
+                        _l10n?.candidateOnlineToday ?? 'Online hôm nay',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -268,13 +273,15 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
               ],
               _InfoLine(
                 icon: Icons.place_rounded,
-                label: 'Cách ${candidate.distanceBand ?? '?'} km',
+                label: _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
+                    'Cách ${candidate.distanceBand ?? '?'} km',
                 color: AppColors.primary,
               ),
               const SizedBox(height: AppSpacing.xs),
               _InfoLine(
                 icon: Icons.music_note_rounded,
-                label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
+                label: _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
+                    'cùng ${candidate.sharedBaitu.length} bài tủ',
                 color: AppColors.teal,
               ),
             ],
@@ -302,13 +309,15 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
       return [
         _InfoLine(
           icon: Icons.place_rounded,
-          label: 'Cách ${candidate.distanceBand ?? '?'} km',
+          label: _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
+              'Cách ${candidate.distanceBand ?? '?'} km',
           color: AppColors.primary,
         ),
         const SizedBox(height: AppSpacing.xs),
         _InfoLine(
           icon: Icons.music_note_rounded,
-          label: 'cùng ${candidate.sharedBaitu.length} bài tủ',
+          label: _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
+              'cùng ${candidate.sharedBaitu.length} bài tủ',
           color: AppColors.teal,
         ),
       ];
@@ -318,7 +327,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
       if (candidate.sharedGenres.isEmpty) {
         return [
           Text(
-            'Chưa chung thể loại nào',
+            _l10n?.candidateNoSharedGenres ?? 'Chưa chung thể loại nào',
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
@@ -341,7 +350,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
       Text(
         candidate.bio?.trim().isNotEmpty == true
             ? candidate.bio!.trim()
-            : 'Chưa có giới thiệu — hỏi thử khi match nhé!',
+            : (_l10n?.candidateNoBio ?? 'Chưa có giới thiệu — hỏi thử khi match nhé!'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: Theme.of(

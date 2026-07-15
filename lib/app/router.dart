@@ -98,17 +98,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/legal/privacy',
-        builder: (_, _) => const LegalScreen(
-          assetPath: 'assets/legal/privacy_vi.md',
-          title: 'Chính sách bảo mật',
-        ),
+        builder: (_, _) => const LegalScreen(doc: LegalDoc.privacy),
       ),
       GoRoute(
         path: '/legal/tos',
-        builder: (_, _) => const LegalScreen(
-          assetPath: 'assets/legal/tos_vi.md',
-          title: 'Điều khoản sử dụng',
-        ),
+        builder: (_, _) => const LegalScreen(doc: LegalDoc.tos),
       ),
       GoRoute(
         path: '/plan/shared/:token',

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/wave_divider.dart';
@@ -83,7 +84,9 @@ class CandidateDetailSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final name = candidate.displayName ?? 'Bạn hát mới';
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final name =
+        candidate.displayName ?? (l10n?.candidateFallbackName ?? 'Bạn hát mới');
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
     final monogram = name.isEmpty ? '?' : name[0].toUpperCase();
 
@@ -157,7 +160,8 @@ class CandidateDetailSheet extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.xs),
                         Flexible(
                           child: Text(
-                            'Cách ${candidate.distanceBand ?? '?'} km',
+                            l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
+                                'Cách ${candidate.distanceBand ?? '?'} km',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodyLarge
@@ -176,9 +180,10 @@ class CandidateDetailSheet extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.md),
                 OutlinedButton.icon(
                   key: const Key('quote_photo'),
-                  onPressed: () => onQuote!('Ảnh này xịn quá! '),
+                  onPressed: () =>
+                      onQuote!(l10n?.candidatePhotoQuote ?? 'Ảnh này xịn quá! '),
                   icon: const Icon(Icons.photo_camera_outlined),
-                  label: const Text('Trả lời ảnh này'),
+                  label: Text(l10n?.candidateReplyPhoto ?? 'Trả lời ảnh này'),
                 ),
               ],
             ],
@@ -206,7 +211,7 @@ class CandidateDetailSheet extends ConsumerWidget {
           ),
           const WaveDivider(height: AppSpacing.xxl),
           Text(
-            'Gu nhạc chung',
+            l10n?.candidateSharedGenresTitle ?? 'Gu nhạc chung',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: AppColors.ink,
               fontWeight: FontWeight.w900,
@@ -215,7 +220,7 @@ class CandidateDetailSheet extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           if (candidate.sharedGenres.isEmpty)
             Text(
-              'Chưa trùng thể loại nào.',
+              l10n?.candidateNoSharedGenresDot ?? 'Chưa trùng thể loại nào.',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
@@ -231,7 +236,7 @@ class CandidateDetailSheet extends ConsumerWidget {
             ),
           const WaveDivider(height: AppSpacing.xxl),
           Text(
-            'Bài tủ chung',
+            l10n?.candidateSharedBaituTitle ?? 'Bài tủ chung',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: AppColors.ink,
               fontWeight: FontWeight.w900,
@@ -240,7 +245,7 @@ class CandidateDetailSheet extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           if (candidate.sharedBaitu.isEmpty)
             Text(
-              'Chưa có bài tủ chung — cơ hội khám phá!',
+              l10n?.candidateNoSharedBaitu ?? 'Chưa có bài tủ chung — cơ hội khám phá!',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
@@ -285,9 +290,10 @@ class CandidateDetailSheet extends ConsumerWidget {
                       TextButton(
                         key: Key('quote_baitu_$i'),
                         onPressed: () => onQuote!(
-                          'Về bài "${titleById[song] ?? song}" của bạn: ',
+                          l10n?.candidateSongQuote(titleById[song] ?? song) ??
+                              'Về bài "${titleById[song] ?? song}" của bạn: ',
                         ),
-                        child: const Text('Trả lời'),
+                        child: Text(l10n?.candidateReply ?? 'Trả lời'),
                       ),
                     const SizedBox(width: AppSpacing.xs),
                   ],
@@ -327,9 +333,10 @@ class CandidateDetailSheet extends ConsumerWidget {
                       child: TextButton(
                         key: Key('quote_prompt_${prompt['prompt_id']}'),
                         onPressed: () => onQuote!(
-                          'Bạn nói "${prompt['answer']}" — kể thêm đi: ',
+                          l10n?.candidatePromptQuote('${prompt['answer']}') ??
+                              'Bạn nói "${prompt['answer']}" — kể thêm đi: ',
                         ),
-                        child: const Text('Trả lời'),
+                        child: Text(l10n?.candidateReply ?? 'Trả lời'),
                       ),
                     ),
                 ],
@@ -345,7 +352,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                       key: const Key('detail_pass_btn'),
                       onPressed: onPass,
                       icon: const Icon(Icons.close_rounded),
-                      label: const Text('Bỏ qua'),
+                      label: Text(l10n?.discoveryPass ?? 'Bỏ qua'),
                     ),
                   ),
                 if (onPass != null && onLike != null)
@@ -356,7 +363,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                       key: const Key('detail_like_btn'),
                       onPressed: onLike,
                       icon: Icons.favorite_rounded,
-                      child: const Text('Thích'),
+                      child: Text(l10n?.discoveryLike ?? 'Thích'),
                     ),
                   ),
               ],
@@ -370,7 +377,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                 builder: (_) => ReportSheet(targetId: candidate.id),
               ),
               icon: const Icon(Icons.shield_outlined),
-              label: const Text('Báo cáo / Chặn'),
+              label: Text(l10n?.candidateReportBlock ?? 'Báo cáo / Chặn'),
             ),
           ),
         ],

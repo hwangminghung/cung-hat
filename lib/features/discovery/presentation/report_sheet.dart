@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/discovery_providers.dart';
 
+/// Lý do report là GIÁ TRỊ GỬI SERVER (reports.reason) — giữ tiếng Việt
+/// canonical để moderation console đọc thống nhất, không l10n.
 const _reasons = ['spam', 'quấy rối', 'ảnh giả', 'khác'];
 
 class ReportSheet extends ConsumerWidget {
@@ -10,19 +13,20 @@ class ReportSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           for (final reason in _reasons)
             ListTile(
-              title: Text('Báo cáo: $reason'),
+              title: Text(l10n?.reportTitle(reason) ?? 'Báo cáo: $reason'),
               onTap: () => _report(context, ref, reason),
             ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.block),
-            title: const Text('Chặn người này'),
+            title: Text(l10n?.reportBlockUser ?? 'Chặn người này'),
             onTap: () => _block(context, ref),
           ),
         ],
@@ -37,14 +41,17 @@ class ReportSheet extends ConsumerWidget {
   ) async {
     final nav = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     try {
       await ref.read(discoveryRepositoryProvider).reportUser(targetId, reason);
       nav.pop();
-      messenger.showSnackBar(const SnackBar(content: Text('Đã gửi báo cáo.')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n?.reportSent ?? 'Đã gửi báo cáo.')),
+      );
     } catch (_) {
       nav.pop();
       messenger.showSnackBar(
-        const SnackBar(content: Text('Không gửi được báo cáo.')),
+        SnackBar(content: Text(l10n?.reportSendError ?? 'Không gửi được báo cáo.')),
       );
     }
   }
@@ -52,6 +59,7 @@ class ReportSheet extends ConsumerWidget {
   Future<void> _block(BuildContext context, WidgetRef ref) async {
     final nav = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     try {
       await ref.read(discoveryRepositoryProvider).blockUser(targetId);
       // candidatesProvider giờ là family theo genre — invalidate deck chính.
@@ -59,10 +67,14 @@ class ReportSheet extends ConsumerWidget {
       // dù cache client chưa refresh ngay.)
       ref.invalidate(candidatesProvider(null));
       nav.pop();
-      messenger.showSnackBar(const SnackBar(content: Text('Đã chặn.')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n?.reportBlocked ?? 'Đã chặn.')),
+      );
     } catch (_) {
       nav.pop();
-      messenger.showSnackBar(const SnackBar(content: Text('Không chặn được.')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n?.reportBlockError ?? 'Không chặn được.')),
+      );
     }
   }
 }

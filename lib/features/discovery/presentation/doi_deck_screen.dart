@@ -63,6 +63,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     0.0,
   ));
 
+  AppLocalizations? get _l10n =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations);
+
   void _scheduleProgress(double h, double v) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _dragProgress.value != (h, v)) {
@@ -119,7 +122,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không lưu được cài đặt, thử lại.')),
+          SnackBar(
+            content:
+                Text(_l10n?.commonSaveError ?? 'Không lưu được cài đặt, thử lại.'),
+          ),
         );
       }
     }
@@ -162,7 +168,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               ),
               Expanded(
                 child: Text(
-                  musicThemeById(genre)?.title ?? 'Khám Phá',
+                  musicThemeById(genre)?.title ??
+                      (_l10n?.exploreFallbackTitle ?? 'Khám Phá'),
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
@@ -191,9 +198,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           ),
           error: (err, _) => EmptyState(
             icon: Icons.wifi_off_rounded,
-            title: 'Không tải được gợi ý',
-            subtitle: 'Kiểm tra kết nối rồi thử lại.',
-            actionLabel: 'Thử lại',
+            title: l10n?.deckLoadErrorTitle ?? 'Không tải được gợi ý',
+            subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+            actionLabel: l10n?.commonRetry ?? 'Thử lại',
             onAction: _refreshDeck,
           ),
           data: (items) {
@@ -292,7 +299,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                           KeoPromoItem(:final keo) => SwipeOverlays(
                             hProgress: h / 100,
                             vProgress: v / 100,
-                            likeLabel: 'XEM KÈO',
+                            likeLabel: _l10n?.deckPromoSeeKeo ?? 'XEM KÈO',
                             showSuper: false,
                             child: KeoPromoCard(
                               key: ValueKey('keo-promo-${keo.id}'),
@@ -378,7 +385,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
             if (widget.genre != null) ...[
               _DeckHeaderButton(
                 key: const Key('theme_deck_back'),
-                tooltip: 'Quay lại',
+                tooltip: l10n?.commonBack ?? 'Quay lại',
                 icon: Icons.arrow_back_rounded,
                 onTap: () => context.pop(),
               ),
@@ -388,7 +395,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               child: Text(
                 widget.genre == null
                     ? l10n?.appTitle ?? 'Cùng Hát'
-                    : theme?.title ?? 'Khám Phá',
+                    : theme?.title ?? (l10n?.exploreFallbackTitle ?? 'Khám Phá'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -400,7 +407,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
             if (widget.genre == null) ...[
               _DeckHeaderButton(
                 key: const Key('filter_btn'),
-                tooltip: 'Bộ lọc',
+                tooltip: l10n?.filterTitle ?? 'Bộ lọc',
                 icon: Icons.filter_alt_outlined,
                 onTap: () => showModalBottomSheet<void>(
                   context: context,
@@ -411,7 +418,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               const SizedBox(width: AppSpacing.sm),
               _DeckHeaderButton(
                 key: const Key('explore_btn'),
-                tooltip: 'Khám Phá theo gu nhạc',
+                tooltip: l10n?.deckExploreTooltip ?? 'Khám Phá theo gu nhạc',
                 icon: Icons.queue_music_rounded,
                 onTap: () => context.push('/explore'),
               ),
@@ -420,7 +427,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               const SizedBox(width: AppSpacing.sm),
             ],
             _DeckHeaderButton(
-              tooltip: 'Làm mới',
+              tooltip: l10n?.deckRefreshTooltip ?? 'Làm mới',
               icon: Icons.refresh_rounded,
               onTap: _refreshDeck,
             ),
@@ -454,7 +461,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.xs),
             child: Text(
-              'Đang tìm trong 100 km',
+              l10n?.deckSearching100 ?? 'Đang tìm trong 100 km',
               key: const Key('radius_chip'),
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: AppColors.primaryDark,
@@ -471,8 +478,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     final boostExpiry = ref.watch(activeBoostProvider);
     final boosting = boostExpiry != null && boostExpiry.isAfter(DateTime.now());
     final tooltip = boosting
-        ? 'Đang boost đến ${_formatHhMm(boostExpiry)}'
-        : 'Boost hồ sơ';
+        ? (_l10n?.deckBoostingUntil(_formatHhMm(boostExpiry)) ??
+            'Đang boost đến ${_formatHhMm(boostExpiry)}')
+        : (_l10n?.deckBoostTooltip ?? 'Boost hồ sơ');
     return _DeckHeaderButton(
       key: const Key('deck_boost_btn'),
       tooltip: tooltip,
@@ -507,9 +515,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       ref.read(activeBoostProvider.notifier).state = expiry;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.',
+              _l10n?.deckBoostStarted ??
+                  'Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.',
             ),
           ),
         );
@@ -521,9 +530,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         ref.invalidate(entitlementsProvider);
       }
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(err.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(err.localizedMessage(_l10n))),
+        );
       }
     } finally {
       _boostInFlight = false;
@@ -562,9 +571,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         ref.invalidate(entitlementsProvider);
       }
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(err.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(err.localizedMessage(_l10n))),
+        );
       }
     } finally {
       _rewindInFlight = false;
@@ -577,7 +586,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           .read(discoveryRepositoryProvider)
           .recordSwipe(candidate.id, dir);
       if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
-        final myName = ref.read(myProfileProvider).value?.displayName ?? 'Bạn';
+        final myName = ref.read(myProfileProvider).value?.displayName ??
+            (_l10n?.celebrateYouFallback ?? 'Bạn');
         // Không để lỗi lấy matchId chặn màn ăn mừng — matchId null vẫn cho
         // xem MatchCelebration, chỉ là nút "Nhắn tin ngay" sẽ không điều
         // hướng được.
@@ -651,9 +661,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         case DiscoverySwipeError.boostLimit:
         // unknown: swipe CÓ THỂ đã được ghi — undo sẽ desync, nên chỉ báo lỗi.
         case DiscoverySwipeError.unknown:
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(err.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(err.localizedMessage(_l10n))),
+          );
       }
     }
   }
@@ -718,6 +728,7 @@ class _EmptyDeck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -732,8 +743,8 @@ class _EmptyDeck extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Text(
             radius >= 100
-                ? 'Đã tìm hết trong 100 km'
-                : 'Chưa có bạn hát quanh đây',
+                ? (l10n?.deckExhausted100 ?? 'Đã tìm hết trong 100 km')
+                : (l10n?.deckEmptyNearby ?? 'Chưa có bạn hát quanh đây'),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
@@ -743,20 +754,21 @@ class _EmptyDeck extends StatelessWidget {
               key: const Key('expand_radius_btn'),
               onPressed: onExpand,
               icon: const Icon(Icons.travel_explore_rounded),
-              label: const Text('Mở rộng tìm quanh 100 km'),
+              label: Text(l10n?.deckExpand100 ?? 'Mở rộng tìm quanh 100 km'),
             )
           else
             OutlinedButton.icon(
               key: const Key('deck_retry_btn'),
               onPressed: onRefresh,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Làm mới gợi ý'),
+              label: Text(l10n?.deckRefreshSuggestions ?? 'Làm mới gợi ý'),
             ),
           const SizedBox(height: AppSpacing.sm),
           SwitchListTile(
             key: const Key('auto_expand_switch'),
-            title: const Text('Tự mở rộng khi hết người'),
-            subtitle: const Text('Tự động tìm quanh 100 km khi 50 km đã hết'),
+            title: Text(l10n?.deckAutoExpandTitle ?? 'Tự mở rộng khi hết người'),
+            subtitle: Text(l10n?.deckAutoExpandSub ??
+                'Tự động tìm quanh 100 km khi 50 km đã hết'),
             value: autoExpand,
             onChanged: onToggleAutoExpand,
           ),

@@ -16,8 +16,9 @@ String bubbleTime(String createdAtIso) {
 String? dayLabelBetween(
   String? prevCreatedAtIso,
   String createdAtIso,
-  DateTime now,
-) {
+  DateTime now, {
+  String today = 'Hôm nay',
+}) {
   final local = DateTime.parse(createdAtIso).toLocal();
   if (prevCreatedAtIso != null) {
     final prev = DateTime.parse(prevCreatedAtIso).toLocal();
@@ -31,7 +32,7 @@ String? dayLabelBetween(
       local.year == now.year &&
       local.month == now.month &&
       local.day == now.day;
-  return isToday ? 'Hôm nay' : '${local.day}/${local.month}';
+  return isToday ? today : '${local.day}/${local.month}';
 }
 
 /// Vạch ngày giữa dòng chat — dùng chung chat 1-1 và chat nhóm.

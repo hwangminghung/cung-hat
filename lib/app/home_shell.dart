@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_shadows.dart';
 import '../core/theme/app_spacing.dart';
+import '../l10n/app_localizations.dart';
 import '../features/billing/application/billing_providers.dart';
 import '../features/chat/application/inbox_providers.dart';
 import '../features/chat/presentation/inbox_screen.dart';
@@ -36,7 +37,6 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 
   // Icon set follows design-system/MASTER.md: Đôi group · Kèo mic ·
   // Chat chat_bubble · Hồ sơ person.
-  static const _labels = ['Đôi', 'Kèo', 'Chat', 'Hồ sơ'];
   static const _icons = [
     Icons.group_outlined,
     Icons.mic_external_on_outlined,
@@ -65,6 +65,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final labels = [
+      l10n?.tabDoi ?? 'Đôi',
+      l10n?.tabKeo ?? 'Kèo',
+      l10n?.tabChat ?? 'Chat',
+      l10n?.tabProfile ?? 'Hồ sơ',
+    ];
     final tabs = <Widget Function()>[
       () => const DoiDeckScreen(),
       () => const KeoBoardScreen(),
@@ -83,11 +90,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         selectedIndex: _index,
         onDestinationSelected: _select,
         destinations: [
-          for (var i = 0; i < _labels.length; i++)
+          for (var i = 0; i < labels.length; i++)
             NavigationDestination(
               icon: Icon(_icons[i]),
               selectedIcon: Icon(_iconsSel[i]),
-              label: _labels[i],
+              label: labels[i],
             ),
         ],
       ),
@@ -105,6 +112,7 @@ class _ProfileTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final profile = ref.watch(myProfileProvider).value;
     final name = profile?.displayName?.trim();
     return SafeArea(
@@ -118,11 +126,12 @@ class _ProfileTab extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text('Hồ sơ', style: Theme.of(context).textTheme.displaySmall),
+              Text(l10n?.tabProfile ?? 'Hồ sơ',
+                  style: Theme.of(context).textTheme.displaySmall),
               const Spacer(),
               IconButton.outlined(
                 key: const Key('profile_gear_btn'),
-                tooltip: 'Cài đặt',
+                tooltip: l10n?.settingsTitle ?? 'Cài đặt',
                 onPressed: () => context.push('/settings'),
                 icon: const Icon(Icons.settings_outlined),
               ),
@@ -154,7 +163,9 @@ class _ProfileTab extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (name?.isNotEmpty ?? false) ? name! : 'Hồ sơ',
+                      (name?.isNotEmpty ?? false)
+                          ? name!
+                          : (l10n?.tabProfile ?? 'Hồ sơ'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(
@@ -165,7 +176,8 @@ class _ProfileTab extends ConsumerWidget {
                     Text(
                       (profile?.bio?.trim().isNotEmpty ?? false)
                           ? profile!.bio!.trim()
-                          : 'Quản lý lượt thích, gói nâng cấp và cài đặt.',
+                          : (l10n?.shellProfileSub ??
+                              'Quản lý lượt thích, gói nâng cấp và cài đặt.'),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -184,9 +196,9 @@ class _ProfileTab extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           _ProfileTile(
             icon: Icons.favorite_rounded,
-            title: 'Ai đã thích bạn',
+            title: l10n?.shellTileLikes ?? 'Ai đã thích bạn',
             badgeLabel: 'PRO',
-            subtitle: 'Mở danh sách người đã thả tim',
+            subtitle: l10n?.shellTileLikesSub ?? 'Mở danh sách người đã thả tim',
             onTap: () {
               final unlocked = ref.read(hasEntitlementProvider('see_likes'));
               if (unlocked) {
@@ -200,14 +212,14 @@ class _ProfileTab extends ConsumerWidget {
           ),
           _ProfileTile(
             icon: Icons.workspace_premium_rounded,
-            title: 'Nâng cấp',
-            subtitle: 'Pro, boost kèo và bộ lọc nâng cao',
+            title: l10n?.storeTitle ?? 'Nâng cấp',
+            subtitle: l10n?.shellTileUpgradeSub ?? 'Pro, boost kèo và bộ lọc nâng cao',
             onTap: () => context.push('/store'),
           ),
           _ProfileTile(
             icon: Icons.photo_library_rounded,
-            title: 'Ảnh hồ sơ',
-            subtitle: 'Thêm tối đa 6 ảnh vào hồ sơ',
+            title: l10n?.shellTilePhotos ?? 'Ảnh hồ sơ',
+            subtitle: l10n?.shellTilePhotosSub ?? 'Thêm tối đa 6 ảnh vào hồ sơ',
             onTap: () => showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,
@@ -223,8 +235,9 @@ class _ProfileTab extends ConsumerWidget {
           ),
           _ProfileTile(
             icon: Icons.chat_bubble_outline_rounded,
-            title: 'Thẻ hỏi-đáp',
-            subtitle: 'Chọn tối đa 3 câu để hồ sơ có chuyện mà bắt',
+            title: l10n?.shellTilePrompts ?? 'Thẻ hỏi-đáp',
+            subtitle:
+                l10n?.shellTilePromptsSub ?? 'Chọn tối đa 3 câu để hồ sơ có chuyện mà bắt',
             onTap: () => showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,
@@ -240,8 +253,8 @@ class _ProfileTab extends ConsumerWidget {
           ),
           _ProfileTile(
             icon: Icons.settings_rounded,
-            title: 'Cài đặt',
-            subtitle: 'Quyền riêng tư, dữ liệu và pháp lý',
+            title: l10n?.settingsTitle ?? 'Cài đặt',
+            subtitle: l10n?.shellTileSettingsSub ?? 'Quyền riêng tư, dữ liệu và pháp lý',
             onTap: () => context.push('/settings'),
           ),
         ],
@@ -255,10 +268,11 @@ class _CompletionCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final profile = ref.watch(myProfileProvider).value;
     final taste = ref.watch(myTasteCountsProvider).value;
     if (profile == null || taste == null) return const SizedBox.shrink();
-    final r = profileCompletion(profile, taste);
+    final r = profileCompletion(profile, taste, l10n: l10n);
     if (r.percent >= 100) return const SizedBox.shrink();
     return Container(
       key: const Key('completion_card'),
@@ -273,7 +287,8 @@ class _CompletionCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Hồ sơ hoàn thiện ${r.percent}%',
+            l10n?.completionPercent(r.percent) ??
+                'Hồ sơ hoàn thiện ${r.percent}%',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: AppSpacing.sm),

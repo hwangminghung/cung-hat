@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/pressable.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/ticket_card.dart';
@@ -153,8 +154,12 @@ class _KeoDetails extends StatelessWidget {
           children: [
             StampChip(
               label: keo.joinMode == 'open'
-                  ? 'Mở · vào là tham gia'
-                  : 'Cần duyệt',
+                  ? (Localizations.of<AppLocalizations>(context, AppLocalizations)
+                          ?.keoModeOpen ??
+                      'Mở · vào là tham gia')
+                  : (Localizations.of<AppLocalizations>(context, AppLocalizations)
+                          ?.keoModeApproval ??
+                      'Cần duyệt'),
               tone: keo.joinMode == 'open'
                   ? StampChipTone.lime
                   : StampChipTone.teal,
@@ -172,10 +177,17 @@ class _KeoDetails extends StatelessWidget {
             if (keo.areaLabel != null)
               _Meta(Icons.place_outlined, keo.areaLabel!),
             if (keo.distanceBand != null)
-              _Meta(Icons.near_me_outlined, 'cách ${keo.distanceBand} km'),
+              _Meta(
+                Icons.near_me_outlined,
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.keoCardDistance(keo.distanceBand!) ??
+                    'cách ${keo.distanceBand} km',
+              ),
             _Meta(
               Icons.groups_outlined,
-              '${keo.slotsFilled}/${keo.sizeTarget} người',
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.keoCardPeople(keo.slotsFilled, keo.sizeTarget) ??
+                  '${keo.slotsFilled}/${keo.sizeTarget} người',
             ),
             if (keo.hostName != null)
               _Meta(Icons.person_outline, keo.hostName!),

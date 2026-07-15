@@ -5,6 +5,7 @@ import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/message_safety.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../chat/application/chat_providers.dart';
 import '../../chat/domain/message.dart';
@@ -67,6 +68,9 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
     }
   }
 
+  AppLocalizations? get _l10n =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations);
+
   Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _sending) return;
@@ -90,9 +94,10 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Chưa mở chat nhóm. Cần tất cả thành viên đồng ý tham gia.',
+            _l10n?.chatKeoNotOpen ??
+                'Chưa mở chat nhóm. Cần tất cả thành viên đồng ý tham gia.',
           ),
         ),
       );
@@ -150,7 +155,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Chat nhóm'),
+            Text(_l10n?.chatGroupTitle ?? 'Chat nhóm'),
             if (keoTitle != null)
               Text(
                 keoTitle,
@@ -173,9 +178,10 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
             child: historyAsync.hasError && messages.isEmpty
                 ? EmptyState(
                     icon: Icons.wifi_off_rounded,
-                    title: 'Không tải được tin nhắn',
-                    subtitle: 'Kiểm tra kết nối rồi thử lại.',
-                    actionLabel: 'Thử lại',
+                    title: _l10n?.chatHistoryError ?? 'Không tải được tin nhắn',
+                    subtitle: _l10n?.commonCheckConnection ??
+                        'Kiểm tra kết nối rồi thử lại.',
+                    actionLabel: _l10n?.commonRetry ?? 'Thử lại',
                     onAction: () => ref.invalidate(
                       keoMessageHistoryProvider(widget.keoId),
                     ),
@@ -185,7 +191,8 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.xxl),
                       child: Text(
-                        'Chưa có tin nhắn. Mở lời bằng một bài tủ của bạn.',
+                        _l10n?.chatEmptyKeo ??
+                            'Chưa có tin nhắn. Mở lời bằng một bài tủ của bạn.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -209,6 +216,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
                         index == 0 ? null : messages[index - 1].createdAt,
                         message.createdAt,
                         DateTime.now(),
+                        today: _l10n?.chatToday ?? 'Hôm nay',
                       );
                       final bubble = MessageBubble(
                         message: message,
@@ -254,6 +262,7 @@ class _GroupRulesBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -267,12 +276,12 @@ class _GroupRulesBanner extends StatelessWidget {
         color: AppColors.secondary.withValues(alpha: 0.36),
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
         clipBehavior: Clip.antiAlias,
-        child: const ExpansionTile(
-          leading: Icon(Icons.info_rounded, color: AppColors.secondaryDark),
+        child: ExpansionTile(
+          leading: const Icon(Icons.info_rounded, color: AppColors.secondaryDark),
           iconColor: AppColors.secondaryDark,
           collapsedIconColor: AppColors.secondaryDark,
-          title: Text('Luật nhóm'),
-          childrenPadding: EdgeInsets.fromLTRB(
+          title: Text(l10n?.chatGroupRules ?? 'Luật nhóm'),
+          childrenPadding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
             0,
             AppSpacing.lg,
@@ -282,7 +291,8 @@ class _GroupRulesBanner extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Không quay/chụp khi chưa đồng ý · Chia tiền rõ ràng · Tôn trọng riêng tư',
+                l10n?.chatGroupRulesBody ??
+                    'Không quay/chụp khi chưa đồng ý · Chia tiền rõ ràng · Tôn trọng riêng tư',
               ),
             ),
           ],

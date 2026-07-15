@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../application/admin_providers.dart';
 
@@ -18,22 +19,29 @@ class ModerationScreen extends ConsumerWidget {
       ref.invalidate(openReportsProvider);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Thao tác thất bại')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.adminActionFailed ??
+                  'Thao tác thất bại',
+            ),
+          ),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final reportsAsync = ref.watch(openReportsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Kiểm duyệt')),
+      appBar: AppBar(title: Text(l10n?.adminTitle ?? 'Kiểm duyệt')),
       body: reportsAsync.when(
         data: (reports) {
           if (reports.isEmpty) {
-            return const Center(child: Text('Không có báo cáo nào'));
+            return Center(child: Text(l10n?.adminEmpty ?? 'Không có báo cáo nào'));
           }
           return ListView(
             children: [
@@ -52,15 +60,15 @@ class ModerationScreen extends ConsumerWidget {
                       children: [
                         TextButton(
                           onPressed: () => _act(context, ref, r.id, 'hide'),
-                          child: const Text('Ẩn'),
+                          child: Text(l10n?.adminHide ?? 'Ẩn'),
                         ),
                         TextButton(
                           onPressed: () => _act(context, ref, r.id, 'remove'),
-                          child: const Text('Gỡ'),
+                          child: Text(l10n?.adminRemove ?? 'Gỡ'),
                         ),
                         TextButton(
                           onPressed: () => _act(context, ref, r.id, 'dismiss'),
-                          child: const Text('Bỏ qua'),
+                          child: Text(l10n?.adminDismiss ?? 'Bỏ qua'),
                         ),
                       ],
                     ),
@@ -70,7 +78,8 @@ class ModerationScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => const Center(child: Text('Không tải được báo cáo')),
+        error: (e, _) =>
+            Center(child: Text(l10n?.adminLoadError ?? 'Không tải được báo cáo')),
       ),
     );
   }

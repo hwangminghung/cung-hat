@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 
 /// Reusable multi-select chip grid for genres / artists / songs (bài tủ).
@@ -26,11 +27,14 @@ class TasteChips<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const EmptyState(
-        key: Key('taste_empty'),
+      final l10n =
+          Localizations.of<AppLocalizations>(context, AppLocalizations);
+      return EmptyState(
+        key: const Key('taste_empty'),
         icon: Icons.library_music_outlined,
-        title: 'Chưa có dữ liệu gu nhạc',
-        subtitle: 'Kiểm tra dữ liệu mẫu hoặc thử tải lại sau ít phút.',
+        title: l10n?.onbTasteEmptyTitle ?? 'Chưa có dữ liệu gu nhạc',
+        subtitle: l10n?.onbTasteEmptySub ??
+            'Kiểm tra dữ liệu mẫu hoặc thử tải lại sau ít phút.',
       );
     }
 

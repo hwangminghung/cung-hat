@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../keo/domain/keo.dart';
 
 /// Thẻ quảng bá Kèo trộn trong deck Đôi. Vuốt phải = xem chi tiết,
@@ -19,6 +20,7 @@ class KeoPromoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -38,7 +40,7 @@ class KeoPromoCard extends StatelessWidget {
               color: AppColors.onPrimary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
             ),
-            child: Text('🎤 Kèo gần bạn',
+            child: Text(l10n?.promoKeoNearby ?? '🎤 Kèo gần bạn',
                 style: Theme.of(context)
                     .textTheme
                     .labelMedium
@@ -54,8 +56,9 @@ class KeoPromoCard extends StatelessWidget {
                   ?.copyWith(color: AppColors.onPrimary)),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            '${keo.slotsFilled}/${keo.sizeTarget} chỗ · ${_hhmm(keo.timeWindowStart)}'
-            '${keo.distanceBand != null ? ' · cách ${keo.distanceBand} km' : ''}',
+            '${l10n?.promoSeats(keo.slotsFilled, keo.sizeTarget) ?? '${keo.slotsFilled}/${keo.sizeTarget} chỗ'}'
+            ' · ${_hhmm(keo.timeWindowStart)}'
+            '${keo.distanceBand != null ? ' · ${l10n?.promoDistanceKm(keo.distanceBand!) ?? 'cách ${keo.distanceBand} km'}' : ''}',
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
@@ -70,7 +73,7 @@ class KeoPromoCard extends StatelessWidget {
                     ?.copyWith(color: AppColors.onPrimary)),
           ],
           const SizedBox(height: AppSpacing.md),
-          Text('Vuốt phải để xem kèo →',
+          Text(l10n?.promoSwipeRight ?? 'Vuốt phải để xem kèo →',
               style: Theme.of(context)
                   .textTheme
                   .labelMedium

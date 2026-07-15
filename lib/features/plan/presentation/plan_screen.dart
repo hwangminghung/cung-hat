@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../application/plan_providers.dart';
 import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/hard_card.dart';
@@ -34,22 +35,26 @@ class PlanScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  String _statusLabel(String status) {
+  String _statusLabel(String status, AppLocalizations? l10n) {
     switch (status) {
       case 'confirmed':
-        return 'Đã chốt';
+        return l10n?.planStatusConfirmed ?? 'Đã chốt';
       case 'proposed':
-        return 'Chờ đồng ý';
+        return l10n?.planStatusProposed ?? 'Chờ đồng ý';
       default:
         return status;
     }
   }
 
-  String _venueName(List<VenueSuggestion> venues, String venueId) {
+  String _venueName(
+    List<VenueSuggestion> venues,
+    String venueId,
+    AppLocalizations? l10n,
+  ) {
     for (final v in venues) {
       if (v.id == venueId) return v.name;
     }
-    return 'Quán đã chọn';
+    return l10n?.planVenuePicked ?? 'Quán đã chọn';
   }
 
   String _venueAddress(List<VenueSuggestion> venues, String? venueId) {
@@ -66,7 +71,13 @@ class PlanScreen extends ConsumerWidget {
     final venues = venuesAsync.asData?.value ?? const <VenueSuggestion>[];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Kế hoạch')),
+      appBar: AppBar(
+        title: Text(
+          Localizations.of<AppLocalizations>(context, AppLocalizations)
+                  ?.planTitle ??
+              'Kế hoạch',
+        ),
+      ),
       body: ListView(
         children: [
           venuesAsync.when(
@@ -96,22 +107,28 @@ class PlanScreen extends ConsumerWidget {
               padding: EdgeInsets.all(16),
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (e, _) => const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Không tải được kế hoạch'),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.planLoadError ??
+                    'Không tải được kế hoạch',
+              ),
             ),
           ),
           // Venue suggestions section
           venuesAsync.when(
             data: (list) {
               if (list.isEmpty) {
+                final l10n = Localizations.of<AppLocalizations>(
+                    context, AppLocalizations);
                 return EmptyState(
                   key: const Key('venues_empty_state'),
                   icon: Icons.place_outlined,
-                  title: 'Chưa có quán gợi ý',
-                  subtitle:
+                  title: l10n?.planNoVenuesTitle ?? 'Chưa có quán gợi ý',
+                  subtitle: l10n?.planNoVenuesSub ??
                       'Khi có dữ liệu quán từ Places hoặc seed, bản đồ sẽ hiển thị marker để chọn điểm hẹn.',
-                  actionLabel: 'Tải lại',
+                  actionLabel: l10n?.planReload ?? 'Tải lại',
                   onAction: () {
                     ref.invalidate(nearestVenuesProvider(keoId));
                     ref.invalidate(keoMidpointProvider(keoId));
@@ -128,9 +145,13 @@ class PlanScreen extends ConsumerWidget {
               padding: EdgeInsets.all(16),
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (e, _) => const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Không tải được danh sách quán'),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.planVenuesLoadError ??
+                    'Không tải được danh sách quán',
+              ),
             ),
           ),
         ],
@@ -144,7 +165,8 @@ class PlanScreen extends ConsumerWidget {
     Plan plan,
     List<VenueSuggestion> venues,
   ) {
-    final name = _venueName(venues, plan.venueId);
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final name = _venueName(venues, plan.venueId, l10n);
     return HardCard(
       margin: const EdgeInsets.all(12),
       child: Padding(
@@ -157,21 +179,22 @@ class PlanScreen extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 4),
-            Text('Thời gian: ${plan.scheduledAt}'),
+            Text(l10n?.planTime(plan.scheduledAt) ?? 'Thời gian: ${plan.scheduledAt}'),
             const SizedBox(height: 4),
-            Text('Trạng thái: ${_statusLabel(plan.status)}'),
+            Text(l10n?.planStatus(_statusLabel(plan.status, l10n)) ??
+                'Trạng thái: ${_statusLabel(plan.status, l10n)}'),
             const SizedBox(height: 12),
             if (plan.status != 'confirmed')
               FilledButton(
                 key: const Key('confirm_plan_btn'),
-                child: const Text('Đồng ý kế hoạch'),
+                child: Text(l10n?.planConfirmCta ?? 'Đồng ý kế hoạch'),
                 onPressed: () async {
                   try {
                     await ref.read(planRepositoryProvider).confirmPlan(plan.id);
                     ref.invalidate(currentPlanProvider(keoId));
                   } catch (_) {
                     if (context.mounted) {
-                      _snack(context, 'Không đồng ý được');
+                      _snack(context, l10n?.planConfirmError ?? 'Không đồng ý được');
                     }
                   }
                 },
@@ -197,15 +220,15 @@ class PlanScreen extends ConsumerWidget {
                       mode: LaunchMode.externalApplication,
                     );
                     if (!ok && context.mounted) {
-                      _snack(context, 'Không mở được bản đồ');
+                      _snack(context, l10n?.planMapError ?? 'Không mở được bản đồ');
                     }
                   } catch (_) {
                     if (context.mounted) {
-                      _snack(context, 'Không mở được bản đồ');
+                      _snack(context, l10n?.planMapError ?? 'Không mở được bản đồ');
                     }
                   }
                 },
-                child: const Text('Chỉ đường'),
+                child: Text(l10n?.planDirections ?? 'Chỉ đường'),
               ),
               const SizedBox(height: 12),
               SafetyToolkit(planId: plan.id),
@@ -236,12 +259,20 @@ class PlanScreen extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(v.address),
             const SizedBox(height: 4),
-            Text('Gợi ý vì gần điểm cân bằng cả nhóm · cách $band km'),
+            Text(
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.planSuggestReason(band) ??
+                  'Gợi ý vì gần điểm cân bằng cả nhóm · cách $band km',
+            ),
             if (isHost) ...[
               const SizedBox(height: 8),
               TextButton(
                 key: Key('pick_venue_${v.id}'),
-                child: const Text('Chọn quán này'),
+                child: Text(
+                  Localizations.of<AppLocalizations>(context, AppLocalizations)
+                          ?.planPickVenue ??
+                      'Chọn quán này',
+                ),
                 onPressed: () => _pickVenue(context, ref, v),
               ),
             ],
@@ -269,11 +300,21 @@ class PlanScreen extends ConsumerWidget {
       await ref.read(planRepositoryProvider).proposePlan(keoId, v.id, when);
       ref.invalidate(currentPlanProvider(keoId));
       if (context.mounted) {
-        _snack(context, 'Đã đề xuất kế hoạch');
+        _snack(
+          context,
+          Localizations.of<AppLocalizations>(context, AppLocalizations)
+                  ?.planProposed ??
+              'Đã đề xuất kế hoạch',
+        );
       }
     } catch (_) {
       if (context.mounted) {
-        _snack(context, 'Không đề xuất được');
+        _snack(
+          context,
+          Localizations.of<AppLocalizations>(context, AppLocalizations)
+                  ?.planProposeError ??
+              'Không đề xuất được',
+        );
       }
     }
   }

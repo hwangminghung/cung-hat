@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
@@ -19,9 +20,10 @@ class LikesTeaserScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final teasers = ref.watch(likesTeaserProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Ai đã thích bạn')),
+      appBar: AppBar(title: Text(l10n?.shellTileLikes ?? 'Ai đã thích bạn')),
       body: teasers.when(
         loading: () => GridView.count(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -38,17 +40,18 @@ class LikesTeaserScreen extends ConsumerWidget {
         ),
         error: (_, _) => EmptyState(
           icon: Icons.wifi_off_rounded,
-          title: 'Không tải được danh sách',
-          subtitle: 'Kiểm tra kết nối rồi thử lại.',
-          actionLabel: 'Thử lại',
+          title: l10n?.teaserLoadError ?? 'Không tải được danh sách',
+          subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+          actionLabel: l10n?.commonRetry ?? 'Thử lại',
           onAction: () => ref.invalidate(likesTeaserProvider),
         ),
         data: (list) {
           if (list.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.favorite_border_rounded,
-              title: 'Chưa có ai thích bạn',
-              subtitle: 'Hoàn thiện hồ sơ để được thấy nhiều hơn nhé.',
+              title: l10n?.likesEmptyTitle ?? 'Chưa có ai thích bạn',
+              subtitle:
+                  l10n?.teaserEmptySub ?? 'Hoàn thiện hồ sơ để được thấy nhiều hơn nhé.',
             );
           }
           return Column(
@@ -62,7 +65,8 @@ class LikesTeaserScreen extends ConsumerWidget {
                   AppSpacing.sm,
                 ),
                 child: Text(
-                  '${list.length} người đã thích bạn',
+                  l10n?.teaserCount(list.length) ??
+                      '${list.length} người đã thích bạn',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
@@ -94,7 +98,9 @@ class LikesTeaserScreen extends ConsumerWidget {
                       variant: ProUpsellVariant.seeLikes,
                     ),
                     icon: const Icon(Icons.workspace_premium_rounded),
-                    label: const Text('Mở khoá với Pro — xem ai thích bạn'),
+                    label: Text(
+                      l10n?.teaserUnlockCta ?? 'Mở khoá với Pro — xem ai thích bạn',
+                    ),
                   ),
                 ),
               ),

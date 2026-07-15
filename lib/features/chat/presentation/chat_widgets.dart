@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/message.dart';
 import '../domain/song_share.dart';
 import 'chat_timeline.dart';
@@ -14,21 +15,23 @@ import 'song_share_widgets.dart';
 /// Hỏi xác nhận trước khi gửi tin có dấu hiệu nhạy cảm (tiền bạc/OTP...).
 /// Trả true nếu user vẫn muốn gửi.
 Future<bool> confirmUnsafeMessage(BuildContext context) async {
+  final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Gửi tin này?'),
-      content: const Text(
-        'Tin nhắn có vẻ liên quan tới tiền bạc hoặc thông tin nhạy cảm. Hãy kiểm tra kỹ trước khi gửi.',
+      title: Text(l10n?.sendThisTitle ?? 'Gửi tin này?'),
+      content: Text(
+        l10n?.sendThisBody ??
+            'Tin nhắn có vẻ liên quan tới tiền bạc hoặc thông tin nhạy cảm. Hãy kiểm tra kỹ trước khi gửi.',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Hủy'),
+          child: Text(l10n?.cancel ?? 'Hủy'),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text('Gửi'),
+          child: Text(l10n?.send ?? 'Gửi'),
         ),
       ],
     ),
@@ -130,6 +133,7 @@ class ChatComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return SafeArea(
       top: false,
       child: Container(
@@ -144,7 +148,7 @@ class ChatComposer extends StatelessWidget {
           children: [
             IconButton.outlined(
               key: const Key('share_song_btn'),
-              tooltip: 'Gửi bài tủ',
+              tooltip: l10n?.chatShareSongTooltip ?? 'Gửi bài tủ',
               onPressed: sending ? null : onShareSong,
               icon: const Icon(Icons.music_note_outlined),
             ),
@@ -154,8 +158,8 @@ class ChatComposer extends StatelessWidget {
                 controller: controller,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),
-                decoration: const InputDecoration(
-                  hintText: 'Nhắn gì đó...',
+                decoration: InputDecoration(
+                  hintText: l10n?.chatComposerHint ?? 'Nhắn gì đó...',
                   isDense: true,
                 ),
               ),

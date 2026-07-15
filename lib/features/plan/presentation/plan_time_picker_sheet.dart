@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class PlanTimePickerSheet extends StatefulWidget {
   const PlanTimePickerSheet({
     super.key,
@@ -43,11 +45,13 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
   }
 
   String _dateLabel(DateTime date) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final today = DateTime(widget.now.year, widget.now.month, widget.now.day);
     final tomorrow = today.add(const Duration(days: 1));
-    if (_sameDay(date, today)) return 'Hôm nay';
-    if (_sameDay(date, tomorrow)) return 'Mai';
-    const weekdays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    if (_sameDay(date, today)) return l10n?.chatToday ?? 'Hôm nay';
+    if (_sameDay(date, tomorrow)) return l10n?.planTomorrow ?? 'Mai';
+    final weekdays =
+        (l10n?.planWeekdaysShort ?? 'T2,T3,T4,T5,T6,T7,CN').split(',');
     return weekdays[date.weekday - 1];
   }
 
@@ -119,7 +123,10 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Chọn lịch hát',
+                        Localizations.of<AppLocalizations>(
+                                    context, AppLocalizations)
+                                ?.planPickSchedule ??
+                            'Chọn lịch hát',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 4),
@@ -131,7 +138,10 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Đóng',
+                  tooltip: Localizations.of<AppLocalizations>(
+                              context, AppLocalizations)
+                          ?.commonClose ??
+                      'Đóng',
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
                 ),
@@ -186,7 +196,11 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                   key: const Key('plan_time_custom_btn'),
                   onPressed: _pickCustomTime,
                   icon: const Icon(Icons.schedule),
-                  label: const Text('Giờ khác'),
+                  label: Text(
+                    Localizations.of<AppLocalizations>(context, AppLocalizations)
+                            ?.planOtherTime ??
+                        'Giờ khác',
+                  ),
                 ),
               ],
             ),
@@ -198,7 +212,11 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                 onPressed: _selectedWhen.isAfter(widget.now)
                     ? () => Navigator.of(context).pop(_selectedWhen)
                     : null,
-                child: const Text('Đề xuất kế hoạch'),
+                child: Text(
+                  Localizations.of<AppLocalizations>(context, AppLocalizations)
+                          ?.planProposeCta ??
+                      'Đề xuất kế hoạch',
+                ),
               ),
             ),
           ],

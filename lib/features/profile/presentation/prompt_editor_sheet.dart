@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/profile_providers.dart';
 import '../domain/karaoke_prompts.dart';
 import '../domain/profile.dart';
@@ -68,7 +69,13 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
     }
     if (!_answers.containsKey(id) && _answers.length >= maxPrompts) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tối đa $maxPrompts thẻ')),
+        SnackBar(
+          content: Text(
+            Localizations.of<AppLocalizations>(context, AppLocalizations)
+                    ?.promptMax(maxPrompts) ??
+                'Tối đa $maxPrompts thẻ',
+          ),
+        ),
       );
       return;
     }
@@ -108,7 +115,13 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không lưu được, thử lại.')),
+          SnackBar(
+            content: Text(
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.filterSaveError ??
+                  'Không lưu được, thử lại.',
+            ),
+          ),
         );
       }
     } finally {
@@ -149,12 +162,16 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Thẻ hỏi-đáp',
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.shellTilePrompts ??
+                    'Thẻ hỏi-đáp',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Chọn tối đa $maxPrompts câu để hồ sơ có chuyện mà bắt.',
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.promptSubMax(maxPrompts) ??
+                    'Chọn tối đa $maxPrompts câu để hồ sơ có chuyện mà bắt.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -329,8 +346,11 @@ class _PromptRowState extends State<_PromptRow> {
                 maxLength: 120,
                 maxLines: 2,
                 onChanged: onChanged,
-                decoration: const InputDecoration(
-                  hintText: 'Câu trả lời của bạn…',
+                decoration: InputDecoration(
+                  hintText: Localizations.of<AppLocalizations>(
+                              context, AppLocalizations)
+                          ?.promptAnswerHint ??
+                      'Câu trả lời của bạn…',
                   isDense: true,
                 ),
               ),

@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../profile/application/profile_providers.dart';
 import '../../settings/application/settings_providers.dart';
 import '../application/photo_providers.dart';
@@ -78,7 +79,13 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không tải được ảnh. Thử lại nhé.')),
+          SnackBar(
+            content: Text(
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.photoLoadError ??
+                  'Không tải được ảnh. Thử lại nhé.',
+            ),
+          ),
         );
       }
     } finally {
@@ -90,19 +97,20 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
     if (_busySlot != null) return;
     final userId = _currentUserId;
     if (userId == null) return;
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xoá ảnh này?'),
-        content: const Text('Ảnh sẽ bị gỡ khỏi hồ sơ của bạn.'),
+        title: Text(l10n?.photoDeleteTitle ?? 'Xoá ảnh này?'),
+        content: Text(l10n?.photoDeleteBody ?? 'Ảnh sẽ bị gỡ khỏi hồ sơ của bạn.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Huỷ'),
+            child: Text(l10n?.cancel ?? 'Huỷ'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xoá'),
+            child: Text(l10n?.commonDelete ?? 'Xoá'),
           ),
         ],
       ),
@@ -117,7 +125,13 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không xoá được ảnh. Thử lại nhé.')),
+          SnackBar(
+            content: Text(
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.photoDeleteError ??
+                  'Không xoá được ảnh. Thử lại nhé.',
+            ),
+          ),
         );
       }
     } finally {
@@ -157,10 +171,17 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Ảnh hồ sơ', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.shellTilePhotos ??
+                    'Ảnh hồ sơ',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Thêm tối đa $_maxSlots ảnh để hồ sơ nổi bật hơn.',
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.photoSubMax(_maxSlots) ??
+                    'Thêm tối đa $_maxSlots ảnh để hồ sơ nổi bật hơn.',
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
@@ -337,14 +358,20 @@ class _ConsentGate extends StatelessWidget {
           const Icon(Icons.lock_outline_rounded, color: AppColors.primaryDark),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Bật đồng ý dùng ảnh để thêm ảnh vào hồ sơ.',
+            Localizations.of<AppLocalizations>(context, AppLocalizations)
+                    ?.photoConsentNeeded ??
+                'Bật đồng ý dùng ảnh để thêm ảnh vào hồ sơ.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.md),
           FilledButton(
             key: const Key('photos_consent_cta'),
             onPressed: () => context.push('/settings'),
-            child: const Text('Bật trong Cài đặt'),
+            child: Text(
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.photoConsentCta ??
+                  'Bật trong Cài đặt',
+            ),
           ),
         ],
       ),

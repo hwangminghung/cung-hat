@@ -147,7 +147,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendThisBody =>
-      'This looks like it may share financial or contact info. Send anyway?';
+      'This message looks money- or personal-info-related. Double-check before sending.';
 
   @override
   String get cancel => 'Cancel';
@@ -280,4 +280,1037 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoveryExploreBrand => 'CÙNG HÁT';
+
+  @override
+  String get tabChat => 'Chat';
+
+  @override
+  String get tabProfile => 'Profile';
+
+  @override
+  String get shellTileLikes => 'Who liked you';
+
+  @override
+  String get shellTileLikesSub => 'See everyone who sent you a heart';
+
+  @override
+  String get shellTileUpgradeSub => 'Pro, keo boosts and advanced filters';
+
+  @override
+  String get shellTilePhotos => 'Profile photos';
+
+  @override
+  String get shellTilePhotosSub => 'Add up to 6 photos to your profile';
+
+  @override
+  String get shellTilePrompts => 'Prompt cards';
+
+  @override
+  String get shellTilePromptsSub =>
+      'Pick up to 3 prompts to spark conversations';
+
+  @override
+  String get shellTileSettingsSub => 'Privacy, data and legal';
+
+  @override
+  String get shellProfileSub => 'Manage likes, upgrades and settings.';
+
+  @override
+  String completionPercent(int percent) {
+    return 'Profile $percent% complete';
+  }
+
+  @override
+  String get completionAddPhoto => 'Add your first photo → get seen way more';
+
+  @override
+  String get completionThreePhotos => '3 photos → 2x more views';
+
+  @override
+  String get completionWriteBio => 'Write a bio → +25% matches';
+
+  @override
+  String get completionPickGenres => 'Pick 3 genres → sharper suggestions';
+
+  @override
+  String get completionAddArtist => 'Add a favourite artist';
+
+  @override
+  String get completionAddBaitu => 'Add 3 go-to songs → easier to join a keo';
+
+  @override
+  String get completionAnswerPrompts =>
+      'Answer 2 prompts → instant icebreakers';
+
+  @override
+  String get upsellCta => 'Upgrade to Pro';
+
+  @override
+  String get upsellLater => 'Maybe later';
+
+  @override
+  String get upsellAllProPerks => 'Plus every other Pro perk';
+
+  @override
+  String get upsellBoostTitle => 'Boost your profile';
+
+  @override
+  String get upsellBoostB1 => 'One 30-minute Boost every day';
+
+  @override
+  String get upsellBoostB2 => 'Jump to the top of nearby decks';
+
+  @override
+  String get upsellRewindTitle => 'Rewind your swipe';
+
+  @override
+  String get upsellRewindB1 => 'Passed by mistake? Undo your last swipe';
+
+  @override
+  String get upsellRewindB2 => 'Unlimited rewinds';
+
+  @override
+  String get upsellSeeLikesTitle => 'See who liked you';
+
+  @override
+  String get upsellSeeLikesB1 => 'Unlock the list of people who liked you';
+
+  @override
+  String get upsellSeeLikesB2 => 'Match instantly — no lucky swipe needed';
+
+  @override
+  String get upsellKeoCreateTitle => 'Create your own keo';
+
+  @override
+  String get upsellKeoCreateB1 => 'Host it your way: venue, time, members';
+
+  @override
+  String get upsellKeoCreateB2 => 'Open or approval-only — you decide';
+
+  @override
+  String get upsellKeoJoinTitle => 'Join multiple keo at once';
+
+  @override
+  String get upsellKeoJoinB1 => 'Free accounts get 1 active keo';
+
+  @override
+  String get upsellKeoJoinB2 => 'Pro joins unlimited keo';
+
+  @override
+  String get upsellLikeQuotaTitle => 'Out of likes for today';
+
+  @override
+  String get upsellLikeQuotaB1 => 'Pro gets unlimited daily likes';
+
+  @override
+  String get upsellLikeQuotaB2 => '5 Super Likes every day';
+
+  @override
+  String get upsellSuperQuotaTitle => 'Out of Super Likes for today';
+
+  @override
+  String get upsellSuperQuotaB1 => 'Pro gets 5 Super Likes a day';
+
+  @override
+  String get upsellSuperQuotaB2 => 'Super Likes make you 3x more visible';
+
+  @override
+  String get onbLoadRetrySub => 'Try again in a few minutes.';
+
+  @override
+  String get onbTasteEmptyTitle => 'No music data yet';
+
+  @override
+  String get onbTasteEmptySub =>
+      'Check the seed data or try reloading in a few minutes.';
+
+  @override
+  String get commonRetry => 'Retry';
+
+  @override
+  String get commonBack => 'Back';
+
+  @override
+  String get commonCheckConnection => 'Check your connection and try again.';
+
+  @override
+  String get commonSaveError => 'Couldn\'t save the setting, try again.';
+
+  @override
+  String get deckErrorLikeLimit =>
+      'You\'re out of likes for today. Upgrade to Pro for unlimited likes.';
+
+  @override
+  String get deckErrorSuperLimit => 'You\'re out of Super Likes for today.';
+
+  @override
+  String get deckErrorProRequired => 'This feature is for Pro members.';
+
+  @override
+  String get deckErrorBoostActive => 'You already have a boost running.';
+
+  @override
+  String get deckErrorBoostLimit =>
+      'You\'ve used today\'s boost. Try again tomorrow.';
+
+  @override
+  String get deckErrorUnknown => 'Couldn\'t save your swipe. Try again later.';
+
+  @override
+  String get candidateFallbackName => 'New singer';
+
+  @override
+  String get commonReport => 'Report';
+
+  @override
+  String get candidateViewProfile => 'View profile';
+
+  @override
+  String get candidateOnlineToday => 'Online today';
+
+  @override
+  String candidateDistanceKm(String band) {
+    return '$band km away';
+  }
+
+  @override
+  String candidateSharedBaitu(int count) {
+    return '$count shared go-to songs';
+  }
+
+  @override
+  String get candidateNoSharedGenres => 'No shared genres yet';
+
+  @override
+  String get candidateNoBio => 'No bio yet — ask them when you match!';
+
+  @override
+  String get candidatePhotoQuote => 'This photo is so cool! ';
+
+  @override
+  String get candidateReplyPhoto => 'Reply to this photo';
+
+  @override
+  String get candidateSharedGenresTitle => 'Shared music taste';
+
+  @override
+  String get candidateNoSharedGenresDot => 'No overlapping genres yet.';
+
+  @override
+  String get candidateSharedBaituTitle => 'Shared go-to songs';
+
+  @override
+  String get candidateNoSharedBaitu => 'No shared songs yet — room to explore!';
+
+  @override
+  String candidateSongQuote(String title) {
+    return 'About your song \"$title\": ';
+  }
+
+  @override
+  String get candidateReply => 'Reply';
+
+  @override
+  String candidatePromptQuote(String answer) {
+    return 'You said \"$answer\" — tell me more: ';
+  }
+
+  @override
+  String get candidateReportBlock => 'Report / Block';
+
+  @override
+  String get exploreFallbackTitle => 'Explore';
+
+  @override
+  String get deckLoadErrorTitle => 'Couldn\'t load suggestions';
+
+  @override
+  String get deckPromoSeeKeo => 'SEE KEO';
+
+  @override
+  String get deckExploreTooltip => 'Explore by music taste';
+
+  @override
+  String get deckRefreshTooltip => 'Refresh';
+
+  @override
+  String get deckSearching100 => 'Searching within 100 km';
+
+  @override
+  String deckBoostingUntil(String time) {
+    return 'Boosting until $time';
+  }
+
+  @override
+  String get deckBoostTooltip => 'Boost profile';
+
+  @override
+  String get deckBoostStarted =>
+      'Boosting for 30 minutes — your profile is prioritized nearby.';
+
+  @override
+  String get celebrateYouFallback => 'You';
+
+  @override
+  String get deckExhausted100 => 'Searched everything within 100 km';
+
+  @override
+  String get deckEmptyNearby => 'No singers nearby yet';
+
+  @override
+  String get deckExpand100 => 'Expand search to 100 km';
+
+  @override
+  String get deckRefreshSuggestions => 'Refresh suggestions';
+
+  @override
+  String get deckAutoExpandTitle => 'Auto-expand when you run out';
+
+  @override
+  String get deckAutoExpandSub =>
+      'Automatically search 100 km once 50 km is empty';
+
+  @override
+  String get filterApplied => 'Filters applied.';
+
+  @override
+  String get filterSaveError => 'Couldn\'t save, try again.';
+
+  @override
+  String get filterTitle => 'Filters';
+
+  @override
+  String get filterRadius => 'Search radius';
+
+  @override
+  String get filterAutoExpandSub => 'Search 100 km when suggestions run out';
+
+  @override
+  String get filterApply => 'Apply';
+
+  @override
+  String get promoKeoNearby => '🎤 Keo near you';
+
+  @override
+  String promoSeats(int filled, int target) {
+    return '$filled/$target seats';
+  }
+
+  @override
+  String promoDistanceKm(String band) {
+    return '$band km away';
+  }
+
+  @override
+  String get promoSwipeRight => 'Swipe right to view the keo →';
+
+  @override
+  String get likesEmptyTitle => 'No likes yet';
+
+  @override
+  String get likesEmptySub =>
+      'Keep singing your heart out — the right people will come.';
+
+  @override
+  String get likesAnonymous => 'Anonymous';
+
+  @override
+  String get likesLockedTitle => 'Unlock to see who liked you';
+
+  @override
+  String get teaserLoadError => 'Couldn\'t load the list';
+
+  @override
+  String get teaserEmptySub => 'Complete your profile to get seen more.';
+
+  @override
+  String teaserCount(int count) {
+    return '$count people liked you';
+  }
+
+  @override
+  String get teaserUnlockCta => 'Unlock with Pro — see who likes you';
+
+  @override
+  String get celebrateTitle => 'It\'s a match!';
+
+  @override
+  String celebrateBody(String name) {
+    return 'You and $name liked each other';
+  }
+
+  @override
+  String celebrateSharedBaitu(String songs) {
+    return 'Shared songs: $songs';
+  }
+
+  @override
+  String get celebrateChatNow => 'Chat now';
+
+  @override
+  String get celebrateContinue => 'Keep exploring';
+
+  @override
+  String reportTitle(String reason) {
+    return 'Report: $reason';
+  }
+
+  @override
+  String get reportBlockUser => 'Block this user';
+
+  @override
+  String get reportSent => 'Report sent.';
+
+  @override
+  String get reportSendError => 'Couldn\'t send the report.';
+
+  @override
+  String get reportBlocked => 'Blocked.';
+
+  @override
+  String get reportBlockError => 'Couldn\'t block.';
+
+  @override
+  String exploreOpenSemantics(String title) {
+    return 'Open $title';
+  }
+
+  @override
+  String get keoErrorProRequired => 'You need Pro to create a keo.';
+
+  @override
+  String get keoErrorFreeJoinLimit =>
+      'You\'re already in 1 keo. Leave it or upgrade to Pro to join more.';
+
+  @override
+  String get keoErrorFull => 'This keo is full.';
+
+  @override
+  String get keoErrorAlreadyDeclined => 'You were declined from this keo.';
+
+  @override
+  String get keoErrorNotOpen => 'This keo is no longer open.';
+
+  @override
+  String get keoErrorBlocked =>
+      'You can\'t join this keo due to safety settings.';
+
+  @override
+  String get keoErrorNoLocation =>
+      'Location is needed to match a keo. Turn on Location and try again.';
+
+  @override
+  String get keoErrorAgeNotVerified => 'Verify your age before matching a keo.';
+
+  @override
+  String get keoErrorNoMatchableKeo =>
+      'No matching keo found yet, try again later.';
+
+  @override
+  String get keoErrorInvalidTimeWindow =>
+      'Invalid time window. Pick another slot.';
+
+  @override
+  String get keoErrorInvalidGroupSize => 'Invalid group size.';
+
+  @override
+  String get keoErrorGeneric => 'Something went wrong, try again.';
+
+  @override
+  String get keoModeOpen => 'Open · join instantly';
+
+  @override
+  String get keoModeApproval => 'Approval needed';
+
+  @override
+  String keoCardDistance(String band) {
+    return '$band km away';
+  }
+
+  @override
+  String keoCardPeople(int filled, int target) {
+    return '$filled/$target people';
+  }
+
+  @override
+  String get keoBoardLoadError => 'Couldn\'t load keo list';
+
+  @override
+  String get keoBoardEmptyTitle => 'No keo nearby yet';
+
+  @override
+  String get keoBoardEmptySub =>
+      'Tap match-me to find a fitting keo or create your own.';
+
+  @override
+  String get keoCreateCta => 'Create keo';
+
+  @override
+  String get keoBoardTitle => 'Keo around you';
+
+  @override
+  String get keoBoardStoreTooltip => 'Store';
+
+  @override
+  String get keoBoardSubtitle =>
+      'Find a singing group that fits your taste, nearby and on schedule.';
+
+  @override
+  String get keoBoardMatchMe => 'Match me a group';
+
+  @override
+  String get keoBoardMatchMeSub =>
+      'Auto-suggest keo that fit your taste, location and time.';
+
+  @override
+  String get keoSharedTitle => 'Shared keo';
+
+  @override
+  String get keoSharedLoadError => 'Couldn\'t load the keo';
+
+  @override
+  String get keoSharedNotFound => 'Keo not found';
+
+  @override
+  String get keoSharedNotFoundSub =>
+      'The link is wrong or the keo was deleted.';
+
+  @override
+  String get keoSharedExpired => 'Link expired';
+
+  @override
+  String keoSharedSeats(int filled, int target) {
+    return '$filled/$target seats';
+  }
+
+  @override
+  String keoSharedHost(String name) {
+    return 'Host: $name';
+  }
+
+  @override
+  String get keoSharedAnonymous => 'Anonymous';
+
+  @override
+  String get keoSharedJoinCta => 'View keo & ask to join';
+
+  @override
+  String get keoSharedLoginCta => 'Sign in to ask to join';
+
+  @override
+  String get keoStatusConfirmedMember => 'Confirmed';
+
+  @override
+  String get keoStatusApproved => 'Approved';
+
+  @override
+  String get keoStatusRequested => 'Pending';
+
+  @override
+  String get keoStatusLeft => 'Left';
+
+  @override
+  String get keoStatusDeclined => 'Declined';
+
+  @override
+  String get keoDetailTitle => 'Keo details';
+
+  @override
+  String get keoDetailShareTooltip => 'Share keo';
+
+  @override
+  String keoDetailShareMessage(String title, String link) {
+    return 'Keo \"$title\" is looking for singers — join on Cùng Hát: $link';
+  }
+
+  @override
+  String get keoDetailShareError => 'Couldn\'t create the link, try again.';
+
+  @override
+  String get keoDetailMembers => 'Members';
+
+  @override
+  String get keoDetailApproveError => 'Couldn\'t approve';
+
+  @override
+  String get keoDetailDeclineError => 'Couldn\'t decline';
+
+  @override
+  String get keoDetailConfirmError => 'Couldn\'t confirm';
+
+  @override
+  String get keoDetailLeaveError => 'Couldn\'t leave the keo';
+
+  @override
+  String keoDetailMemberCount(int count) {
+    return '$count people in this keo';
+  }
+
+  @override
+  String get keoDetailHostChip => 'Host';
+
+  @override
+  String get keoDetailApprove => 'Approve';
+
+  @override
+  String get keoDetailDecline => 'Decline';
+
+  @override
+  String get keoDetailRequestJoin => 'Ask to join';
+
+  @override
+  String get keoDetailConfirmJoin => 'Confirm joining';
+
+  @override
+  String get keoDetailConfirmed => 'Joining confirmed';
+
+  @override
+  String get keoDetailOpenChat => 'Open group chat';
+
+  @override
+  String get keoDetailPickVenue => 'Pick the venue';
+
+  @override
+  String get keoDetailViewPlan => 'View plan';
+
+  @override
+  String get keoDetailLeave => 'Leave keo';
+
+  @override
+  String get keoCreatePick => 'Pick';
+
+  @override
+  String get keoCreateNameMissing => 'Enter a keo name';
+
+  @override
+  String get keoCreateTimeMissing => 'Pick start and end times';
+
+  @override
+  String get keoCreateTimeOrder => 'End time must be after start time';
+
+  @override
+  String get keoCreateNoLocation =>
+      'Couldn\'t get your location. Turn on Location and try again.';
+
+  @override
+  String get keoCreateHeadline => 'Invite a group to sing';
+
+  @override
+  String get keoCreateSubtitle =>
+      'Pick the time, music taste and how members join.';
+
+  @override
+  String get keoCreateNameLabel => 'Keo name';
+
+  @override
+  String get keoCreateNameHint => 'V-Pop tonight';
+
+  @override
+  String get keoCreateAreaLabel => 'Area';
+
+  @override
+  String get keoCreateAreaHint => 'District 1, Ho Chi Minh City';
+
+  @override
+  String get keoCreateVenueLater => 'Pick the venue after creating';
+
+  @override
+  String get keoCreateVenueLaterSub =>
+      'The host picks the venue on the Plan screen.';
+
+  @override
+  String keoCreateStart(String time) {
+    return 'Start: $time';
+  }
+
+  @override
+  String keoCreateEnd(String time) {
+    return 'End: $time';
+  }
+
+  @override
+  String get keoCreateSize => 'Group size';
+
+  @override
+  String keoCreateSizeN(int n) {
+    return '$n people';
+  }
+
+  @override
+  String get keoCreateGenres => 'Genres';
+
+  @override
+  String get keoCreateGenresError => 'Couldn\'t load genres';
+
+  @override
+  String get keoCreateJoinMode => 'Join mode';
+
+  @override
+  String get keoCreateModeApproval => 'Approval';
+
+  @override
+  String get keoCreateModeOpen => 'Open';
+
+  @override
+  String get keoMatchNoneFound => 'No matching keo found yet. Try again later.';
+
+  @override
+  String get keoMatchExistingTitle => 'A keo that fits you';
+
+  @override
+  String get keoMatchNewTitle => 'Found a matching group';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get keoMatchReasonSharedGenres => 'Shared taste';
+
+  @override
+  String get keoMatchReasonNearYou => 'Near you';
+
+  @override
+  String get keoMatchReasonEveningSlot => 'Great time slot';
+
+  @override
+  String get keoMatchReasonOpenJoin => 'Instant join';
+
+  @override
+  String get keoMatchReasonAvailableSlots => 'Seats left';
+
+  @override
+  String get keoMatchReasonActiveHost => 'Host online';
+
+  @override
+  String get chatShareSongTooltip => 'Send a go-to song';
+
+  @override
+  String get chatComposerHint => 'Say something...';
+
+  @override
+  String get chatSendError => 'Couldn\'t send the message. Try again later.';
+
+  @override
+  String get chatProfileError => 'Couldn\'t open the profile. Try again later.';
+
+  @override
+  String get chatProfileGone => 'Profile no longer available.';
+
+  @override
+  String get chatUnmatchTitle => 'Unmatch?';
+
+  @override
+  String get chatUnmatchBody =>
+      'You two won\'t be able to message each other anymore.';
+
+  @override
+  String get chatUnmatchCta => 'Unmatch';
+
+  @override
+  String get chatUnmatchError => 'Couldn\'t unmatch, try again later';
+
+  @override
+  String get chatEmptyMatch =>
+      'No messages yet. Break the ice with a go-to song.';
+
+  @override
+  String get chatEmptyKeo =>
+      'No messages yet. Open with one of your go-to songs.';
+
+  @override
+  String get chatHistoryError => 'Couldn\'t load messages';
+
+  @override
+  String get chatGroupTitle => 'Group chat';
+
+  @override
+  String get chatGroupRules => 'Group rules';
+
+  @override
+  String get chatGroupRulesBody =>
+      'No filming/photos without consent · Split costs clearly · Respect privacy';
+
+  @override
+  String get chatKeoNotOpen =>
+      'Group chat isn\'t open yet. Everyone must confirm joining first.';
+
+  @override
+  String get chatToday => 'Today';
+
+  @override
+  String get songShareEmpty =>
+      'You haven\'t picked any go-to songs. Add some in your Profile.';
+
+  @override
+  String get inboxTitle => 'Messages';
+
+  @override
+  String get inboxSubtitle => 'Where conversations live once you match.';
+
+  @override
+  String get inboxSectionKeo => 'Your keo';
+
+  @override
+  String get inboxSectionMatches => 'Direct messages';
+
+  @override
+  String get inboxTurnFirst => 'Say hi first';
+
+  @override
+  String get inboxTurnYours => 'Your turn';
+
+  @override
+  String get inboxReady => 'Ready for a karaoke invite';
+
+  @override
+  String get inboxEmptyTitle => 'No conversations yet';
+
+  @override
+  String get inboxEmptySub => 'Find a keo to start chatting with new friends!';
+
+  @override
+  String get inboxFindKeo => 'Find a keo';
+
+  @override
+  String get inboxLoadError => 'Couldn\'t load conversations';
+
+  @override
+  String get keoStateOpen => 'Open';
+
+  @override
+  String get keoStateFull => 'Full';
+
+  @override
+  String get keoStatePlanning => 'Planning';
+
+  @override
+  String get keoStateConfirmed => 'Confirmed';
+
+  @override
+  String get bookingPickGateway => 'Pick a payment gateway';
+
+  @override
+  String get bookingNotConfigured => 'Payment gateway not configured yet';
+
+  @override
+  String get bookingCreateError => 'Couldn\'t create the payment';
+
+  @override
+  String get planStatusConfirmed => 'Confirmed';
+
+  @override
+  String get planStatusProposed => 'Awaiting approval';
+
+  @override
+  String get planVenuePicked => 'Chosen venue';
+
+  @override
+  String get planTitle => 'Plan';
+
+  @override
+  String get planLoadError => 'Couldn\'t load the plan';
+
+  @override
+  String get planNoVenuesTitle => 'No venue suggestions yet';
+
+  @override
+  String get planNoVenuesSub =>
+      'Once venue data arrives from Places or seed, the map will show markers to pick a meeting spot.';
+
+  @override
+  String get planReload => 'Reload';
+
+  @override
+  String get planVenuesLoadError => 'Couldn\'t load the venue list';
+
+  @override
+  String planTime(String time) {
+    return 'Time: $time';
+  }
+
+  @override
+  String planStatus(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String get planConfirmCta => 'Approve the plan';
+
+  @override
+  String get planConfirmError => 'Couldn\'t approve';
+
+  @override
+  String get planMapError => 'Couldn\'t open the map';
+
+  @override
+  String get planDirections => 'Directions';
+
+  @override
+  String planSuggestReason(String band) {
+    return 'Suggested for being near the group midpoint · $band km away';
+  }
+
+  @override
+  String get planPickVenue => 'Pick this venue';
+
+  @override
+  String get planProposed => 'Plan proposed';
+
+  @override
+  String get planProposeError => 'Couldn\'t propose';
+
+  @override
+  String get planPickSchedule => 'Pick a singing time';
+
+  @override
+  String get planOtherTime => 'Another time';
+
+  @override
+  String get planProposeCta => 'Propose the plan';
+
+  @override
+  String get safetyShare => 'Share with friends';
+
+  @override
+  String safetyShareMessage(String link) {
+    return 'I\'m going karaoke, here\'s the plan: $link';
+  }
+
+  @override
+  String get safetyShareError => 'Couldn\'t create the share link';
+
+  @override
+  String get safetyArrived => 'I\'ve arrived';
+
+  @override
+  String get safetyArrivedOk => 'Arrival recorded';
+
+  @override
+  String get safetyArrivedError => 'Couldn\'t record it';
+
+  @override
+  String get planSharedTitle => 'Shared plan';
+
+  @override
+  String get planSharedNotFound => 'Plan not found';
+
+  @override
+  String get planMidpointMarker => 'Group midpoint';
+
+  @override
+  String get planTomorrow => 'Tmrw';
+
+  @override
+  String get planWeekdaysShort => 'Mon,Tue,Wed,Thu,Fri,Sat,Sun';
+
+  @override
+  String get settingsSectionPrivacy => 'Privacy';
+
+  @override
+  String get settingsSectionData => 'My data';
+
+  @override
+  String get settingsSectionAccount => 'Account';
+
+  @override
+  String get settingsSignOut => 'Sign out';
+
+  @override
+  String get settingsSectionLegal => 'Legal';
+
+  @override
+  String get settingsTerms => 'Terms';
+
+  @override
+  String get settingsExportError =>
+      'Couldn\'t export your data. Please try again.';
+
+  @override
+  String get settingsDeleteError => 'Couldn\'t delete the account, try again.';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get storeProDesc =>
+      'Create keo, join without limits and unlock every paid feature.';
+
+  @override
+  String get storeBoostDesc =>
+      'Put your keo at the top of the board for 24 hours.';
+
+  @override
+  String get storeSeeLikesDesc => 'Unlock the list of people who liked you.';
+
+  @override
+  String get storeFiltersDesc =>
+      'Filter by music taste, age, area and activity.';
+
+  @override
+  String get storeHeroSub =>
+      'Unlock tools that fill your keo faster with the right people.';
+
+  @override
+  String get storeOpenError => 'Couldn\'t open the store. Try again later.';
+
+  @override
+  String get storeLoadError => 'Couldn\'t load the store';
+
+  @override
+  String get photoLoadError => 'Couldn\'t load photos. Try again.';
+
+  @override
+  String get photoDeleteTitle => 'Delete this photo?';
+
+  @override
+  String get photoDeleteBody => 'It will be removed from your profile.';
+
+  @override
+  String get photoDeleteError => 'Couldn\'t delete the photo. Try again.';
+
+  @override
+  String photoSubMax(int max) {
+    return 'Add up to $max photos to make your profile stand out.';
+  }
+
+  @override
+  String get photoConsentNeeded =>
+      'Enable the photo consent to add profile photos.';
+
+  @override
+  String get photoConsentCta => 'Enable in Settings';
+
+  @override
+  String promptMax(int max) {
+    return 'Up to $max prompts';
+  }
+
+  @override
+  String promptSubMax(int max) {
+    return 'Pick up to $max prompts to spark conversations.';
+  }
+
+  @override
+  String get promptAnswerHint => 'Your answer…';
+
+  @override
+  String get adminActionFailed => 'Action failed';
+
+  @override
+  String get adminTitle => 'Moderation';
+
+  @override
+  String get adminEmpty => 'No reports';
+
+  @override
+  String get adminHide => 'Hide';
+
+  @override
+  String get adminRemove => 'Remove';
+
+  @override
+  String get adminDismiss => 'Dismiss';
+
+  @override
+  String get adminLoadError => 'Couldn\'t load reports';
 }

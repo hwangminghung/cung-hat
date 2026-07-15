@@ -6,6 +6,7 @@ import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/message_safety.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../discovery/domain/candidate.dart';
@@ -71,6 +72,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
+  AppLocalizations? get _l10n =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations);
+
   Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _sending) return;
@@ -93,7 +97,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không gửi được tin nhắn. Thử lại sau.')),
+        SnackBar(
+          content: Text(
+            _l10n?.chatSendError ?? 'Không gửi được tin nhắn. Thử lại sau.',
+          ),
+        ),
       );
       return;
     }
@@ -114,15 +122,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không mở được hồ sơ. Thử lại sau.')),
+        SnackBar(
+          content: Text(
+            _l10n?.chatProfileError ?? 'Không mở được hồ sơ. Thử lại sau.',
+          ),
+        ),
       );
       return;
     }
     if (!mounted) return;
     if (candidate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Hồ sơ không còn.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_l10n?.chatProfileGone ?? 'Hồ sơ không còn.')),
+      );
       return;
     }
     CandidateDetailSheet.show(
@@ -143,17 +155,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Huỷ ghép?'),
-        content: const Text('Hai bạn sẽ không nhắn tin được với nhau nữa.'),
+        title: Text(_l10n?.chatUnmatchTitle ?? 'Huỷ ghép?'),
+        content: Text(
+          _l10n?.chatUnmatchBody ?? 'Hai bạn sẽ không nhắn tin được với nhau nữa.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Để sau'),
+            child: Text(_l10n?.upsellLater ?? 'Để sau'),
           ),
           FilledButton(
             key: const Key('unmatch_confirm_btn'),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Huỷ ghép'),
+            child: Text(_l10n?.chatUnmatchCta ?? 'Huỷ ghép'),
           ),
         ],
       ),
@@ -175,7 +189,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không huỷ ghép được, thử lại sau')),
+          SnackBar(
+            content: Text(
+              _l10n?.chatUnmatchError ?? 'Không huỷ ghép được, thử lại sau',
+            ),
+          ),
         );
       }
     } finally {
@@ -223,7 +241,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             key: const Key('chat_profile_btn'),
             onPressed: _openMatchProfile,
             icon: const Icon(Icons.person_rounded),
-            tooltip: 'Hồ sơ',
+            tooltip: _l10n?.tabProfile ?? 'Hồ sơ',
           ),
           PopupMenuButton<String>(
             key: const Key('chat_menu_btn'),
@@ -234,18 +252,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             onSelected: (v) {
               if (v == 'unmatch') _confirmUnmatch();
             },
-            itemBuilder: (_) => const [
+            itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'unmatch',
-                key: Key('unmatch_btn'),
-                child: Text('Huỷ ghép'),
+                key: const Key('unmatch_btn'),
+                child: Text(_l10n?.chatUnmatchCta ?? 'Huỷ ghép'),
               ),
             ],
           ),
           TextButton.icon(
             onPressed: () => context.push('/keo/create'),
             icon: const Icon(Icons.groups_rounded),
-            label: const Text('Lập kèo'),
+            label: Text(_l10n?.chatPromoteKeo ?? 'Lập kèo'),
           ),
         ],
       ),
@@ -258,9 +276,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: historyAsync.hasError && messages.isEmpty
                 ? EmptyState(
                     icon: Icons.wifi_off_rounded,
-                    title: 'Không tải được tin nhắn',
-                    subtitle: 'Kiểm tra kết nối rồi thử lại.',
-                    actionLabel: 'Thử lại',
+                    title: _l10n?.chatHistoryError ?? 'Không tải được tin nhắn',
+                    subtitle: _l10n?.commonCheckConnection ??
+                        'Kiểm tra kết nối rồi thử lại.',
+                    actionLabel: _l10n?.commonRetry ?? 'Thử lại',
                     onAction: () => ref.invalidate(
                       messageHistoryProvider(widget.matchId),
                     ),
@@ -270,7 +289,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.xxl),
                       child: Text(
-                        'Chưa có tin nhắn. Rủ nhau bằng một bài tủ đi.',
+                        _l10n?.chatEmptyMatch ??
+                            'Chưa có tin nhắn. Rủ nhau bằng một bài tủ đi.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -293,6 +313,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         index == 0 ? null : messages[index - 1].createdAt,
                         message.createdAt,
                         DateTime.now(),
+                        today: _l10n?.chatToday ?? 'Hôm nay',
                       );
                       final bubble = MessageBubble(
                         message: message,
