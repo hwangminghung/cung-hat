@@ -365,7 +365,7 @@ abstract class AppLocalizations {
   /// No description provided for @sendThisBody.
   ///
   /// In en, this message translates to:
-  /// **'This looks like it may share financial or contact info. Send anyway?'**
+  /// **'This message looks money- or personal-info-related. Double-check before sending.'**
   String get sendThisBody;
 
   /// No description provided for @cancel.
@@ -1879,6 +1879,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Host online'**
   String get keoMatchReasonActiveHost;
+
+  /// No description provided for @chatShareSongTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a go-to song'**
+  String get chatShareSongTooltip;
+
+  /// No description provided for @chatComposerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Say something...'**
+  String get chatComposerHint;
+
+  /// No description provided for @chatSendError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the message. Try again later.'**
+  String get chatSendError;
+
+  /// No description provided for @chatProfileError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the profile. Try again later.'**
+  String get chatProfileError;
+
+  /// No description provided for @chatProfileGone.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile no longer available.'**
+  String get chatProfileGone;
+
+  /// No description provided for @chatUnmatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmatch?'**
+  String get chatUnmatchTitle;
+
+  /// No description provided for @chatUnmatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You two won\'t be able to message each other anymore.'**
+  String get chatUnmatchBody;
+
+  /// No description provided for @chatUnmatchCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmatch'**
+  String get chatUnmatchCta;
+
+  /// No description provided for @chatUnmatchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t unmatch, try again later'**
+  String get chatUnmatchError;
+
+  /// No description provided for @chatEmptyMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet. Break the ice with a go-to song.'**
+  String get chatEmptyMatch;
+
+  /// No description provided for @chatEmptyKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet. Open with one of your go-to songs.'**
+  String get chatEmptyKeo;
+
+  /// No description provided for @chatHistoryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load messages'**
+  String get chatHistoryError;
+
+  /// No description provided for @chatGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group chat'**
+  String get chatGroupTitle;
+
+  /// No description provided for @chatGroupRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Group rules'**
+  String get chatGroupRules;
+
+  /// No description provided for @chatGroupRulesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No filming/photos without consent · Split costs clearly · Respect privacy'**
+  String get chatGroupRulesBody;
+
+  /// No description provided for @chatKeoNotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Group chat isn\'t open yet. Everyone must confirm joining first.'**
+  String get chatKeoNotOpen;
+
+  /// No description provided for @chatToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get chatToday;
+
+  /// No description provided for @songShareEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t picked any go-to songs. Add some in your Profile.'**
+  String get songShareEmpty;
+
+  /// No description provided for @inboxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get inboxTitle;
+
+  /// No description provided for @inboxSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where conversations live once you match.'**
+  String get inboxSubtitle;
+
+  /// No description provided for @inboxSectionKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'Your keo'**
+  String get inboxSectionKeo;
+
+  /// No description provided for @inboxSectionMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct messages'**
+  String get inboxSectionMatches;
+
+  /// No description provided for @inboxTurnFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Say hi first'**
+  String get inboxTurnFirst;
+
+  /// No description provided for @inboxTurnYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your turn'**
+  String get inboxTurnYours;
+
+  /// No description provided for @inboxReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for a karaoke invite'**
+  String get inboxReady;
+
+  /// No description provided for @inboxEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet'**
+  String get inboxEmptyTitle;
+
+  /// No description provided for @inboxEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a keo to start chatting with new friends!'**
+  String get inboxEmptySub;
+
+  /// No description provided for @inboxFindKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a keo'**
+  String get inboxFindKeo;
+
+  /// No description provided for @inboxLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load conversations'**
+  String get inboxLoadError;
+
+  /// No description provided for @keoStateOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get keoStateOpen;
+
+  /// No description provided for @keoStateFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get keoStateFull;
+
+  /// No description provided for @keoStatePlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get keoStatePlanning;
+
+  /// No description provided for @keoStateConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get keoStateConfirmed;
 }
 
 class _AppLocalizationsDelegate

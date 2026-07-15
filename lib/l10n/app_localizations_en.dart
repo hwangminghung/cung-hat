@@ -147,7 +147,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendThisBody =>
-      'This looks like it may share financial or contact info. Send anyway?';
+      'This message looks money- or personal-info-related. Double-check before sending.';
 
   @override
   String get cancel => 'Cancel';
@@ -980,4 +980,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keoMatchReasonActiveHost => 'Host online';
+
+  @override
+  String get chatShareSongTooltip => 'Send a go-to song';
+
+  @override
+  String get chatComposerHint => 'Say something...';
+
+  @override
+  String get chatSendError => 'Couldn\'t send the message. Try again later.';
+
+  @override
+  String get chatProfileError => 'Couldn\'t open the profile. Try again later.';
+
+  @override
+  String get chatProfileGone => 'Profile no longer available.';
+
+  @override
+  String get chatUnmatchTitle => 'Unmatch?';
+
+  @override
+  String get chatUnmatchBody =>
+      'You two won\'t be able to message each other anymore.';
+
+  @override
+  String get chatUnmatchCta => 'Unmatch';
+
+  @override
+  String get chatUnmatchError => 'Couldn\'t unmatch, try again later';
+
+  @override
+  String get chatEmptyMatch =>
+      'No messages yet. Break the ice with a go-to song.';
+
+  @override
+  String get chatEmptyKeo =>
+      'No messages yet. Open with one of your go-to songs.';
+
+  @override
+  String get chatHistoryError => 'Couldn\'t load messages';
+
+  @override
+  String get chatGroupTitle => 'Group chat';
+
+  @override
+  String get chatGroupRules => 'Group rules';
+
+  @override
+  String get chatGroupRulesBody =>
+      'No filming/photos without consent · Split costs clearly · Respect privacy';
+
+  @override
+  String get chatKeoNotOpen =>
+      'Group chat isn\'t open yet. Everyone must confirm joining first.';
+
+  @override
+  String get chatToday => 'Today';
+
+  @override
+  String get songShareEmpty =>
+      'You haven\'t picked any go-to songs. Add some in your Profile.';
+
+  @override
+  String get inboxTitle => 'Messages';
+
+  @override
+  String get inboxSubtitle => 'Where conversations live once you match.';
+
+  @override
+  String get inboxSectionKeo => 'Your keo';
+
+  @override
+  String get inboxSectionMatches => 'Direct messages';
+
+  @override
+  String get inboxTurnFirst => 'Say hi first';
+
+  @override
+  String get inboxTurnYours => 'Your turn';
+
+  @override
+  String get inboxReady => 'Ready for a karaoke invite';
+
+  @override
+  String get inboxEmptyTitle => 'No conversations yet';
+
+  @override
+  String get inboxEmptySub => 'Find a keo to start chatting with new friends!';
+
+  @override
+  String get inboxFindKeo => 'Find a keo';
+
+  @override
+  String get inboxLoadError => 'Couldn\'t load conversations';
+
+  @override
+  String get keoStateOpen => 'Open';
+
+  @override
+  String get keoStateFull => 'Full';
+
+  @override
+  String get keoStatePlanning => 'Planning';
+
+  @override
+  String get keoStateConfirmed => 'Confirmed';
 }

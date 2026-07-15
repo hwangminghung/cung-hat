@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/stamp_chip.dart';
@@ -23,6 +24,7 @@ class InboxScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final async = ref.watch(inboxProvider);
     final myId = ref.watch(myProfileProvider).value?.id;
     // Section "Kèo của bạn" degrade êm: provider lỗi/đang tải → coi như rỗng,
@@ -36,18 +38,20 @@ class InboxScreen extends ConsumerWidget {
         ),
         error: (e, _) => EmptyState(
           icon: Icons.wifi_off_rounded,
-          title: 'Không tải được cuộc trò chuyện',
-          subtitle: 'Kiểm tra kết nối rồi thử lại.',
-          actionLabel: 'Thử lại',
+          title: l10n?.inboxLoadError ?? 'Không tải được cuộc trò chuyện',
+          subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+          actionLabel: l10n?.commonRetry ?? 'Thử lại',
           onAction: () => ref.invalidate(inboxProvider),
         ),
         data: (matches) {
           if (matches.isEmpty && keos.isEmpty) {
             return EmptyState(
               icon: Icons.chat_bubble_rounded,
-              title: 'Chưa có cuộc trò chuyện nào',
-              subtitle: 'Tìm kèo ngay để bắt đầu trò chuyện với những người bạn mới!',
-              actionLabel: onFindKeo != null ? 'Tìm kèo ngay' : null,
+              title: l10n?.inboxEmptyTitle ?? 'Chưa có cuộc trò chuyện nào',
+              subtitle: l10n?.inboxEmptySub ??
+                  'Tìm kèo ngay để bắt đầu trò chuyện với những người bạn mới!',
+              actionLabel:
+                  onFindKeo != null ? (l10n?.inboxFindKeo ?? 'Tìm kèo ngay') : null,
               onAction: onFindKeo,
             );
           }
@@ -62,12 +66,12 @@ class InboxScreen extends ConsumerWidget {
             children: [
               const _InboxHeader(),
               if (keos.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.only(
+                Padding(
+                  padding: const EdgeInsets.only(
                     top: AppSpacing.lg,
                     bottom: AppSpacing.sm,
                   ),
-                  child: _SectionLabel('Kèo của bạn'),
+                  child: _SectionLabel(l10n?.inboxSectionKeo ?? 'Kèo của bạn'),
                 ),
                 ..._withWaveDividers([
                   for (final keo in keos)
@@ -87,12 +91,12 @@ class InboxScreen extends ConsumerWidget {
                 ]),
               ],
               if (matches.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.only(
+                Padding(
+                  padding: const EdgeInsets.only(
                     top: AppSpacing.lg,
                     bottom: AppSpacing.sm,
                   ),
-                  child: _SectionLabel('Tin nhắn đôi'),
+                  child: _SectionLabel(l10n?.inboxSectionMatches ?? 'Tin nhắn đôi'),
                 ),
                 ..._withWaveDividers([
                   for (final match in matches)
@@ -112,14 +116,15 @@ class InboxScreen extends ConsumerWidget {
     MatchSummary match,
     String? myId,
   ) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final otherName = match.otherName;
     final monogram =
         otherName.isEmpty ? '?' : otherName.characters.first.toUpperCase();
     String? turnLabel;
     if (match.lastSenderId == null) {
-      turnLabel = 'Nhắn trước đi';
+      turnLabel = l10n?.inboxTurnFirst ?? 'Nhắn trước đi';
     } else if (myId != null && match.lastSenderId != myId) {
-      turnLabel = 'Đến lượt bạn';
+      turnLabel = l10n?.inboxTurnYours ?? 'Đến lượt bạn';
     }
     return _InboxTile(
       monogram: monogram,
@@ -155,15 +160,17 @@ class _InboxHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Tin nhắn', style: Theme.of(context).textTheme.headlineMedium),
+          Text(l10n?.inboxTitle ?? 'Tin nhắn',
+              style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Nơi giữ các cuộc trò chuyện sau khi chung gu.',
+            l10n?.inboxSubtitle ?? 'Nơi giữ các cuộc trò chuyện sau khi chung gu.',
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
@@ -261,7 +268,10 @@ class _InboxTile extends StatelessWidget {
                       )
                     else
                       Text(
-                        'Sẵn sàng rủ đi hát',
+                        Localizations.of<AppLocalizations>(
+                                    context, AppLocalizations)
+                                ?.inboxReady ??
+                            'Sẵn sàng rủ đi hát',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: textTheme.bodyMedium?.copyWith(
@@ -291,16 +301,16 @@ class _KeoInboxTile extends StatelessWidget {
   final Keo keo;
   final VoidCallback onTap;
 
-  static String _statusLabel(String status) {
+  static String _statusLabel(String status, AppLocalizations? l10n) {
     switch (status) {
       case 'open':
-        return 'Đang mở';
+        return l10n?.keoStateOpen ?? 'Đang mở';
       case 'full':
-        return 'Đủ người';
+        return l10n?.keoStateFull ?? 'Đủ người';
       case 'planning':
-        return 'Đang lên kế hoạch';
+        return l10n?.keoStatePlanning ?? 'Đang lên kế hoạch';
       case 'confirmed':
-        return 'Đã chốt';
+        return l10n?.keoStateConfirmed ?? 'Đã chốt';
       default:
         return status;
     }
@@ -308,11 +318,12 @@ class _KeoInboxTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final textTheme = Theme.of(context).textTheme;
     final area = keo.areaLabel;
     final subtitle = area == null || area.isEmpty
-        ? _statusLabel(keo.status)
-        : '${_statusLabel(keo.status)} · $area';
+        ? _statusLabel(keo.status, l10n)
+        : '${_statusLabel(keo.status, l10n)} · $area';
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
@@ -363,10 +374,10 @@ class _KeoInboxTile extends StatelessWidget {
                     ),
                     if (keo.isMine) ...[
                       const SizedBox(height: AppSpacing.xs),
-                      const Align(
+                      Align(
                         alignment: Alignment.centerLeft,
                         child: StampChip(
-                          label: 'Chủ kèo',
+                          label: l10n?.keoDetailHostChip ?? 'Chủ kèo',
                           tone: StampChipTone.lime,
                           leadingIcon: Icons.auto_awesome_outlined,
                         ),

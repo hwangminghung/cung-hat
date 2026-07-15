@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../onboarding/application/reference_providers.dart';
 import '../../profile/application/profile_providers.dart';
 import '../domain/song_share.dart';
@@ -37,7 +38,9 @@ class _SongShareSheet extends ConsumerWidget {
         body = Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Text(
-            'Bạn chưa chọn bài tủ nào. Vào Hồ sơ để thêm nhé.',
+            Localizations.of<AppLocalizations>(context, AppLocalizations)
+                    ?.songShareEmpty ??
+                'Bạn chưa chọn bài tủ nào. Vào Hồ sơ để thêm nhé.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -90,7 +93,9 @@ class _SongShareSheet extends ConsumerWidget {
               AppSpacing.sm,
             ),
             child: Text(
-              'Gửi bài tủ',
+              Localizations.of<AppLocalizations>(context, AppLocalizations)
+                      ?.chatShareSongTooltip ??
+                  'Gửi bài tủ',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),

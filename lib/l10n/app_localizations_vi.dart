@@ -146,7 +146,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get sendThisBody =>
-      'Tin này có thể chứa thông tin tài chính/liên hệ. Vẫn gửi?';
+      'Tin nhắn có vẻ liên quan tới tiền bạc hoặc thông tin nhạy cảm. Hãy kiểm tra kỹ trước khi gửi.';
 
   @override
   String get cancel => 'Hủy';
@@ -976,4 +976,108 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get keoMatchReasonActiveHost => 'Chủ kèo đang online';
+
+  @override
+  String get chatShareSongTooltip => 'Gửi bài tủ';
+
+  @override
+  String get chatComposerHint => 'Nhắn gì đó...';
+
+  @override
+  String get chatSendError => 'Không gửi được tin nhắn. Thử lại sau.';
+
+  @override
+  String get chatProfileError => 'Không mở được hồ sơ. Thử lại sau.';
+
+  @override
+  String get chatProfileGone => 'Hồ sơ không còn.';
+
+  @override
+  String get chatUnmatchTitle => 'Huỷ ghép?';
+
+  @override
+  String get chatUnmatchBody => 'Hai bạn sẽ không nhắn tin được với nhau nữa.';
+
+  @override
+  String get chatUnmatchCta => 'Huỷ ghép';
+
+  @override
+  String get chatUnmatchError => 'Không huỷ ghép được, thử lại sau';
+
+  @override
+  String get chatEmptyMatch => 'Chưa có tin nhắn. Rủ nhau bằng một bài tủ đi.';
+
+  @override
+  String get chatEmptyKeo =>
+      'Chưa có tin nhắn. Mở lời bằng một bài tủ của bạn.';
+
+  @override
+  String get chatHistoryError => 'Không tải được tin nhắn';
+
+  @override
+  String get chatGroupTitle => 'Chat nhóm';
+
+  @override
+  String get chatGroupRules => 'Luật nhóm';
+
+  @override
+  String get chatGroupRulesBody =>
+      'Không quay/chụp khi chưa đồng ý · Chia tiền rõ ràng · Tôn trọng riêng tư';
+
+  @override
+  String get chatKeoNotOpen =>
+      'Chưa mở chat nhóm. Cần tất cả thành viên đồng ý tham gia.';
+
+  @override
+  String get chatToday => 'Hôm nay';
+
+  @override
+  String get songShareEmpty =>
+      'Bạn chưa chọn bài tủ nào. Vào Hồ sơ để thêm nhé.';
+
+  @override
+  String get inboxTitle => 'Tin nhắn';
+
+  @override
+  String get inboxSubtitle => 'Nơi giữ các cuộc trò chuyện sau khi chung gu.';
+
+  @override
+  String get inboxSectionKeo => 'Kèo của bạn';
+
+  @override
+  String get inboxSectionMatches => 'Tin nhắn đôi';
+
+  @override
+  String get inboxTurnFirst => 'Nhắn trước đi';
+
+  @override
+  String get inboxTurnYours => 'Đến lượt bạn';
+
+  @override
+  String get inboxReady => 'Sẵn sàng rủ đi hát';
+
+  @override
+  String get inboxEmptyTitle => 'Chưa có cuộc trò chuyện nào';
+
+  @override
+  String get inboxEmptySub =>
+      'Tìm kèo ngay để bắt đầu trò chuyện với những người bạn mới!';
+
+  @override
+  String get inboxFindKeo => 'Tìm kèo ngay';
+
+  @override
+  String get inboxLoadError => 'Không tải được cuộc trò chuyện';
+
+  @override
+  String get keoStateOpen => 'Đang mở';
+
+  @override
+  String get keoStateFull => 'Đủ người';
+
+  @override
+  String get keoStatePlanning => 'Đang lên kế hoạch';
+
+  @override
+  String get keoStateConfirmed => 'Đã chốt';
 }
