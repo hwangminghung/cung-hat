@@ -1305,4 +1305,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get adminLoadError => 'Không tải được báo cáo';
+
+  @override
+  String get settingsLanguage => 'Ngôn ngữ';
+
+  @override
+  String get settingsLangSystem => 'Theo hệ thống';
 }

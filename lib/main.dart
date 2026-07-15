@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/config/app_config.dart';
+import 'core/l10n/locale_controller.dart';
 import 'core/providers/supabase_providers.dart';
 import 'core/push/push_service.dart';
 import 'app/app.dart';
@@ -21,10 +22,15 @@ Future<void> main() async {
     '--dart-define-from-file=env/dev.json (hoặc env/dev.emulator.json).',
   );
   await Supabase.initialize(url: cfg.supabaseUrl, anonKey: cfg.supabaseAnonKey); // ignore: deprecated_member_use
+  // [LANG] Đọc ngôn ngữ user đã chọn TRƯỚC runApp — không nháy frame đầu.
+  final savedLocale = await loadSavedLocaleOverride();
   unawaited(_initPush(Supabase.instance.client));
   runApp(
     ProviderScope(
-      overrides: [supabaseClientProvider.overrideWithValue(Supabase.instance.client)],
+      overrides: [
+        supabaseClientProvider.overrideWithValue(Supabase.instance.client),
+        initialLocaleProvider.overrideWithValue(savedLocale),
+      ],
       child: const CungHatApp(),
     ),
   );
