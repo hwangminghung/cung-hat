@@ -2495,7 +2495,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLanguage.
   ///
   /// In en, this message translates to:
-  /// **'Ngôn ngữ'**
+  /// **'Language'**
   String get settingsLanguage;
 
   /// No description provided for @settingsLangSystem.

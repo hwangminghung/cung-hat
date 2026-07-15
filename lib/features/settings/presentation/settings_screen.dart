@@ -59,7 +59,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       for (final purpose in consentPurposes)
                         SwitchListTile(
                           key: Key('consent_$purpose'),
-                          title: Text(consentLabelsVi[purpose] ?? purpose),
+                          title: Text(consentLabel(purpose, _l10n)),
                           value: consents[purpose] ?? false,
                           onChanged: (value) =>
                               _handleToggleConsent(purpose, value),

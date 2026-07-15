@@ -462,6 +462,6 @@
   "adminRemove": "Remove",
   "adminDismiss": "Dismiss",
   "adminLoadError": "Couldn't load reports",
-  "settingsLanguage": "Ngôn ngữ",
+  "settingsLanguage": "Language",
   "settingsLangSystem": "System default"
 }

@@ -1315,7 +1315,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminLoadError => 'Couldn\'t load reports';
 
   @override
-  String get settingsLanguage => 'Ngôn ngữ';
+  String get settingsLanguage => 'Language';
 
   @override
   String get settingsLangSystem => 'System default';
