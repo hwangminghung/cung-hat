@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../discovery/application/discovery_providers.dart';
@@ -53,12 +54,15 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
+  AppLocalizations? get _l10n =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations);
+
   void _snack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   String _fmt(DateTime? dt) {
-    if (dt == null) return 'Chọn';
+    if (dt == null) return _l10n?.keoCreatePick ?? 'Chọn';
     String two(int n) => n.toString().padLeft(2, '0');
     return '${two(dt.day)}/${two(dt.month)} ${two(dt.hour)}:${two(dt.minute)}';
   }
@@ -67,15 +71,15 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
     final title = _titleCtrl.text.trim();
     final areaText = _areaCtrl.text.trim();
     if (title.isEmpty) {
-      _snack('Nhập tên kèo');
+      _snack(_l10n?.keoCreateNameMissing ?? 'Nhập tên kèo');
       return;
     }
     if (_start == null || _end == null) {
-      _snack('Chọn giờ bắt đầu và kết thúc');
+      _snack(_l10n?.keoCreateTimeMissing ?? 'Chọn giờ bắt đầu và kết thúc');
       return;
     }
     if (!_end!.isAfter(_start!)) {
-      _snack('Giờ kết thúc phải sau giờ bắt đầu');
+      _snack(_l10n?.keoCreateTimeOrder ?? 'Giờ kết thúc phải sau giờ bắt đầu');
       return;
     }
 
@@ -85,7 +89,8 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
       if (!mounted) return;
       if (pos == null) {
         _snack(
-          'Không lấy được vị trí. Bật Location trên emulator rồi thử lại.',
+          _l10n?.keoCreateNoLocation ??
+              'Không lấy được vị trí. Bật Location trên emulator rồi thử lại.',
         );
         return;
       }
@@ -106,7 +111,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
       context.go('/keo/$id');
     } catch (e) {
       if (!mounted) return;
-      _snack(keoErrorMessage(e));
+      _snack(keoErrorMessage(e, _l10n));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -116,7 +121,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
   Widget build(BuildContext context) {
     final genresAsync = ref.watch(genresProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Tạo kèo')),
+      appBar: AppBar(title: Text(_l10n?.keoCreateCta ?? 'Tạo kèo')),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
@@ -144,7 +149,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                         color: AppColors.onPrimary,
                       ),
                     )
-                  : const Text('Tạo kèo'),
+                  : Text(_l10n?.keoCreateCta ?? 'Tạo kèo'),
             ),
           ),
         ),
@@ -182,12 +187,13 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Rủ một nhóm đi hát',
+                        _l10n?.keoCreateHeadline ?? 'Rủ một nhóm đi hát',
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        'Chọn thời gian, gu nhạc và cách duyệt thành viên.',
+                        _l10n?.keoCreateSubtitle ??
+                            'Chọn thời gian, gu nhạc và cách duyệt thành viên.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -205,20 +211,20 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                 TextField(
                   key: const Key('create_keo_title_field'),
                   controller: _titleCtrl,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.mic_external_on_outlined),
-                    labelText: 'Tên kèo',
-                    hintText: 'V-Pop tối nay',
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.mic_external_on_outlined),
+                    labelText: _l10n?.keoCreateNameLabel ?? 'Tên kèo',
+                    hintText: _l10n?.keoCreateNameHint ?? 'V-Pop tối nay',
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextField(
                   key: const Key('create_keo_area_field'),
                   controller: _areaCtrl,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.place_outlined),
-                    labelText: 'Khu vực',
-                    hintText: 'Quận 1, Hồ Chí Minh',
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.place_outlined),
+                    labelText: _l10n?.keoCreateAreaLabel ?? 'Khu vực',
+                    hintText: _l10n?.keoCreateAreaHint ?? 'Quận 1, Hồ Chí Minh',
                   ),
                 ),
               ],
@@ -254,12 +260,13 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Chọn quán sau khi tạo kèo',
+                          _l10n?.keoCreateVenueLater ?? 'Chọn quán sau khi tạo kèo',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          'Chủ kèo sẽ chốt quán ở màn Kế hoạch.',
+                          _l10n?.keoCreateVenueLaterSub ??
+                              'Chủ kèo sẽ chốt quán ở màn Kế hoạch.',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: AppColors.textSecondary),
                         ),
@@ -280,7 +287,9 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                       if (dt != null) setState(() => _start = dt);
                     },
               icon: const Icon(Icons.schedule_rounded),
-              label: Text('Bắt đầu: ${_fmt(_start)}'),
+              label: Text(
+                _l10n?.keoCreateStart(_fmt(_start)) ?? 'Bắt đầu: ${_fmt(_start)}',
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             OutlinedButton.icon(
@@ -291,7 +300,9 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                       if (dt != null) setState(() => _end = dt);
                     },
               icon: const Icon(Icons.flag_rounded),
-              label: Text('Kết thúc: ${_fmt(_end)}'),
+              label: Text(
+                _l10n?.keoCreateEnd(_fmt(_end)) ?? 'Kết thúc: ${_fmt(_end)}',
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             const WaveDivider(),
@@ -300,15 +311,16 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
               children: [
                 DropdownButtonFormField<int>(
                   initialValue: _size,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.groups_outlined),
-                    labelText: 'Số người',
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.groups_outlined),
+                    labelText: _l10n?.keoCreateSize ?? 'Số người',
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 2, child: Text('2 người')),
-                    DropdownMenuItem(value: 3, child: Text('3 người')),
-                    DropdownMenuItem(value: 4, child: Text('4 người')),
-                    DropdownMenuItem(value: 5, child: Text('5 người')),
+                  items: [
+                    for (final n in const [2, 3, 4, 5])
+                      DropdownMenuItem(
+                        value: n,
+                        child: Text(_l10n?.keoCreateSizeN(n) ?? '$n người'),
+                      ),
                   ],
                   onChanged: _submitting
                       ? null
@@ -319,7 +331,8 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                 const SizedBox(height: AppSpacing.md),
                 const WaveDivider(),
                 const SizedBox(height: AppSpacing.md),
-                Text('Thể loại', style: Theme.of(context).textTheme.titleSmall),
+                Text(_l10n?.keoCreateGenres ?? 'Thể loại',
+                    style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: AppSpacing.sm),
                 genresAsync.when(
                   data: (genres) => LayoutBuilder(
@@ -379,7 +392,8 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                   ),
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => const Text('Không tải được thể loại'),
+                  error: (e, _) =>
+                      Text(_l10n?.keoCreateGenresError ?? 'Không tải được thể loại'),
                 ),
               ],
             ),
@@ -387,7 +401,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
             const WaveDivider(),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Chế độ tham gia',
+              _l10n?.keoCreateJoinMode ?? 'Chế độ tham gia',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -416,13 +430,14 @@ class _JoinModeChoices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return LayoutBuilder(
       builder: (context, constraints) {
         final textScale = MediaQuery.textScalerOf(context).scale(12) / 12;
         final stack = constraints.maxWidth < 300 || textScale > 1.35;
         final approval = _JoinModeChoice(
           value: 'approval',
-          label: 'Cần duyệt',
+          label: l10n?.keoCreateModeApproval ?? 'Cần duyệt',
           icon: Icons.verified_user_outlined,
           selected: selected == 'approval',
           enabled: enabled,
@@ -430,7 +445,7 @@ class _JoinModeChoices extends StatelessWidget {
         );
         final open = _JoinModeChoice(
           value: 'open',
-          label: 'Mở',
+          label: l10n?.keoCreateModeOpen ?? 'Mở',
           icon: Icons.lock_open_outlined,
           selected: selected == 'open',
           enabled: enabled,

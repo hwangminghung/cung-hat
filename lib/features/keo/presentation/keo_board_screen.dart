@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/pressable.dart';
@@ -48,9 +49,18 @@ class KeoBoardScreen extends ConsumerWidget {
                 ),
                 error: (err, _) => EmptyState(
                   icon: Icons.wifi_off_rounded,
-                  title: 'Không tải được danh sách kèo',
-                  subtitle: 'Kiểm tra kết nối rồi thử lại.',
-                  actionLabel: 'Thử lại',
+                  title: Localizations.of<AppLocalizations>(
+                              context, AppLocalizations)
+                          ?.keoBoardLoadError ??
+                      'Không tải được danh sách kèo',
+                  subtitle: Localizations.of<AppLocalizations>(
+                              context, AppLocalizations)
+                          ?.commonCheckConnection ??
+                      'Kiểm tra kết nối rồi thử lại.',
+                  actionLabel: Localizations.of<AppLocalizations>(
+                              context, AppLocalizations)
+                          ?.commonRetry ??
+                      'Thử lại',
                   onAction: () => ref.invalidate(openKeosProvider),
                 ),
                 data: (keos) {
@@ -63,10 +73,15 @@ class KeoBoardScreen extends ConsumerWidget {
                       children: [
                         _boardHeader(context),
                         _matchBanner(context, ref),
-                        const EmptyState(
+                        EmptyState(
                           icon: Icons.groups_rounded,
-                          title: 'Chưa có kèo quanh đây',
-                          subtitle:
+                          title: Localizations.of<AppLocalizations>(
+                                      context, AppLocalizations)
+                                  ?.keoBoardEmptyTitle ??
+                              'Chưa có kèo quanh đây',
+                          subtitle: Localizations.of<AppLocalizations>(
+                                      context, AppLocalizations)
+                                  ?.keoBoardEmptySub ??
                               'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
                         ),
                       ],
@@ -106,7 +121,11 @@ class KeoBoardScreen extends ConsumerWidget {
                 child: GradientButton(
                   onPressed: () => _openCreate(context, isPro),
                   icon: Icons.add_box_outlined,
-                  child: const Text('Tạo kèo'),
+                  child: Text(
+                    Localizations.of<AppLocalizations>(context, AppLocalizations)
+                            ?.keoCreateCta ??
+                        'Tạo kèo',
+                  ),
                 ),
               ),
             ),
@@ -142,12 +161,17 @@ class KeoBoardScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                'Kèo quanh bạn',
+                Localizations.of<AppLocalizations>(context, AppLocalizations)
+                        ?.keoBoardTitle ??
+                    'Kèo quanh bạn',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             IconButton.outlined(
-              tooltip: 'Cửa hàng',
+              tooltip: Localizations.of<AppLocalizations>(
+                          context, AppLocalizations)
+                      ?.keoBoardStoreTooltip ??
+                  'Cửa hàng',
               onPressed: () => context.push('/store'),
               icon: const Icon(Icons.storefront_outlined),
             ),
@@ -155,7 +179,9 @@ class KeoBoardScreen extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Tìm nhóm đi hát hợp gu, gần bạn và có lịch phù hợp.',
+          Localizations.of<AppLocalizations>(context, AppLocalizations)
+                  ?.keoBoardSubtitle ??
+              'Tìm nhóm đi hát hợp gu, gần bạn và có lịch phù hợp.',
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
@@ -208,7 +234,10 @@ class KeoBoardScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ghép nhóm cho tôi',
+                      Localizations.of<AppLocalizations>(
+                                  context, AppLocalizations)
+                              ?.keoBoardMatchMe ??
+                          'Ghép nhóm cho tôi',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.ink,
                         fontWeight: FontWeight.w800,
@@ -216,7 +245,10 @@ class KeoBoardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Tự động gợi ý kèo hợp gu, gần bạn và đúng khung giờ.',
+                      Localizations.of<AppLocalizations>(
+                                  context, AppLocalizations)
+                              ?.keoBoardMatchMeSub ??
+                          'Tự động gợi ý kèo hợp gu, gần bạn và đúng khung giờ.',
                       style: Theme.of(
                         context,
                       ).textTheme.bodySmall?.copyWith(color: AppColors.ink),

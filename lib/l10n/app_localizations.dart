@@ -1327,6 +1327,558 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open {title}'**
   String exploreOpenSemantics(String title);
+
+  /// No description provided for @keoErrorProRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You need Pro to create a keo.'**
+  String get keoErrorProRequired;
+
+  /// No description provided for @keoErrorFreeJoinLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in 1 keo. Leave it or upgrade to Pro to join more.'**
+  String get keoErrorFreeJoinLimit;
+
+  /// No description provided for @keoErrorFull.
+  ///
+  /// In en, this message translates to:
+  /// **'This keo is full.'**
+  String get keoErrorFull;
+
+  /// No description provided for @keoErrorAlreadyDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'You were declined from this keo.'**
+  String get keoErrorAlreadyDeclined;
+
+  /// No description provided for @keoErrorNotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'This keo is no longer open.'**
+  String get keoErrorNotOpen;
+
+  /// No description provided for @keoErrorBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t join this keo due to safety settings.'**
+  String get keoErrorBlocked;
+
+  /// No description provided for @keoErrorNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is needed to match a keo. Turn on Location and try again.'**
+  String get keoErrorNoLocation;
+
+  /// No description provided for @keoErrorAgeNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your age before matching a keo.'**
+  String get keoErrorAgeNotVerified;
+
+  /// No description provided for @keoErrorNoMatchableKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching keo found yet, try again later.'**
+  String get keoErrorNoMatchableKeo;
+
+  /// No description provided for @keoErrorInvalidTimeWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid time window. Pick another slot.'**
+  String get keoErrorInvalidTimeWindow;
+
+  /// No description provided for @keoErrorInvalidGroupSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid group size.'**
+  String get keoErrorInvalidGroupSize;
+
+  /// No description provided for @keoErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong, try again.'**
+  String get keoErrorGeneric;
+
+  /// No description provided for @keoModeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open · join instantly'**
+  String get keoModeOpen;
+
+  /// No description provided for @keoModeApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval needed'**
+  String get keoModeApproval;
+
+  /// No description provided for @keoCardDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} km away'**
+  String keoCardDistance(String band);
+
+  /// No description provided for @keoCardPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{filled}/{target} people'**
+  String keoCardPeople(int filled, int target);
+
+  /// No description provided for @keoBoardLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load keo list'**
+  String get keoBoardLoadError;
+
+  /// No description provided for @keoBoardEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No keo nearby yet'**
+  String get keoBoardEmptyTitle;
+
+  /// No description provided for @keoBoardEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap match-me to find a fitting keo or create your own.'**
+  String get keoBoardEmptySub;
+
+  /// No description provided for @keoCreateCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Create keo'**
+  String get keoCreateCta;
+
+  /// No description provided for @keoBoardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keo around you'**
+  String get keoBoardTitle;
+
+  /// No description provided for @keoBoardStoreTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get keoBoardStoreTooltip;
+
+  /// No description provided for @keoBoardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a singing group that fits your taste, nearby and on schedule.'**
+  String get keoBoardSubtitle;
+
+  /// No description provided for @keoBoardMatchMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Match me a group'**
+  String get keoBoardMatchMe;
+
+  /// No description provided for @keoBoardMatchMeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-suggest keo that fit your taste, location and time.'**
+  String get keoBoardMatchMeSub;
+
+  /// No description provided for @keoSharedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared keo'**
+  String get keoSharedTitle;
+
+  /// No description provided for @keoSharedLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the keo'**
+  String get keoSharedLoadError;
+
+  /// No description provided for @keoSharedNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Keo not found'**
+  String get keoSharedNotFound;
+
+  /// No description provided for @keoSharedNotFoundSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The link is wrong or the keo was deleted.'**
+  String get keoSharedNotFoundSub;
+
+  /// No description provided for @keoSharedExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Link expired'**
+  String get keoSharedExpired;
+
+  /// No description provided for @keoSharedSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'{filled}/{target} seats'**
+  String keoSharedSeats(int filled, int target);
+
+  /// No description provided for @keoSharedHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Host: {name}'**
+  String keoSharedHost(String name);
+
+  /// No description provided for @keoSharedAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get keoSharedAnonymous;
+
+  /// No description provided for @keoSharedJoinCta.
+  ///
+  /// In en, this message translates to:
+  /// **'View keo & ask to join'**
+  String get keoSharedJoinCta;
+
+  /// No description provided for @keoSharedLoginCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to ask to join'**
+  String get keoSharedLoginCta;
+
+  /// No description provided for @keoStatusConfirmedMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get keoStatusConfirmedMember;
+
+  /// No description provided for @keoStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get keoStatusApproved;
+
+  /// No description provided for @keoStatusRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get keoStatusRequested;
+
+  /// No description provided for @keoStatusLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get keoStatusLeft;
+
+  /// No description provided for @keoStatusDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get keoStatusDeclined;
+
+  /// No description provided for @keoDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keo details'**
+  String get keoDetailTitle;
+
+  /// No description provided for @keoDetailShareTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share keo'**
+  String get keoDetailShareTooltip;
+
+  /// No description provided for @keoDetailShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Keo \"{title}\" is looking for singers — join on Cùng Hát: {link}'**
+  String keoDetailShareMessage(String title, String link);
+
+  /// No description provided for @keoDetailShareError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the link, try again.'**
+  String get keoDetailShareError;
+
+  /// No description provided for @keoDetailMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get keoDetailMembers;
+
+  /// No description provided for @keoDetailApproveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t approve'**
+  String get keoDetailApproveError;
+
+  /// No description provided for @keoDetailDeclineError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t decline'**
+  String get keoDetailDeclineError;
+
+  /// No description provided for @keoDetailConfirmError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t confirm'**
+  String get keoDetailConfirmError;
+
+  /// No description provided for @keoDetailLeaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t leave the keo'**
+  String get keoDetailLeaveError;
+
+  /// No description provided for @keoDetailMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people in this keo'**
+  String keoDetailMemberCount(int count);
+
+  /// No description provided for @keoDetailHostChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get keoDetailHostChip;
+
+  /// No description provided for @keoDetailApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get keoDetailApprove;
+
+  /// No description provided for @keoDetailDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get keoDetailDecline;
+
+  /// No description provided for @keoDetailRequestJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to join'**
+  String get keoDetailRequestJoin;
+
+  /// No description provided for @keoDetailConfirmJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm joining'**
+  String get keoDetailConfirmJoin;
+
+  /// No description provided for @keoDetailConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining confirmed'**
+  String get keoDetailConfirmed;
+
+  /// No description provided for @keoDetailOpenChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Open group chat'**
+  String get keoDetailOpenChat;
+
+  /// No description provided for @keoDetailPickVenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the venue'**
+  String get keoDetailPickVenue;
+
+  /// No description provided for @keoDetailViewPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'View plan'**
+  String get keoDetailViewPlan;
+
+  /// No description provided for @keoDetailLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave keo'**
+  String get keoDetailLeave;
+
+  /// No description provided for @keoCreatePick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick'**
+  String get keoCreatePick;
+
+  /// No description provided for @keoCreateNameMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a keo name'**
+  String get keoCreateNameMissing;
+
+  /// No description provided for @keoCreateTimeMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick start and end times'**
+  String get keoCreateTimeMissing;
+
+  /// No description provided for @keoCreateTimeOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be after start time'**
+  String get keoCreateTimeOrder;
+
+  /// No description provided for @keoCreateNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get your location. Turn on Location and try again.'**
+  String get keoCreateNoLocation;
+
+  /// No description provided for @keoCreateHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite a group to sing'**
+  String get keoCreateHeadline;
+
+  /// No description provided for @keoCreateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the time, music taste and how members join.'**
+  String get keoCreateSubtitle;
+
+  /// No description provided for @keoCreateNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keo name'**
+  String get keoCreateNameLabel;
+
+  /// No description provided for @keoCreateNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'V-Pop tonight'**
+  String get keoCreateNameHint;
+
+  /// No description provided for @keoCreateAreaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get keoCreateAreaLabel;
+
+  /// No description provided for @keoCreateAreaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'District 1, Ho Chi Minh City'**
+  String get keoCreateAreaHint;
+
+  /// No description provided for @keoCreateVenueLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the venue after creating'**
+  String get keoCreateVenueLater;
+
+  /// No description provided for @keoCreateVenueLaterSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The host picks the venue on the Plan screen.'**
+  String get keoCreateVenueLaterSub;
+
+  /// No description provided for @keoCreateStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start: {time}'**
+  String keoCreateStart(String time);
+
+  /// No description provided for @keoCreateEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End: {time}'**
+  String keoCreateEnd(String time);
+
+  /// No description provided for @keoCreateSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Group size'**
+  String get keoCreateSize;
+
+  /// No description provided for @keoCreateSizeN.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} people'**
+  String keoCreateSizeN(int n);
+
+  /// No description provided for @keoCreateGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get keoCreateGenres;
+
+  /// No description provided for @keoCreateGenresError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load genres'**
+  String get keoCreateGenresError;
+
+  /// No description provided for @keoCreateJoinMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Join mode'**
+  String get keoCreateJoinMode;
+
+  /// No description provided for @keoCreateModeApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval'**
+  String get keoCreateModeApproval;
+
+  /// No description provided for @keoCreateModeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get keoCreateModeOpen;
+
+  /// No description provided for @keoMatchNoneFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching keo found yet. Try again later.'**
+  String get keoMatchNoneFound;
+
+  /// No description provided for @keoMatchExistingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A keo that fits you'**
+  String get keoMatchExistingTitle;
+
+  /// No description provided for @keoMatchNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Found a matching group'**
+  String get keoMatchNewTitle;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// No description provided for @keoMatchReasonSharedGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared taste'**
+  String get keoMatchReasonSharedGenres;
+
+  /// No description provided for @keoMatchReasonNearYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Near you'**
+  String get keoMatchReasonNearYou;
+
+  /// No description provided for @keoMatchReasonEveningSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Great time slot'**
+  String get keoMatchReasonEveningSlot;
+
+  /// No description provided for @keoMatchReasonOpenJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant join'**
+  String get keoMatchReasonOpenJoin;
+
+  /// No description provided for @keoMatchReasonAvailableSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Seats left'**
+  String get keoMatchReasonAvailableSlots;
+
+  /// No description provided for @keoMatchReasonActiveHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Host online'**
+  String get keoMatchReasonActiveHost;
 }
 
 class _AppLocalizationsDelegate

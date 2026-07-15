@@ -673,4 +673,307 @@ class AppLocalizationsVi extends AppLocalizations {
   String exploreOpenSemantics(String title) {
     return 'Mở $title';
   }
+
+  @override
+  String get keoErrorProRequired => 'Cần gói Pro để tạo kèo.';
+
+  @override
+  String get keoErrorFreeJoinLimit =>
+      'Bạn đang tham gia 1 kèo. Rời kèo cũ hoặc nâng cấp Pro để tham gia thêm.';
+
+  @override
+  String get keoErrorFull => 'Kèo đã đầy.';
+
+  @override
+  String get keoErrorAlreadyDeclined => 'Bạn đã bị từ chối ở kèo này.';
+
+  @override
+  String get keoErrorNotOpen => 'Kèo không còn mở.';
+
+  @override
+  String get keoErrorBlocked => 'Không thể vào kèo này vì cài đặt an toàn.';
+
+  @override
+  String get keoErrorNoLocation =>
+      'Cần bật vị trí để ghép kèo. Hãy bật Location rồi thử lại.';
+
+  @override
+  String get keoErrorAgeNotVerified => 'Cần xác minh tuổi trước khi ghép kèo.';
+
+  @override
+  String get keoErrorNoMatchableKeo =>
+      'Chưa tìm được kèo phù hợp, thử lại sau.';
+
+  @override
+  String get keoErrorInvalidTimeWindow =>
+      'Giờ hẹn không hợp lệ. Hãy chọn khung giờ khác.';
+
+  @override
+  String get keoErrorInvalidGroupSize => 'Số người trong kèo không hợp lệ.';
+
+  @override
+  String get keoErrorGeneric => 'Có lỗi xảy ra, thử lại.';
+
+  @override
+  String get keoModeOpen => 'Mở · vào là tham gia';
+
+  @override
+  String get keoModeApproval => 'Cần duyệt';
+
+  @override
+  String keoCardDistance(String band) {
+    return 'cách $band km';
+  }
+
+  @override
+  String keoCardPeople(int filled, int target) {
+    return '$filled/$target người';
+  }
+
+  @override
+  String get keoBoardLoadError => 'Không tải được danh sách kèo';
+
+  @override
+  String get keoBoardEmptyTitle => 'Chưa có kèo quanh đây';
+
+  @override
+  String get keoBoardEmptySub =>
+      'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.';
+
+  @override
+  String get keoCreateCta => 'Tạo kèo';
+
+  @override
+  String get keoBoardTitle => 'Kèo quanh bạn';
+
+  @override
+  String get keoBoardStoreTooltip => 'Cửa hàng';
+
+  @override
+  String get keoBoardSubtitle =>
+      'Tìm nhóm đi hát hợp gu, gần bạn và có lịch phù hợp.';
+
+  @override
+  String get keoBoardMatchMe => 'Ghép nhóm cho tôi';
+
+  @override
+  String get keoBoardMatchMeSub =>
+      'Tự động gợi ý kèo hợp gu, gần bạn và đúng khung giờ.';
+
+  @override
+  String get keoSharedTitle => 'Kèo được chia sẻ';
+
+  @override
+  String get keoSharedLoadError => 'Không tải được kèo';
+
+  @override
+  String get keoSharedNotFound => 'Không tìm thấy kèo';
+
+  @override
+  String get keoSharedNotFoundSub => 'Link không đúng hoặc kèo đã bị xoá.';
+
+  @override
+  String get keoSharedExpired => 'Link đã hết hạn';
+
+  @override
+  String keoSharedSeats(int filled, int target) {
+    return '$filled/$target chỗ';
+  }
+
+  @override
+  String keoSharedHost(String name) {
+    return 'Host: $name';
+  }
+
+  @override
+  String get keoSharedAnonymous => 'Ẩn danh';
+
+  @override
+  String get keoSharedJoinCta => 'Xem kèo & xin vào';
+
+  @override
+  String get keoSharedLoginCta => 'Đăng nhập để xin vào';
+
+  @override
+  String get keoStatusConfirmedMember => 'Đã xác nhận';
+
+  @override
+  String get keoStatusApproved => 'Đã duyệt';
+
+  @override
+  String get keoStatusRequested => 'Chờ duyệt';
+
+  @override
+  String get keoStatusLeft => 'Đã rời';
+
+  @override
+  String get keoStatusDeclined => 'Bị từ chối';
+
+  @override
+  String get keoDetailTitle => 'Chi tiết kèo';
+
+  @override
+  String get keoDetailShareTooltip => 'Chia sẻ kèo';
+
+  @override
+  String keoDetailShareMessage(String title, String link) {
+    return 'Kèo \"$title\" đang tuyển giọng ca — vào Cùng Hát xin một chỗ: $link';
+  }
+
+  @override
+  String get keoDetailShareError => 'Không tạo được link, thử lại.';
+
+  @override
+  String get keoDetailMembers => 'Thành viên';
+
+  @override
+  String get keoDetailApproveError => 'Không duyệt được';
+
+  @override
+  String get keoDetailDeclineError => 'Không từ chối được';
+
+  @override
+  String get keoDetailConfirmError => 'Không xác nhận được';
+
+  @override
+  String get keoDetailLeaveError => 'Không rời kèo được';
+
+  @override
+  String keoDetailMemberCount(int count) {
+    return '$count người trong kèo';
+  }
+
+  @override
+  String get keoDetailHostChip => 'Chủ kèo';
+
+  @override
+  String get keoDetailApprove => 'Duyệt';
+
+  @override
+  String get keoDetailDecline => 'Từ chối';
+
+  @override
+  String get keoDetailRequestJoin => 'Xin vào kèo';
+
+  @override
+  String get keoDetailConfirmJoin => 'Đồng ý tham gia';
+
+  @override
+  String get keoDetailConfirmed => 'Đã xác nhận tham gia';
+
+  @override
+  String get keoDetailOpenChat => 'Mở chat nhóm';
+
+  @override
+  String get keoDetailPickVenue => 'Chốt quán';
+
+  @override
+  String get keoDetailViewPlan => 'Xem kế hoạch';
+
+  @override
+  String get keoDetailLeave => 'Rời kèo';
+
+  @override
+  String get keoCreatePick => 'Chọn';
+
+  @override
+  String get keoCreateNameMissing => 'Nhập tên kèo';
+
+  @override
+  String get keoCreateTimeMissing => 'Chọn giờ bắt đầu và kết thúc';
+
+  @override
+  String get keoCreateTimeOrder => 'Giờ kết thúc phải sau giờ bắt đầu';
+
+  @override
+  String get keoCreateNoLocation =>
+      'Không lấy được vị trí. Bật Location trên emulator rồi thử lại.';
+
+  @override
+  String get keoCreateHeadline => 'Rủ một nhóm đi hát';
+
+  @override
+  String get keoCreateSubtitle =>
+      'Chọn thời gian, gu nhạc và cách duyệt thành viên.';
+
+  @override
+  String get keoCreateNameLabel => 'Tên kèo';
+
+  @override
+  String get keoCreateNameHint => 'V-Pop tối nay';
+
+  @override
+  String get keoCreateAreaLabel => 'Khu vực';
+
+  @override
+  String get keoCreateAreaHint => 'Quận 1, Hồ Chí Minh';
+
+  @override
+  String get keoCreateVenueLater => 'Chọn quán sau khi tạo kèo';
+
+  @override
+  String get keoCreateVenueLaterSub => 'Chủ kèo sẽ chốt quán ở màn Kế hoạch.';
+
+  @override
+  String keoCreateStart(String time) {
+    return 'Bắt đầu: $time';
+  }
+
+  @override
+  String keoCreateEnd(String time) {
+    return 'Kết thúc: $time';
+  }
+
+  @override
+  String get keoCreateSize => 'Số người';
+
+  @override
+  String keoCreateSizeN(int n) {
+    return '$n người';
+  }
+
+  @override
+  String get keoCreateGenres => 'Thể loại';
+
+  @override
+  String get keoCreateGenresError => 'Không tải được thể loại';
+
+  @override
+  String get keoCreateJoinMode => 'Chế độ tham gia';
+
+  @override
+  String get keoCreateModeApproval => 'Cần duyệt';
+
+  @override
+  String get keoCreateModeOpen => 'Mở';
+
+  @override
+  String get keoMatchNoneFound => 'Chưa tìm được kèo phù hợp. Thử lại sau.';
+
+  @override
+  String get keoMatchExistingTitle => 'Kèo hợp với bạn';
+
+  @override
+  String get keoMatchNewTitle => 'Đã tìm thấy nhóm phù hợp';
+
+  @override
+  String get commonClose => 'Đóng';
+
+  @override
+  String get keoMatchReasonSharedGenres => 'Hợp gu nhạc';
+
+  @override
+  String get keoMatchReasonNearYou => 'Gần bạn';
+
+  @override
+  String get keoMatchReasonEveningSlot => 'Giờ đẹp';
+
+  @override
+  String get keoMatchReasonOpenJoin => 'Vào nhanh';
+
+  @override
+  String get keoMatchReasonAvailableSlots => 'Còn chỗ';
+
+  @override
+  String get keoMatchReasonActiveHost => 'Chủ kèo đang online';
 }

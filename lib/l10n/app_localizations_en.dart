@@ -674,4 +674,310 @@ class AppLocalizationsEn extends AppLocalizations {
   String exploreOpenSemantics(String title) {
     return 'Open $title';
   }
+
+  @override
+  String get keoErrorProRequired => 'You need Pro to create a keo.';
+
+  @override
+  String get keoErrorFreeJoinLimit =>
+      'You\'re already in 1 keo. Leave it or upgrade to Pro to join more.';
+
+  @override
+  String get keoErrorFull => 'This keo is full.';
+
+  @override
+  String get keoErrorAlreadyDeclined => 'You were declined from this keo.';
+
+  @override
+  String get keoErrorNotOpen => 'This keo is no longer open.';
+
+  @override
+  String get keoErrorBlocked =>
+      'You can\'t join this keo due to safety settings.';
+
+  @override
+  String get keoErrorNoLocation =>
+      'Location is needed to match a keo. Turn on Location and try again.';
+
+  @override
+  String get keoErrorAgeNotVerified => 'Verify your age before matching a keo.';
+
+  @override
+  String get keoErrorNoMatchableKeo =>
+      'No matching keo found yet, try again later.';
+
+  @override
+  String get keoErrorInvalidTimeWindow =>
+      'Invalid time window. Pick another slot.';
+
+  @override
+  String get keoErrorInvalidGroupSize => 'Invalid group size.';
+
+  @override
+  String get keoErrorGeneric => 'Something went wrong, try again.';
+
+  @override
+  String get keoModeOpen => 'Open · join instantly';
+
+  @override
+  String get keoModeApproval => 'Approval needed';
+
+  @override
+  String keoCardDistance(String band) {
+    return '$band km away';
+  }
+
+  @override
+  String keoCardPeople(int filled, int target) {
+    return '$filled/$target people';
+  }
+
+  @override
+  String get keoBoardLoadError => 'Couldn\'t load keo list';
+
+  @override
+  String get keoBoardEmptyTitle => 'No keo nearby yet';
+
+  @override
+  String get keoBoardEmptySub =>
+      'Tap match-me to find a fitting keo or create your own.';
+
+  @override
+  String get keoCreateCta => 'Create keo';
+
+  @override
+  String get keoBoardTitle => 'Keo around you';
+
+  @override
+  String get keoBoardStoreTooltip => 'Store';
+
+  @override
+  String get keoBoardSubtitle =>
+      'Find a singing group that fits your taste, nearby and on schedule.';
+
+  @override
+  String get keoBoardMatchMe => 'Match me a group';
+
+  @override
+  String get keoBoardMatchMeSub =>
+      'Auto-suggest keo that fit your taste, location and time.';
+
+  @override
+  String get keoSharedTitle => 'Shared keo';
+
+  @override
+  String get keoSharedLoadError => 'Couldn\'t load the keo';
+
+  @override
+  String get keoSharedNotFound => 'Keo not found';
+
+  @override
+  String get keoSharedNotFoundSub =>
+      'The link is wrong or the keo was deleted.';
+
+  @override
+  String get keoSharedExpired => 'Link expired';
+
+  @override
+  String keoSharedSeats(int filled, int target) {
+    return '$filled/$target seats';
+  }
+
+  @override
+  String keoSharedHost(String name) {
+    return 'Host: $name';
+  }
+
+  @override
+  String get keoSharedAnonymous => 'Anonymous';
+
+  @override
+  String get keoSharedJoinCta => 'View keo & ask to join';
+
+  @override
+  String get keoSharedLoginCta => 'Sign in to ask to join';
+
+  @override
+  String get keoStatusConfirmedMember => 'Confirmed';
+
+  @override
+  String get keoStatusApproved => 'Approved';
+
+  @override
+  String get keoStatusRequested => 'Pending';
+
+  @override
+  String get keoStatusLeft => 'Left';
+
+  @override
+  String get keoStatusDeclined => 'Declined';
+
+  @override
+  String get keoDetailTitle => 'Keo details';
+
+  @override
+  String get keoDetailShareTooltip => 'Share keo';
+
+  @override
+  String keoDetailShareMessage(String title, String link) {
+    return 'Keo \"$title\" is looking for singers — join on Cùng Hát: $link';
+  }
+
+  @override
+  String get keoDetailShareError => 'Couldn\'t create the link, try again.';
+
+  @override
+  String get keoDetailMembers => 'Members';
+
+  @override
+  String get keoDetailApproveError => 'Couldn\'t approve';
+
+  @override
+  String get keoDetailDeclineError => 'Couldn\'t decline';
+
+  @override
+  String get keoDetailConfirmError => 'Couldn\'t confirm';
+
+  @override
+  String get keoDetailLeaveError => 'Couldn\'t leave the keo';
+
+  @override
+  String keoDetailMemberCount(int count) {
+    return '$count people in this keo';
+  }
+
+  @override
+  String get keoDetailHostChip => 'Host';
+
+  @override
+  String get keoDetailApprove => 'Approve';
+
+  @override
+  String get keoDetailDecline => 'Decline';
+
+  @override
+  String get keoDetailRequestJoin => 'Ask to join';
+
+  @override
+  String get keoDetailConfirmJoin => 'Confirm joining';
+
+  @override
+  String get keoDetailConfirmed => 'Joining confirmed';
+
+  @override
+  String get keoDetailOpenChat => 'Open group chat';
+
+  @override
+  String get keoDetailPickVenue => 'Pick the venue';
+
+  @override
+  String get keoDetailViewPlan => 'View plan';
+
+  @override
+  String get keoDetailLeave => 'Leave keo';
+
+  @override
+  String get keoCreatePick => 'Pick';
+
+  @override
+  String get keoCreateNameMissing => 'Enter a keo name';
+
+  @override
+  String get keoCreateTimeMissing => 'Pick start and end times';
+
+  @override
+  String get keoCreateTimeOrder => 'End time must be after start time';
+
+  @override
+  String get keoCreateNoLocation =>
+      'Couldn\'t get your location. Turn on Location and try again.';
+
+  @override
+  String get keoCreateHeadline => 'Invite a group to sing';
+
+  @override
+  String get keoCreateSubtitle =>
+      'Pick the time, music taste and how members join.';
+
+  @override
+  String get keoCreateNameLabel => 'Keo name';
+
+  @override
+  String get keoCreateNameHint => 'V-Pop tonight';
+
+  @override
+  String get keoCreateAreaLabel => 'Area';
+
+  @override
+  String get keoCreateAreaHint => 'District 1, Ho Chi Minh City';
+
+  @override
+  String get keoCreateVenueLater => 'Pick the venue after creating';
+
+  @override
+  String get keoCreateVenueLaterSub =>
+      'The host picks the venue on the Plan screen.';
+
+  @override
+  String keoCreateStart(String time) {
+    return 'Start: $time';
+  }
+
+  @override
+  String keoCreateEnd(String time) {
+    return 'End: $time';
+  }
+
+  @override
+  String get keoCreateSize => 'Group size';
+
+  @override
+  String keoCreateSizeN(int n) {
+    return '$n people';
+  }
+
+  @override
+  String get keoCreateGenres => 'Genres';
+
+  @override
+  String get keoCreateGenresError => 'Couldn\'t load genres';
+
+  @override
+  String get keoCreateJoinMode => 'Join mode';
+
+  @override
+  String get keoCreateModeApproval => 'Approval';
+
+  @override
+  String get keoCreateModeOpen => 'Open';
+
+  @override
+  String get keoMatchNoneFound => 'No matching keo found yet. Try again later.';
+
+  @override
+  String get keoMatchExistingTitle => 'A keo that fits you';
+
+  @override
+  String get keoMatchNewTitle => 'Found a matching group';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get keoMatchReasonSharedGenres => 'Shared taste';
+
+  @override
+  String get keoMatchReasonNearYou => 'Near you';
+
+  @override
+  String get keoMatchReasonEveningSlot => 'Great time slot';
+
+  @override
+  String get keoMatchReasonOpenJoin => 'Instant join';
+
+  @override
+  String get keoMatchReasonAvailableSlots => 'Seats left';
+
+  @override
+  String get keoMatchReasonActiveHost => 'Host online';
 }
