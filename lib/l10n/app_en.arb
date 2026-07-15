@@ -112,5 +112,55 @@
       }
     }
   },
-  "discoveryExploreBrand": "CÙNG HÁT"
+  "discoveryExploreBrand": "CÙNG HÁT",
+  "tabChat": "Chat",
+  "tabProfile": "Profile",
+  "shellTileLikes": "Who liked you",
+  "shellTileLikesSub": "See everyone who sent you a heart",
+  "shellTileUpgradeSub": "Pro, keo boosts and advanced filters",
+  "shellTilePhotos": "Profile photos",
+  "shellTilePhotosSub": "Add up to 6 photos to your profile",
+  "shellTilePrompts": "Prompt cards",
+  "shellTilePromptsSub": "Pick up to 3 prompts to spark conversations",
+  "shellTileSettingsSub": "Privacy, data and legal",
+  "shellProfileSub": "Manage likes, upgrades and settings.",
+  "completionPercent": "Profile {percent}% complete",
+  "@completionPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "completionAddPhoto": "Add your first photo → get seen way more",
+  "completionThreePhotos": "3 photos → 2x more views",
+  "completionWriteBio": "Write a bio → +25% matches",
+  "completionPickGenres": "Pick 3 genres → sharper suggestions",
+  "completionAddArtist": "Add a favourite artist",
+  "completionAddBaitu": "Add 3 go-to songs → easier to join a keo",
+  "completionAnswerPrompts": "Answer 2 prompts → instant icebreakers",
+  "upsellCta": "Upgrade to Pro",
+  "upsellLater": "Maybe later",
+  "upsellAllProPerks": "Plus every other Pro perk",
+  "upsellBoostTitle": "Boost your profile",
+  "upsellBoostB1": "One 30-minute Boost every day",
+  "upsellBoostB2": "Jump to the top of nearby decks",
+  "upsellRewindTitle": "Rewind your swipe",
+  "upsellRewindB1": "Passed by mistake? Undo your last swipe",
+  "upsellRewindB2": "Unlimited rewinds",
+  "upsellSeeLikesTitle": "See who liked you",
+  "upsellSeeLikesB1": "Unlock the list of people who liked you",
+  "upsellSeeLikesB2": "Match instantly — no lucky swipe needed",
+  "upsellKeoCreateTitle": "Create your own keo",
+  "upsellKeoCreateB1": "Host it your way: venue, time, members",
+  "upsellKeoCreateB2": "Open or approval-only — you decide",
+  "upsellKeoJoinTitle": "Join multiple keo at once",
+  "upsellKeoJoinB1": "Free accounts get 1 active keo",
+  "upsellKeoJoinB2": "Pro joins unlimited keo",
+  "upsellLikeQuotaTitle": "Out of likes for today",
+  "upsellLikeQuotaB1": "Pro gets unlimited daily likes",
+  "upsellLikeQuotaB2": "5 Super Likes every day",
+  "upsellSuperQuotaTitle": "Out of Super Likes for today",
+  "upsellSuperQuotaB1": "Pro gets 5 Super Likes a day",
+  "upsellSuperQuotaB2": "Super Likes make you 3x more visible"
 }

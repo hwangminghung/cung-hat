@@ -607,6 +607,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CÙNG HÁT'**
   String get discoveryExploreBrand;
+
+  /// No description provided for @tabChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get tabChat;
+
+  /// No description provided for @tabProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get tabProfile;
+
+  /// No description provided for @shellTileLikes.
+  ///
+  /// In en, this message translates to:
+  /// **'Who liked you'**
+  String get shellTileLikes;
+
+  /// No description provided for @shellTileLikesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'See everyone who sent you a heart'**
+  String get shellTileLikesSub;
+
+  /// No description provided for @shellTileUpgradeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro, keo boosts and advanced filters'**
+  String get shellTileUpgradeSub;
+
+  /// No description provided for @shellTilePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photos'**
+  String get shellTilePhotos;
+
+  /// No description provided for @shellTilePhotosSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add up to 6 photos to your profile'**
+  String get shellTilePhotosSub;
+
+  /// No description provided for @shellTilePrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt cards'**
+  String get shellTilePrompts;
+
+  /// No description provided for @shellTilePromptsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up to 3 prompts to spark conversations'**
+  String get shellTilePromptsSub;
+
+  /// No description provided for @shellTileSettingsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy, data and legal'**
+  String get shellTileSettingsSub;
+
+  /// No description provided for @shellProfileSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage likes, upgrades and settings.'**
+  String get shellProfileSub;
+
+  /// No description provided for @completionPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile {percent}% complete'**
+  String completionPercent(int percent);
+
+  /// No description provided for @completionAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first photo → get seen way more'**
+  String get completionAddPhoto;
+
+  /// No description provided for @completionThreePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'3 photos → 2x more views'**
+  String get completionThreePhotos;
+
+  /// No description provided for @completionWriteBio.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a bio → +25% matches'**
+  String get completionWriteBio;
+
+  /// No description provided for @completionPickGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick 3 genres → sharper suggestions'**
+  String get completionPickGenres;
+
+  /// No description provided for @completionAddArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a favourite artist'**
+  String get completionAddArtist;
+
+  /// No description provided for @completionAddBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'Add 3 go-to songs → easier to join a keo'**
+  String get completionAddBaitu;
+
+  /// No description provided for @completionAnswerPrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer 2 prompts → instant icebreakers'**
+  String get completionAnswerPrompts;
+
+  /// No description provided for @upsellCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro'**
+  String get upsellCta;
+
+  /// No description provided for @upsellLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get upsellLater;
+
+  /// No description provided for @upsellAllProPerks.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus every other Pro perk'**
+  String get upsellAllProPerks;
+
+  /// No description provided for @upsellBoostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost your profile'**
+  String get upsellBoostTitle;
+
+  /// No description provided for @upsellBoostB1.
+  ///
+  /// In en, this message translates to:
+  /// **'One 30-minute Boost every day'**
+  String get upsellBoostB1;
+
+  /// No description provided for @upsellBoostB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to the top of nearby decks'**
+  String get upsellBoostB2;
+
+  /// No description provided for @upsellRewindTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewind your swipe'**
+  String get upsellRewindTitle;
+
+  /// No description provided for @upsellRewindB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed by mistake? Undo your last swipe'**
+  String get upsellRewindB1;
+
+  /// No description provided for @upsellRewindB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited rewinds'**
+  String get upsellRewindB2;
+
+  /// No description provided for @upsellSeeLikesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See who liked you'**
+  String get upsellSeeLikesTitle;
+
+  /// No description provided for @upsellSeeLikesB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the list of people who liked you'**
+  String get upsellSeeLikesB1;
+
+  /// No description provided for @upsellSeeLikesB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Match instantly — no lucky swipe needed'**
+  String get upsellSeeLikesB2;
+
+  /// No description provided for @upsellKeoCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your own keo'**
+  String get upsellKeoCreateTitle;
+
+  /// No description provided for @upsellKeoCreateB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Host it your way: venue, time, members'**
+  String get upsellKeoCreateB1;
+
+  /// No description provided for @upsellKeoCreateB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Open or approval-only — you decide'**
+  String get upsellKeoCreateB2;
+
+  /// No description provided for @upsellKeoJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join multiple keo at once'**
+  String get upsellKeoJoinTitle;
+
+  /// No description provided for @upsellKeoJoinB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Free accounts get 1 active keo'**
+  String get upsellKeoJoinB1;
+
+  /// No description provided for @upsellKeoJoinB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro joins unlimited keo'**
+  String get upsellKeoJoinB2;
+
+  /// No description provided for @upsellLikeQuotaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of likes for today'**
+  String get upsellLikeQuotaTitle;
+
+  /// No description provided for @upsellLikeQuotaB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro gets unlimited daily likes'**
+  String get upsellLikeQuotaB1;
+
+  /// No description provided for @upsellLikeQuotaB2.
+  ///
+  /// In en, this message translates to:
+  /// **'5 Super Likes every day'**
+  String get upsellLikeQuotaB2;
+
+  /// No description provided for @upsellSuperQuotaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Super Likes for today'**
+  String get upsellSuperQuotaTitle;
+
+  /// No description provided for @upsellSuperQuotaB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro gets 5 Super Likes a day'**
+  String get upsellSuperQuotaB1;
+
+  /// No description provided for @upsellSuperQuotaB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Likes make you 3x more visible'**
+  String get upsellSuperQuotaB2;
 }
 
 class _AppLocalizationsDelegate

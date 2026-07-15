@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Paywall theo ngữ cảnh: mỗi tính năng bị chặn mở đúng biến thể của nó
 /// (học Tinder — headline khớp tính năng vừa bấm). KHÔNG hiện số giá ở đây:
@@ -24,71 +25,83 @@ class _VariantData {
   final List<String> bullets;
 }
 
-const _variantData = <ProUpsellVariant, _VariantData>{
-  ProUpsellVariant.boost: _VariantData(
-    Icons.bolt_rounded,
-    'Boost hồ sơ của bạn',
-    [
-      '1 lần Boost 30 phút mỗi ngày',
-      'Lên đầu deck của mọi người quanh đây',
-      'Kèm mọi quyền lợi Pro khác',
-    ],
-  ),
-  ProUpsellVariant.rewind: _VariantData(
-    Icons.replay_rounded,
-    'Rút lại lượt vuốt',
-    [
-      'Lỡ tay bỏ qua? Rút lại ngay lượt gần nhất',
-      'Không giới hạn số lần rút lại',
-      'Kèm mọi quyền lợi Pro khác',
-    ],
-  ),
-  ProUpsellVariant.seeLikes: _VariantData(
-    Icons.favorite_rounded,
-    'Xem ai đã thích bạn',
-    [
-      'Mở danh sách người đã thả tim bạn',
-      'Match ngay không cần vuốt trúng',
-      'Kèm mọi quyền lợi Pro khác',
-    ],
-  ),
-  ProUpsellVariant.keoCreate: _VariantData(
-    Icons.mic_external_on_rounded,
-    'Tự tạo kèo của riêng bạn',
-    [
-      'Làm chủ kèo: chọn quán, giờ, thành viên',
-      'Kèo mở hoặc cần duyệt — bạn quyết',
-      'Kèm mọi quyền lợi Pro khác',
-    ],
-  ),
-  ProUpsellVariant.keoJoinLimit: _VariantData(
-    Icons.groups_rounded,
-    'Tham gia nhiều kèo cùng lúc',
-    [
-      'Miễn phí chỉ được 1 kèo đang hoạt động',
-      'Pro tham gia không giới hạn kèo',
-      'Kèm mọi quyền lợi Pro khác',
-    ],
-  ),
-  ProUpsellVariant.likeQuota: _VariantData(
-    Icons.favorite_border_rounded,
-    'Hết lượt thích hôm nay',
-    [
-      'Pro thích không giới hạn mỗi ngày',
-      '5 Siêu thích mỗi ngày',
-      'Kèm mọi quyền lợi Pro khác',
-    ],
-  ),
-  ProUpsellVariant.superQuota: _VariantData(
-    Icons.star_rounded,
-    'Hết lượt Siêu thích hôm nay',
-    [
-      'Pro có 5 Siêu thích mỗi ngày',
-      'Siêu thích giúp bạn nổi bật gấp 3 lần',
-      'Kèm mọi quyền lợi Pro khác',
-    ],
-  ),
-};
+/// [L10N] Copy theo variant qua l10n (fallback VI khi test pump không
+/// delegates); icon giữ trong switch để 1 nguồn sự thật cho từng variant.
+_VariantData _dataFor(ProUpsellVariant variant, AppLocalizations? l) {
+  final perks = l?.upsellAllProPerks ?? 'Kèm mọi quyền lợi Pro khác';
+  switch (variant) {
+    case ProUpsellVariant.boost:
+      return _VariantData(
+        Icons.bolt_rounded,
+        l?.upsellBoostTitle ?? 'Boost hồ sơ của bạn',
+        [
+          l?.upsellBoostB1 ?? '1 lần Boost 30 phút mỗi ngày',
+          l?.upsellBoostB2 ?? 'Lên đầu deck của mọi người quanh đây',
+          perks,
+        ],
+      );
+    case ProUpsellVariant.rewind:
+      return _VariantData(
+        Icons.replay_rounded,
+        l?.upsellRewindTitle ?? 'Rút lại lượt vuốt',
+        [
+          l?.upsellRewindB1 ?? 'Lỡ tay bỏ qua? Rút lại ngay lượt gần nhất',
+          l?.upsellRewindB2 ?? 'Không giới hạn số lần rút lại',
+          perks,
+        ],
+      );
+    case ProUpsellVariant.seeLikes:
+      return _VariantData(
+        Icons.favorite_rounded,
+        l?.upsellSeeLikesTitle ?? 'Xem ai đã thích bạn',
+        [
+          l?.upsellSeeLikesB1 ?? 'Mở danh sách người đã thả tim bạn',
+          l?.upsellSeeLikesB2 ?? 'Match ngay không cần vuốt trúng',
+          perks,
+        ],
+      );
+    case ProUpsellVariant.keoCreate:
+      return _VariantData(
+        Icons.mic_external_on_rounded,
+        l?.upsellKeoCreateTitle ?? 'Tự tạo kèo của riêng bạn',
+        [
+          l?.upsellKeoCreateB1 ?? 'Làm chủ kèo: chọn quán, giờ, thành viên',
+          l?.upsellKeoCreateB2 ?? 'Kèo mở hoặc cần duyệt — bạn quyết',
+          perks,
+        ],
+      );
+    case ProUpsellVariant.keoJoinLimit:
+      return _VariantData(
+        Icons.groups_rounded,
+        l?.upsellKeoJoinTitle ?? 'Tham gia nhiều kèo cùng lúc',
+        [
+          l?.upsellKeoJoinB1 ?? 'Miễn phí chỉ được 1 kèo đang hoạt động',
+          l?.upsellKeoJoinB2 ?? 'Pro tham gia không giới hạn kèo',
+          perks,
+        ],
+      );
+    case ProUpsellVariant.likeQuota:
+      return _VariantData(
+        Icons.favorite_border_rounded,
+        l?.upsellLikeQuotaTitle ?? 'Hết lượt thích hôm nay',
+        [
+          l?.upsellLikeQuotaB1 ?? 'Pro thích không giới hạn mỗi ngày',
+          l?.upsellLikeQuotaB2 ?? '5 Siêu thích mỗi ngày',
+          perks,
+        ],
+      );
+    case ProUpsellVariant.superQuota:
+      return _VariantData(
+        Icons.star_rounded,
+        l?.upsellSuperQuotaTitle ?? 'Hết lượt Siêu thích hôm nay',
+        [
+          l?.upsellSuperQuotaB1 ?? 'Pro có 5 Siêu thích mỗi ngày',
+          l?.upsellSuperQuotaB2 ?? 'Siêu thích giúp bạn nổi bật gấp 3 lần',
+          perks,
+        ],
+      );
+  }
+}
 
 /// Bottom sheet mời nâng cấp Pro — dùng chung cho mọi gate ở Kèo và Đôi.
 class ProUpsellSheet extends StatelessWidget {
@@ -108,7 +121,8 @@ class ProUpsellSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = _variantData[variant]!;
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final data = _dataFor(variant, l10n);
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
@@ -168,11 +182,11 @@ class ProUpsellSheet extends StatelessWidget {
                   context.push('/store');
                 },
                 icon: const Icon(Icons.workspace_premium_rounded),
-                label: const Text('Nâng cấp Pro'),
+                label: Text(l10n?.upsellCta ?? 'Nâng cấp Pro'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Để sau'),
+                child: Text(l10n?.upsellLater ?? 'Để sau'),
               ),
             ],
           ),

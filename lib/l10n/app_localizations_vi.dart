@@ -279,4 +279,138 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get discoveryExploreBrand => 'CÙNG HÁT';
+
+  @override
+  String get tabChat => 'Chat';
+
+  @override
+  String get tabProfile => 'Hồ sơ';
+
+  @override
+  String get shellTileLikes => 'Ai đã thích bạn';
+
+  @override
+  String get shellTileLikesSub => 'Mở danh sách người đã thả tim';
+
+  @override
+  String get shellTileUpgradeSub => 'Pro, boost kèo và bộ lọc nâng cao';
+
+  @override
+  String get shellTilePhotos => 'Ảnh hồ sơ';
+
+  @override
+  String get shellTilePhotosSub => 'Thêm tối đa 6 ảnh vào hồ sơ';
+
+  @override
+  String get shellTilePrompts => 'Thẻ hỏi-đáp';
+
+  @override
+  String get shellTilePromptsSub =>
+      'Chọn tối đa 3 câu để hồ sơ có chuyện mà bắt';
+
+  @override
+  String get shellTileSettingsSub => 'Quyền riêng tư, dữ liệu và pháp lý';
+
+  @override
+  String get shellProfileSub => 'Quản lý lượt thích, gói nâng cấp và cài đặt.';
+
+  @override
+  String completionPercent(int percent) {
+    return 'Hồ sơ hoàn thiện $percent%';
+  }
+
+  @override
+  String get completionAddPhoto =>
+      'Thêm ảnh đầu tiên → được thấy nhiều hơn hẳn';
+
+  @override
+  String get completionThreePhotos => 'Đủ 3 ảnh → x2 lượt được thấy';
+
+  @override
+  String get completionWriteBio => 'Viết bio → +25% match';
+
+  @override
+  String get completionPickGenres => 'Chọn đủ 3 thể loại → gợi ý chuẩn gu hơn';
+
+  @override
+  String get completionAddArtist => 'Thêm nghệ sĩ yêu thích';
+
+  @override
+  String get completionAddBaitu => 'Thêm 3 bài tủ → dễ vào kèo hơn';
+
+  @override
+  String get completionAnswerPrompts =>
+      'Trả lời 2 thẻ hỏi-đáp → có chuyện mà bắt';
+
+  @override
+  String get upsellCta => 'Nâng cấp Pro';
+
+  @override
+  String get upsellLater => 'Để sau';
+
+  @override
+  String get upsellAllProPerks => 'Kèm mọi quyền lợi Pro khác';
+
+  @override
+  String get upsellBoostTitle => 'Boost hồ sơ của bạn';
+
+  @override
+  String get upsellBoostB1 => '1 lần Boost 30 phút mỗi ngày';
+
+  @override
+  String get upsellBoostB2 => 'Lên đầu deck của mọi người quanh đây';
+
+  @override
+  String get upsellRewindTitle => 'Rút lại lượt vuốt';
+
+  @override
+  String get upsellRewindB1 => 'Lỡ tay bỏ qua? Rút lại ngay lượt gần nhất';
+
+  @override
+  String get upsellRewindB2 => 'Không giới hạn số lần rút lại';
+
+  @override
+  String get upsellSeeLikesTitle => 'Xem ai đã thích bạn';
+
+  @override
+  String get upsellSeeLikesB1 => 'Mở danh sách người đã thả tim bạn';
+
+  @override
+  String get upsellSeeLikesB2 => 'Match ngay không cần vuốt trúng';
+
+  @override
+  String get upsellKeoCreateTitle => 'Tự tạo kèo của riêng bạn';
+
+  @override
+  String get upsellKeoCreateB1 => 'Làm chủ kèo: chọn quán, giờ, thành viên';
+
+  @override
+  String get upsellKeoCreateB2 => 'Kèo mở hoặc cần duyệt — bạn quyết';
+
+  @override
+  String get upsellKeoJoinTitle => 'Tham gia nhiều kèo cùng lúc';
+
+  @override
+  String get upsellKeoJoinB1 => 'Miễn phí chỉ được 1 kèo đang hoạt động';
+
+  @override
+  String get upsellKeoJoinB2 => 'Pro tham gia không giới hạn kèo';
+
+  @override
+  String get upsellLikeQuotaTitle => 'Hết lượt thích hôm nay';
+
+  @override
+  String get upsellLikeQuotaB1 => 'Pro thích không giới hạn mỗi ngày';
+
+  @override
+  String get upsellLikeQuotaB2 => '5 Siêu thích mỗi ngày';
+
+  @override
+  String get upsellSuperQuotaTitle => 'Hết lượt Siêu thích hôm nay';
+
+  @override
+  String get upsellSuperQuotaB1 => 'Pro có 5 Siêu thích mỗi ngày';
+
+  @override
+  String get upsellSuperQuotaB2 => 'Siêu thích giúp bạn nổi bật gấp 3 lần';
 }

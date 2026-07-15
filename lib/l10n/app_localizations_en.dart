@@ -280,4 +280,137 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoveryExploreBrand => 'CÙNG HÁT';
+
+  @override
+  String get tabChat => 'Chat';
+
+  @override
+  String get tabProfile => 'Profile';
+
+  @override
+  String get shellTileLikes => 'Who liked you';
+
+  @override
+  String get shellTileLikesSub => 'See everyone who sent you a heart';
+
+  @override
+  String get shellTileUpgradeSub => 'Pro, keo boosts and advanced filters';
+
+  @override
+  String get shellTilePhotos => 'Profile photos';
+
+  @override
+  String get shellTilePhotosSub => 'Add up to 6 photos to your profile';
+
+  @override
+  String get shellTilePrompts => 'Prompt cards';
+
+  @override
+  String get shellTilePromptsSub =>
+      'Pick up to 3 prompts to spark conversations';
+
+  @override
+  String get shellTileSettingsSub => 'Privacy, data and legal';
+
+  @override
+  String get shellProfileSub => 'Manage likes, upgrades and settings.';
+
+  @override
+  String completionPercent(int percent) {
+    return 'Profile $percent% complete';
+  }
+
+  @override
+  String get completionAddPhoto => 'Add your first photo → get seen way more';
+
+  @override
+  String get completionThreePhotos => '3 photos → 2x more views';
+
+  @override
+  String get completionWriteBio => 'Write a bio → +25% matches';
+
+  @override
+  String get completionPickGenres => 'Pick 3 genres → sharper suggestions';
+
+  @override
+  String get completionAddArtist => 'Add a favourite artist';
+
+  @override
+  String get completionAddBaitu => 'Add 3 go-to songs → easier to join a keo';
+
+  @override
+  String get completionAnswerPrompts =>
+      'Answer 2 prompts → instant icebreakers';
+
+  @override
+  String get upsellCta => 'Upgrade to Pro';
+
+  @override
+  String get upsellLater => 'Maybe later';
+
+  @override
+  String get upsellAllProPerks => 'Plus every other Pro perk';
+
+  @override
+  String get upsellBoostTitle => 'Boost your profile';
+
+  @override
+  String get upsellBoostB1 => 'One 30-minute Boost every day';
+
+  @override
+  String get upsellBoostB2 => 'Jump to the top of nearby decks';
+
+  @override
+  String get upsellRewindTitle => 'Rewind your swipe';
+
+  @override
+  String get upsellRewindB1 => 'Passed by mistake? Undo your last swipe';
+
+  @override
+  String get upsellRewindB2 => 'Unlimited rewinds';
+
+  @override
+  String get upsellSeeLikesTitle => 'See who liked you';
+
+  @override
+  String get upsellSeeLikesB1 => 'Unlock the list of people who liked you';
+
+  @override
+  String get upsellSeeLikesB2 => 'Match instantly — no lucky swipe needed';
+
+  @override
+  String get upsellKeoCreateTitle => 'Create your own keo';
+
+  @override
+  String get upsellKeoCreateB1 => 'Host it your way: venue, time, members';
+
+  @override
+  String get upsellKeoCreateB2 => 'Open or approval-only — you decide';
+
+  @override
+  String get upsellKeoJoinTitle => 'Join multiple keo at once';
+
+  @override
+  String get upsellKeoJoinB1 => 'Free accounts get 1 active keo';
+
+  @override
+  String get upsellKeoJoinB2 => 'Pro joins unlimited keo';
+
+  @override
+  String get upsellLikeQuotaTitle => 'Out of likes for today';
+
+  @override
+  String get upsellLikeQuotaB1 => 'Pro gets unlimited daily likes';
+
+  @override
+  String get upsellLikeQuotaB2 => '5 Super Likes every day';
+
+  @override
+  String get upsellSuperQuotaTitle => 'Out of Super Likes for today';
+
+  @override
+  String get upsellSuperQuotaB1 => 'Pro gets 5 Super Likes a day';
+
+  @override
+  String get upsellSuperQuotaB2 => 'Super Likes make you 3x more visible';
 }

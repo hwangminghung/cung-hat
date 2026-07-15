@@ -112,5 +112,55 @@
       }
     }
   },
-  "discoveryExploreBrand": "CÙNG HÁT"
+  "discoveryExploreBrand": "CÙNG HÁT",
+  "tabChat": "Chat",
+  "tabProfile": "Hồ sơ",
+  "shellTileLikes": "Ai đã thích bạn",
+  "shellTileLikesSub": "Mở danh sách người đã thả tim",
+  "shellTileUpgradeSub": "Pro, boost kèo và bộ lọc nâng cao",
+  "shellTilePhotos": "Ảnh hồ sơ",
+  "shellTilePhotosSub": "Thêm tối đa 6 ảnh vào hồ sơ",
+  "shellTilePrompts": "Thẻ hỏi-đáp",
+  "shellTilePromptsSub": "Chọn tối đa 3 câu để hồ sơ có chuyện mà bắt",
+  "shellTileSettingsSub": "Quyền riêng tư, dữ liệu và pháp lý",
+  "shellProfileSub": "Quản lý lượt thích, gói nâng cấp và cài đặt.",
+  "completionPercent": "Hồ sơ hoàn thiện {percent}%",
+  "@completionPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "completionAddPhoto": "Thêm ảnh đầu tiên → được thấy nhiều hơn hẳn",
+  "completionThreePhotos": "Đủ 3 ảnh → x2 lượt được thấy",
+  "completionWriteBio": "Viết bio → +25% match",
+  "completionPickGenres": "Chọn đủ 3 thể loại → gợi ý chuẩn gu hơn",
+  "completionAddArtist": "Thêm nghệ sĩ yêu thích",
+  "completionAddBaitu": "Thêm 3 bài tủ → dễ vào kèo hơn",
+  "completionAnswerPrompts": "Trả lời 2 thẻ hỏi-đáp → có chuyện mà bắt",
+  "upsellCta": "Nâng cấp Pro",
+  "upsellLater": "Để sau",
+  "upsellAllProPerks": "Kèm mọi quyền lợi Pro khác",
+  "upsellBoostTitle": "Boost hồ sơ của bạn",
+  "upsellBoostB1": "1 lần Boost 30 phút mỗi ngày",
+  "upsellBoostB2": "Lên đầu deck của mọi người quanh đây",
+  "upsellRewindTitle": "Rút lại lượt vuốt",
+  "upsellRewindB1": "Lỡ tay bỏ qua? Rút lại ngay lượt gần nhất",
+  "upsellRewindB2": "Không giới hạn số lần rút lại",
+  "upsellSeeLikesTitle": "Xem ai đã thích bạn",
+  "upsellSeeLikesB1": "Mở danh sách người đã thả tim bạn",
+  "upsellSeeLikesB2": "Match ngay không cần vuốt trúng",
+  "upsellKeoCreateTitle": "Tự tạo kèo của riêng bạn",
+  "upsellKeoCreateB1": "Làm chủ kèo: chọn quán, giờ, thành viên",
+  "upsellKeoCreateB2": "Kèo mở hoặc cần duyệt — bạn quyết",
+  "upsellKeoJoinTitle": "Tham gia nhiều kèo cùng lúc",
+  "upsellKeoJoinB1": "Miễn phí chỉ được 1 kèo đang hoạt động",
+  "upsellKeoJoinB2": "Pro tham gia không giới hạn kèo",
+  "upsellLikeQuotaTitle": "Hết lượt thích hôm nay",
+  "upsellLikeQuotaB1": "Pro thích không giới hạn mỗi ngày",
+  "upsellLikeQuotaB2": "5 Siêu thích mỗi ngày",
+  "upsellSuperQuotaTitle": "Hết lượt Siêu thích hôm nay",
+  "upsellSuperQuotaB1": "Pro có 5 Siêu thích mỗi ngày",
+  "upsellSuperQuotaB2": "Siêu thích giúp bạn nổi bật gấp 3 lần"
 }

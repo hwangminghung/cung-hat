@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations.dart';
 import 'profile.dart';
 
 /// Counts of taste selections (thể loại, nghệ sĩ, bài tủ) for the current
@@ -17,7 +18,13 @@ class CompletionResult {
 
 /// Trọng số cố định (tổng 100): ảnh≥1=20, ảnh≥3=+10, bio=15,
 /// genres≥3=15, artists≥1=10, bài tủ≥3=15, prompts≥2=15.
-CompletionResult profileCompletion(Profile p, TasteCounts taste) {
+/// [L10N] Gợi ý là chuỗi UI → nhận [l10n] từ call-site (null = fallback VI,
+/// giữ test cũ gọi không l10n nguyên expectation).
+CompletionResult profileCompletion(
+  Profile p,
+  TasteCounts taste, {
+  AppLocalizations? l10n,
+}) {
   var percent = 0;
   // (weight, suggestion, insertion order) — declaration order below is the
   // intended tiebreak when weights are equal. List.sort is not stable in
@@ -34,13 +41,17 @@ CompletionResult profileCompletion(Profile p, TasteCounts taste) {
   }
 
   final photos = p.photoPaths.length;
-  item(photos >= 1, 20, 'Thêm ảnh đầu tiên → được thấy nhiều hơn hẳn');
-  item(photos >= 3, 10, 'Đủ 3 ảnh → x2 lượt được thấy');
-  item(p.bio?.trim().isNotEmpty == true, 15, 'Viết bio → +25% match');
-  item(taste.genres >= 3, 15, 'Chọn đủ 3 thể loại → gợi ý chuẩn gu hơn');
-  item(taste.artists >= 1, 10, 'Thêm nghệ sĩ yêu thích');
-  item(taste.baitu >= 3, 15, 'Thêm 3 bài tủ → dễ vào kèo hơn');
-  item(p.prompts.length >= 2, 15, 'Trả lời 2 thẻ hỏi-đáp → có chuyện mà bắt');
+  item(photos >= 1, 20,
+      l10n?.completionAddPhoto ?? 'Thêm ảnh đầu tiên → được thấy nhiều hơn hẳn');
+  item(photos >= 3, 10, l10n?.completionThreePhotos ?? 'Đủ 3 ảnh → x2 lượt được thấy');
+  item(p.bio?.trim().isNotEmpty == true, 15,
+      l10n?.completionWriteBio ?? 'Viết bio → +25% match');
+  item(taste.genres >= 3, 15,
+      l10n?.completionPickGenres ?? 'Chọn đủ 3 thể loại → gợi ý chuẩn gu hơn');
+  item(taste.artists >= 1, 10, l10n?.completionAddArtist ?? 'Thêm nghệ sĩ yêu thích');
+  item(taste.baitu >= 3, 15, l10n?.completionAddBaitu ?? 'Thêm 3 bài tủ → dễ vào kèo hơn');
+  item(p.prompts.length >= 2, 15,
+      l10n?.completionAnswerPrompts ?? 'Trả lời 2 thẻ hỏi-đáp → có chuyện mà bắt');
 
   missing.sort((a, b) {
     final byWeight = b.$1.compareTo(a.$1);
