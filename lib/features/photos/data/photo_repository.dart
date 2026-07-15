@@ -58,7 +58,16 @@ class PhotoRepository {
     final path = '$uid/${slot}_${DateTime.now().millisecondsSinceEpoch}.jpg';
     await _storage.upload(path, bytes);
     final next = [...current, path];
-    await _client.rpc('set_my_photo_paths', params: {'p_paths': next});
+    try {
+      await _client.rpc('set_my_photo_paths', params: {'p_paths': next});
+    } catch (_) {
+      // [AUDIT L6] RPC fail sau khi upload OK → file mồ côi trong bucket
+      // (không path nào trỏ tới). Dọn best-effort rồi ném lại cho UI báo lỗi.
+      try {
+        await _storage.remove([path]);
+      } catch (_) {}
+      rethrow;
+    }
     return next;
   }
 

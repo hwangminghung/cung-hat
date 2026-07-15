@@ -184,6 +184,31 @@ void main() {
         })).called(1);
   });
 
+  // [AUDIT L6] RPC lưu path fail sau khi upload OK → file mồ côi trong bucket
+  // (không path nào trỏ tới). Repo phải dọn best-effort rồi ném lại lỗi.
+  test('uploadPhoto dọn file mồ côi khi RPC lưu path fail', () async {
+    final client = MockSupabaseClient();
+    final auth = _MockGoTrue();
+    final storage = _MockPhotoStorage();
+    when(() => client.auth).thenReturn(auth);
+    when(() => auth.currentUser).thenReturn(_FakeUser('u1'));
+    when(() => storage.upload(any(), any())).thenAnswer((_) async {});
+    when(() => storage.remove(any())).thenAnswer((_) async {});
+    when(() => client.rpc('set_my_photo_paths', params: any(named: 'params')))
+        .thenThrow(StateError('net'));
+
+    final repo = PhotoRepository(client, storage: storage);
+    await expectLater(
+      repo.uploadPhoto(Uint8List.fromList([1]), slot: 0),
+      throwsStateError,
+    );
+
+    final removed =
+        verify(() => storage.remove(captureAny())).captured.single as List;
+    expect(removed, hasLength(1));
+    expect(removed.single as String, startsWith('u1/0_'));
+  });
+
   test('removePhoto removes from storage then calls set_my_photo_paths with the pruned list', () async {
     final client = MockSupabaseClient();
     final storage = _MockPhotoStorage();
