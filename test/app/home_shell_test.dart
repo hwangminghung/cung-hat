@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:cung_hat/l10n/app_localizations.dart';
 import 'package:cung_hat/app/home_shell.dart';
 import 'package:cung_hat/features/chat/application/inbox_providers.dart';
 import 'package:cung_hat/features/chat/data/match_inbox.dart';
@@ -91,6 +92,35 @@ void main() {
     await tester.pumpAndSettle();
     // Không invalidate → provider giữ cache, vẫn 1. Có fix → refetch = 2.
     expect(inboxCalls, 2);
+  });
+
+  // [L10N] Smoke song ngữ: pump VỚI delegates + locale EN → UI chrome phải
+  // hiện tiếng Anh (không rơi về fallback VI). Test khác pump KHÔNG delegates
+  // để giữ nguyên finder tiếng Việt qua fallback — đây là test duy nhất
+  // chứng minh nhánh EN thật sự sống.
+  testWidgets('locale EN → tab labels hiện tiếng Anh', (tester) async {
+    final fakeLoc = _FakeLocationService();
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null)
+              .overrideWith((ref) => Future.value(<Candidate>[])),
+          locationServiceProvider.overrideWithValue(fakeLoc),
+          openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
+        ],
+        child: const MaterialApp(
+          locale: Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: HomeShell(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Hồ sơ'), findsNothing);
   });
 
   testWidgets('tab đã thăm giữ state khi chuyển đi (IndexedStack, audit M7)',
