@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../onboarding/presentation/consent_step.dart';
 import '../application/settings_providers.dart';
@@ -23,13 +24,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// [AUDIT M1] Chặn double-tap trong lúc RPC xoá tài khoản đang bay.
   bool _deleting = false;
 
+  AppLocalizations? get _l10n =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations);
+
   @override
   Widget build(BuildContext context) {
     final consentsAsync = ref.watch(myConsentsProvider);
     final consents = consentsAsync.value ?? const <String, bool>{};
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cài đặt')),
+      appBar: AppBar(title: Text(_l10n?.settingsTitle ?? 'Cài đặt')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
@@ -43,7 +47,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: WaveDivider(),
           ),
           _Section(
-            title: 'Quyền riêng tư',
+            title: _l10n?.settingsSectionPrivacy ?? 'Quyền riêng tư',
             child: consentsAsync.isLoading
                 ? const Padding(
                     padding: EdgeInsets.all(AppSpacing.lg),
@@ -64,26 +68,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           _Section(
-            title: 'Dữ liệu của tôi',
+            title: _l10n?.settingsSectionData ?? 'Dữ liệu của tôi',
             child: _SettingsTile(
               icon: Icons.download_rounded,
-              title: 'Tải dữ liệu của tôi',
+              title: _l10n?.exportData ?? 'Tải dữ liệu của tôi',
               onTap: _exportData,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           _Section(
-            title: 'Tài khoản',
+            title: _l10n?.settingsSectionAccount ?? 'Tài khoản',
             child: Column(
               children: [
                 _SettingsTile(
                   icon: Icons.logout_rounded,
-                  title: 'Đăng xuất',
+                  title: _l10n?.settingsSignOut ?? 'Đăng xuất',
                   onTap: _signOut,
                 ),
                 _SettingsTile(
                   icon: Icons.delete_forever_rounded,
-                  title: 'Xóa tài khoản',
+                  title: _l10n?.deleteAccount ?? 'Xóa tài khoản',
                   danger: true,
                   onTap: _deleting ? null : _deleteAccount,
                 ),
@@ -92,17 +96,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           _Section(
-            title: 'Pháp lý',
+            title: _l10n?.settingsSectionLegal ?? 'Pháp lý',
             child: Column(
               children: [
                 _SettingsTile(
                   icon: Icons.privacy_tip_rounded,
-                  title: 'Chính sách bảo mật',
+                  title: _l10n?.privacyTitle ?? 'Chính sách bảo mật',
                   onTap: () => context.push('/legal/privacy'),
                 ),
                 _SettingsTile(
                   icon: Icons.description_rounded,
-                  title: 'Điều khoản',
+                  title: _l10n?.settingsTerms ?? 'Điều khoản',
                   onTap: () => context.push('/legal/tos'),
                 ),
               ],
@@ -129,8 +133,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ref.invalidate(myConsentsProvider);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Không lưu được cài đặt, thử lại.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                _l10n?.commonSaveError ?? 'Không lưu được cài đặt, thử lại.')));
       }
     }
   }
@@ -142,8 +147,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không thể tải dữ liệu. Vui lòng thử lại.'),
+        SnackBar(
+          content: Text(
+            _l10n?.settingsExportError ?? 'Không thể tải dữ liệu. Vui lòng thử lại.',
+          ),
         ),
       );
     }
@@ -158,18 +165,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xóa tài khoản?'),
-        content: const Text(
-          'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xóa.',
+        title: Text('${_l10n?.deleteAccount ?? 'Xóa tài khoản'}?'),
+        content: Text(
+          _l10n?.deleteConfirm ??
+              'Hành động này không thể hoàn tác. Tài khoản và dữ liệu của bạn sẽ bị xóa.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
+            child: Text(_l10n?.cancel ?? 'Hủy'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Xóa'),
+            child: Text(_l10n?.commonDelete ?? 'Xóa'),
           ),
         ],
       ),
@@ -185,7 +193,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // user không biết đã xoá hay chưa.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không xoá được tài khoản, thử lại.')),
+          SnackBar(
+            content: Text(
+              _l10n?.settingsDeleteError ?? 'Không xoá được tài khoản, thử lại.',
+            ),
+          ),
         );
       }
     } finally {

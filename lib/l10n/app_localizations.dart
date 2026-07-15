@@ -2293,6 +2293,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mon,Tue,Wed,Thu,Fri,Sat,Sun'**
   String get planWeekdaysShort;
+
+  /// No description provided for @settingsSectionPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get settingsSectionPrivacy;
+
+  /// No description provided for @settingsSectionData.
+  ///
+  /// In en, this message translates to:
+  /// **'My data'**
+  String get settingsSectionData;
+
+  /// No description provided for @settingsSectionAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsSectionAccount;
+
+  /// No description provided for @settingsSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get settingsSignOut;
+
+  /// No description provided for @settingsSectionLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get settingsSectionLegal;
+
+  /// No description provided for @settingsTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get settingsTerms;
+
+  /// No description provided for @settingsExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t export your data. Please try again.'**
+  String get settingsExportError;
+
+  /// No description provided for @settingsDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the account, try again.'**
+  String get settingsDeleteError;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @storeProDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create keo, join without limits and unlock every paid feature.'**
+  String get storeProDesc;
+
+  /// No description provided for @storeBoostDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Put your keo at the top of the board for 24 hours.'**
+  String get storeBoostDesc;
+
+  /// No description provided for @storeSeeLikesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the list of people who liked you.'**
+  String get storeSeeLikesDesc;
+
+  /// No description provided for @storeFiltersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by music taste, age, area and activity.'**
+  String get storeFiltersDesc;
+
+  /// No description provided for @storeHeroSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock tools that fill your keo faster with the right people.'**
+  String get storeHeroSub;
+
+  /// No description provided for @storeOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the store. Try again later.'**
+  String get storeOpenError;
+
+  /// No description provided for @storeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the store'**
+  String get storeLoadError;
+
+  /// No description provided for @photoLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load photos. Try again.'**
+  String get photoLoadError;
+
+  /// No description provided for @photoDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this photo?'**
+  String get photoDeleteTitle;
+
+  /// No description provided for @photoDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be removed from your profile.'**
+  String get photoDeleteBody;
+
+  /// No description provided for @photoDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the photo. Try again.'**
+  String get photoDeleteError;
+
+  /// No description provided for @photoSubMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Add up to {max} photos to make your profile stand out.'**
+  String photoSubMax(int max);
+
+  /// No description provided for @photoConsentNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the photo consent to add profile photos.'**
+  String get photoConsentNeeded;
+
+  /// No description provided for @photoConsentCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable in Settings'**
+  String get photoConsentCta;
+
+  /// No description provided for @promptMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} prompts'**
+  String promptMax(int max);
+
+  /// No description provided for @promptSubMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up to {max} prompts to spark conversations.'**
+  String promptSubMax(int max);
+
+  /// No description provided for @promptAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer…'**
+  String get promptAnswerHint;
+
+  /// No description provided for @adminActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed'**
+  String get adminActionFailed;
+
+  /// No description provided for @adminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderation'**
+  String get adminTitle;
+
+  /// No description provided for @adminEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports'**
+  String get adminEmpty;
+
+  /// No description provided for @adminHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get adminHide;
+
+  /// No description provided for @adminRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get adminRemove;
+
+  /// No description provided for @adminDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get adminDismiss;
+
+  /// No description provided for @adminLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load reports'**
+  String get adminLoadError;
 }
 
 class _AppLocalizationsDelegate

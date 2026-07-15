@@ -1202,4 +1202,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planWeekdaysShort => 'Mon,Tue,Wed,Thu,Fri,Sat,Sun';
+
+  @override
+  String get settingsSectionPrivacy => 'Privacy';
+
+  @override
+  String get settingsSectionData => 'My data';
+
+  @override
+  String get settingsSectionAccount => 'Account';
+
+  @override
+  String get settingsSignOut => 'Sign out';
+
+  @override
+  String get settingsSectionLegal => 'Legal';
+
+  @override
+  String get settingsTerms => 'Terms';
+
+  @override
+  String get settingsExportError =>
+      'Couldn\'t export your data. Please try again.';
+
+  @override
+  String get settingsDeleteError => 'Couldn\'t delete the account, try again.';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get storeProDesc =>
+      'Create keo, join without limits and unlock every paid feature.';
+
+  @override
+  String get storeBoostDesc =>
+      'Put your keo at the top of the board for 24 hours.';
+
+  @override
+  String get storeSeeLikesDesc => 'Unlock the list of people who liked you.';
+
+  @override
+  String get storeFiltersDesc =>
+      'Filter by music taste, age, area and activity.';
+
+  @override
+  String get storeHeroSub =>
+      'Unlock tools that fill your keo faster with the right people.';
+
+  @override
+  String get storeOpenError => 'Couldn\'t open the store. Try again later.';
+
+  @override
+  String get storeLoadError => 'Couldn\'t load the store';
+
+  @override
+  String get photoLoadError => 'Couldn\'t load photos. Try again.';
+
+  @override
+  String get photoDeleteTitle => 'Delete this photo?';
+
+  @override
+  String get photoDeleteBody => 'It will be removed from your profile.';
+
+  @override
+  String get photoDeleteError => 'Couldn\'t delete the photo. Try again.';
+
+  @override
+  String photoSubMax(int max) {
+    return 'Add up to $max photos to make your profile stand out.';
+  }
+
+  @override
+  String get photoConsentNeeded =>
+      'Enable the photo consent to add profile photos.';
+
+  @override
+  String get photoConsentCta => 'Enable in Settings';
+
+  @override
+  String promptMax(int max) {
+    return 'Up to $max prompts';
+  }
+
+  @override
+  String promptSubMax(int max) {
+    return 'Pick up to $max prompts to spark conversations.';
+  }
+
+  @override
+  String get promptAnswerHint => 'Your answer…';
+
+  @override
+  String get adminActionFailed => 'Action failed';
+
+  @override
+  String get adminTitle => 'Moderation';
+
+  @override
+  String get adminEmpty => 'No reports';
+
+  @override
+  String get adminHide => 'Hide';
+
+  @override
+  String get adminRemove => 'Remove';
+
+  @override
+  String get adminDismiss => 'Dismiss';
+
+  @override
+  String get adminLoadError => 'Couldn\'t load reports';
 }

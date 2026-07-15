@@ -1197,4 +1197,112 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get planWeekdaysShort => 'T2,T3,T4,T5,T6,T7,CN';
+
+  @override
+  String get settingsSectionPrivacy => 'Quyền riêng tư';
+
+  @override
+  String get settingsSectionData => 'Dữ liệu của tôi';
+
+  @override
+  String get settingsSectionAccount => 'Tài khoản';
+
+  @override
+  String get settingsSignOut => 'Đăng xuất';
+
+  @override
+  String get settingsSectionLegal => 'Pháp lý';
+
+  @override
+  String get settingsTerms => 'Điều khoản';
+
+  @override
+  String get settingsExportError => 'Không thể tải dữ liệu. Vui lòng thử lại.';
+
+  @override
+  String get settingsDeleteError => 'Không xoá được tài khoản, thử lại.';
+
+  @override
+  String get commonDelete => 'Xóa';
+
+  @override
+  String get storeProDesc =>
+      'Tạo kèo, tham gia không giới hạn và mở mọi tính năng trả phí.';
+
+  @override
+  String get storeBoostDesc => 'Đưa kèo của bạn lên đầu bảng trong 24 giờ.';
+
+  @override
+  String get storeSeeLikesDesc => 'Mở khóa danh sách người đã thả tim bạn.';
+
+  @override
+  String get storeFiltersDesc =>
+      'Lọc theo gu nhạc, độ tuổi, khu vực và trạng thái hoạt động.';
+
+  @override
+  String get storeHeroSub =>
+      'Mở khóa các công cụ giúp kèo lên nhanh và đúng người.';
+
+  @override
+  String get storeOpenError => 'Không mở được cửa hàng. Thử lại sau.';
+
+  @override
+  String get storeLoadError => 'Không tải được cửa hàng';
+
+  @override
+  String get photoLoadError => 'Không tải được ảnh. Thử lại nhé.';
+
+  @override
+  String get photoDeleteTitle => 'Xoá ảnh này?';
+
+  @override
+  String get photoDeleteBody => 'Ảnh sẽ bị gỡ khỏi hồ sơ của bạn.';
+
+  @override
+  String get photoDeleteError => 'Không xoá được ảnh. Thử lại nhé.';
+
+  @override
+  String photoSubMax(int max) {
+    return 'Thêm tối đa $max ảnh để hồ sơ nổi bật hơn.';
+  }
+
+  @override
+  String get photoConsentNeeded => 'Bật đồng ý dùng ảnh để thêm ảnh vào hồ sơ.';
+
+  @override
+  String get photoConsentCta => 'Bật trong Cài đặt';
+
+  @override
+  String promptMax(int max) {
+    return 'Tối đa $max thẻ';
+  }
+
+  @override
+  String promptSubMax(int max) {
+    return 'Chọn tối đa $max câu để hồ sơ có chuyện mà bắt.';
+  }
+
+  @override
+  String get promptAnswerHint => 'Câu trả lời của bạn…';
+
+  @override
+  String get adminActionFailed => 'Thao tác thất bại';
+
+  @override
+  String get adminTitle => 'Kiểm duyệt';
+
+  @override
+  String get adminEmpty => 'Không có báo cáo nào';
+
+  @override
+  String get adminHide => 'Ẩn';
+
+  @override
+  String get adminRemove => 'Gỡ';
+
+  @override
+  String get adminDismiss => 'Bỏ qua';
+
+  @override
+  String get adminLoadError => 'Không tải được báo cáo';
 }
