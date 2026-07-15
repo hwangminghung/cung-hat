@@ -8,16 +8,28 @@ import 'billing_providers.dart';
 const _consumables = <String>{'boost'};
 
 class IapController {
-  IapController(this.ref);
+  IapController(this.ref, {InAppPurchase? iap})
+      : _iap = iap ?? InAppPurchase.instance;
 
   final Ref ref;
-  final InAppPurchase _iap = InAppPurchase.instance;
+  final InAppPurchase _iap;
   Map<String, String>? _catalog;
+  bool _initialized = false;
 
-  /// Call from app startup (NOT from the constructor) — touches platform channels.
+  /// Call from app startup (NOT from the constructor) — touches platform
+  /// channels. [AUDIT C1] Không gọi init thì purchaseStream không có listener:
+  /// user trả tiền nhưng validate-iap không bao giờ chạy, entitlement không
+  /// được cấp. Idempotent: purchaseStream là single-subscription, listen 2
+  /// lần sẽ throw. Nuốt lỗi platform channel để dev/test không crash.
   Future<void> init() async {
-    if (!await _iap.isAvailable()) return;
-    _iap.purchaseStream.listen(_onPurchases);
+    if (_initialized) return;
+    _initialized = true;
+    try {
+      if (!await _iap.isAvailable()) return;
+      _iap.purchaseStream.listen(_onPurchases);
+    } catch (e) {
+      debugPrint('IAP init skipped: $e');
+    }
   }
 
   Future<String?> _productIdFor(String feature) async {
@@ -31,13 +43,14 @@ class IapController {
     return _catalog![feature];
   }
 
-  /// Best-effort purchase kick-off. Real product wiring is TODO(prod).
-  Future<void> buy(String feature) async {
+  /// Kick-off mua hàng. Trả false khi không mở được flow store (catalog lỗi,
+  /// product không tồn tại, store throw) để UI báo user thay vì im lặng.
+  Future<bool> buy(String feature) async {
     final productId = await _productIdFor(feature);
-    if (productId == null) return;
+    if (productId == null) return false;
     try {
       final response = await _iap.queryProductDetails({productId});
-      if (response.productDetails.isEmpty) return;
+      if (response.productDetails.isEmpty) return false;
       final product = response.productDetails.first;
       final param = PurchaseParam(productDetails: product);
       if (_consumables.contains(feature)) {
@@ -45,9 +58,10 @@ class IapController {
       } else {
         await _iap.buyNonConsumable(purchaseParam: param);
       }
+      return true;
     } catch (e) {
-      // TODO(prod): surface store errors to the user.
       debugPrint('IAP buy failed for $feature: $e');
+      return false;
     }
   }
 

@@ -155,9 +155,23 @@ class StoreScreen extends ConsumerWidget {
                               highlight:
                                   _copy[product.type]?.highlight ?? false,
                             ),
-                            onBuy: () => ref
-                                .read(iapControllerProvider)
-                                .buy(product.type),
+                            onBuy: () async {
+                              final ok = await ref
+                                  .read(iapControllerProvider)
+                                  .buy(product.type);
+                              // [AUDIT C1] buy fail (catalog/store lỗi) trước
+                              // đây im lặng — user bấm Mua mà không có gì
+                              // xảy ra.
+                              if (!ok && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Không mở được cửa hàng. Thử lại sau.',
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                       ],
                     );
