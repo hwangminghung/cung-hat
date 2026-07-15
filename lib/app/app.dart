@@ -59,7 +59,14 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
       theme: AppTheme.light(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('vi'),
+      // [L10N] Song ngữ: theo ngôn ngữ máy; máy đặt thứ tiếng ngoài
+      // supportedLocales → rơi về tiếng Việt (thị trường chính).
+      localeResolutionCallback: (device, supported) {
+        for (final s in supported) {
+          if (device?.languageCode == s.languageCode) return s;
+        }
+        return const Locale('vi');
+      },
       routerConfig: ref.watch(goRouterProvider),
     );
   }
