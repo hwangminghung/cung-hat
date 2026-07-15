@@ -1,12 +1,14 @@
 // GoTrue Send-SMS hook. XAC THUC = Standard Webhooks signature (GoTrue ky moi request)
 // — verify_jwt=false trong config.toml vi GoTrue KHONG gui JWT; thieu chu ky/secret -> chan.
 // KHONG BAO GIO log OTP/phone. Provider VN chua chon -> fail-closed 501 sau khi verify.
-import { json } from "../_shared/hmac.ts";
+import { json, safeEqual } from "../_shared/hmac.ts";
 
-function b64ToBytes(b64: string): Uint8Array {
+// Uint8Array<ArrayBuffer> (khong phai ArrayBufferLike): lib type Deno 2.9+
+// yeu cau BufferSource khong-shared cho crypto.subtle.importKey.
+function b64ToBytes(b64: string): Uint8Array<ArrayBuffer> {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 }
-async function hmacSha256B64(key: Uint8Array, msg: string): Promise<string> {
+async function hmacSha256B64(key: Uint8Array<ArrayBuffer>, msg: string): Promise<string> {
   const k = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const sig = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(msg));
   return btoa(String.fromCharCode(...new Uint8Array(sig)));
@@ -36,7 +38,7 @@ Deno.serve(async (req) => {
   }
   const ok = sigHeader.split(" ").some((part) => {
     const [ver, sig] = part.split(",");
-    return ver === "v1" && sig === expected;
+    return ver === "v1" && typeof sig === "string" && safeEqual(sig, expected);
   });
   if (!ok) return new Response("bad signature", { status: 401 });
 

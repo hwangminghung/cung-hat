@@ -5,7 +5,9 @@ function b64url(data: Uint8Array | string): string {
     .replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
-function pemToDer(pem: string): Uint8Array {
+// Uint8Array<ArrayBuffer> (khong phai ArrayBufferLike): lib type Deno 2.9+
+// yeu cau BufferSource khong-shared cho crypto.subtle.importKey.
+function pemToDer(pem: string): Uint8Array<ArrayBuffer> {
   const b64 = pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 }
