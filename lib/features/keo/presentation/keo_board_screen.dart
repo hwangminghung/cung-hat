@@ -90,6 +90,8 @@ class KeoBoardScreen extends ConsumerWidget {
                                 .openSettingsFor(locStatus),
                           )
                         else
+                          // P2: board rỗng thật → "Ghép nhóm cho tôi" là CTA
+                          // chính (một chạm ra gợi ý/proposal thay vì ngõ cụt).
                           EmptyState(
                             icon: Icons.groups_rounded,
                             title: Localizations.of<AppLocalizations>(
@@ -100,6 +102,11 @@ class KeoBoardScreen extends ConsumerWidget {
                                         context, AppLocalizations)
                                     ?.keoBoardEmptySub ??
                                 'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
+                            actionLabel: Localizations.of<AppLocalizations>(
+                                        context, AppLocalizations)
+                                    ?.keoBoardMatchMe ??
+                                'Ghép nhóm cho tôi',
+                            onAction: () => _runAutoMatch(context, ref),
                           ),
                       ],
                     );

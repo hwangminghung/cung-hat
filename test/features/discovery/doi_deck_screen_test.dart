@@ -263,6 +263,77 @@ void main() {
     expect(analytics.events, contains('match'));
   });
 
+  testWidgets('P2-c: lần đầu có card → coach-mark vuốt; tap → tắt và KHÔNG hiện lại', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+    final overrides = [
+      photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+      candidatesProvider(null).overrideWith(
+        (ref) async => const [
+          Candidate(id: 'c1', displayName: 'A'),
+          Candidate(id: 'c2', displayName: 'B'),
+        ],
+      ),
+      locationServiceProvider.overrideWithValue(locationService),
+      entitlementsProvider.overrideWith((ref) async => <String>{}),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('swipe_coach_mark')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('swipe_coach_mark')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('swipe_coach_mark')), findsNothing);
+
+    // Dựng lại màn (mô phỏng lần vào sau) → cờ prefs đã set, không hiện lại.
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('swipe_coach_mark')), findsNothing);
+  });
+
+  testWidgets('P2-c: deck rỗng → không hiện coach-mark', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+          discoveryPrefsProvider.overrideWith(
+            (ref) async => (autoExpand: false, radiusKm: 50),
+          ),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('swipe_coach_mark')), findsNothing);
+  });
+
   testWidgets('like_limit lỗi dồn dập chỉ mở một ProUpsellSheet', (
     tester,
   ) async {

@@ -1362,4 +1362,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onbPhotosSkip => 'Later';
+
+  @override
+  String get onbConsentAll => 'Agree to all';
+
+  @override
+  String get deckCoachSwipe =>
+      'Swipe right to Like · left to Pass · up to Super Like';
+
+  @override
+  String get deckCoachTap => 'Tap to start';
 }

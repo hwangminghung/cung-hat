@@ -1355,4 +1355,14 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get onbPhotosSkip => 'Để sau';
+
+  @override
+  String get onbConsentAll => 'Đồng ý tất cả';
+
+  @override
+  String get deckCoachSwipe =>
+      'Vuốt phải để Thích · trái để Bỏ qua · vuốt lên để Siêu thích';
+
+  @override
+  String get deckCoachTap => 'Chạm để bắt đầu';
 }
