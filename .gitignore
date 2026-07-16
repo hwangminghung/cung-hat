@@ -14,3 +14,6 @@ supabase/functions/.env
 # QA screenshot artifacts (emulator/manual verify runs)
 qa_screenshots/
 test/screenshots/
+
+# Python bytecode cache
+scripts/__pycache__/
