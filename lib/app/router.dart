@@ -16,6 +16,7 @@ import '../features/keo/presentation/keo_detail_screen.dart';
 import '../features/legal/presentation/legal_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
 import '../features/onboarding/presentation/onboarding_flow.dart';
+import '../features/onboarding/presentation/onboarding_photos_screen.dart';
 import '../features/keo/presentation/shared_keo_screen.dart';
 import '../features/plan/presentation/plan_screen.dart';
 import '../features/plan/presentation/shared_plan_screen.dart';
@@ -82,6 +83,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/auth', builder: (_, _) => const PhoneScreen()),
       GoRoute(path: '/otp', builder: (_, _) => const OtpScreen()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingFlow()),
+      // P1-6: bước ảnh optional SAU submit — route con nên authRedirect
+      // (match đúng chuỗi '/onboarding') không đá về home.
+      GoRoute(
+        path: '/onboarding/photos',
+        builder: (_, _) => const OnboardingPhotosScreen(),
+      ),
       GoRoute(path: '/admin', builder: (_, _) => const ModerationScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),

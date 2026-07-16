@@ -1337,4 +1337,17 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get locationPushFailedTitle => 'Không gửi được vị trí';
+
+  @override
+  String get onbPhotosTitle => 'Thêm ảnh';
+
+  @override
+  String get onbPhotosSubOptional =>
+      'Không bắt buộc — bạn có thể bổ sung hoặc đổi ảnh bất cứ lúc nào trong Hồ sơ.';
+
+  @override
+  String get onbPhotosDone => 'Xong';
+
+  @override
+  String get onbPhotosSkip => 'Để sau';
 }

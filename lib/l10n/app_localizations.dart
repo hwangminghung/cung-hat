@@ -2551,6 +2551,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t send your location'**
   String get locationPushFailedTitle;
+
+  /// No description provided for @onbPhotosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get onbPhotosTitle;
+
+  /// No description provided for @onbPhotosSubOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — you can add or change photos any time from your Profile.'**
+  String get onbPhotosSubOptional;
+
+  /// No description provided for @onbPhotosDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get onbPhotosDone;
+
+  /// No description provided for @onbPhotosSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get onbPhotosSkip;
 }
 
 class _AppLocalizationsDelegate
