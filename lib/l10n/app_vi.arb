@@ -471,5 +471,9 @@
   "locationServiceOffSub": "Bật định vị (GPS) rồi thử lại.",
   "locationNoFixTitle": "Không lấy được vị trí",
   "locationNoFixSub": "Không bắt được tín hiệu định vị — thử lại sau giây lát.",
-  "locationPushFailedTitle": "Không gửi được vị trí"
+  "locationPushFailedTitle": "Không gửi được vị trí",
+  "onbPhotosTitle": "Thêm ảnh",
+  "onbPhotosSubOptional": "Không bắt buộc — bạn có thể bổ sung hoặc đổi ảnh bất cứ lúc nào trong Hồ sơ.",
+  "onbPhotosDone": "Xong",
+  "onbPhotosSkip": "Để sau"
 }

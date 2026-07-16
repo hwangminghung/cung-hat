@@ -37,10 +37,17 @@ Future<Uint8List?> _defaultPick() async {
 /// [pickBytes] is injectable for deterministic widget tests; it defaults to a
 /// real gallery pick.
 class PhotoManagerSheet extends ConsumerStatefulWidget {
-  const PhotoManagerSheet({super.key, Future<Uint8List?> Function()? pickBytes})
-    : pickBytes = pickBytes ?? _defaultPick;
+  const PhotoManagerSheet({
+    super.key,
+    Future<Uint8List?> Function()? pickBytes,
+    this.showHandle = true,
+  }) : pickBytes = pickBytes ?? _defaultPick;
 
   final Future<Uint8List?> Function() pickBytes;
+
+  /// false khi nhúng vào một màn hình thường (P1-6 bước ảnh onboarding) —
+  /// thanh kéo bottom-sheet không còn ý nghĩa ở đó.
+  final bool showHandle;
 
   @override
   ConsumerState<PhotoManagerSheet> createState() => _PhotoManagerSheetState();
@@ -160,17 +167,20 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceMuted,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+              if (widget.showHandle) ...[
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceMuted,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusPill),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.lg),
+              ],
               Text(
                 Localizations.of<AppLocalizations>(context, AppLocalizations)
                         ?.shellTilePhotos ??

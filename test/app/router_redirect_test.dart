@@ -40,6 +40,18 @@ void main() {
       isNull,
     );
   });
+  test('bước ảnh sau onboarding (P1-6) KHÔNG bị đá về home', () {
+    // /onboarding/photos chạy SAU khi profile đã tạo — redirect chỉ match
+    // đúng chuỗi '/onboarding', route con phải được ở lại.
+    expect(
+      authRedirect(
+        signedIn: true,
+        hasProfile: true,
+        location: '/onboarding/photos',
+      ),
+      isNull,
+    );
+  });
   test('unauthenticated can view a shared plan', () {
     expect(
       authRedirect(

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../application/onboarding_controller.dart';
@@ -68,7 +69,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
-  void _onFinish() {
+  Future<void> _onFinish() async {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     if (_dob == null || !isAdult(_dob!)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,7 +90,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       );
       return;
     }
-    ref
+    await ref
         .read(onboardingControllerProvider.notifier)
         .submit(
           displayName: _nameCtrl.text,
@@ -102,6 +103,13 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           songIds: _songSel.toList(),
           language: Localizations.localeOf(context).languageCode,
         );
+    if (!mounted) return;
+    // P1-6: profile đã tạo → chủ động sang bước ảnh optional TRƯỚC khi
+    // router kịp đá '/onboarding' về home (lỗi submit thì ở lại, listener
+    // dưới build đã lo SnackBar).
+    if (!ref.read(onboardingControllerProvider).hasError) {
+      context.go('/onboarding/photos');
+    }
   }
 
   Widget _tasteSection<T>({

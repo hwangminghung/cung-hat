@@ -1344,4 +1344,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationPushFailedTitle => 'Couldn\'t send your location';
+
+  @override
+  String get onbPhotosTitle => 'Add photos';
+
+  @override
+  String get onbPhotosSubOptional =>
+      'Optional — you can add or change photos any time from your Profile.';
+
+  @override
+  String get onbPhotosDone => 'Done';
+
+  @override
+  String get onbPhotosSkip => 'Later';
 }

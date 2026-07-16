@@ -471,5 +471,9 @@
   "locationServiceOffSub": "Turn on location (GPS), then try again.",
   "locationNoFixTitle": "Couldn't get your location",
   "locationNoFixSub": "No location fix — try again in a moment.",
-  "locationPushFailedTitle": "Couldn't send your location"
+  "locationPushFailedTitle": "Couldn't send your location",
+  "onbPhotosTitle": "Add photos",
+  "onbPhotosSubOptional": "Optional — you can add or change photos any time from your Profile.",
+  "onbPhotosDone": "Done",
+  "onbPhotosSkip": "Later"
 }
