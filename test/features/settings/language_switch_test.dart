@@ -101,11 +101,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [settingsRepositoryProvider.overrideWithValue(repo)],
-          child: MaterialApp(
-            locale: const Locale('en'),
+          child: const MaterialApp(
+            locale: Locale('en'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const SettingsScreen(),
+            home: SettingsScreen(),
           ),
         ),
       );
