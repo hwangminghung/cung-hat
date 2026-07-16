@@ -18,9 +18,11 @@ void main() {
     expect(isAdult(DateTime(2008, 6, 20), now: DateTime(2026, 6, 20)), isTrue);
   });
 
-  testWidgets('DOB uses three tappable date boxes with the preserved key', (
-    tester,
-  ) async {
+  Future<void> pumpStep(
+    WidgetTester tester, {
+    DateTime? dob,
+    ValueChanged<DateTime>? onPick,
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light(),
@@ -28,29 +30,83 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: DobStep(dob: DateTime(2004, 9, 12), onPick: (_) {}),
+          body: SingleChildScrollView(
+            child: DobStep(dob: dob, onPick: onPick ?? (_) {}),
+          ),
         ),
       ),
     );
+  }
 
-    expect(find.text('12'), findsOneWidget);
-    expect(find.text('09'), findsOneWidget);
-    expect(find.text('2004'), findsOneWidget);
+  testWidgets('P2-a: 3 ô NHẬP trực tiếp thay modal picker, giữ key cũ', (
+    tester,
+  ) async {
+    await pumpStep(tester, dob: DateTime(2004, 9, 12));
+
+    // Giá trị dob có sẵn hiển thị trong 3 ô nhập.
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('dob_day'))).controller?.text,
+      '12',
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('dob_month')))
+          .controller
+          ?.text,
+      '09',
+    );
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('dob_year'))).controller?.text,
+      '2004',
+    );
     expect(find.text('Ngày'), findsOneWidget);
     expect(find.text('Tháng'), findsOneWidget);
     expect(find.text('Năm'), findsOneWidget);
-    expect(find.text('Chọn ngày sinh'), findsNothing);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('pick_dob_btn')),
-        matching: find.byType(Ink),
-      ),
-      findsNWidgets(3),
-    );
+    // Key cũ giữ nguyên làm mỏ neo cho integration_test/app_test.dart.
+    expect(find.byKey(const Key('pick_dob_btn')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('pick_dob_btn')));
+    // Tap vào ô KHÔNG mở modal picker nữa (lý do P2-a: picker brittle).
+    await tester.tap(find.byKey(const Key('dob_day')));
     await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsNothing);
+  });
 
-    expect(find.byType(DatePickerDialog), findsOneWidget);
+  testWidgets('P2-a: nhập đủ 3 ô hợp lệ → onPick nhận đúng ngày', (
+    tester,
+  ) async {
+    DateTime? picked;
+    await pumpStep(tester, onPick: (d) => picked = d);
+
+    await tester.enterText(find.byKey(const Key('dob_day')), '01');
+    await tester.enterText(find.byKey(const Key('dob_month')), '01');
+    await tester.enterText(find.byKey(const Key('dob_year')), '2000');
+    await tester.pump();
+
+    expect(picked, DateTime(2000, 1, 1));
+  });
+
+  testWidgets('P2-a: ngày không tồn tại (31/02) → không onPick', (
+    tester,
+  ) async {
+    DateTime? picked;
+    await pumpStep(tester, onPick: (d) => picked = d);
+
+    await tester.enterText(find.byKey(const Key('dob_day')), '31');
+    await tester.enterText(find.byKey(const Key('dob_month')), '02');
+    await tester.enterText(find.byKey(const Key('dob_year')), '2000');
+    await tester.pump();
+
+    expect(picked, isNull);
+  });
+
+  testWidgets('P2-a: chưa nhập đủ 3 ô → không onPick', (tester) async {
+    DateTime? picked;
+    await pumpStep(tester, onPick: (d) => picked = d);
+
+    await tester.enterText(find.byKey(const Key('dob_day')), '15');
+    await tester.enterText(find.byKey(const Key('dob_month')), '06');
+    await tester.pump();
+
+    expect(picked, isNull);
   });
 }

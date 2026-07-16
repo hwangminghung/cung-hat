@@ -78,6 +78,19 @@ class ConsentStep extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: AppSpacing.lg),
+        // P2: một chạm gộp — bật TOÀN BỘ consent (kể cả marketing; user vẫn
+        // tắt lại từng cái được). Giảm ma sát đọc 5 dòng ở bước 2 funnel.
+        OutlinedButton.icon(
+          key: const Key('consent_all_btn'),
+          onPressed: () {
+            for (final purpose in consentPurposes) {
+              onChanged(purpose, true);
+            }
+          },
+          icon: const Icon(Icons.done_all_rounded),
+          label: Text(l10n?.onbConsentAll ?? 'Đồng ý tất cả'),
+        ),
+        const SizedBox(height: AppSpacing.md),
         for (final purpose in _requiredConsentOrder) ...[
           _RequiredConsentRow(
             key: Key('consent_$purpose'),

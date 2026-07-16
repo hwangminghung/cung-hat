@@ -2581,6 +2581,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Later'**
   String get onbPhotosSkip;
+
+  /// No description provided for @onbConsentAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree to all'**
+  String get onbConsentAll;
+
+  /// No description provided for @deckCoachSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right to Like · left to Pass · up to Super Like'**
+  String get deckCoachSwipe;
+
+  /// No description provided for @deckCoachTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to start'**
+  String get deckCoachTap;
 }
 
 class _AppLocalizationsDelegate

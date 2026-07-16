@@ -10,15 +10,25 @@ import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/keo/application/keo_providers.dart';
 import 'package:cung_hat/features/keo/data/keo_repository.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
+import 'package:cung_hat/features/keo/domain/keo_match_suggestion.dart';
 import 'package:cung_hat/features/keo/presentation/keo_board_screen.dart';
+import 'package:cung_hat/shared/widgets/gradient_button.dart';
 
-/// Đếm số lần board fetch để chứng minh retry có invalidate openKeosProvider.
+/// Đếm số lần board fetch để chứng minh retry có invalidate openKeosProvider;
+/// đếm suggestMatch cho CTA "Ghép nhóm cho tôi" ở empty state (P2-d).
 class _CountingKeoRepository implements KeoRepository {
   int listCalls = 0;
+  int suggestCalls = 0;
 
   @override
   Future<List<Keo>> listOpenKeos({int limit = 30}) async {
     listCalls++;
+    return const [];
+  }
+
+  @override
+  Future<List<KeoMatchSuggestion>> suggestMatch({int limit = 3}) async {
+    suggestCalls++;
     return const [];
   }
 
@@ -115,6 +125,37 @@ void main() {
       expect(repo.listCalls, greaterThan(callsBeforeRetry));
       expect(find.text('Chưa có kèo quanh đây'), findsOneWidget);
       expect(find.text('Không lấy được vị trí'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'P2-d: board rỗng (empty thật) → CTA chính "Ghép nhóm cho tôi" chạy auto-match',
+    (tester) async {
+      final repo = _CountingKeoRepository();
+      final locationService = _MockLocationService();
+      when(
+        () => locationService.captureAndPush(),
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+      await tester.pumpWidget(
+        _wrap(
+          repo: repo,
+          locationService: locationService,
+          status: LocationCaptureStatus.success,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // CTA nằm trong EmptyState (GradientButton) — banner phía trên vẫn còn.
+      final cta = find.widgetWithText(GradientButton, 'Ghép nhóm cho tôi');
+      expect(cta, findsOneWidget);
+
+      await tester.ensureVisible(cta);
+      await tester.pumpAndSettle();
+      await tester.tap(cta);
+      await tester.pumpAndSettle();
+
+      expect(repo.suggestCalls, 1);
     },
   );
 }

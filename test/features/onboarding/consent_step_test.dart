@@ -80,4 +80,23 @@ void main() {
       expect(find.byKey(Key('consent_$purpose')), findsOneWidget);
     }
   });
+
+  testWidgets('P2-b: Đồng ý tất cả bật toàn bộ consent một chạm', (
+    tester,
+  ) async {
+    final changes = <String, bool>{};
+    await pumpConsentStep(
+      tester,
+      onChanged: (key, value) => changes[key] = value,
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('consent_all_btn')));
+    await tester.tap(find.byKey(const Key('consent_all_btn')));
+    await tester.pump();
+
+    // Mọi purpose (kể cả marketing) được bật — user vẫn tắt lại từng cái được.
+    for (final purpose in consentPurposes) {
+      expect(changes[purpose], isTrue, reason: 'purpose $purpose phải được bật');
+    }
+  });
 }

@@ -476,5 +476,8 @@
   "onbPhotosTitle": "Add photos",
   "onbPhotosSubOptional": "Optional — you can add or change photos any time from your Profile.",
   "onbPhotosDone": "Done",
-  "onbPhotosSkip": "Later"
+  "onbPhotosSkip": "Later",
+  "onbConsentAll": "Agree to all",
+  "deckCoachSwipe": "Swipe right to Like · left to Pass · up to Super Like",
+  "deckCoachTap": "Tap to start"
 }

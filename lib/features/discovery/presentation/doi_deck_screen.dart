@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/app_colors.dart';
@@ -79,9 +80,34 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     });
   }
 
+  /// P2: coach-mark vuốt lần đầu — cờ per-device, hiện MỘT lần khi deck có
+  /// card; tắt khi tap hoặc ngay lượt vuốt đầu tiên.
+  static const _coachSeenKey = 'deck_swipe_coach_seen';
+  bool _showCoach = false;
+
+  Future<void> _initCoachMark() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool(_coachSeenKey) ?? false) return;
+    } catch (_) {
+      return; // không đọc được cờ → thà không hiện còn hơn hiện lặp
+    }
+    if (mounted) setState(() => _showCoach = true);
+  }
+
+  Future<void> _dismissCoach() async {
+    if (!_showCoach) return;
+    setState(() => _showCoach = false);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_coachSeenKey, true);
+    } catch (_) {}
+  }
+
   @override
   void initState() {
     super.initState();
+    unawaited(_initCoachMark());
     if (widget.genre != null) return;
     // Bất biến tái dùng vị trí: deck chủ đề dùng vị trí đã đẩy từ deck chính
     // (luôn mount trước ở tab 0); server đọc vị trí LƯU TRỮ nên không cần bắt
@@ -309,7 +335,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       AppSpacing.lg,
                       AppSpacing.xl,
                     ),
-                    child: CardSwiper(
+                    child: Stack(
+                      children: [
+                        CardSwiper(
                       // Key theo list instance: sau khi vuốt hết deck, CardSwiper
                       // cũ giữ index đã cạn nên list mới fetch về không hiển thị —
                       // đổi key ép dựng swiper mới cho mỗi lần fetch.
@@ -358,6 +386,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                       },
                       onSwipe: (previousIndex, currentIndex, direction) {
                         _scheduleProgress(0, 0);
+                        // Vuốt được rồi thì coach-mark hết nhiệm vụ.
+                        if (_showCoach) unawaited(_dismissCoach());
                         final item = items[previousIndex];
                         switch (item) {
                           case CandidateItem(:final candidate):
@@ -385,6 +415,62 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                         _scheduleProgress(0, 0);
                         if (mounted) _refreshDeck();
                       },
+                        ),
+                        if (_showCoach)
+                          Positioned.fill(
+                            child: GestureDetector(
+                              key: const Key('swipe_coach_mark'),
+                              behavior: HitTestBehavior.opaque,
+                              onTap: _dismissCoach,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.55),
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                child: Center(
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.all(AppSpacing.xl),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.swipe_rounded,
+                                          color: Colors.white,
+                                          size: 56,
+                                        ),
+                                        const SizedBox(height: AppSpacing.lg),
+                                        Text(
+                                          _l10n?.deckCoachSwipe ??
+                                              'Vuốt phải để Thích · trái để Bỏ qua · vuốt lên để Siêu thích',
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                        ),
+                                        const SizedBox(height: AppSpacing.md),
+                                        Text(
+                                          _l10n?.deckCoachTap ??
+                                              'Chạm để bắt đầu',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: Colors.white70,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

@@ -476,5 +476,8 @@
   "onbPhotosTitle": "Thêm ảnh",
   "onbPhotosSubOptional": "Không bắt buộc — bạn có thể bổ sung hoặc đổi ảnh bất cứ lúc nào trong Hồ sơ.",
   "onbPhotosDone": "Xong",
-  "onbPhotosSkip": "Để sau"
+  "onbPhotosSkip": "Để sau",
+  "onbConsentAll": "Đồng ý tất cả",
+  "deckCoachSwipe": "Vuốt phải để Thích · trái để Bỏ qua · vuốt lên để Siêu thích",
+  "deckCoachTap": "Chạm để bắt đầu"
 }
