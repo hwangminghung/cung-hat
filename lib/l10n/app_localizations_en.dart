@@ -1319,4 +1319,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLangSystem => 'System default';
+
+  @override
+  String get locationPermissionTitle => 'Location permission needed';
+
+  @override
+  String get locationPermissionSub =>
+      'Allow location access so we can find singers and keos near you.';
+
+  @override
+  String get locationOpenSettings => 'Open settings';
+
+  @override
+  String get locationServiceOffTitle => 'Location is turned off';
+
+  @override
+  String get locationServiceOffSub => 'Turn on location (GPS), then try again.';
+
+  @override
+  String get locationNoFixTitle => 'Couldn\'t get your location';
+
+  @override
+  String get locationNoFixSub => 'No location fix — try again in a moment.';
+
+  @override
+  String get locationPushFailedTitle => 'Couldn\'t send your location';
 }

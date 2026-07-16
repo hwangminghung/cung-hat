@@ -20,7 +20,7 @@ Future<void> _pumpProfileTab(
   required TasteCounts taste,
 }) async {
   final fakeLoc = _FakeLocationService();
-  when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+  when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [

@@ -97,7 +97,7 @@ void main() {
         final locationService = _FakeLocationService();
         when(
           () => locationService.captureAndPush(),
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) async => LocationCaptureStatus.success);
 
         await tester.pumpWidget(
           ProviderScope(
@@ -129,7 +129,7 @@ void main() {
       final locationService = _FakeLocationService();
       when(
         () => locationService.captureAndPush(),
-      ).thenAnswer((_) async => true);
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -267,7 +267,7 @@ void main() {
         final locationService = _FakeLocationService();
         when(
           () => locationService.captureAndPush(),
-        ).thenAnswer((_) async => false);
+        ).thenAnswer((_) async => LocationCaptureStatus.success);
 
         await tester.pumpWidget(
           ProviderScope(
@@ -306,7 +306,7 @@ void main() {
         final locationService = _FakeLocationService();
         when(
           () => locationService.captureAndPush(),
-        ).thenAnswer((_) async => false);
+        ).thenAnswer((_) async => LocationCaptureStatus.success);
 
         await tester.pumpWidget(
           ProviderScope(
@@ -342,7 +342,7 @@ void main() {
       final locationService = _FakeLocationService();
       when(
         () => locationService.captureAndPush(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -381,7 +381,7 @@ void main() {
         final locationService = _FakeLocationService();
         when(
           () => locationService.captureAndPush(),
-        ).thenAnswer((_) async => false);
+        ).thenAnswer((_) async => LocationCaptureStatus.success);
 
         // Harness router mirror app router (router.dart): /explore/:genre dựng
         // DoiDeckScreen THẬT — pop phải quan sát được qua nội dung route dưới.
@@ -444,7 +444,7 @@ void main() {
       final locationService = _FakeLocationService();
       when(
         () => locationService.captureAndPush(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -478,7 +478,7 @@ void main() {
       final locationService = _FakeLocationService();
       when(
         () => locationService.captureAndPush(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(

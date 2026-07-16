@@ -463,5 +463,13 @@
   "adminDismiss": "Bỏ qua",
   "adminLoadError": "Không tải được báo cáo",
   "settingsLanguage": "Ngôn ngữ",
-  "settingsLangSystem": "Theo hệ thống"
+  "settingsLangSystem": "Theo hệ thống",
+  "locationPermissionTitle": "Cần quyền vị trí",
+  "locationPermissionSub": "Cho phép truy cập vị trí để tìm bạn hát và kèo quanh bạn.",
+  "locationOpenSettings": "Mở cài đặt",
+  "locationServiceOffTitle": "Định vị đang tắt",
+  "locationServiceOffSub": "Bật định vị (GPS) rồi thử lại.",
+  "locationNoFixTitle": "Không lấy được vị trí",
+  "locationNoFixSub": "Không bắt được tín hiệu định vị — thử lại sau giây lát.",
+  "locationPushFailedTitle": "Không gửi được vị trí"
 }

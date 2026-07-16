@@ -1311,4 +1311,30 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get settingsLangSystem => 'Theo hệ thống';
+
+  @override
+  String get locationPermissionTitle => 'Cần quyền vị trí';
+
+  @override
+  String get locationPermissionSub =>
+      'Cho phép truy cập vị trí để tìm bạn hát và kèo quanh bạn.';
+
+  @override
+  String get locationOpenSettings => 'Mở cài đặt';
+
+  @override
+  String get locationServiceOffTitle => 'Định vị đang tắt';
+
+  @override
+  String get locationServiceOffSub => 'Bật định vị (GPS) rồi thử lại.';
+
+  @override
+  String get locationNoFixTitle => 'Không lấy được vị trí';
+
+  @override
+  String get locationNoFixSub =>
+      'Không bắt được tín hiệu định vị — thử lại sau giây lát.';
+
+  @override
+  String get locationPushFailedTitle => 'Không gửi được vị trí';
 }

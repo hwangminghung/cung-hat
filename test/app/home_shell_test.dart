@@ -23,7 +23,7 @@ class _FakeLocationService extends Mock implements LocationService {}
 void main() {
   testWidgets('HomeShell shows 4 tabs and switches', (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         // Tab 0 now hosts DoiDeckScreen, which reads candidatesProvider →
@@ -57,7 +57,7 @@ void main() {
   testWidgets('chọn tab Chat → inboxProvider refetch (kể cả lần quay lại)',
       (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     // inboxProvider là FutureProvider one-shot (KHÔNG autoDispose): không
     // invalidate khi chuyển tab thì lần quay lại Chat dùng cache cũ — pill
     // 'Đến lượt bạn'/badge unread trễ. Đếm số lần build để chứng minh refetch.
@@ -100,7 +100,7 @@ void main() {
   // chứng minh nhánh EN thật sự sống.
   testWidgets('locale EN → tab labels hiện tiếng Anh', (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -126,7 +126,7 @@ void main() {
   testWidgets('tab đã thăm giữ state khi chuyển đi (IndexedStack, audit M7)',
       (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -155,7 +155,7 @@ void main() {
       "tab Hồ sơ: dòng 'Ai đã thích bạn' có badge PRO (tránh bait-click)",
       (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -179,7 +179,7 @@ void main() {
   testWidgets('tab Hồ sơ: có WaveProgress (thẻ hoàn thiện) + nút bánh răng',
       (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [

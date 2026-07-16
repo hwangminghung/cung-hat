@@ -35,7 +35,7 @@ void main() {
       final locationService = _FakeLocationService();
       when(
         () => locationService.captureAndPush(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -63,11 +63,87 @@ void main() {
     },
   );
 
+  testWidgets(
+    'deck rỗng + chưa cấp quyền vị trí → error state đúng nguyên nhân (P0-1)',
+    (tester) async {
+      final locationService = _FakeLocationService();
+      when(
+        () => locationService.captureAndPush(),
+      ).thenAnswer((_) async => LocationCaptureStatus.permissionDenied);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            discoveryPrefsProvider.overrideWith(
+              (ref) async => (autoExpand: false, radiusKm: 50),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Không được đổ lỗi "hết người" khi thật ra là thiếu quyền vị trí.
+      expect(find.text('Cần quyền vị trí'), findsOneWidget);
+      expect(find.text('Mở cài đặt'), findsOneWidget);
+      expect(find.text('Chưa có bạn hát quanh đây'), findsNothing);
+      expect(find.byKey(const Key('expand_radius_btn')), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Thử lại sau lỗi vị trí thành công → quay về empty state thường (P0-1)',
+    (tester) async {
+      final locationService = _FakeLocationService();
+      final responses = [
+        LocationCaptureStatus.noFix,
+        LocationCaptureStatus.success,
+      ];
+      when(
+        () => locationService.captureAndPush(),
+      ).thenAnswer((_) async => responses.removeAt(0));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
+            locationServiceProvider.overrideWithValue(locationService),
+            entitlementsProvider.overrideWith((ref) async => <String>{}),
+            discoveryPrefsProvider.overrideWith(
+              (ref) async => (autoExpand: false, radiusKm: 50),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Không lấy được vị trí'), findsOneWidget);
+
+      await tester.tap(find.text('Thử lại'));
+      await tester.pumpAndSettle();
+
+      // Lần thử lại thành công + vẫn không có ứng viên → empty state THẬT.
+      expect(find.text('Chưa có bạn hát quanh đây'), findsOneWidget);
+      expect(find.text('Không lấy được vị trí'), findsNothing);
+      verify(() => locationService.captureAndPush()).called(2);
+    },
+  );
+
   testWidgets('like_limit lỗi dồn dập chỉ mở một ProUpsellSheet', (
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
 
     // recordSwipe trả future treo để dồn 2 lỗi like_limit về cùng lúc,
     // mô phỏng user vuốt nhanh khi đã hết lượt.
@@ -120,7 +196,7 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
 
     // recordSwipe raise like_limit — server chưa ghi lượt vuốt, nên client
     // phải undo để card quay lại deck. Dùng completer để lỗi về SAU khi
@@ -178,7 +254,7 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
 
     final repo = _MockDiscoveryRepository();
     when(() => repo.activateBoost()).thenAnswer((_) async => DateTime.now());
@@ -219,7 +295,7 @@ void main() {
       final locationService = _FakeLocationService();
       when(
         () => locationService.captureAndPush(),
-      ).thenAnswer((_) async => false);
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
       final repo = _MockDiscoveryRepository();
       // activateBoost treo để mô phỏng RPC đang bay khi user bấm boost lần 2.
@@ -270,7 +346,7 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
 
     // Expiry phải là UTC — mô phỏng đúng DateTime.parse('...Z') mà repo trả về
     // từ timestamptz. `expected` tính từ .toLocal() nên đúng ở mọi múi giờ;
@@ -316,7 +392,7 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => false);
+    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
 
     final repo = _MockDiscoveryRepository();
     when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => false);

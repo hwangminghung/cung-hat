@@ -2503,6 +2503,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System default'**
   String get settingsLangSystem;
+
+  /// No description provided for @locationPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission needed'**
+  String get locationPermissionTitle;
+
+  /// No description provided for @locationPermissionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access so we can find singers and keos near you.'**
+  String get locationPermissionSub;
+
+  /// No description provided for @locationOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get locationOpenSettings;
+
+  /// No description provided for @locationServiceOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is turned off'**
+  String get locationServiceOffTitle;
+
+  /// No description provided for @locationServiceOffSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location (GPS), then try again.'**
+  String get locationServiceOffSub;
+
+  /// No description provided for @locationNoFixTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get your location'**
+  String get locationNoFixTitle;
+
+  /// No description provided for @locationNoFixSub.
+  ///
+  /// In en, this message translates to:
+  /// **'No location fix — try again in a moment.'**
+  String get locationNoFixSub;
+
+  /// No description provided for @locationPushFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send your location'**
+  String get locationPushFailedTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -97,7 +97,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -128,7 +128,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -161,7 +161,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
       final repo = _MockDiscoveryRepositoryForRadius();
       when(() => repo.setAutoExpand(any())).thenAnswer((_) async {});
 
@@ -191,7 +191,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
       // RPC lỗi async (offline/server) — UI phải nuốt lỗi + báo SnackBar,
       // KHÔNG leak unhandled exception, KHÔNG invalidate discoveryPrefsProvider.
       final repo = _MockDiscoveryRepositoryForRadius();
@@ -231,7 +231,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -261,7 +261,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -290,7 +290,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
