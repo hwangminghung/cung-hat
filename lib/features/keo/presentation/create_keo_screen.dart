@@ -11,6 +11,7 @@ import '../../../shared/widgets/wave_divider.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../onboarding/application/reference_providers.dart';
 import '../application/keo_providers.dart';
+import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../data/keo_errors.dart';
 
 class CreateKeoScreen extends ConsumerStatefulWidget {
@@ -111,7 +112,12 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
       context.go('/keo/$id');
     } catch (e) {
       if (!mounted) return;
-      _snack(keoErrorMessage(e, _l10n));
+      // P1-5: free đã giữ 1 kèo active → mở upsell Pro thay vì snack khô.
+      if (keoErrorCode(e) == 'free_host_limit') {
+        ProUpsellSheet.show(context, variant: ProUpsellVariant.keoCreate);
+      } else {
+        _snack(keoErrorMessage(e, _l10n));
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

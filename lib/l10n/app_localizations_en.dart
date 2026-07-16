@@ -379,10 +379,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upsellSeeLikesB2 => 'Match instantly — no lucky swipe needed';
 
   @override
-  String get upsellKeoCreateTitle => 'Create your own keo';
+  String get upsellKeoCreateTitle => 'Host unlimited keos';
 
   @override
-  String get upsellKeoCreateB1 => 'Host it your way: venue, time, members';
+  String get upsellKeoCreateB1 =>
+      'Free keeps 1 open keo — Pro hosts as many as you like';
 
   @override
   String get upsellKeoCreateB2 => 'Open or approval-only — you decide';
@@ -677,6 +678,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keoErrorProRequired => 'You need Pro to create a keo.';
+
+  @override
+  String get keoErrorFreeHostLimit =>
+      'Free keeps 1 open keo at a time. Cancel it or upgrade to Pro to host more.';
 
   @override
   String get keoErrorFreeJoinLimit =>

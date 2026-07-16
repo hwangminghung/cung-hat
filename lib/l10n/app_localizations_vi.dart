@@ -379,10 +379,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get upsellSeeLikesB2 => 'Match ngay không cần vuốt trúng';
 
   @override
-  String get upsellKeoCreateTitle => 'Tự tạo kèo của riêng bạn';
+  String get upsellKeoCreateTitle => 'Tạo kèo không giới hạn';
 
   @override
-  String get upsellKeoCreateB1 => 'Làm chủ kèo: chọn quán, giờ, thành viên';
+  String get upsellKeoCreateB1 =>
+      'Gói Free giữ 1 kèo đang mở — Pro mở bao nhiêu tuỳ bạn';
 
   @override
   String get upsellKeoCreateB2 => 'Kèo mở hoặc cần duyệt — bạn quyết';
@@ -676,6 +677,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get keoErrorProRequired => 'Cần gói Pro để tạo kèo.';
+
+  @override
+  String get keoErrorFreeHostLimit =>
+      'Gói Free giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.';
 
   @override
   String get keoErrorFreeJoinLimit =>
