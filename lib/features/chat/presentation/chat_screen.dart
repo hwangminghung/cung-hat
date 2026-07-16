@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -94,6 +97,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     try {
       await ref.read(chatRepositoryProvider).sendMessage(widget.matchId, text);
+      unawaited(ref.read(analyticsProvider).logChatSent('match'));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

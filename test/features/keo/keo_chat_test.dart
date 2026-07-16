@@ -9,12 +9,52 @@ import 'package:cung_hat/features/chat/domain/message.dart';
 import 'package:cung_hat/features/keo/application/keo_providers.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/keo/domain/keo_member.dart';
+import 'package:cung_hat/core/analytics/analytics_service.dart';
 import 'package:cung_hat/features/keo/presentation/keo_chat_screen.dart';
+import '../../support/analytics_fakes.dart';
 import '../../support/supabase_mocks.dart';
 
 class _MockChatRepo extends Mock implements ChatRepository {}
 
 void main() {
+  testWidgets('gửi tin nhóm thành công → log chat_sent thread_type=keo (P0-3)', (
+    tester,
+  ) async {
+    final repo = _MockChatRepo();
+    final analytics = RecordingAnalytics();
+    when(() => repo.markKeoRead('k1')).thenAnswer((_) async {});
+    when(() => repo.sendKeoMessage(any(), any())).thenAnswer((_) async => 'm1');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          chatRepositoryProvider.overrideWithValue(repo),
+          analyticsProvider.overrideWithValue(analytics),
+          keoMessageHistoryProvider(
+            'k1',
+          ).overrideWith((ref) async => const <Message>[]),
+          keoLiveMessagesProvider(
+            'k1',
+          ).overrideWith((ref) => const Stream<Message>.empty()),
+          keoHeaderProvider('k1').overrideWith((ref) async => null),
+          keoRosterProvider('k1').overrideWith((ref) async => const []),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const KeoChatScreen(keoId: 'k1'),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), 'tối nay hát nhé');
+    await tester.tap(find.byKey(const Key('send_btn')));
+    await tester.pump();
+
+    expect(analytics.events, ['chat_sent']);
+    expect(analytics.params.single, {'thread_type': 'keo'});
+  });
   test('sendKeoMessage calls send_keo_message RPC', () async {
     final client = MockSupabaseClient();
     when(

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -233,6 +236,7 @@ class KeoDetailScreen extends ConsumerWidget {
   Future<void> _requestJoin(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(keoRepositoryProvider).requestJoin(keoId);
+      unawaited(ref.read(analyticsProvider).logKeoJoinRequest());
       ref.invalidate(keoRosterProvider(keoId));
     } catch (e) {
       if (!context.mounted) return;

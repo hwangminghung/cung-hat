@@ -5,11 +5,43 @@ import 'package:mocktail/mocktail.dart';
 import 'package:cung_hat/features/chat/application/chat_providers.dart';
 import 'package:cung_hat/features/chat/data/chat_repository.dart';
 import 'package:cung_hat/features/chat/domain/message.dart';
+import 'package:cung_hat/core/analytics/analytics_service.dart';
 import 'package:cung_hat/features/chat/presentation/chat_screen.dart';
+
+import '../../support/analytics_fakes.dart';
 
 class _MockRepo extends Mock implements ChatRepository {}
 
 void main() {
+  testWidgets('gửi tin 1-1 thành công → log chat_sent thread_type=match (P0-3)', (
+    tester,
+  ) async {
+    final repo = _MockRepo();
+    final analytics = RecordingAnalytics();
+    when(() => repo.history(any())).thenAnswer((_) async => <Message>[]);
+    when(
+      () => repo.subscribe(any()),
+    ).thenAnswer((_) => const Stream<Message>.empty());
+    when(() => repo.markRead(any())).thenAnswer((_) async {});
+    when(() => repo.sendMessage(any(), any())).thenAnswer((_) async => 'm1');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          chatRepositoryProvider.overrideWithValue(repo),
+          analyticsProvider.overrideWithValue(analytics),
+        ],
+        child: const MaterialApp(
+          home: ChatScreen(matchId: 't1', otherName: 'Linh'),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'đi hát nhé');
+    await tester.tap(find.byKey(const Key('send_btn')));
+    await tester.pump();
+    expect(analytics.events, ['chat_sent']);
+    expect(analytics.params.single, {'thread_type': 'match'});
+  });
   testWidgets('typing a safe message and sending calls sendMessage', (
     tester,
   ) async {
