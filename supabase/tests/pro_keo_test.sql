@@ -32,13 +32,14 @@ insert into public.entitlements (user_id, feature, source) values
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000a1"}';
 select ok(app_private.has_entitlement('see_likes'), 'pro user has see_likes via superset');
 
--- Case 2: free user cannot create keo.
+-- Case 2 (P1-5 2026-07-16 DAO GATE): free duoc tao keo DAU TIEN; gioi han
+-- moi (1 keo active dang host -> free_host_limit) test o free_host_keo_test.sql.
 set local role postgres;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000b1"}';
 set local role authenticated;
-select throws_ok(
-  $$ select public.create_keo('K',21.0,105.8,'HN',now()+interval '1 day',now()+interval '1 day 2 hours',4,null,null,array[]::text[],'open') $$,
-  '23514', null, 'free user blocked from create_keo');
+select ok(
+  public.create_keo('K',21.0,105.8,'HN',now()+interval '1 day',now()+interval '1 day 2 hours',4,null,null,array[]::text[],'open') is not null,
+  'P1-5: free user tao duoc keo dau tien');
 
 -- Case 3: pro user creates an OPEN keo (store the id in a temp table for later cases).
 set local role postgres;

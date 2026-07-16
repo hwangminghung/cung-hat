@@ -797,13 +797,13 @@ abstract class AppLocalizations {
   /// No description provided for @upsellKeoCreateTitle.
   ///
   /// In en, this message translates to:
-  /// **'Create your own keo'**
+  /// **'Host unlimited keos'**
   String get upsellKeoCreateTitle;
 
   /// No description provided for @upsellKeoCreateB1.
   ///
   /// In en, this message translates to:
-  /// **'Host it your way: venue, time, members'**
+  /// **'Free keeps 1 open keo — Pro hosts as many as you like'**
   String get upsellKeoCreateB1;
 
   /// No description provided for @upsellKeoCreateB2.
@@ -1333,6 +1333,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You need Pro to create a keo.'**
   String get keoErrorProRequired;
+
+  /// No description provided for @keoErrorFreeHostLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Free keeps 1 open keo at a time. Cancel it or upgrade to Pro to host more.'**
+  String get keoErrorFreeHostLimit;
 
   /// No description provided for @keoErrorFreeJoinLimit.
   ///

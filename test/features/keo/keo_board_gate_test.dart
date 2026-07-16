@@ -118,12 +118,15 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('FREE user: tapping Tao keo shows the upgrade sheet', (
+  testWidgets('FREE user: bấm Tạo kèo đi thẳng vào màn tạo (P1-5 đảo gate)', (
     tester,
   ) async {
     await tester.pumpWidget(
       _wrap(
-        MaterialApp(theme: AppTheme.light(), home: const KeoBoardScreen()),
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: _boardRouter(),
+        ),
         entitlements: const <String>{},
       ),
     );
@@ -132,8 +135,10 @@ void main() {
     await tester.tap(find.text('Tạo kèo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Tự tạo kèo của riêng bạn'), findsOneWidget);
-    expect(find.text('Nâng cấp Pro'), findsOneWidget);
+    // Gate giờ nằm server-side (free_host_limit khi đã giữ 1 kèo active) —
+    // client không chặn trước nữa.
+    expect(find.text('Tạo kèo không giới hạn'), findsNothing);
+    expect(find.text('create-stub'), findsOneWidget);
   });
 
   testWidgets('PRO user: tapping Tao keo does NOT show the upgrade sheet', (
@@ -150,19 +155,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The FAB reads isProProvider, which depends on the async entitlements
-    // future. Nothing in this isolated screen keeps that future alive, so warm
-    // it (as a parent shell would in the real app) before tapping.
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(KeoBoardScreen)),
-    );
-    await container.read(entitlementsProvider.future);
-    await tester.pumpAndSettle();
-
     await tester.tap(find.text('Tạo kèo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Tự tạo kèo của riêng bạn'), findsNothing);
+    expect(find.text('Tạo kèo không giới hạn'), findsNothing);
     expect(find.text('create-stub'), findsOneWidget);
   });
 

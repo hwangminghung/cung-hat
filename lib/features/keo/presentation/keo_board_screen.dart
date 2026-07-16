@@ -12,10 +12,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/pressable.dart';
-import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/wave_divider.dart';
-import '../../billing/application/billing_providers.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../discovery/application/location_service.dart';
 import '../../discovery/presentation/location_error_state.dart';
@@ -31,7 +29,6 @@ class KeoBoardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final keosAsync = ref.watch(openKeosProvider);
-    final isPro = ref.watch(isProProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -139,7 +136,9 @@ class KeoBoardScreen extends ConsumerWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: GradientButton(
-                  onPressed: () => _openCreate(context, isPro),
+                  // P1-5 đảo gate: free được host 1 kèo active — client không
+                  // chặn trước nữa, server raise free_host_limit khi vượt.
+                  onPressed: () => context.push('/keo/create'),
                   icon: Icons.add_box_outlined,
                   child: Text(
                     Localizations.of<AppLocalizations>(context, AppLocalizations)
@@ -165,18 +164,6 @@ class KeoBoardScreen extends ConsumerWidget {
     if (status == LocationCaptureStatus.success) {
       ref.invalidate(openKeosProvider);
     }
-  }
-
-  void _openCreate(BuildContext context, bool isPro) {
-    if (isPro) {
-      context.push('/keo/create');
-    } else {
-      _showProSheet(context);
-    }
-  }
-
-  void _showProSheet(BuildContext context) {
-    ProUpsellSheet.show(context, variant: ProUpsellVariant.keoCreate);
   }
 
   Widget _boardHeader(BuildContext context) => Padding(

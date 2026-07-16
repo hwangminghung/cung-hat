@@ -5,6 +5,8 @@ import '../../../l10n/app_localizations.dart';
 /// [L10N] Map VI giữ làm fallback; UI truyền l10n vào [keoErrorMessage].
 const _messages = <String, String>{
   'pro_required': 'Cần gói Pro để tạo kèo.',
+  'free_host_limit':
+      'Gói Free giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.',
   'free_join_limit':
       'Bạn đang tham gia 1 kèo. Rời kèo cũ hoặc nâng cấp Pro để tham gia thêm.',
   'keo_full': 'Kèo đã đầy.',
@@ -21,6 +23,7 @@ const _messages = <String, String>{
 
 String? _localized(String? code, AppLocalizations? l10n) => switch (code) {
       'pro_required' => l10n?.keoErrorProRequired,
+      'free_host_limit' => l10n?.keoErrorFreeHostLimit,
       'free_join_limit' => l10n?.keoErrorFreeJoinLimit,
       'keo_full' => l10n?.keoErrorFull,
       'already_declined' => l10n?.keoErrorAlreadyDeclined,

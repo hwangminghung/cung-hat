@@ -176,6 +176,14 @@ select is(
   'proposal fallback does not insert a keo row'
 );
 
+-- P1-5 (2026-07-16) DAO GATE: free khong con bi pro_required — gioi han moi
+-- la 1 keo active dang host. Seed cho aa04 mot keo dang mo roi thu tao tiep.
+insert into public.keo (id, host_id, title, area_geo, time_window_start, time_window_end, group_size_target, status)
+values ('00000000-0000-0000-0000-00000000aaf0', '00000000-0000-0000-0000-00000000aa04',
+        'Keo dang mo cua aa04', 'SRID=4326;POINT(105.8 21.0)'::public.geography,
+        now() + interval '6 hours', now() + interval '8 hours', 4, 'open')
+on conflict (id) do nothing;
+
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-00000000aa04"}';
 set local role authenticated;
 
@@ -189,8 +197,8 @@ select throws_ok(
     'open'
   ) $$,
   '23514',
-  'pro_required',
-  'free user cannot create auto-matched keo'
+  'free_host_limit',
+  'free dang host 1 keo active -> auto-match khong tao them duoc (P1-5)'
 );
 
 set local role postgres;
