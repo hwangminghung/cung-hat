@@ -13,11 +13,48 @@ import 'package:cung_hat/features/profile/domain/profile.dart';
 import 'package:cung_hat/shared/widgets/gradient_button.dart';
 import 'package:cung_hat/shared/widgets/stamp_chip.dart';
 import 'package:cung_hat/shared/widgets/ticket_card.dart';
+import 'package:cung_hat/core/analytics/analytics_service.dart';
 import 'package:cung_hat/shared/widgets/wave_divider.dart';
+
+import '../../support/analytics_fakes.dart';
 
 class _MockRepo extends Mock implements KeoRepository {}
 
 void main() {
+  testWidgets('Xin vào kèo thành công → log keo_join_request (P0-3)', (
+    tester,
+  ) async {
+    final repo = _MockRepo();
+    final analytics = RecordingAnalytics();
+    when(() => repo.roster('k1')).thenAnswer(
+      (_) async => const [
+        KeoMember(
+          userId: 'u1',
+          displayName: 'Mai',
+          role: 'host',
+          joinStatus: 'approved',
+        ),
+      ],
+    );
+    when(() => repo.requestJoin('k1')).thenAnswer((_) async {});
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          keoRepositoryProvider.overrideWithValue(repo),
+          myProfileProvider.overrideWith((ref) => Future<Profile?>.value(null)),
+          analyticsProvider.overrideWithValue(analytics),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const KeoDetailScreen(keoId: 'k1', title: 'Hát tối T7'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('request_join_btn')));
+    await tester.pumpAndSettle();
+    expect(analytics.events, ['keo_join_request']);
+  });
   testWidgets('renders roster and Xin vào kèo button', (tester) async {
     final repo = _MockRepo();
     when(() => repo.roster('k1')).thenAnswer(

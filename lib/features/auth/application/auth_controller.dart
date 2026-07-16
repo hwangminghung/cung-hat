@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/analytics/analytics_service.dart';
 import 'auth_providers.dart';
 
 enum AuthPhase { idle, sending, codeSent, verifying, verified, error }
@@ -37,6 +40,8 @@ class AuthController extends Notifier<AuthFlowState> {
     state = state.copyWith(phase: AuthPhase.verifying, phone: phone);
     try {
       await ref.read(authRepositoryProvider).verifyOtp(phone, token);
+      // P0-3: fire-and-forget — telemetry không được chặn/making fail flow auth.
+      unawaited(ref.read(analyticsProvider).logLogin());
       state = state.copyWith(phase: AuthPhase.verified, phone: phone);
     } catch (e) {
       state = state.copyWith(phase: AuthPhase.error, error: e.toString());

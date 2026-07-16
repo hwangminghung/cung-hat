@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../application/onboarding_controller.dart';
 import '../application/reference_providers.dart';
 import '../domain/music_ref.dart';
@@ -39,6 +42,13 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   static const _lastStep = 3;
 
   @override
+  void initState() {
+    super.initState();
+    // P0-3: mount = vào bước 1 của funnel.
+    unawaited(ref.read(analyticsProvider).logOnboardingStep(1));
+  }
+
+  @override
   void dispose() {
     _nameCtrl.dispose();
     _bioCtrl.dispose();
@@ -47,6 +57,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   }
 
   void _moveToStep(int nextStep, {bool grantRequired = false}) {
+    // P0-3: funnel chỉ đếm CHIỀU TIẾN (quay lại không phải tiến độ mới).
+    if (nextStep > _step) {
+      unawaited(ref.read(analyticsProvider).logOnboardingStep(nextStep + 1));
+    }
     setState(() {
       if (grantRequired) grantRequiredConsents(_consents);
       _step = nextStep;

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../profile/application/profile_providers.dart';
 import '../../profile/domain/profile.dart';
 import 'onboarding_providers.dart';
@@ -37,6 +40,10 @@ class OnboardingController extends AsyncNotifier<void> {
       await onb.saveTaste(genreIds: genreIds, artistIds: artistIds, songIds: songIds);
       ref.invalidate(myProfileProvider); // router re-evaluates → leaves onboarding
     });
+    if (!state.hasError) {
+      // P0-3: sign_up = kích hoạt thật (profile đã tạo), fire-and-forget.
+      unawaited(ref.read(analyticsProvider).logSignUp());
+    }
   }
 }
 

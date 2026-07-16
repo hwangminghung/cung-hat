@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cung_hat/core/analytics/analytics_service.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
+import 'package:cung_hat/features/profile/application/profile_providers.dart';
+import 'package:cung_hat/features/profile/domain/profile.dart';
 import 'package:cung_hat/features/billing/application/billing_providers.dart';
 import 'package:cung_hat/features/discovery/application/discovery_providers.dart';
 import 'package:cung_hat/features/discovery/application/location_service.dart';
@@ -15,6 +19,8 @@ import 'package:cung_hat/features/discovery/presentation/doi_deck_screen.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
 import 'package:cung_hat/features/photos/data/photo_repository.dart';
 import 'package:cung_hat/shared/widgets/pro_upsell_sheet.dart';
+
+import '../../support/analytics_fakes.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
 
@@ -138,6 +144,124 @@ void main() {
       verify(() => locationService.captureAndPush()).called(2);
     },
   );
+
+  testWidgets('captureAndPush permissionDenied → log location_denied (P0-3)', (
+    tester,
+  ) async {
+    final analytics = RecordingAnalytics();
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.permissionDenied);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+          discoveryPrefsProvider.overrideWith(
+            (ref) async => (autoExpand: false, radiusKm: 50),
+          ),
+          analyticsProvider.overrideWithValue(analytics),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(analytics.events, ['location_denied']);
+  });
+
+  testWidgets('like đầu tiên log first_swipe MỘT lần dù vuốt tiếp (P0-3)', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final analytics = RecordingAnalytics();
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+    final repo = _MockDiscoveryRepository();
+    when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => false);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveryRepositoryProvider.overrideWithValue(repo),
+          photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+          candidatesProvider(null).overrideWith(
+            (ref) async => const [
+              Candidate(id: 'c1', displayName: 'A'),
+              Candidate(id: 'c2', displayName: 'B'),
+            ],
+          ),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+          analyticsProvider.overrideWithValue(analytics),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('deck_like_btn')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('deck_like_btn')));
+    await tester.pumpAndSettle();
+
+    expect(
+      analytics.events.where((e) => e == 'first_swipe').length,
+      1,
+      reason: 'first_swipe là metric TTFV — chỉ log đúng một lần',
+    );
+  });
+
+  testWidgets('recordSwipe trả match → log event match (P0-3)', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final analytics = RecordingAnalytics();
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+    final repo = _MockDiscoveryRepository();
+    when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => true);
+    when(() => repo.getMatchIdWith(any())).thenAnswer((_) async => 'm1');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          discoveryRepositoryProvider.overrideWithValue(repo),
+          photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+          candidatesProvider(null).overrideWith(
+            (ref) async => const [
+              Candidate(id: 'c1', displayName: 'Quỳnh'),
+              Candidate(id: 'c2', displayName: 'Bảo'),
+            ],
+          ),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+          myProfileProvider.overrideWith(
+            (ref) => Future<Profile?>.value(
+              const Profile(id: 'me', displayName: 'Minh'),
+            ),
+          ),
+          analyticsProvider.overrideWithValue(analytics),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('deck_like_btn')));
+    // MatchCelebration có animation lặp — pump khung cố định thay vì settle.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(analytics.events, contains('match'));
+  });
 
   testWidgets('like_limit lỗi dồn dập chỉ mở một ProUpsellSheet', (
     tester,

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -90,6 +93,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       // Ghi NGUYÊN NHÂN (P0-1) để deck/board không đổ lỗi "hết người" khi
       // thật ra là thiếu quyền/GPS tắt/mạng lỗi.
       ref.read(locationStatusProvider.notifier).state = status;
+      // P0-3: kết quả xin quyền vị trí — điểm rơi lớn nhất của funnel.
+      unawaited(ref.read(analyticsProvider).logLocationResult(
+          granted: status != LocationCaptureStatus.permissionDenied));
       if (status == LocationCaptureStatus.success) {
         ref.invalidate(candidatesProvider(widget.genre));
       }
@@ -107,6 +113,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       final status = await ref.read(locationServiceProvider).captureAndPush();
       if (!mounted) return;
       ref.read(locationStatusProvider.notifier).state = status;
+      unawaited(ref.read(analyticsProvider).logLocationResult(
+          granted: status != LocationCaptureStatus.permissionDenied));
       if (status == LocationCaptureStatus.success) _refreshDeck();
     } finally {
       _locationRetryInFlight = false;
@@ -625,6 +633,12 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       final isMatch = await ref
           .read(discoveryRepositoryProvider)
           .recordSwipe(candidate.id, dir);
+      if (mounted) {
+        // P0-3: TTFV — chỉ log sau khi server ĐÃ ghi lượt vuốt (quota reject
+        // raise trước khi ghi nên không tính là "đã vuốt").
+        unawaited(ref.read(analyticsProvider).logFirstSwipe());
+        if (isMatch) unawaited(ref.read(analyticsProvider).logMatch());
+      }
       if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
         final myName = ref.read(myProfileProvider).value?.displayName ??
             (_l10n?.celebrateYouFallback ?? 'Bạn');

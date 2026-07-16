@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -157,6 +160,8 @@ class KeoBoardScreen extends ConsumerWidget {
   Future<void> _retryLocation(WidgetRef ref) async {
     final status = await ref.read(locationServiceProvider).captureAndPush();
     ref.read(locationStatusProvider.notifier).state = status;
+    unawaited(ref.read(analyticsProvider).logLocationResult(
+        granted: status != LocationCaptureStatus.permissionDenied));
     if (status == LocationCaptureStatus.success) {
       ref.invalidate(openKeosProvider);
     }
@@ -391,6 +396,7 @@ class KeoBoardScreen extends ConsumerWidget {
     if (keoId == null) return;
 
     await ref.read(keoRepositoryProvider).requestJoin(keoId);
+    unawaited(ref.read(analyticsProvider).logKeoJoinRequest());
     ref.invalidate(openKeosProvider);
     if (sheetContext.mounted) {
       Navigator.of(sheetContext).pop();

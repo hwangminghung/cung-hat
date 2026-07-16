@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -91,6 +94,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
 
     try {
       await ref.read(chatRepositoryProvider).sendKeoMessage(widget.keoId, text);
+      unawaited(ref.read(analyticsProvider).logChatSent('keo'));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

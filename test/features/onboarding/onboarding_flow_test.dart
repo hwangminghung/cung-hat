@@ -4,12 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import 'package:cung_hat/features/onboarding/presentation/onboarding_flow.dart';
+import 'package:cung_hat/core/analytics/analytics_service.dart';
 import 'package:cung_hat/features/onboarding/application/reference_providers.dart';
 import 'package:cung_hat/shared/widgets/wave_divider.dart';
+
+import '../../support/analytics_fakes.dart';
 
 Future<void> pumpFlow(
   WidgetTester tester, {
   TextScaler textScaler = TextScaler.noScaling,
+  AnalyticsService? analytics,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -17,6 +21,7 @@ Future<void> pumpFlow(
         genresProvider.overrideWith((ref) async => []),
         artistsProvider.overrideWith((ref) async => []),
         songsProvider.overrideWith((ref) async => []),
+        if (analytics != null) analyticsProvider.overrideWithValue(analytics),
       ],
       child: MaterialApp(
         theme: AppTheme.light(),
@@ -242,5 +247,25 @@ void main() {
     expect(find.text('Bài tủ'), findsOneWidget);
     expect(find.byKey(const Key('onb_finish')), findsOneWidget);
     expect(find.text('Hoàn tất'), findsOneWidget);
+  });
+
+  testWidgets('log onboarding_step_x khi vào bước, chỉ đếm CHIỀU TIẾN (P0-3)', (
+    tester,
+  ) async {
+    final analytics = RecordingAnalytics();
+    await pumpFlow(tester, analytics: analytics);
+
+    // Mount = vào bước 1.
+    expect(analytics.events, ['onboarding_step_1']);
+
+    await tester.tap(find.byKey(const Key('onb_continue')));
+    await tester.pump();
+    expect(analytics.events, ['onboarding_step_1', 'onboarding_step_2']);
+
+    // Quay lại rồi tiến lại: back không log, re-enter bước 2 log lần nữa
+    // vẫn hợp lệ cho funnel (max step) — nhưng CHỈ log khi đi tới.
+    await tester.tap(find.byKey(const Key('onb_back')));
+    await tester.pump();
+    expect(analytics.events, ['onboarding_step_1', 'onboarding_step_2']);
   });
 }
