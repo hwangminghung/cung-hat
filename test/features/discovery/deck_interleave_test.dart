@@ -72,7 +72,7 @@ void main() {
     testWidgets('hiện thẻ quảng bá Kèo ở đầu deck', (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -103,7 +103,7 @@ void main() {
         (tester) async {
       final locationService = _FakeLocationService();
       when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => LocationCaptureStatus.success);
       final repo = _MockDiscoveryRepository();
       when(() => repo.recordSwipe(any(), any()))
           .thenAnswer((_) async => false);

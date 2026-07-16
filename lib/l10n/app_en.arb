@@ -463,5 +463,13 @@
   "adminDismiss": "Dismiss",
   "adminLoadError": "Couldn't load reports",
   "settingsLanguage": "Language",
-  "settingsLangSystem": "System default"
+  "settingsLangSystem": "System default",
+  "locationPermissionTitle": "Location permission needed",
+  "locationPermissionSub": "Allow location access so we can find singers and keos near you.",
+  "locationOpenSettings": "Open settings",
+  "locationServiceOffTitle": "Location is turned off",
+  "locationServiceOffSub": "Turn on location (GPS), then try again.",
+  "locationNoFixTitle": "Couldn't get your location",
+  "locationNoFixSub": "No location fix — try again in a moment.",
+  "locationPushFailedTitle": "Couldn't send your location"
 }

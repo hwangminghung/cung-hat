@@ -15,6 +15,12 @@ final discoveryRepositoryProvider =
 final locationServiceProvider =
     Provider((ref) => LocationService(ref.watch(discoveryRepositoryProvider)));
 
+/// Kết quả lần captureAndPush GẦN NHẤT (P0-1) — null = chưa thử lần nào.
+/// Deck Đôi ghi khi vào tab; board Kèo đọc chung (list_open_keos cũng cần vị
+/// trí đã lưu) nên cả hai màn phân biệt được "thiếu vị trí" với "hết người".
+final locationStatusProvider =
+    StateProvider<LocationCaptureStatus?>((ref) => null);
+
 /// (auto_expand, radius_km) đã lưu server-side — nguồn chính cho Bộ lọc và
 /// cho bán kính hiệu lực của deck (xem [candidatesProvider]).
 final discoveryPrefsProvider = FutureProvider<({bool autoExpand, int radiusKm})>(

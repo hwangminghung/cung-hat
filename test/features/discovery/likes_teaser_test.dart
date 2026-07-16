@@ -106,7 +106,7 @@ void main() {
       'FREE user: tap tile Ai đã thích bạn → điều hướng màn teaser (KHÔNG mở sheet trực tiếp)',
       (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       _shellHost(entitlements: const <String>{}, fakeLoc: fakeLoc),
     );
@@ -127,7 +127,7 @@ void main() {
   testWidgets('PRO user: tap tile Ai đã thích bạn → /likes như cũ',
       (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => false);
+    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       _shellHost(entitlements: const <String>{'pro'}, fakeLoc: fakeLoc),
     );

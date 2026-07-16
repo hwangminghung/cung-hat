@@ -14,6 +14,7 @@ import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../../billing/application/billing_providers.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/discovery_providers.dart';
+import '../application/location_service.dart';
 import '../data/discovery_errors.dart';
 import '../domain/candidate.dart';
 import '../domain/deck_item.dart';
@@ -23,6 +24,7 @@ import 'candidate_detail_sheet.dart';
 import 'deck_action_bar.dart';
 import 'filter_sheet.dart';
 import 'keo_promo_card.dart';
+import 'location_error_state.dart';
 import 'match_celebration.dart';
 import 'swipe_overlays.dart';
 
@@ -83,9 +85,32 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     // lại — bắt lại mỗi lần vào vừa chậm (chờ GPS) vừa xoá cache candidates
     // của genre qua invalidate bên dưới.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final ok = await ref.read(locationServiceProvider).captureAndPush();
-      if (ok && mounted) ref.invalidate(candidatesProvider(widget.genre));
+      final status = await ref.read(locationServiceProvider).captureAndPush();
+      if (!mounted) return;
+      // Ghi NGUYÊN NHÂN (P0-1) để deck/board không đổ lỗi "hết người" khi
+      // thật ra là thiếu quyền/GPS tắt/mạng lỗi.
+      ref.read(locationStatusProvider.notifier).state = status;
+      if (status == LocationCaptureStatus.success) {
+        ref.invalidate(candidatesProvider(widget.genre));
+      }
     });
+  }
+
+  /// Chặn double-tap "Thử lại" khi capture đang bay (cùng convention
+  /// _boostInFlight/_rewindInFlight).
+  bool _locationRetryInFlight = false;
+
+  Future<void> _retryLocation() async {
+    if (_locationRetryInFlight) return;
+    _locationRetryInFlight = true;
+    try {
+      final status = await ref.read(locationServiceProvider).captureAndPush();
+      if (!mounted) return;
+      ref.read(locationStatusProvider.notifier).state = status;
+      if (status == LocationCaptureStatus.success) _refreshDeck();
+    } finally {
+      _locationRetryInFlight = false;
+    }
   }
 
   @override
@@ -206,6 +231,21 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           data: (items) {
             final hasCandidates = items.whereType<CandidateItem>().isNotEmpty;
             if (!hasCandidates) {
+              // P0-1: deck rỗng VÌ THIẾU VỊ TRÍ phải nói đúng nguyên nhân —
+              // mở rộng bán kính cũng vô ích khi server không có vị trí user.
+              final locStatus = ref.watch(locationStatusProvider);
+              if (locStatus != null &&
+                  locStatus != LocationCaptureStatus.success) {
+                return _wrapEmptyWithGenreHeader(
+                  LocationErrorState(
+                    status: locStatus,
+                    onRetry: _retryLocation,
+                    onOpenSettings: () => ref
+                        .read(locationServiceProvider)
+                        .openSettingsFor(locStatus),
+                  ),
+                );
+              }
               final radius = _effectiveRadius();
               final autoExpand =
                   ref.watch(discoveryPrefsProvider).value?.autoExpand ?? false;

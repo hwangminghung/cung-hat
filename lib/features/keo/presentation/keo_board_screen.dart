@@ -14,6 +14,8 @@ import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../billing/application/billing_providers.dart';
 import '../../discovery/application/discovery_providers.dart';
+import '../../discovery/application/location_service.dart';
+import '../../discovery/presentation/location_error_state.dart';
 import '../application/keo_providers.dart';
 import '../data/keo_errors.dart';
 import '../domain/keo_match_suggestion.dart';
@@ -65,6 +67,12 @@ class KeoBoardScreen extends ConsumerWidget {
                 ),
                 data: (keos) {
                   if (keos.isEmpty) {
+                    // P0-1: board rỗng VÌ THIẾU VỊ TRÍ (list_open_keos cần vị
+                    // trí đã lưu) phải nói đúng nguyên nhân thay vì "chưa có
+                    // kèo". Status do deck Đôi (tab 0, mount trước) ghi.
+                    final locStatus = ref.watch(locationStatusProvider);
+                    final locationBlocked = locStatus != null &&
+                        locStatus != LocationCaptureStatus.success;
                     return ListView(
                       padding: const EdgeInsets.only(
                         bottom: AppSpacing.lg,
@@ -73,17 +81,26 @@ class KeoBoardScreen extends ConsumerWidget {
                       children: [
                         _boardHeader(context),
                         _matchBanner(context, ref),
-                        EmptyState(
-                          icon: Icons.groups_rounded,
-                          title: Localizations.of<AppLocalizations>(
-                                      context, AppLocalizations)
-                                  ?.keoBoardEmptyTitle ??
-                              'Chưa có kèo quanh đây',
-                          subtitle: Localizations.of<AppLocalizations>(
-                                      context, AppLocalizations)
-                                  ?.keoBoardEmptySub ??
-                              'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
-                        ),
+                        if (locationBlocked)
+                          LocationErrorState(
+                            status: locStatus,
+                            onRetry: () => _retryLocation(ref),
+                            onOpenSettings: () => ref
+                                .read(locationServiceProvider)
+                                .openSettingsFor(locStatus),
+                          )
+                        else
+                          EmptyState(
+                            icon: Icons.groups_rounded,
+                            title: Localizations.of<AppLocalizations>(
+                                        context, AppLocalizations)
+                                    ?.keoBoardEmptyTitle ??
+                                'Chưa có kèo quanh đây',
+                            subtitle: Localizations.of<AppLocalizations>(
+                                        context, AppLocalizations)
+                                    ?.keoBoardEmptySub ??
+                                'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
+                          ),
                       ],
                     );
                   }
@@ -133,6 +150,16 @@ class KeoBoardScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Thử bắt + đẩy vị trí lại từ error state (P0-1); thành công thì fetch
+  /// lại board (list_open_keos giờ mới có vị trí để tính khoảng cách).
+  Future<void> _retryLocation(WidgetRef ref) async {
+    final status = await ref.read(locationServiceProvider).captureAndPush();
+    ref.read(locationStatusProvider.notifier).state = status;
+    if (status == LocationCaptureStatus.success) {
+      ref.invalidate(openKeosProvider);
+    }
   }
 
   void _openCreate(BuildContext context, bool isPro) {
@@ -306,7 +333,11 @@ class KeoBoardScreen extends ConsumerWidget {
     }
 
     try {
-      await ref.read(locationServiceProvider).captureAndPush();
+      final locStatus =
+          await ref.read(locationServiceProvider).captureAndPush();
+      // Ghi nguyên nhân cho empty state (P0-1); vẫn tiếp tục suggest — server
+      // dùng vị trí ĐÃ LƯU nên có thể vẫn gợi ý được với vị trí cũ.
+      ref.read(locationStatusProvider.notifier).state = locStatus;
       final suggestions = await ref.read(keoRepositoryProvider).suggestMatch();
 
       dismissLoading();

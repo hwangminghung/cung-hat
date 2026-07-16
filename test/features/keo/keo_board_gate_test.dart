@@ -53,7 +53,8 @@ class _FakeKeoRepository implements KeoRepository {
 
 class _FakeLocationService implements LocationService {
   @override
-  Future<bool> captureAndPush() async => true;
+  Future<LocationCaptureStatus> captureAndPush() async =>
+      LocationCaptureStatus.success;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
