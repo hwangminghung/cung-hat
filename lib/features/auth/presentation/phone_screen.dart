@@ -65,8 +65,10 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                     tagline: l10n?.authTagline ?? 'Kết bạn qua những bài hát',
                   ),
                   const SizedBox(height: AppSpacing.xl),
+                  // UI review: hạ minh họa để khối nhập liệu + nút chính
+                  // không bị đẩy quá thấp khi bàn phím mở trên màn phổ biến.
                   const _MusicBoxHero(),
-                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.xl),
                   Text(
                     l10n?.authPhoneTitle ?? 'Đăng nhập bằng số điện thoại',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -228,13 +230,13 @@ class _MusicBoxHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 176,
+      height: 148,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Positioned(
             left: 16,
-            top: 30,
+            top: 22,
             child: Transform.rotate(
               angle: -0.18,
               child: const Icon(
@@ -258,7 +260,7 @@ class _MusicBoxHero extends StatelessWidget {
             child: Container(
               key: const Key('login_music_box_hero'),
               width: 244,
-              height: 164,
+              height: 136,
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: AppColors.surfaceAlt,

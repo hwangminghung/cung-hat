@@ -44,7 +44,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Đôi'), findsOneWidget);
     expect(find.text('Kèo'), findsOneWidget);
-    expect(find.text('Chat'), findsOneWidget);
+    expect(find.text('Tin nhắn'), findsOneWidget);
     expect(find.text('Hồ sơ'), findsOneWidget);
     await tester.tap(find.text('Kèo'));
     await tester.pumpAndSettle();
@@ -81,14 +81,14 @@ void main() {
     // Provider lazy: chưa vào tab Chat thì chưa build lần nào.
     expect(inboxCalls, 0);
 
-    await tester.tap(find.text('Chat'));
+    await tester.tap(find.text('Tin nhắn'));
     await tester.pumpAndSettle();
     expect(inboxCalls, 1);
 
     await tester.tap(find.text('Đôi'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Chat'));
+    await tester.tap(find.text('Tin nhắn'));
     await tester.pumpAndSettle();
     // Không invalidate → provider giữ cache, vẫn 1. Có fix → refetch = 2.
     expect(inboxCalls, 2);
@@ -141,7 +141,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Chat'));
+    await tester.tap(find.text('Tin nhắn'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Đôi'));
     await tester.pumpAndSettle();
@@ -203,6 +203,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(WaveProgress), findsOneWidget);
-    expect(find.byKey(const Key('profile_gear_btn')), findsOneWidget);
+    // UI review: bỏ bánh răng trùng lặp — Cài đặt vẫn vào được qua card cuối
+    // danh sách, và danh sách cuộn được tới mục cuối (không bị nav che).
+    expect(find.byKey(const Key('profile_gear_btn')), findsNothing);
+    await tester.dragUntilVisible(
+      find.text('Cài đặt'),
+      find.byType(ListView),
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Cài đặt'), findsOneWidget);
   });
 }

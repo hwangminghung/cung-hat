@@ -155,7 +155,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(EmptyState), findsOneWidget);
-      expect(find.text('Chưa có cuộc trò chuyện nào'), findsOneWidget);
+      expect(find.text('Chưa có cuộc trò chuyện'), findsOneWidget);
     },
   );
 

@@ -113,7 +113,7 @@
     }
   },
   "discoveryExploreBrand": "CÙNG HÁT",
-  "tabChat": "Chat",
+  "tabChat": "Messages",
   "tabProfile": "Profile",
   "shellTileLikes": "Who liked you",
   "shellTileLikesSub": "See everyone who sent you a heart",
@@ -380,8 +380,8 @@
   "inboxTurnYours": "Your turn",
   "inboxReady": "Ready for a karaoke invite",
   "inboxEmptyTitle": "No conversations yet",
-  "inboxEmptySub": "Find a keo to start chatting with new friends!",
-  "inboxFindKeo": "Find a keo",
+  "inboxEmptySub": "Join a kèo to start chatting with new friends.",
+  "inboxFindKeo": "Find a kèo",
   "inboxLoadError": "Couldn't load conversations",
   "keoStateOpen": "Open",
   "keoStateFull": "Full",
@@ -464,7 +464,7 @@
   "adminDismiss": "Dismiss",
   "adminLoadError": "Couldn't load reports",
   "settingsLanguage": "Language",
-  "settingsLangSystem": "System default",
+  "settingsLangSystem": "Default (Vietnamese)",
   "locationPermissionTitle": "Location permission needed",
   "locationPermissionSub": "Allow location access so we can find singers and keos near you.",
   "locationOpenSettings": "Open settings",
@@ -478,6 +478,6 @@
   "onbPhotosDone": "Done",
   "onbPhotosSkip": "Later",
   "onbConsentAll": "Agree to all",
-  "deckCoachSwipe": "Swipe right to Like · left to Pass · up to Super Like",
-  "deckCoachTap": "Tap to start"
+  "deckCoachSwipe": "Swipe right to like\nSwipe left to pass\nSwipe up to Super Like",
+  "deckCoachTap": "Start"
 }

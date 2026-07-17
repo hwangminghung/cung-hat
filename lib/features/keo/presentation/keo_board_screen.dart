@@ -13,7 +13,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/pressable.dart';
 import '../../../shared/widgets/skeleton.dart';
-import '../../../shared/widgets/wave_divider.dart';
+import '../../../shared/widgets/tab_header.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../discovery/application/location_service.dart';
 import '../../discovery/presentation/location_error_state.dart';
@@ -37,10 +37,7 @@ class KeoBoardScreen extends ConsumerWidget {
             Expanded(
               child: keosAsync.when(
                 loading: () => ListView(
-                  padding: const EdgeInsets.only(
-                    top: AppSpacing.lg,
-                    bottom: AppSpacing.lg,
-                  ),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
                   children: [
                     _boardHeader(context),
                     _matchBanner(context, ref),
@@ -51,17 +48,23 @@ class KeoBoardScreen extends ConsumerWidget {
                 ),
                 error: (err, _) => EmptyState(
                   icon: Icons.wifi_off_rounded,
-                  title: Localizations.of<AppLocalizations>(
-                              context, AppLocalizations)
-                          ?.keoBoardLoadError ??
+                  title:
+                      Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.keoBoardLoadError ??
                       'Không tải được danh sách kèo',
-                  subtitle: Localizations.of<AppLocalizations>(
-                              context, AppLocalizations)
-                          ?.commonCheckConnection ??
+                  subtitle:
+                      Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.commonCheckConnection ??
                       'Kiểm tra kết nối rồi thử lại.',
-                  actionLabel: Localizations.of<AppLocalizations>(
-                              context, AppLocalizations)
-                          ?.commonRetry ??
+                  actionLabel:
+                      Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.commonRetry ??
                       'Thử lại',
                   onAction: () => ref.invalidate(openKeosProvider),
                 ),
@@ -71,13 +74,11 @@ class KeoBoardScreen extends ConsumerWidget {
                     // trí đã lưu) phải nói đúng nguyên nhân thay vì "chưa có
                     // kèo". Status do deck Đôi (tab 0, mount trước) ghi.
                     final locStatus = ref.watch(locationStatusProvider);
-                    final locationBlocked = locStatus != null &&
+                    final locationBlocked =
+                        locStatus != null &&
                         locStatus != LocationCaptureStatus.success;
                     return ListView(
-                      padding: const EdgeInsets.only(
-                        bottom: AppSpacing.lg,
-                        top: AppSpacing.lg,
-                      ),
+                      padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
                       children: [
                         _boardHeader(context),
                         _matchBanner(context, ref),
@@ -94,17 +95,23 @@ class KeoBoardScreen extends ConsumerWidget {
                           // chính (một chạm ra gợi ý/proposal thay vì ngõ cụt).
                           EmptyState(
                             icon: Icons.groups_rounded,
-                            title: Localizations.of<AppLocalizations>(
-                                        context, AppLocalizations)
-                                    ?.keoBoardEmptyTitle ??
+                            title:
+                                Localizations.of<AppLocalizations>(
+                                  context,
+                                  AppLocalizations,
+                                )?.keoBoardEmptyTitle ??
                                 'Chưa có kèo quanh đây',
-                            subtitle: Localizations.of<AppLocalizations>(
-                                        context, AppLocalizations)
-                                    ?.keoBoardEmptySub ??
+                            subtitle:
+                                Localizations.of<AppLocalizations>(
+                                  context,
+                                  AppLocalizations,
+                                )?.keoBoardEmptySub ??
                                 'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
-                            actionLabel: Localizations.of<AppLocalizations>(
-                                        context, AppLocalizations)
-                                    ?.keoBoardMatchMe ??
+                            actionLabel:
+                                Localizations.of<AppLocalizations>(
+                                  context,
+                                  AppLocalizations,
+                                )?.keoBoardMatchMe ??
                                 'Ghép nhóm cho tôi',
                             onAction: () => _runAutoMatch(context, ref),
                           ),
@@ -113,10 +120,7 @@ class KeoBoardScreen extends ConsumerWidget {
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.only(
-                      bottom: AppSpacing.lg,
-                      top: AppSpacing.lg,
-                    ),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
                     itemCount: keos.length + 2,
                     itemBuilder: (context, index) {
                       if (index == 0) return _boardHeader(context);
@@ -134,11 +138,13 @@ class KeoBoardScreen extends ConsumerWidget {
               ),
             ),
             Padding(
+              // UI review: CTA sticky bớt "nặng" — thu padding dọc, list phía
+              // trên đã có bottom padding xxl nên card cuối không bị bí.
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
+                AppSpacing.xs,
+                AppSpacing.lg,
                 AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.lg,
               ),
               child: SizedBox(
                 width: double.infinity,
@@ -148,8 +154,10 @@ class KeoBoardScreen extends ConsumerWidget {
                   onPressed: () => context.push('/keo/create'),
                   icon: Icons.add_box_outlined,
                   child: Text(
-                    Localizations.of<AppLocalizations>(context, AppLocalizations)
-                            ?.keoCreateCta ??
+                    Localizations.of<AppLocalizations>(
+                          context,
+                          AppLocalizations,
+                        )?.keoCreateCta ??
                         'Tạo kèo',
                   ),
                 ),
@@ -166,58 +174,45 @@ class KeoBoardScreen extends ConsumerWidget {
   Future<void> _retryLocation(WidgetRef ref) async {
     final status = await ref.read(locationServiceProvider).captureAndPush();
     ref.read(locationStatusProvider.notifier).state = status;
-    unawaited(ref.read(analyticsProvider).logLocationResult(
-        granted: status != LocationCaptureStatus.permissionDenied));
+    unawaited(
+      ref
+          .read(analyticsProvider)
+          .logLocationResult(
+            granted: status != LocationCaptureStatus.permissionDenied,
+          ),
+    );
     if (status == LocationCaptureStatus.success) {
       ref.invalidate(openKeosProvider);
     }
   }
 
-  Widget _boardHeader(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(
-      AppSpacing.lg,
-      AppSpacing.md,
-      AppSpacing.lg,
-      AppSpacing.sm,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                Localizations.of<AppLocalizations>(context, AppLocalizations)
-                        ?.keoBoardTitle ??
-                    'Kèo quanh bạn',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ),
-            IconButton.outlined(
-              tooltip: Localizations.of<AppLocalizations>(
-                          context, AppLocalizations)
-                      ?.keoBoardStoreTooltip ??
-                  'Cửa hàng',
-              onPressed: () => context.push('/store'),
-              icon: const Icon(Icons.storefront_outlined),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          Localizations.of<AppLocalizations>(context, AppLocalizations)
-                  ?.keoBoardSubtitle ??
-              'Tìm nhóm đi hát hợp gu, gần bạn và có lịch phù hợp.',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: WaveDivider(),
-        ),
-      ],
-    ),
+  // Header theo quy tắc chung 4 tab (TabHeader): tiêu đề trái, action 44×44
+  // phải, wave đóng khối — action Cửa hàng giữ nguyên.
+  Widget _boardHeader(BuildContext context) => TabHeader(
+    title:
+        Localizations.of<AppLocalizations>(
+          context,
+          AppLocalizations,
+        )?.keoBoardTitle ??
+        'Kèo gần bạn',
+    subtitle:
+        Localizations.of<AppLocalizations>(
+          context,
+          AppLocalizations,
+        )?.keoBoardSubtitle ??
+        'Tìm nhóm hát hợp gu, gần bạn và đúng thời gian.',
+    actions: [
+      HeaderActionButton(
+        tooltip:
+            Localizations.of<AppLocalizations>(
+              context,
+              AppLocalizations,
+            )?.keoBoardStoreTooltip ??
+            'Cửa hàng',
+        icon: Icons.storefront_outlined,
+        onTap: () => context.push('/store'),
+      ),
+    ],
   );
 
   Widget _matchBanner(BuildContext context, WidgetRef ref) => Padding(
@@ -261,8 +256,9 @@ class KeoBoardScreen extends ConsumerWidget {
                   children: [
                     Text(
                       Localizations.of<AppLocalizations>(
-                                  context, AppLocalizations)
-                              ?.keoBoardMatchMe ??
+                            context,
+                            AppLocalizations,
+                          )?.keoBoardMatchMe ??
                           'Ghép nhóm cho tôi',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.ink,
@@ -272,9 +268,10 @@ class KeoBoardScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       Localizations.of<AppLocalizations>(
-                                  context, AppLocalizations)
-                              ?.keoBoardMatchMeSub ??
-                          'Tự động gợi ý kèo hợp gu, gần bạn và đúng khung giờ.',
+                            context,
+                            AppLocalizations,
+                          )?.keoBoardMatchMeSub ??
+                          'Tự động gợi ý kèo phù hợp với gu nhạc, vị trí và thời gian của bạn.',
                       style: Theme.of(
                         context,
                       ).textTheme.bodySmall?.copyWith(color: AppColors.ink),
@@ -332,8 +329,9 @@ class KeoBoardScreen extends ConsumerWidget {
     }
 
     try {
-      final locStatus =
-          await ref.read(locationServiceProvider).captureAndPush();
+      final locStatus = await ref
+          .read(locationServiceProvider)
+          .captureAndPush();
       // Ghi nguyên nhân cho empty state (P0-1); vẫn tiếp tục suggest — server
       // dùng vị trí ĐÃ LƯU nên có thể vẫn gợi ý được với vị trí cũ.
       ref.read(locationStatusProvider.notifier).state = locStatus;

@@ -12,6 +12,8 @@ import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/tab_header.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
@@ -120,8 +122,13 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       // thật ra là thiếu quyền/GPS tắt/mạng lỗi.
       ref.read(locationStatusProvider.notifier).state = status;
       // P0-3: kết quả xin quyền vị trí — điểm rơi lớn nhất của funnel.
-      unawaited(ref.read(analyticsProvider).logLocationResult(
-          granted: status != LocationCaptureStatus.permissionDenied));
+      unawaited(
+        ref
+            .read(analyticsProvider)
+            .logLocationResult(
+              granted: status != LocationCaptureStatus.permissionDenied,
+            ),
+      );
       if (status == LocationCaptureStatus.success) {
         ref.invalidate(candidatesProvider(widget.genre));
       }
@@ -139,8 +146,13 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       final status = await ref.read(locationServiceProvider).captureAndPush();
       if (!mounted) return;
       ref.read(locationStatusProvider.notifier).state = status;
-      unawaited(ref.read(analyticsProvider).logLocationResult(
-          granted: status != LocationCaptureStatus.permissionDenied));
+      unawaited(
+        ref
+            .read(analyticsProvider)
+            .logLocationResult(
+              granted: status != LocationCaptureStatus.permissionDenied,
+            ),
+      );
       if (status == LocationCaptureStatus.success) _refreshDeck();
     } finally {
       _locationRetryInFlight = false;
@@ -182,8 +194,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(_l10n?.commonSaveError ?? 'Không lưu được cài đặt, thử lại.'),
+            content: Text(
+              _l10n?.commonSaveError ?? 'Không lưu được cài đặt, thử lại.',
+            ),
           ),
         );
       }
@@ -258,7 +271,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           error: (err, _) => EmptyState(
             icon: Icons.wifi_off_rounded,
             title: l10n?.deckLoadErrorTitle ?? 'Không tải được gợi ý',
-            subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+            subtitle:
+                l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
             actionLabel: l10n?.commonRetry ?? 'Thử lại',
             onAction: _refreshDeck,
           ),
@@ -338,83 +352,90 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                     child: Stack(
                       children: [
                         CardSwiper(
-                      // Key theo list instance: sau khi vuốt hết deck, CardSwiper
-                      // cũ giữ index đã cạn nên list mới fetch về không hiển thị —
-                      // đổi key ép dựng swiper mới cho mỗi lần fetch.
-                      key: ObjectKey(items),
-                      controller: _controller,
-                      cardsCount: items.length,
-                      isLoop: false,
-                      numberOfCardsDisplayed: items.length.clamp(1, 2),
-                      maxAngle: 25,
-                      threshold: 60,
-                      cardBuilder: (context, index, h, v) {
-                        _scheduleProgress(h / 100, v / 100);
-                        final item = items[index];
-                        return switch (item) {
-                          CandidateItem(:final candidate) => SwipeOverlays(
-                            hProgress: h / 100,
-                            vProgress: v / 100,
-                            child: CandidateCard(
-                              // CardSwiper dựng card theo vị trí — không
-                              // key thì State (chỉ số ảnh) bị tái dụng cho
-                              // ứng viên khác khi deck tiến lên.
-                              key: ValueKey(candidate.id),
-                              candidate: candidate,
-                              onOpenDetail: () => CandidateDetailSheet.show(
-                                context,
-                                candidate: candidate,
-                                onPass: () =>
-                                    _controller.swipe(CardSwiperDirection.left),
-                                onLike: () => _controller.swipe(
-                                  CardSwiperDirection.right,
+                          // Key theo list instance: sau khi vuốt hết deck, CardSwiper
+                          // cũ giữ index đã cạn nên list mới fetch về không hiển thị —
+                          // đổi key ép dựng swiper mới cho mỗi lần fetch.
+                          key: ObjectKey(items),
+                          controller: _controller,
+                          cardsCount: items.length,
+                          isLoop: false,
+                          numberOfCardsDisplayed: items.length.clamp(1, 2),
+                          maxAngle: 25,
+                          threshold: 60,
+                          cardBuilder: (context, index, h, v) {
+                            _scheduleProgress(h / 100, v / 100);
+                            final item = items[index];
+                            return switch (item) {
+                              CandidateItem(:final candidate) => SwipeOverlays(
+                                hProgress: h / 100,
+                                vProgress: v / 100,
+                                child: CandidateCard(
+                                  // CardSwiper dựng card theo vị trí — không
+                                  // key thì State (chỉ số ảnh) bị tái dụng cho
+                                  // ứng viên khác khi deck tiến lên.
+                                  key: ValueKey(candidate.id),
+                                  candidate: candidate,
+                                  onOpenDetail: () => CandidateDetailSheet.show(
+                                    context,
+                                    candidate: candidate,
+                                    onPass: () => _controller.swipe(
+                                      CardSwiperDirection.left,
+                                    ),
+                                    onLike: () => _controller.swipe(
+                                      CardSwiperDirection.right,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          KeoPromoItem(:final keo) => SwipeOverlays(
-                            hProgress: h / 100,
-                            vProgress: v / 100,
-                            likeLabel: _l10n?.deckPromoSeeKeo ?? 'XEM KÈO',
-                            showSuper: false,
-                            child: KeoPromoCard(
-                              key: ValueKey('keo-promo-${keo.id}'),
-                              keo: keo,
-                            ),
-                          ),
-                        };
-                      },
-                      onSwipe: (previousIndex, currentIndex, direction) {
-                        _scheduleProgress(0, 0);
-                        // Vuốt được rồi thì coach-mark hết nhiệm vụ.
-                        if (_showCoach) unawaited(_dismissCoach());
-                        final item = items[previousIndex];
-                        switch (item) {
-                          case CandidateItem(:final candidate):
-                            final dir = _directionToSwipe(direction);
-                            if (dir != null) {
-                              // Neo toàn cục ghi kèm genre: rewind chỉ hợp lệ
-                              // từ đúng deck sở hữu swipe thật mới nhất.
-                              ref.read(lastSwipeAnchorProvider.notifier).state =
-                                  (genre: widget.genre, candidate: candidate);
-                              _handleSwipe(candidate, dir);
+                              KeoPromoItem(:final keo) => SwipeOverlays(
+                                hProgress: h / 100,
+                                vProgress: v / 100,
+                                likeLabel: _l10n?.deckPromoSeeKeo ?? 'XEM KÈO',
+                                showSuper: false,
+                                child: KeoPromoCard(
+                                  key: ValueKey('keo-promo-${keo.id}'),
+                                  keo: keo,
+                                ),
+                              ),
+                            };
+                          },
+                          onSwipe: (previousIndex, currentIndex, direction) {
+                            _scheduleProgress(0, 0);
+                            // Vuốt được rồi thì coach-mark hết nhiệm vụ.
+                            if (_showCoach) unawaited(_dismissCoach());
+                            final item = items[previousIndex];
+                            switch (item) {
+                              case CandidateItem(:final candidate):
+                                final dir = _directionToSwipe(direction);
+                                if (dir != null) {
+                                  // Neo toàn cục ghi kèm genre: rewind chỉ hợp lệ
+                                  // từ đúng deck sở hữu swipe thật mới nhất.
+                                  ref
+                                      .read(lastSwipeAnchorProvider.notifier)
+                                      .state = (
+                                    genre: widget.genre,
+                                    candidate: candidate,
+                                  );
+                                  _handleSwipe(candidate, dir);
+                                }
+                              case KeoPromoItem(:final keo):
+                                // Promo: không quota, không record_swipe, không
+                                // rewind — null neo để rewind sau promo no-op
+                                // thay vì undo nhầm swipe thật cũ hơn.
+                                ref
+                                        .read(lastSwipeAnchorProvider.notifier)
+                                        .state =
+                                    null;
+                                if (direction == CardSwiperDirection.right) {
+                                  context.push('/keo/${keo.id}');
+                                }
                             }
-                          case KeoPromoItem(:final keo):
-                            // Promo: không quota, không record_swipe, không
-                            // rewind — null neo để rewind sau promo no-op
-                            // thay vì undo nhầm swipe thật cũ hơn.
-                            ref.read(lastSwipeAnchorProvider.notifier).state =
-                                null;
-                            if (direction == CardSwiperDirection.right) {
-                              context.push('/keo/${keo.id}');
-                            }
-                        }
-                        return true;
-                      },
-                      onEnd: () {
-                        _scheduleProgress(0, 0);
-                        if (mounted) _refreshDeck();
-                      },
+                            return true;
+                          },
+                          onEnd: () {
+                            _scheduleProgress(0, 0);
+                            if (mounted) _refreshDeck();
+                          },
                         ),
                         if (_showCoach)
                           Positioned.fill(
@@ -422,46 +443,65 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                               key: const Key('swipe_coach_mark'),
                               behavior: HitTestBehavior.opaque,
                               onTap: _dismissCoach,
+                              // Scrim nhẹ để card hồ sơ vẫn thấy được; nội
+                              // dung hướng dẫn nằm trong card kem tương phản
+                              // cao + CTA rõ ràng (UI review: bỏ 'Tap to
+                              // start' chìm).
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.55),
+                                  color: Colors.black.withValues(alpha: 0.35),
                                   borderRadius: BorderRadius.circular(28),
                                 ),
                                 child: Center(
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.all(AppSpacing.xl),
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.xl,
+                                    ),
+                                    padding: const EdgeInsets.all(
+                                      AppSpacing.xl,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surface,
+                                      borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusCard,
+                                      ),
+                                      border: Border.all(
+                                        color: AppColors.ink,
+                                        width: 2,
+                                      ),
+                                      boxShadow: const [AppShadows.hard],
+                                    ),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
                                       children: [
                                         const Icon(
                                           Icons.swipe_rounded,
-                                          color: Colors.white,
-                                          size: 56,
-                                        ),
-                                        const SizedBox(height: AppSpacing.lg),
-                                        Text(
-                                          _l10n?.deckCoachSwipe ??
-                                              'Vuốt phải để Thích · trái để Bỏ qua · vuốt lên để Siêu thích',
-                                          textAlign: TextAlign.center,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge
-                                              ?.copyWith(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w800,
-                                              ),
+                                          color: AppColors.primary,
+                                          size: 40,
                                         ),
                                         const SizedBox(height: AppSpacing.md),
                                         Text(
-                                          _l10n?.deckCoachTap ??
-                                              'Chạm để bắt đầu',
+                                          _l10n?.deckCoachSwipe ??
+                                              'Vuốt phải để thích\nVuốt trái để bỏ qua\nVuốt lên để Siêu thích',
+                                          textAlign: TextAlign.center,
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyMedium
+                                              .titleMedium
                                               ?.copyWith(
-                                                color: Colors.white70,
+                                                color: AppColors.ink,
+                                                fontWeight: FontWeight.w800,
+                                                height: 1.6,
                                               ),
+                                        ),
+                                        const SizedBox(height: AppSpacing.lg),
+                                        GradientButton(
+                                          key: const Key('coach_start_btn'),
+                                          onPressed: _dismissCoach,
+                                          child: Text(
+                                            _l10n?.deckCoachTap ?? 'Bắt đầu',
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -509,7 +549,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     final subtitle =
         theme?.subtitle ??
         l10n?.discoveryDeckSubtitle ??
-        'Gợi ý hợp gu nhạc và khoảng cách an toàn.';
+        'Gợi ý hợp gu nhạc, trong khoảng cách an toàn.';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,7 +557,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         Row(
           children: [
             if (widget.genre != null) ...[
-              _DeckHeaderButton(
+              HeaderActionButton(
                 key: const Key('theme_deck_back'),
                 tooltip: l10n?.commonBack ?? 'Quay lại',
                 icon: Icons.arrow_back_rounded,
@@ -529,7 +569,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               child: Text(
                 widget.genre == null
                     ? l10n?.appTitle ?? 'Cùng Hát'
-                    : theme?.title ?? (l10n?.exploreFallbackTitle ?? 'Khám Phá'),
+                    : theme?.title ??
+                          (l10n?.exploreFallbackTitle ?? 'Khám Phá'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -539,7 +580,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               ),
             ),
             if (widget.genre == null) ...[
-              _DeckHeaderButton(
+              HeaderActionButton(
                 key: const Key('filter_btn'),
                 tooltip: l10n?.filterTitle ?? 'Bộ lọc',
                 icon: Icons.filter_alt_outlined,
@@ -550,7 +591,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              _DeckHeaderButton(
+              HeaderActionButton(
                 key: const Key('explore_btn'),
                 tooltip: l10n?.deckExploreTooltip ?? 'Khám Phá theo gu nhạc',
                 icon: Icons.queue_music_rounded,
@@ -560,7 +601,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               _buildBoostButton(context),
               const SizedBox(width: AppSpacing.sm),
             ],
-            _DeckHeaderButton(
+            HeaderActionButton(
               tooltip: l10n?.deckRefreshTooltip ?? 'Làm mới',
               icon: Icons.refresh_rounded,
               onTap: _refreshDeck,
@@ -571,12 +612,16 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         if (widget.genre == null)
           Row(
             children: [
-              Text(
-                l10n?.discoveryDeckTitle ?? 'Đôi hát',
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w900,
-                  height: 0.95,
+              Flexible(
+                child: Text(
+                  l10n?.discoveryDeckTitle ?? 'Ghép đôi cùng hát',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w900,
+                    height: 0.95,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -613,9 +658,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     final boosting = boostExpiry != null && boostExpiry.isAfter(DateTime.now());
     final tooltip = boosting
         ? (_l10n?.deckBoostingUntil(_formatHhMm(boostExpiry)) ??
-            'Đang boost đến ${_formatHhMm(boostExpiry)}')
+              'Đang boost đến ${_formatHhMm(boostExpiry)}')
         : (_l10n?.deckBoostTooltip ?? 'Boost hồ sơ');
-    return _DeckHeaderButton(
+    return HeaderActionButton(
       key: const Key('deck_boost_btn'),
       tooltip: tooltip,
       onTap: _handleBoost,
@@ -664,9 +709,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         ref.invalidate(entitlementsProvider);
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(err.localizedMessage(_l10n))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(err.localizedMessage(_l10n))));
       }
     } finally {
       _boostInFlight = false;
@@ -705,9 +750,9 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         ref.invalidate(entitlementsProvider);
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(err.localizedMessage(_l10n))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(err.localizedMessage(_l10n))));
       }
     } finally {
       _rewindInFlight = false;
@@ -726,7 +771,8 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         if (isMatch) unawaited(ref.read(analyticsProvider).logMatch());
       }
       if ((dir == 'like' || dir == 'super') && isMatch && mounted) {
-        final myName = ref.read(myProfileProvider).value?.displayName ??
+        final myName =
+            ref.read(myProfileProvider).value?.displayName ??
             (_l10n?.celebrateYouFallback ?? 'Bạn');
         // Không để lỗi lấy matchId chặn màn ăn mừng — matchId null vẫn cho
         // xem MatchCelebration, chỉ là nút "Nhắn tin ngay" sẽ không điều
@@ -801,53 +847,11 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
         case DiscoverySwipeError.boostLimit:
         // unknown: swipe CÓ THỂ đã được ghi — undo sẽ desync, nên chỉ báo lỗi.
         case DiscoverySwipeError.unknown:
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(err.localizedMessage(_l10n))),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(err.localizedMessage(_l10n))));
       }
     }
-  }
-}
-
-class _DeckHeaderButton extends StatelessWidget {
-  const _DeckHeaderButton({
-    super.key,
-    required this.tooltip,
-    required this.icon,
-    required this.onTap,
-    this.active = false,
-  });
-
-  final String tooltip;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: active ? AppColors.secondary : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-          border: Border.all(color: AppColors.ink, width: 2),
-          boxShadow: const [AppShadows.hard],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: SizedBox.square(
-              dimension: 44,
-              child: Icon(icon, color: AppColors.ink, size: 24),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -906,9 +910,13 @@ class _EmptyDeck extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           SwitchListTile(
             key: const Key('auto_expand_switch'),
-            title: Text(l10n?.deckAutoExpandTitle ?? 'Tự mở rộng khi hết người'),
-            subtitle: Text(l10n?.deckAutoExpandSub ??
-                'Tự động tìm quanh 100 km khi 50 km đã hết'),
+            title: Text(
+              l10n?.deckAutoExpandTitle ?? 'Tự mở rộng khi hết người',
+            ),
+            subtitle: Text(
+              l10n?.deckAutoExpandSub ??
+                  'Tự động tìm quanh 100 km khi 50 km đã hết',
+            ),
             value: autoExpand,
             onChanged: onToggleAutoExpand,
           ),

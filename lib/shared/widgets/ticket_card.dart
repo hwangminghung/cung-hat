@@ -14,6 +14,7 @@ class TicketCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(AppSpacing.lg),
     this.showPerforation = true,
     this.perforationPosition = 0.28,
+    this.perforationOffset,
   }) : assert(
          perforationPosition > 0 && perforationPosition < 1,
          'perforationPosition must be between 0 and 1.',
@@ -26,12 +27,19 @@ class TicketCard extends StatelessWidget {
   /// Horizontal position of the vertical perforation as a width fraction.
   final double perforationPosition;
 
+  /// Vi tri duc lo theo dp TU MEP TRAI — dung khi cot ben trai co be rong
+  /// CO DINH (KeoCard: cot gio 58dp): fraction theo be rong man se lech vao
+  /// giua noi dung o man hep (UI review 2026-07-16). Non-null thi thang
+  /// [perforationPosition].
+  final double? perforationOffset;
+
   @override
   Widget build(BuildContext context) {
     const clipper = TicketCardClipper();
     final detailsPainter = TicketCardPainter(
       showPerforation: showPerforation,
       perforationPosition: perforationPosition,
+      perforationOffset: perforationOffset,
     );
 
     return Padding(
@@ -92,6 +100,7 @@ class TicketCardPainter extends CustomPainter {
   const TicketCardPainter({
     this.showPerforation = true,
     this.perforationPosition = 0.28,
+    this.perforationOffset,
     this.surfaceColor = AppColors.surface,
     this.outlineColor = AppColors.ink,
     this.outlineWidth = 2,
@@ -102,6 +111,7 @@ class TicketCardPainter extends CustomPainter {
 
   final bool showPerforation;
   final double perforationPosition;
+  final double? perforationOffset;
   final Color surfaceColor;
   final Color outlineColor;
   final double outlineWidth;
@@ -125,7 +135,8 @@ class TicketCardPainter extends CustomPainter {
 
     if (!showPerforation) return;
 
-    final x = size.width * perforationPosition;
+    final x = perforationOffset ?? size.width * perforationPosition;
+    if (x <= 0 || x >= size.width) return;
     final start = AppSpacing.md;
     final end = size.height - AppSpacing.md;
     if (end <= start) return;
@@ -150,6 +161,7 @@ class TicketCardPainter extends CustomPainter {
   bool shouldRepaint(TicketCardPainter oldDelegate) =>
       showPerforation != oldDelegate.showPerforation ||
       perforationPosition != oldDelegate.perforationPosition ||
+      perforationOffset != oldDelegate.perforationOffset ||
       surfaceColor != oldDelegate.surfaceColor ||
       outlineColor != oldDelegate.outlineColor ||
       outlineWidth != oldDelegate.outlineWidth;

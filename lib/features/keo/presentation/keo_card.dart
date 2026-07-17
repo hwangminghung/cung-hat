@@ -33,7 +33,10 @@ class KeoCard extends StatelessWidget {
         child: TicketCard(
           padding: const EdgeInsets.all(AppSpacing.md),
           showPerforation: time != null && !stackTime,
-          perforationPosition: 0.25,
+          // UI review: đặt đường đục lỗ theo dp (giữa cột giờ 58dp và nội
+          // dung) — fraction theo bề rộng màn làm nó cắt xuyên chữ/chip/avatar
+          // ở màn hẹp.
+          perforationOffset: AppSpacing.md + 58 + AppSpacing.lg / 2,
           child: time != null && !stackTime
               ? IntrinsicHeight(
                   child: Row(
@@ -136,15 +139,24 @@ class _KeoDetails extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
+              // UI review: tiêu đề tối đa 2 dòng, cỡ vừa (titleMedium đậm) —
+              // không tranh chỗ với badge/metadata, không va mũi tên.
               child: Text(
                 keo.title,
-                style: text.titleLarge,
-                maxLines: 3,
+                style: text.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  height: 1.25,
+                ),
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: AppSpacing.xs),
-            const Icon(Icons.arrow_forward_rounded, color: AppColors.ink),
+            const SizedBox(width: AppSpacing.sm),
+            const Icon(
+              Icons.arrow_forward_rounded,
+              color: AppColors.ink,
+              size: 20,
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -154,12 +166,16 @@ class _KeoDetails extends StatelessWidget {
           children: [
             StampChip(
               label: keo.joinMode == 'open'
-                  ? (Localizations.of<AppLocalizations>(context, AppLocalizations)
-                          ?.keoModeOpen ??
-                      'Mở · vào là tham gia')
-                  : (Localizations.of<AppLocalizations>(context, AppLocalizations)
-                          ?.keoModeApproval ??
-                      'Cần duyệt'),
+                  ? (Localizations.of<AppLocalizations>(
+                          context,
+                          AppLocalizations,
+                        )?.keoModeOpen ??
+                        'Mở · vào là tham gia')
+                  : (Localizations.of<AppLocalizations>(
+                          context,
+                          AppLocalizations,
+                        )?.keoModeApproval ??
+                        'Cần duyệt'),
               tone: keo.joinMode == 'open'
                   ? StampChipTone.lime
                   : StampChipTone.teal,
@@ -170,23 +186,36 @@ class _KeoDetails extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
+        // UI review: metadata nhóm thành 2 hàng dễ quét — (địa điểm +
+        // khoảng cách) rồi (số người + chủ kèo); hàng tự wrap khi chật.
         Wrap(
           spacing: AppSpacing.md,
-          runSpacing: AppSpacing.sm,
+          runSpacing: AppSpacing.xs,
           children: [
             if (keo.areaLabel != null)
               _Meta(Icons.place_outlined, keo.areaLabel!),
             if (keo.distanceBand != null)
               _Meta(
                 Icons.near_me_outlined,
-                Localizations.of<AppLocalizations>(context, AppLocalizations)
-                        ?.keoCardDistance(keo.distanceBand!) ??
+                Localizations.of<AppLocalizations>(
+                      context,
+                      AppLocalizations,
+                    )?.keoCardDistance(keo.distanceBand!) ??
                     'cách ${keo.distanceBand} km',
               ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.xs,
+          children: [
             _Meta(
               Icons.groups_outlined,
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.keoCardPeople(keo.slotsFilled, keo.sizeTarget) ??
+              Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.keoCardPeople(keo.slotsFilled, keo.sizeTarget) ??
                   '${keo.slotsFilled}/${keo.sizeTarget} người',
             ),
             if (keo.hostName != null)
@@ -206,10 +235,7 @@ class _KeoDetails extends StatelessWidget {
         ],
         if (keo.memberNames.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          _MemberStrip(
-            names: keo.memberNames,
-            sizeTarget: keo.sizeTarget,
-          ),
+          _MemberStrip(names: keo.memberNames, sizeTarget: keo.sizeTarget),
         ],
       ],
     );
@@ -288,11 +314,17 @@ class _Meta extends StatelessWidget {
       children: [
         Icon(icon, size: 17, color: AppColors.teal),
         const SizedBox(width: AppSpacing.xs),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.ink,
-            fontWeight: FontWeight.w600,
+        // Flexible + ellipsis: nhãn dài (địa danh/tên chủ kèo) co lại thay vì
+        // tràn phải 16px ở màn hẹp (probe 393dp, UI review 2026-07-16).
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
