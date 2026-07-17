@@ -244,11 +244,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authOtpError => 'Mã OTP chưa đúng';
 
   @override
-  String get discoveryDeckTitle => 'Đôi hát';
+  String get discoveryDeckTitle => 'Ghép đôi cùng hát';
 
   @override
   String get discoveryDeckSubtitle =>
-      'Gợi ý hợp gu nhạc và khoảng cách an toàn.';
+      'Gợi ý hợp gu nhạc, trong khoảng cách an toàn.';
 
   @override
   String get discoveryRewind => 'Quay lại';
@@ -281,7 +281,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get discoveryExploreBrand => 'CÙNG HÁT';
 
   @override
-  String get tabChat => 'Chat';
+  String get tabChat => 'Tin nhắn';
 
   @override
   String get tabProfile => 'Hồ sơ';
@@ -302,7 +302,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get shellTilePhotosSub => 'Thêm tối đa 6 ảnh vào hồ sơ';
 
   @override
-  String get shellTilePrompts => 'Thẻ hỏi-đáp';
+  String get shellTilePrompts => 'Thẻ gợi chuyện';
 
   @override
   String get shellTilePromptsSub =>
@@ -749,21 +749,21 @@ class AppLocalizationsVi extends AppLocalizations {
   String get keoCreateCta => 'Tạo kèo';
 
   @override
-  String get keoBoardTitle => 'Kèo quanh bạn';
+  String get keoBoardTitle => 'Kèo gần bạn';
 
   @override
   String get keoBoardStoreTooltip => 'Cửa hàng';
 
   @override
   String get keoBoardSubtitle =>
-      'Tìm nhóm đi hát hợp gu, gần bạn và có lịch phù hợp.';
+      'Tìm nhóm hát hợp gu, gần bạn và đúng thời gian.';
 
   @override
   String get keoBoardMatchMe => 'Ghép nhóm cho tôi';
 
   @override
   String get keoBoardMatchMeSub =>
-      'Tự động gợi ý kèo hợp gu, gần bạn và đúng khung giờ.';
+      'Tự động gợi ý kèo phù hợp với gu nhạc, vị trí và thời gian của bạn.';
 
   @override
   String get keoSharedTitle => 'Kèo được chia sẻ';
@@ -1062,14 +1062,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get inboxReady => 'Sẵn sàng rủ đi hát';
 
   @override
-  String get inboxEmptyTitle => 'Chưa có cuộc trò chuyện nào';
+  String get inboxEmptyTitle => 'Chưa có cuộc trò chuyện';
 
   @override
   String get inboxEmptySub =>
-      'Tìm kèo ngay để bắt đầu trò chuyện với những người bạn mới!';
+      'Tham gia một kèo để bắt đầu trò chuyện với những người bạn mới.';
 
   @override
-  String get inboxFindKeo => 'Tìm kèo ngay';
+  String get inboxFindKeo => 'Tìm kèo';
 
   @override
   String get inboxLoadError => 'Không tải được cuộc trò chuyện';
@@ -1315,7 +1315,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsLanguage => 'Ngôn ngữ';
 
   @override
-  String get settingsLangSystem => 'Theo hệ thống';
+  String get settingsLangSystem => 'Mặc định (Tiếng Việt)';
 
   @override
   String get locationPermissionTitle => 'Cần quyền vị trí';
@@ -1361,8 +1361,8 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get deckCoachSwipe =>
-      'Vuốt phải để Thích · trái để Bỏ qua · vuốt lên để Siêu thích';
+      'Vuốt phải để thích\nVuốt trái để bỏ qua\nVuốt lên để Siêu thích';
 
   @override
-  String get deckCoachTap => 'Chạm để bắt đầu';
+  String get deckCoachTap => 'Bắt đầu';
 }

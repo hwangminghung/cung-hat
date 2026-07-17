@@ -60,7 +60,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Ngôn ngữ'), findsOneWidget);
-      expect(find.text('Theo hệ thống'), findsOneWidget);
+      expect(find.text('Mặc định (Tiếng Việt)'), findsOneWidget);
 
       await tester.dragUntilVisible(
         find.byKey(const Key('lang_en')),

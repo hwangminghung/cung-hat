@@ -153,13 +153,14 @@ class _ActionItem extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
+        // UI review: nhãn 11px khó đọc — nâng lên labelMedium (12px+) và giữ
+        // 1 dòng; khoảng cách dưới do padding của bar trong doi_deck lo.
         Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.visible,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: AppColors.ink,
-            fontSize: 11,
             fontWeight: FontWeight.w800,
           ),
         ),

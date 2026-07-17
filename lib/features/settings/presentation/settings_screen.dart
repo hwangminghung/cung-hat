@@ -74,7 +74,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 _LanguageTile(
                   key: const Key('lang_system'),
-                  label: _l10n?.settingsLangSystem ?? 'Theo hệ thống',
+                  label: _l10n?.settingsLangSystem ?? 'Mặc định (Tiếng Việt)',
                   selected: ref.watch(localeControllerProvider) == null,
                   onTap: () =>
                       ref.read(localeControllerProvider.notifier).set(null),
@@ -168,9 +168,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ref.invalidate(myConsentsProvider);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
             content: Text(
-                _l10n?.commonSaveError ?? 'Không lưu được cài đặt, thử lại.')));
+              _l10n?.commonSaveError ?? 'Không lưu được cài đặt, thử lại.',
+            ),
+          ),
+        );
       }
     }
   }
@@ -184,7 +188,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _l10n?.settingsExportError ?? 'Không thể tải dữ liệu. Vui lòng thử lại.',
+            _l10n?.settingsExportError ??
+                'Không thể tải dữ liệu. Vui lòng thử lại.',
           ),
         ),
       );
@@ -230,7 +235,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              _l10n?.settingsDeleteError ?? 'Không xoá được tài khoản, thử lại.',
+              _l10n?.settingsDeleteError ??
+                  'Không xoá được tài khoản, thử lại.',
             ),
           ),
         );

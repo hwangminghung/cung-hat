@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/stamp_chip.dart';
+import '../../../shared/widgets/tab_header.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../keo/application/keo_providers.dart';
 import '../../keo/domain/keo.dart';
@@ -26,87 +27,114 @@ class InboxScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final async = ref.watch(inboxProvider);
-    final myId = ref.watch(myProfileProvider).value?.id;
     // Section "Kèo của bạn" degrade êm: provider lỗi/đang tải → coi như rỗng,
     // không chặn inbox tin nhắn đôi.
     final keos = ref.watch(myKeosProvider).value ?? const <Keo>[];
+    // UI review: header "Tin nhắn" LUÔN hiện (cả loading/lỗi/rỗng) theo quy
+    // tắc chung 4 tab — trước đây màn rỗng bắt đầu bằng khoảng trắng lớn.
     return SafeArea(
-      child: async.when(
-        loading: () => ListView(
-          padding: const EdgeInsets.only(top: AppSpacing.lg),
-          children: const [SkeletonTile(), SkeletonTile(), SkeletonTile()],
-        ),
-        error: (e, _) => EmptyState(
-          icon: Icons.wifi_off_rounded,
-          title: l10n?.inboxLoadError ?? 'Không tải được cuộc trò chuyện',
-          subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
-          actionLabel: l10n?.commonRetry ?? 'Thử lại',
-          onAction: () => ref.invalidate(inboxProvider),
-        ),
-        data: (matches) {
-          if (matches.isEmpty && keos.isEmpty) {
-            return EmptyState(
-              icon: Icons.chat_bubble_rounded,
-              title: l10n?.inboxEmptyTitle ?? 'Chưa có cuộc trò chuyện nào',
-              subtitle: l10n?.inboxEmptySub ??
-                  'Tìm kèo ngay để bắt đầu trò chuyện với những người bạn mới!',
-              actionLabel:
-                  onFindKeo != null ? (l10n?.inboxFindKeo ?? 'Tìm kèo ngay') : null,
-              onAction: onFindKeo,
-            );
-          }
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.lg,
-              AppSpacing.lg,
-              AppSpacing.xxxl,
-            ),
-            children: [
-              const _InboxHeader(),
-              if (keos.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: AppSpacing.lg,
-                    bottom: AppSpacing.sm,
-                  ),
-                  child: _SectionLabel(l10n?.inboxSectionKeo ?? 'Kèo của bạn'),
-                ),
-                ..._withWaveDividers([
-                  for (final keo in keos)
-                    _KeoInboxTile(
-                      key: ValueKey('my_keo_${keo.id}'),
-                      keo: keo,
-                      onTap: () async {
-                        await context.push(
-                          '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
-                        );
-                        if (context.mounted) {
-                          ref.invalidate(myKeosProvider);
-                          ref.invalidate(inboxProvider);
-                        }
-                      },
-                    ),
-                ]),
-              ],
-              if (matches.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: AppSpacing.lg,
-                    bottom: AppSpacing.sm,
-                  ),
-                  child: _SectionLabel(l10n?.inboxSectionMatches ?? 'Tin nhắn đôi'),
-                ),
-                ..._withWaveDividers([
-                  for (final match in matches)
-                    _buildMatchTile(context, ref, match, myId),
-                ]),
-              ],
-            ],
-          );
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TabHeader(
+            title: l10n?.inboxTitle ?? 'Tin nhắn',
+            subtitle:
+                l10n?.inboxSubtitle ??
+                'Nơi giữ các cuộc trò chuyện sau khi chung gu.',
+          ),
+          Expanded(child: _buildBody(context, ref, l10n, async, keos)),
+        ],
       ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations? l10n,
+    AsyncValue<List<MatchSummary>> async,
+    List<Keo> keos,
+  ) {
+    final myId = ref.watch(myProfileProvider).value?.id;
+    return async.when(
+      loading: () => ListView(
+        padding: const EdgeInsets.only(top: AppSpacing.lg),
+        children: const [SkeletonTile(), SkeletonTile(), SkeletonTile()],
+      ),
+      error: (e, _) => EmptyState(
+        icon: Icons.wifi_off_rounded,
+        title: l10n?.inboxLoadError ?? 'Không tải được cuộc trò chuyện',
+        subtitle:
+            l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+        actionLabel: l10n?.commonRetry ?? 'Thử lại',
+        onAction: () => ref.invalidate(inboxProvider),
+      ),
+      data: (matches) {
+        if (matches.isEmpty && keos.isEmpty) {
+          return EmptyState(
+            icon: Icons.chat_bubble_rounded,
+            title: l10n?.inboxEmptyTitle ?? 'Chưa có cuộc trò chuyện',
+            subtitle:
+                l10n?.inboxEmptySub ??
+                'Tham gia một kèo để bắt đầu trò chuyện với những người bạn mới.',
+            actionLabel: onFindKeo != null
+                ? (l10n?.inboxFindKeo ?? 'Tìm kèo')
+                : null,
+            onAction: onFindKeo,
+          );
+        }
+
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.xxxl,
+          ),
+          children: [
+            if (keos.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: AppSpacing.lg,
+                  bottom: AppSpacing.sm,
+                ),
+                child: _SectionLabel(l10n?.inboxSectionKeo ?? 'Kèo của bạn'),
+              ),
+              ..._withWaveDividers([
+                for (final keo in keos)
+                  _KeoInboxTile(
+                    key: ValueKey('my_keo_${keo.id}'),
+                    keo: keo,
+                    onTap: () async {
+                      await context.push(
+                        '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
+                      );
+                      if (context.mounted) {
+                        ref.invalidate(myKeosProvider);
+                        ref.invalidate(inboxProvider);
+                      }
+                    },
+                  ),
+              ]),
+            ],
+            if (matches.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: AppSpacing.lg,
+                  bottom: AppSpacing.sm,
+                ),
+                child: _SectionLabel(
+                  l10n?.inboxSectionMatches ?? 'Tin nhắn đôi',
+                ),
+              ),
+              ..._withWaveDividers([
+                for (final match in matches)
+                  _buildMatchTile(context, ref, match, myId),
+              ]),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -118,8 +146,9 @@ class InboxScreen extends ConsumerWidget {
   ) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final otherName = match.otherName;
-    final monogram =
-        otherName.isEmpty ? '?' : otherName.characters.first.toUpperCase();
+    final monogram = otherName.isEmpty
+        ? '?'
+        : otherName.characters.first.toUpperCase();
     String? turnLabel;
     if (match.lastSenderId == null) {
       turnLabel = l10n?.inboxTurnFirst ?? 'Nhắn trước đi';
@@ -152,32 +181,6 @@ class InboxScreen extends ConsumerWidget {
           ),
       ],
     ];
-  }
-}
-
-class _InboxHeader extends StatelessWidget {
-  const _InboxHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n?.inboxTitle ?? 'Tin nhắn',
-              style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l10n?.inboxSubtitle ?? 'Nơi giữ các cuộc trò chuyện sau khi chung gu.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -269,8 +272,9 @@ class _InboxTile extends StatelessWidget {
                     else
                       Text(
                         Localizations.of<AppLocalizations>(
-                                    context, AppLocalizations)
-                                ?.inboxReady ??
+                              context,
+                              AppLocalizations,
+                            )?.inboxReady ??
                             'Sẵn sàng rủ đi hát',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

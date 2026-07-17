@@ -282,7 +282,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoveryExploreBrand => 'CÙNG HÁT';
 
   @override
-  String get tabChat => 'Chat';
+  String get tabChat => 'Messages';
 
   @override
   String get tabProfile => 'Profile';
@@ -1071,10 +1071,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inboxEmptyTitle => 'No conversations yet';
 
   @override
-  String get inboxEmptySub => 'Find a keo to start chatting with new friends!';
+  String get inboxEmptySub => 'Join a kèo to start chatting with new friends.';
 
   @override
-  String get inboxFindKeo => 'Find a keo';
+  String get inboxFindKeo => 'Find a kèo';
 
   @override
   String get inboxLoadError => 'Couldn\'t load conversations';
@@ -1323,7 +1323,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
-  String get settingsLangSystem => 'System default';
+  String get settingsLangSystem => 'Default (Vietnamese)';
 
   @override
   String get locationPermissionTitle => 'Location permission needed';
@@ -1368,8 +1368,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckCoachSwipe =>
-      'Swipe right to Like · left to Pass · up to Super Like';
+      'Swipe right to like\nSwipe left to pass\nSwipe up to Super Like';
 
   @override
-  String get deckCoachTap => 'Tap to start';
+  String get deckCoachTap => 'Start';
 }

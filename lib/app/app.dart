@@ -60,10 +60,12 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
       theme: AppTheme.light(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      // [LANG] User chọn ngôn ngữ trong Cài đặt → override; null = theo máy.
-      locale: ref.watch(localeControllerProvider),
-      // [L10N] Song ngữ: theo ngôn ngữ máy; máy đặt thứ tiếng ngoài
-      // supportedLocales → rơi về tiếng Việt (thị trường chính).
+      // [LANG] App phục vụ thị trường VN → MẶC ĐỊNH tiếng Việt bất kể ngôn
+      // ngữ máy (UI review 2026-07-16: máy EN thấy giao diện trộn Việt-Anh).
+      // User vẫn đổi được trong Cài đặt (override 'en'/'vi' persist).
+      locale: ref.watch(localeControllerProvider) ?? const Locale('vi'),
+      // [L10N] Chỉ còn chạy nếu locale trên trả null (không xảy ra nữa) —
+      // giữ làm lưới an toàn: thứ tiếng ngoài supportedLocales → tiếng Việt.
       localeResolutionCallback: (device, supported) {
         for (final s in supported) {
           if (device?.languageCode == s.languageCode) return s;

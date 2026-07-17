@@ -611,7 +611,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabChat.
   ///
   /// In en, this message translates to:
-  /// **'Chat'**
+  /// **'Messages'**
   String get tabChat;
 
   /// No description provided for @tabProfile.
@@ -2045,13 +2045,13 @@ abstract class AppLocalizations {
   /// No description provided for @inboxEmptySub.
   ///
   /// In en, this message translates to:
-  /// **'Find a keo to start chatting with new friends!'**
+  /// **'Join a kèo to start chatting with new friends.'**
   String get inboxEmptySub;
 
   /// No description provided for @inboxFindKeo.
   ///
   /// In en, this message translates to:
-  /// **'Find a keo'**
+  /// **'Find a kèo'**
   String get inboxFindKeo;
 
   /// No description provided for @inboxLoadError.
@@ -2507,7 +2507,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLangSystem.
   ///
   /// In en, this message translates to:
-  /// **'System default'**
+  /// **'Default (Vietnamese)'**
   String get settingsLangSystem;
 
   /// No description provided for @locationPermissionTitle.
@@ -2591,13 +2591,13 @@ abstract class AppLocalizations {
   /// No description provided for @deckCoachSwipe.
   ///
   /// In en, this message translates to:
-  /// **'Swipe right to Like · left to Pass · up to Super Like'**
+  /// **'Swipe right to like\nSwipe left to pass\nSwipe up to Super Like'**
   String get deckCoachSwipe;
 
   /// No description provided for @deckCoachTap.
   ///
   /// In en, this message translates to:
-  /// **'Tap to start'**
+  /// **'Start'**
   String get deckCoachTap;
 }
 

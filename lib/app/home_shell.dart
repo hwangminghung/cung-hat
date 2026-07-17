@@ -16,6 +16,7 @@ import '../features/profile/application/profile_providers.dart';
 import '../features/profile/domain/profile_completion.dart';
 import '../features/profile/presentation/prompt_editor_sheet.dart';
 import '../shared/widgets/stamp_chip.dart';
+import '../shared/widgets/tab_header.dart';
 import '../shared/widgets/wave_divider.dart';
 import '../shared/widgets/wave_progress.dart';
 
@@ -69,7 +70,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final labels = [
       l10n?.tabDoi ?? 'Đôi',
       l10n?.tabKeo ?? 'Kèo',
-      l10n?.tabChat ?? 'Chat',
+      l10n?.tabChat ?? 'Tin nhắn',
       l10n?.tabProfile ?? 'Hồ sơ',
     ];
     final tabs = <Widget Function()>[
@@ -115,147 +116,151 @@ class _ProfileTab extends ConsumerWidget {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final profile = ref.watch(myProfileProvider).value;
     final name = profile?.displayName?.trim();
+    // UI review: header theo quy tắc chung 4 tab; bỏ nút bánh răng trùng lặp
+    // — Cài đặt vẫn còn nguyên qua card cuối danh sách (không mất chức năng,
+    // hết cảm giác hai lối vào cùng một màn hình).
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.xxxl,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Text(l10n?.tabProfile ?? 'Hồ sơ',
-                  style: Theme.of(context).textTheme.displaySmall),
-              const Spacer(),
-              IconButton.outlined(
-                key: const Key('profile_gear_btn'),
-                tooltip: l10n?.settingsTitle ?? 'Cài đặt',
-                onPressed: () => context.push('/settings'),
-                icon: const Icon(Icons.settings_outlined),
+          TabHeader(title: l10n?.tabProfile ?? 'Hồ sơ'),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.xxxl,
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Container(
-                width: 96,
-                height: 96,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryTint,
-                  border: Border.all(color: AppColors.border, width: 2),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: const [AppShadows.hard],
-                ),
-                child: Text(
-                  _monogram(name),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.displaySmall?.copyWith(color: AppColors.ink),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      (name?.isNotEmpty ?? false)
-                          ? name!
-                          : (l10n?.tabProfile ?? 'Hồ sơ'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineMedium?.copyWith(color: AppColors.ink),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      (profile?.bio?.trim().isNotEmpty ?? false)
-                          ? profile!.bio!.trim()
-                          : (l10n?.shellProfileSub ??
-                              'Quản lý lượt thích, gói nâng cấp và cài đặt.'),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                    Container(
+                      width: 96,
+                      height: 96,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTint,
+                        border: Border.all(color: AppColors.border, width: 2),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: const [AppShadows.hard],
+                      ),
+                      child: Text(
+                        _monogram(name),
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(color: AppColors.ink),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    const WaveDivider(),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (name?.isNotEmpty ?? false)
+                                ? name!
+                                : (l10n?.tabProfile ?? 'Hồ sơ'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(color: AppColors.ink),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            (profile?.bio?.trim().isNotEmpty ?? false)
+                                ? profile!.bio!.trim()
+                                : (l10n?.shellProfileSub ??
+                                      'Quản lý lượt thích, gói nâng cấp và cài đặt.'),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppColors.textSecondary),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          const WaveDivider(),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          const _CompletionCard(),
-          const SizedBox(height: AppSpacing.md),
-          _ProfileTile(
-            icon: Icons.favorite_rounded,
-            title: l10n?.shellTileLikes ?? 'Ai đã thích bạn',
-            badgeLabel: 'PRO',
-            subtitle: l10n?.shellTileLikesSub ?? 'Mở danh sách người đã thả tim',
-            onTap: () {
-              final unlocked = ref.read(hasEntitlementProvider('see_likes'));
-              if (unlocked) {
-                context.push('/likes');
-              } else {
-                // Free: màn teaser mosaic thay vì bung sheet Pro ngay — sheet
-                // giờ nằm sau CTA trong màn teaser (likes_teaser_screen.dart).
-                context.push('/likes-teaser');
-              }
-            },
-          ),
-          _ProfileTile(
-            icon: Icons.workspace_premium_rounded,
-            title: l10n?.storeTitle ?? 'Nâng cấp',
-            subtitle: l10n?.shellTileUpgradeSub ?? 'Pro, boost kèo và bộ lọc nâng cao',
-            onTap: () => context.push('/store'),
-          ),
-          _ProfileTile(
-            icon: Icons.photo_library_rounded,
-            title: l10n?.shellTilePhotos ?? 'Ảnh hồ sơ',
-            subtitle: l10n?.shellTilePhotosSub ?? 'Thêm tối đa 6 ảnh vào hồ sơ',
-            onTap: () => showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              showDragHandle: false,
-              backgroundColor: AppColors.surface,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppSpacing.radiusSheet),
+                const SizedBox(height: AppSpacing.md),
+                const _CompletionCard(),
+                const SizedBox(height: AppSpacing.md),
+                _ProfileTile(
+                  icon: Icons.favorite_rounded,
+                  title: l10n?.shellTileLikes ?? 'Ai đã thích bạn',
+                  badgeLabel: 'PRO',
+                  subtitle:
+                      l10n?.shellTileLikesSub ??
+                      'Mở danh sách người đã thả tim',
+                  onTap: () {
+                    final unlocked = ref.read(
+                      hasEntitlementProvider('see_likes'),
+                    );
+                    if (unlocked) {
+                      context.push('/likes');
+                    } else {
+                      // Free: màn teaser mosaic thay vì bung sheet Pro ngay — sheet
+                      // giờ nằm sau CTA trong màn teaser (likes_teaser_screen.dart).
+                      context.push('/likes-teaser');
+                    }
+                  },
                 ),
-              ),
-              builder: (_) => const PhotoManagerSheet(),
-            ),
-          ),
-          _ProfileTile(
-            icon: Icons.chat_bubble_outline_rounded,
-            title: l10n?.shellTilePrompts ?? 'Thẻ hỏi-đáp',
-            subtitle:
-                l10n?.shellTilePromptsSub ?? 'Chọn tối đa 3 câu để hồ sơ có chuyện mà bắt',
-            onTap: () => showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              showDragHandle: false,
-              backgroundColor: AppColors.surface,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppSpacing.radiusSheet),
+                _ProfileTile(
+                  icon: Icons.workspace_premium_rounded,
+                  title: l10n?.storeTitle ?? 'Nâng cấp',
+                  subtitle:
+                      l10n?.shellTileUpgradeSub ??
+                      'Pro, boost kèo và bộ lọc nâng cao',
+                  onTap: () => context.push('/store'),
                 ),
-              ),
-              builder: (_) => const PromptEditorSheet(),
+                _ProfileTile(
+                  icon: Icons.photo_library_rounded,
+                  title: l10n?.shellTilePhotos ?? 'Ảnh hồ sơ',
+                  subtitle:
+                      l10n?.shellTilePhotosSub ?? 'Thêm tối đa 6 ảnh vào hồ sơ',
+                  onTap: () => showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    showDragHandle: false,
+                    backgroundColor: AppColors.surface,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppSpacing.radiusSheet),
+                      ),
+                    ),
+                    builder: (_) => const PhotoManagerSheet(),
+                  ),
+                ),
+                _ProfileTile(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  title: l10n?.shellTilePrompts ?? 'Thẻ hỏi-đáp',
+                  subtitle:
+                      l10n?.shellTilePromptsSub ??
+                      'Chọn tối đa 3 câu để hồ sơ có chuyện mà bắt',
+                  onTap: () => showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    showDragHandle: false,
+                    backgroundColor: AppColors.surface,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppSpacing.radiusSheet),
+                      ),
+                    ),
+                    builder: (_) => const PromptEditorSheet(),
+                  ),
+                ),
+                _ProfileTile(
+                  icon: Icons.settings_rounded,
+                  title: l10n?.settingsTitle ?? 'Cài đặt',
+                  subtitle:
+                      l10n?.shellTileSettingsSub ??
+                      'Quyền riêng tư, dữ liệu và pháp lý',
+                  onTap: () => context.push('/settings'),
+                ),
+              ],
             ),
-          ),
-          _ProfileTile(
-            icon: Icons.settings_rounded,
-            title: l10n?.settingsTitle ?? 'Cài đặt',
-            subtitle: l10n?.shellTileSettingsSub ?? 'Quyền riêng tư, dữ liệu và pháp lý',
-            onTap: () => context.push('/settings'),
           ),
         ],
       ),
@@ -378,7 +383,12 @@ class _ProfileTile extends StatelessWidget {
               ],
             ],
           ),
-          subtitle: Text(subtitle),
+          // UI review: mô tả tối đa 2 dòng cho mọi card, không đẩy lệch hàng.
+          subtitle: Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           trailing: const Icon(Icons.chevron_right_rounded),
           onTap: onTap,
         ),
