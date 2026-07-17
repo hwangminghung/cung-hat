@@ -59,7 +59,7 @@ class ThemeBoardScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 l10n?.discoveryExploreSubtitle ??
-                    'Chọn một mood, gặp người cùng tần số.',
+                    'Chọn một chất nhạc, gặp người cùng tần số.',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: AppColors.ink,
                   fontWeight: FontWeight.w700,

@@ -142,7 +142,7 @@ void main() {
   });
 
   testWidgets(
-      'panel: activeToday + sharedGenres → hiện "Online hôm nay" + chip #genre (mockup 07)',
+      'panel: activeToday + sharedGenres → hiện "Trực tuyến hôm nay" + chip #genre (mockup 07)',
       (tester) async {
     const candidate = Candidate(
       id: 'x',
@@ -161,7 +161,7 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Online hôm nay'), findsOneWidget);
+    expect(find.text('Trực tuyến hôm nay'), findsOneWidget);
     expect(find.text('#ballad'), findsOneWidget);
   });
 
@@ -180,7 +180,7 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Online hôm nay'), findsNothing);
+    expect(find.text('Trực tuyến hôm nay'), findsNothing);
     expect(find.text('#ballad'), findsNothing);
   });
 

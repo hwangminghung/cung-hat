@@ -8,8 +8,8 @@ enum DiscoverySwipeError {
   likeLimit('Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.'),
   superLimit('Bạn đã hết lượt Siêu thích hôm nay.'),
   proRequired('Tính năng này dành cho thành viên Pro.'),
-  boostActive('Bạn đang trong một lượt boost.'),
-  boostLimit('Bạn đã dùng hết lượt boost hôm nay. Thử lại vào ngày mai.'),
+  boostActive('Bạn đang trong một lượt tăng hiển thị.'),
+  boostLimit('Bạn đã dùng hết lượt tăng hiển thị hôm nay. Thử lại vào ngày mai.'),
   unknown('Không lưu được lượt vuốt. Thử lại sau.');
 
   const DiscoverySwipeError(this.message);

@@ -244,6 +244,21 @@ class AppLocalizationsVi extends AppLocalizations {
   String get authOtpError => 'Mã OTP chưa đúng';
 
   @override
+  String get authErrorSendFailed =>
+      'Không thể gửi mã OTP. Vui lòng kiểm tra số điện thoại và thử lại.';
+
+  @override
+  String get authErrorOtpInvalid =>
+      'Mã OTP không đúng hoặc đã hết hạn. Vui lòng thử lại.';
+
+  @override
+  String get authErrorNetwork =>
+      'Không thể kết nối. Vui lòng kiểm tra mạng và thử lại.';
+
+  @override
+  String get authErrorGeneric => 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+
+  @override
   String get discoveryDeckTitle => 'Ghép đôi cùng hát';
 
   @override
@@ -267,7 +282,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get discoveryExploreSubtitle =>
-      'Chọn một mood, gặp người cùng tần số.';
+      'Chọn một chất nhạc, gặp người cùng tần số.';
 
   @override
   String get discoveryExploreOpen => 'Đang mở';
@@ -293,7 +308,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get shellTileLikesSub => 'Mở danh sách người đã thả tim';
 
   @override
-  String get shellTileUpgradeSub => 'Pro, boost kèo và bộ lọc nâng cao';
+  String get shellTileUpgradeSub => 'Pro, tăng hiển thị kèo và bộ lọc nâng cao';
 
   @override
   String get shellTilePhotos => 'Ảnh hồ sơ';
@@ -327,7 +342,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get completionThreePhotos => 'Đủ 3 ảnh → x2 lượt được thấy';
 
   @override
-  String get completionWriteBio => 'Viết bio → +25% match';
+  String get completionWriteBio => 'Viết giới thiệu → +25% ghép đôi';
 
   @override
   String get completionPickGenres => 'Chọn đủ 3 thể loại → gợi ý chuẩn gu hơn';
@@ -352,13 +367,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get upsellAllProPerks => 'Kèm mọi quyền lợi Pro khác';
 
   @override
-  String get upsellBoostTitle => 'Boost hồ sơ của bạn';
+  String get upsellBoostTitle => 'Tăng hiển thị hồ sơ của bạn';
 
   @override
-  String get upsellBoostB1 => '1 lần Boost 30 phút mỗi ngày';
+  String get upsellBoostB1 => '1 lần tăng hiển thị 30 phút mỗi ngày';
 
   @override
-  String get upsellBoostB2 => 'Lên đầu deck của mọi người quanh đây';
+  String get upsellBoostB2 => 'Lên đầu danh sách gợi ý quanh đây';
 
   @override
   String get upsellRewindTitle => 'Rút lại lượt vuốt';
@@ -376,14 +391,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get upsellSeeLikesB1 => 'Mở danh sách người đã thả tim bạn';
 
   @override
-  String get upsellSeeLikesB2 => 'Match ngay không cần vuốt trúng';
+  String get upsellSeeLikesB2 => 'Ghép đôi ngay không cần vuốt trúng';
 
   @override
   String get upsellKeoCreateTitle => 'Tạo kèo không giới hạn';
 
   @override
   String get upsellKeoCreateB1 =>
-      'Gói Free giữ 1 kèo đang mở — Pro mở bao nhiêu tuỳ bạn';
+      'Gói miễn phí chỉ giữ 1 kèo đang mở — Pro mở bao nhiêu tuỳ bạn';
 
   @override
   String get upsellKeoCreateB2 => 'Kèo mở hoặc cần duyệt — bạn quyết';
@@ -448,11 +463,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deckErrorProRequired => 'Tính năng này dành cho thành viên Pro.';
 
   @override
-  String get deckErrorBoostActive => 'Bạn đang trong một lượt boost.';
+  String get deckErrorBoostActive => 'Bạn đang trong một lượt tăng hiển thị.';
 
   @override
   String get deckErrorBoostLimit =>
-      'Bạn đã dùng hết lượt boost hôm nay. Thử lại vào ngày mai.';
+      'Bạn đã dùng hết lượt tăng hiển thị hôm nay. Thử lại vào ngày mai.';
 
   @override
   String get deckErrorUnknown => 'Không lưu được lượt vuốt. Thử lại sau.';
@@ -467,7 +482,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get candidateViewProfile => 'Xem hồ sơ';
 
   @override
-  String get candidateOnlineToday => 'Online hôm nay';
+  String get candidateOnlineToday => 'Trực tuyến hôm nay';
 
   @override
   String candidateDistanceKm(String band) {
@@ -483,7 +498,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get candidateNoSharedGenres => 'Chưa chung thể loại nào';
 
   @override
-  String get candidateNoBio => 'Chưa có giới thiệu — hỏi thử khi match nhé!';
+  String get candidateNoBio => 'Chưa có giới thiệu — hỏi thử khi ghép đôi nhé!';
 
   @override
   String get candidatePhotoQuote => 'Ảnh này xịn quá! ';
@@ -540,15 +555,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String deckBoostingUntil(String time) {
-    return 'Đang boost đến $time';
+    return 'Đang tăng hiển thị đến $time';
   }
 
   @override
-  String get deckBoostTooltip => 'Boost hồ sơ';
+  String get deckBoostTooltip => 'Tăng hiển thị hồ sơ';
 
   @override
   String get deckBoostStarted =>
-      'Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.';
+      'Đang tăng hiển thị 30 phút — hồ sơ của bạn được ưu tiên quanh đây.';
 
   @override
   String get celebrateYouFallback => 'Bạn';
@@ -680,7 +695,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get keoErrorFreeHostLimit =>
-      'Gói Free giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.';
+      'Gói miễn phí chỉ giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.';
 
   @override
   String get keoErrorFreeJoinLimit =>
@@ -700,7 +715,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get keoErrorNoLocation =>
-      'Cần bật vị trí để ghép kèo. Hãy bật Location rồi thử lại.';
+      'Cần bật vị trí để ghép kèo. Hãy bật vị trí rồi thử lại.';
 
   @override
   String get keoErrorAgeNotVerified => 'Cần xác minh tuổi trước khi ghép kèo.';
@@ -775,10 +790,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get keoSharedNotFound => 'Không tìm thấy kèo';
 
   @override
-  String get keoSharedNotFoundSub => 'Link không đúng hoặc kèo đã bị xoá.';
+  String get keoSharedNotFoundSub => 'Liên kết không đúng hoặc kèo đã bị xoá.';
 
   @override
-  String get keoSharedExpired => 'Link đã hết hạn';
+  String get keoSharedExpired => 'Liên kết đã hết hạn';
 
   @override
   String keoSharedSeats(int filled, int target) {
@@ -787,7 +802,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String keoSharedHost(String name) {
-    return 'Host: $name';
+    return 'Chủ kèo: $name';
   }
 
   @override
@@ -826,7 +841,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get keoDetailShareError => 'Không tạo được link, thử lại.';
+  String get keoDetailShareError => 'Không tạo được liên kết, thử lại.';
 
   @override
   String get keoDetailMembers => 'Thành viên';
@@ -867,7 +882,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get keoDetailConfirmed => 'Đã xác nhận tham gia';
 
   @override
-  String get keoDetailOpenChat => 'Mở chat nhóm';
+  String get keoDetailOpenChat => 'Mở trò chuyện nhóm';
 
   @override
   String get keoDetailPickVenue => 'Chốt quán';
@@ -892,7 +907,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get keoCreateNoLocation =>
-      'Không lấy được vị trí. Bật Location trên emulator rồi thử lại.';
+      'Không lấy được vị trí. Bật vị trí trên máy rồi thử lại.';
 
   @override
   String get keoCreateHeadline => 'Rủ một nhóm đi hát';
@@ -980,7 +995,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get keoMatchReasonAvailableSlots => 'Còn chỗ';
 
   @override
-  String get keoMatchReasonActiveHost => 'Chủ kèo đang online';
+  String get keoMatchReasonActiveHost => 'Chủ kèo đang trực tuyến';
 
   @override
   String get chatShareSongTooltip => 'Gửi bài tủ';
@@ -1020,7 +1035,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get chatHistoryError => 'Không tải được tin nhắn';
 
   @override
-  String get chatGroupTitle => 'Chat nhóm';
+  String get chatGroupTitle => 'Trò chuyện nhóm';
 
   @override
   String get chatGroupRules => 'Luật nhóm';
@@ -1031,7 +1046,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get chatKeoNotOpen =>
-      'Chưa mở chat nhóm. Cần tất cả thành viên đồng ý tham gia.';
+      'Chưa mở trò chuyện nhóm. Cần tất cả thành viên đồng ý tham gia.';
 
   @override
   String get chatToday => 'Hôm nay';
@@ -1177,7 +1192,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get safetyShareError => 'Không tạo được link chia sẻ';
+  String get safetyShareError => 'Không tạo được liên kết chia sẻ';
 
   @override
   String get safetyArrived => 'Tôi đã tới';

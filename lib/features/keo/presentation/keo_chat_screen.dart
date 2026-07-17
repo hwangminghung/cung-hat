@@ -101,7 +101,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
         SnackBar(
           content: Text(
             _l10n?.chatKeoNotOpen ??
-                'Chưa mở chat nhóm. Cần tất cả thành viên đồng ý tham gia.',
+                'Chưa mở trò chuyện nhóm. Cần tất cả thành viên đồng ý tham gia.',
           ),
         ),
       );
@@ -159,7 +159,7 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_l10n?.chatGroupTitle ?? 'Chat nhóm'),
+            Text(_l10n?.chatGroupTitle ?? 'Trò chuyện nhóm'),
             if (keoTitle != null)
               Text(
                 keoTitle,

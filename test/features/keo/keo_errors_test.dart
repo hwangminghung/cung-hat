@@ -17,7 +17,7 @@ void main() {
     );
     expect(
       keoErrorMessage('... free_host_limit ...'),
-      'Gói Free giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.',
+      'Gói miễn phí chỉ giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.',
     );
   });
 }

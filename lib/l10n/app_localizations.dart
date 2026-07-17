@@ -542,6 +542,30 @@ abstract class AppLocalizations {
   /// **'That OTP code isn\'t correct'**
   String get authOtpError;
 
+  /// No description provided for @authErrorSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the OTP code. Check your phone number and try again.'**
+  String get authErrorSendFailed;
+
+  /// No description provided for @authErrorOtpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The OTP code is incorrect or has expired. Please try again.'**
+  String get authErrorOtpInvalid;
+
+  /// No description provided for @authErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t connect. Check your network and try again.'**
+  String get authErrorNetwork;
+
+  /// No description provided for @authErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get authErrorGeneric;
+
   /// No description provided for @discoveryDeckTitle.
   ///
   /// In en, this message translates to:

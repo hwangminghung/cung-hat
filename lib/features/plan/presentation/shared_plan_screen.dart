@@ -29,7 +29,7 @@ class SharedPlanScreen extends ConsumerWidget {
           }
           if (data['expired'] == true) {
             return Center(
-              child: Text(l10n?.keoSharedExpired ?? 'Link đã hết hạn'),
+              child: Text(l10n?.keoSharedExpired ?? 'Liên kết đã hết hạn'),
             );
           }
           return Padding(

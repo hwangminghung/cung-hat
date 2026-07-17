@@ -35,7 +35,7 @@ class SafetyToolkit extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        l10n?.safetyShareError ?? 'Không tạo được link chia sẻ',
+                        l10n?.safetyShareError ?? 'Không tạo được liên kết chia sẻ',
                       ),
                     ),
                   );

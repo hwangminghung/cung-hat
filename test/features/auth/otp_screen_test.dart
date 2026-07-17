@@ -330,7 +330,10 @@ void main() {
     final state = container.read(authControllerProvider);
     expect(state.phone, '+84900000001');
     expect(state.phase, AuthPhase.error);
-    expect(find.textContaining('resend failed'), findsOneWidget);
+    // Vòng cuối UI review: raw exception KHÔNG được render — banner chỉ hiện
+    // message thân thiện đã map từ AuthErrorKind (Exception lạ → generic).
+    expect(find.textContaining('resend failed'), findsNothing);
+    expect(find.text('Đã có lỗi xảy ra. Vui lòng thử lại.'), findsOneWidget);
     expect(find.text('Gửi lại mã sau 60s'), findsOneWidget);
     expect(find.byKey(const Key('resend_otp_btn')), findsNothing);
     expect(verifyCalls, 0);
@@ -431,5 +434,31 @@ void main() {
     await tester.pump();
 
     expect(attempts, 2);
+  });
+
+  testWidgets('OTP sai → message VI thân thiện, không lộ raw (vòng cuối)', (
+    tester,
+  ) async {
+    final repo = _MockRepo();
+    when(() => repo.sendOtp(any())).thenAnswer((_) async {});
+    when(() => repo.verifyOtp(any(), any())).thenThrow(
+      AuthApiException(
+        'Token has expired or is invalid',
+        statusCode: '403',
+        code: 'otp_expired',
+      ),
+    );
+
+    await _pumpOtpScreen(tester, repo);
+    await tester.enterText(find.byType(TextField), '000000');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('AuthApiException'), findsNothing);
+    expect(find.textContaining('otp_expired'), findsNothing);
+    expect(find.textContaining('403'), findsNothing);
+    expect(
+      find.text('Mã OTP không đúng hoặc đã hết hạn. Vui lòng thử lại.'),
+      findsOneWidget,
+    );
   });
 }

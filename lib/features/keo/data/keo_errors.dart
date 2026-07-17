@@ -6,7 +6,7 @@ import '../../../l10n/app_localizations.dart';
 const _messages = <String, String>{
   'pro_required': 'Cần gói Pro để tạo kèo.',
   'free_host_limit':
-      'Gói Free giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.',
+      'Gói miễn phí chỉ giữ 1 kèo đang mở. Huỷ kèo cũ hoặc nâng cấp Pro để tạo thêm.',
   'free_join_limit':
       'Bạn đang tham gia 1 kèo. Rời kèo cũ hoặc nâng cấp Pro để tham gia thêm.',
   'keo_full': 'Kèo đã đầy.',
@@ -14,7 +14,7 @@ const _messages = <String, String>{
   'keo_not_open': 'Kèo không còn mở.',
   'blocked': 'Không thể vào kèo này vì cài đặt an toàn.',
   'location_required':
-      'Cần bật vị trí để ghép kèo. Hãy bật Location rồi thử lại.',
+      'Cần bật vị trí để ghép kèo. Hãy bật vị trí rồi thử lại.',
   'age_not_verified': 'Cần xác minh tuổi trước khi ghép kèo.',
   'no_matchable_keo': 'Chưa tìm được kèo phù hợp, thử lại sau.',
   'invalid_time_window': 'Giờ hẹn không hợp lệ. Hãy chọn khung giờ khác.',

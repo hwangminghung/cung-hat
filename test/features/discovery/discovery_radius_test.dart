@@ -252,9 +252,9 @@ void main() {
       expect(find.text('Đã tìm hết trong 100 km'), findsOneWidget);
       expect(find.byKey(const Key('deck_retry_btn')), findsOneWidget);
       expect(find.byKey(const Key('expand_radius_btn')), findsNothing);
-      // radius_chip chỉ nằm trong header của deck KHÔNG rỗng — empty-deck
-      // đã tự truyền đạt "100 km" qua headline riêng của nó.
-      expect(find.byKey(const Key('radius_chip')), findsNothing);
+      // Vòng cuối UI review: header (kèm radius_chip) giờ LUÔN hiện — kể cả
+      // khi deck rỗng — nên chip phạm vi 100 km vẫn còn trên đầu màn.
+      expect(find.byKey(const Key('radius_chip')), findsOneWidget);
     });
 
     testWidgets('deck CÓ candidate + radius=100 → header hiện radius_chip',
