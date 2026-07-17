@@ -91,7 +91,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
       if (pos == null) {
         _snack(
           _l10n?.keoCreateNoLocation ??
-              'Không lấy được vị trí. Bật Location trên emulator rồi thử lại.',
+              'Không lấy được vị trí. Bật vị trí trên máy rồi thử lại.',
         );
         return;
       }

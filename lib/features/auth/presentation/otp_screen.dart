@@ -204,11 +204,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   ),
                   if (state.phase == AuthPhase.error) ...[
                     const SizedBox(height: AppSpacing.md),
+                    // Vòng cuối UI review: chỉ render message đã map từ
+                    // AuthErrorKind — không bao giờ là exception.toString().
                     _ErrorBanner(
-                      message:
-                          state.error ??
-                          l10n?.authOtpError ??
-                          'Mã OTP chưa đúng',
+                      message: authErrorMessage(
+                        state.error ?? AuthErrorKind.otpInvalid,
+                        l10n,
+                      ),
                     ),
                   ],
                   const SizedBox(height: AppSpacing.xxl),

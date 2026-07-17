@@ -77,7 +77,7 @@ void main() {
   test('keoErrorMessage maps auto-match errors', () {
     expect(
       keoErrorMessage('PostgrestException(message: location_required)'),
-      'Cần bật vị trí để ghép kèo. Hãy bật Location rồi thử lại.',
+      'Cần bật vị trí để ghép kèo. Hãy bật vị trí rồi thử lại.',
     );
     expect(
       keoErrorMessage('PostgrestException(message: age_not_verified)'),

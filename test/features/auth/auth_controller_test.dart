@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show AuthResponse;
+import 'dart:io';
+
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show AuthApiException, AuthResponse;
 import 'package:cung_hat/core/analytics/analytics_service.dart';
 import 'package:cung_hat/features/auth/application/auth_controller.dart';
 import 'package:cung_hat/features/auth/application/auth_providers.dart';
@@ -57,5 +60,59 @@ void main() {
     await ctrl.verifyOtp('000000');
     expect(container.read(authControllerProvider).phase, AuthPhase.error);
     expect(analytics.events, isEmpty);
+  });
+
+  // UI review vòng cuối: state KHÔNG bao giờ giữ e.toString() — chỉ giữ
+  // AuthErrorKind đã phân loại để UI map sang message VI thân thiện.
+  test('sendOtp ném AuthApiException → error = sendFailed (không raw)', () async {
+    final repo = _MockRepo();
+    when(() => repo.sendOtp(any())).thenThrow(
+      AuthApiException(
+        'Error sending confirmation OTP to provider: see '
+        'https://www.twilio.com/docs/errors/60203',
+        statusCode: '422',
+        code: 'sms_send_failed',
+      ),
+    );
+    final container = ProviderContainer(overrides: [
+      authRepositoryProvider.overrideWithValue(repo),
+    ]);
+    addTearDown(container.dispose);
+    await container.read(authControllerProvider.notifier).sendOtp('+84900000001');
+    final state = container.read(authControllerProvider);
+    expect(state.phase, AuthPhase.error);
+    expect(state.error, AuthErrorKind.sendFailed);
+  });
+
+  test('verifyOtp ném AuthApiException → error = otpInvalid', () async {
+    final repo = _MockRepo();
+    when(() => repo.sendOtp(any())).thenAnswer((_) async {});
+    when(() => repo.verifyOtp(any(), any())).thenThrow(
+      AuthApiException(
+        'Token has expired or is invalid',
+        statusCode: '403',
+        code: 'otp_expired',
+      ),
+    );
+    final container = ProviderContainer(overrides: [
+      authRepositoryProvider.overrideWithValue(repo),
+    ]);
+    addTearDown(container.dispose);
+    final ctrl = container.read(authControllerProvider.notifier);
+    await ctrl.sendOtp('+84900000001');
+    await ctrl.verifyOtp('000000');
+    expect(container.read(authControllerProvider).error, AuthErrorKind.otpInvalid);
+  });
+
+  test('lỗi mạng (SocketException) → error = network', () async {
+    final repo = _MockRepo();
+    when(() => repo.sendOtp(any()))
+        .thenThrow(const SocketException('Failed host lookup: supabase.co'));
+    final container = ProviderContainer(overrides: [
+      authRepositoryProvider.overrideWithValue(repo),
+    ]);
+    addTearDown(container.dispose);
+    await container.read(authControllerProvider.notifier).sendOtp('+84900000001');
+    expect(container.read(authControllerProvider).error, AuthErrorKind.network);
   });
 }

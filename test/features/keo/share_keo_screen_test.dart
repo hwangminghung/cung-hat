@@ -54,7 +54,7 @@ void main() {
     when(() => repo.resolveSharedKeo('tok'))
         .thenAnswer((_) async => _sample(expired: true));
     await _pump(tester, repo: repo);
-    expect(find.text('Link đã hết hạn'), findsOneWidget);
+    expect(find.text('Liên kết đã hết hạn'), findsOneWidget);
   });
 
   testWidgets('valid token renders keo details + login button when signed out',

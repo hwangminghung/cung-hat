@@ -118,7 +118,7 @@ class KeoDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n?.keoDetailShareError ?? 'Không tạo được link, thử lại.'),
+            content: Text(l10n?.keoDetailShareError ?? 'Không tạo được liên kết, thử lại.'),
           ),
         );
       }
@@ -632,7 +632,7 @@ class _ActionPanel extends StatelessWidget {
             key: const Key('open_keo_chat_btn'),
             onPressed: onOpenChat,
             icon: Icons.chat_bubble_outline_rounded,
-            child: Text(l10n?.keoDetailOpenChat ?? 'Mở chat nhóm'),
+            child: Text(l10n?.keoDetailOpenChat ?? 'Mở trò chuyện nhóm'),
           ),
           const SizedBox(height: AppSpacing.sm),
         ],

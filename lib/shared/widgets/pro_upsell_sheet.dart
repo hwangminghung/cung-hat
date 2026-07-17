@@ -33,10 +33,10 @@ _VariantData _dataFor(ProUpsellVariant variant, AppLocalizations? l) {
     case ProUpsellVariant.boost:
       return _VariantData(
         Icons.bolt_rounded,
-        l?.upsellBoostTitle ?? 'Boost hồ sơ của bạn',
+        l?.upsellBoostTitle ?? 'Tăng hiển thị hồ sơ của bạn',
         [
-          l?.upsellBoostB1 ?? '1 lần Boost 30 phút mỗi ngày',
-          l?.upsellBoostB2 ?? 'Lên đầu deck của mọi người quanh đây',
+          l?.upsellBoostB1 ?? '1 lần tăng hiển thị 30 phút mỗi ngày',
+          l?.upsellBoostB2 ?? 'Lên đầu danh sách gợi ý quanh đây',
           perks,
         ],
       );
@@ -56,7 +56,7 @@ _VariantData _dataFor(ProUpsellVariant variant, AppLocalizations? l) {
         l?.upsellSeeLikesTitle ?? 'Xem ai đã thích bạn',
         [
           l?.upsellSeeLikesB1 ?? 'Mở danh sách người đã thả tim bạn',
-          l?.upsellSeeLikesB2 ?? 'Match ngay không cần vuốt trúng',
+          l?.upsellSeeLikesB2 ?? 'Ghép đôi ngay không cần vuốt trúng',
           perks,
         ],
       );

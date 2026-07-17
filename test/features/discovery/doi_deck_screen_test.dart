@@ -19,6 +19,7 @@ import 'package:cung_hat/features/discovery/presentation/doi_deck_screen.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
 import 'package:cung_hat/features/photos/data/photo_repository.dart';
 import 'package:cung_hat/shared/widgets/pro_upsell_sheet.dart';
+import 'package:cung_hat/shared/widgets/skeleton.dart';
 
 import '../../support/analytics_fakes.dart';
 
@@ -68,6 +69,97 @@ void main() {
       expect(find.byKey(const Key('auto_expand_switch')), findsOneWidget);
     },
   );
+
+  // Vòng cuối UI review: header tab Đôi phải LUÔN hiện — empty/loading/error
+  // không được nuốt mất tiêu đề + 4 action.
+  testWidgets('header vẫn hiện đầy đủ ở EMPTY state (vòng cuối)', (
+    tester,
+  ) async {
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null).overrideWith((ref) async => <Candidate>[]),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+          discoveryPrefsProvider.overrideWith(
+            (ref) async => (autoExpand: false, radiusKm: 50),
+          ),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ghép đôi cùng hát'), findsOneWidget);
+    expect(find.byKey(const Key('filter_btn')), findsOneWidget);
+    expect(find.byKey(const Key('explore_btn')), findsOneWidget);
+    expect(find.byKey(const Key('deck_boost_btn')), findsOneWidget);
+    // Empty state nằm DƯỚI header, không thay thế cả màn.
+    expect(find.text('Chưa có bạn hát quanh đây'), findsOneWidget);
+  });
+
+  testWidgets('header vẫn hiện ở LOADING state (vòng cuối)', (tester) async {
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
+    final pending = Completer<List<Candidate>>();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null).overrideWith((ref) => pending.future),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+          discoveryPrefsProvider.overrideWith(
+            (ref) async => (autoExpand: false, radiusKm: 50),
+          ),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Ghép đôi cùng hát'), findsOneWidget);
+    expect(find.byKey(const Key('filter_btn')), findsOneWidget);
+    expect(find.byType(Skeleton), findsWidgets);
+
+    pending.complete(const <Candidate>[]);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('header vẫn hiện ở ERROR state (vòng cuối)', (tester) async {
+    final locationService = _FakeLocationService();
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          candidatesProvider(null)
+              .overrideWith((ref) async => throw Exception('boom')),
+          locationServiceProvider.overrideWithValue(locationService),
+          entitlementsProvider.overrideWith((ref) async => <String>{}),
+          discoveryPrefsProvider.overrideWith(
+            (ref) async => (autoExpand: false, radiusKm: 50),
+          ),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ghép đôi cùng hát'), findsOneWidget);
+    expect(find.byKey(const Key('explore_btn')), findsOneWidget);
+    expect(find.text('Không tải được gợi ý'), findsOneWidget);
+  });
 
   testWidgets(
     'deck rỗng + chưa cấp quyền vị trí → error state đúng nguyên nhân (P0-1)',
@@ -480,7 +572,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(ProUpsellSheet), findsOneWidget);
-    expect(find.text('Boost hồ sơ của bạn'), findsOneWidget);
+    expect(find.text('Tăng hiển thị hồ sơ của bạn'), findsOneWidget);
     verifyNever(() => repo.activateBoost());
   });
 
@@ -531,7 +623,7 @@ void main() {
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(
-        find.text('Đang boost 30 phút — hồ sơ của bạn được ưu tiên quanh đây.'),
+        find.text('Đang tăng hiển thị 30 phút — hồ sơ của bạn được ưu tiên quanh đây.'),
         findsOneWidget,
       );
     },
@@ -580,7 +672,7 @@ void main() {
         matching: find.byType(Tooltip),
       ),
     );
-    expect(boostTooltip.message, 'Đang boost đến $expected');
+    expect(boostTooltip.message, 'Đang tăng hiển thị đến $expected');
   });
 
   testWidgets('double-tap rewind chỉ gọi undo_last_swipe một lần', (

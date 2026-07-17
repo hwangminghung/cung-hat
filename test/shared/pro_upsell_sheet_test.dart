@@ -21,7 +21,7 @@ void main() {
   }
 
   for (final (variant, headline) in [
-    (ProUpsellVariant.boost, 'Boost hồ sơ của bạn'),
+    (ProUpsellVariant.boost, 'Tăng hiển thị hồ sơ của bạn'),
     (ProUpsellVariant.rewind, 'Rút lại lượt vuốt'),
     (ProUpsellVariant.seeLikes, 'Xem ai đã thích bạn'),
     (ProUpsellVariant.keoCreate, 'Tự tạo kèo của riêng bạn'),

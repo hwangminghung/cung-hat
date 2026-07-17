@@ -53,13 +53,13 @@ class SharedKeoScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.link_off_rounded,
               title: l10n?.keoSharedNotFound ?? 'Không tìm thấy kèo',
-              subtitle: l10n?.keoSharedNotFoundSub ?? 'Link không đúng hoặc kèo đã bị xoá.',
+              subtitle: l10n?.keoSharedNotFoundSub ?? 'Liên kết không đúng hoặc kèo đã bị xoá.',
             );
           }
           if (keo.expired) {
             return EmptyState(
               icon: Icons.schedule_rounded,
-              title: l10n?.keoSharedExpired ?? 'Link đã hết hạn',
+              title: l10n?.keoSharedExpired ?? 'Liên kết đã hết hạn',
             );
           }
           return _SharedKeoBody(keo: keo, formatTime: _formatTime);
@@ -177,7 +177,7 @@ class _SharedKeoBody extends ConsumerWidget {
                     l10n != null
                         ? l10n.keoSharedHost(
                             keo.hostName ?? l10n.keoSharedAnonymous)
-                        : 'Host: ${keo.hostName ?? 'Ẩn danh'}',
+                        : 'Chủ kèo: ${keo.hostName ?? 'Ẩn danh'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),

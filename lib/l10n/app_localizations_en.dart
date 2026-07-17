@@ -245,6 +245,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authOtpError => 'That OTP code isn\'t correct';
 
   @override
+  String get authErrorSendFailed =>
+      'Couldn\'t send the OTP code. Check your phone number and try again.';
+
+  @override
+  String get authErrorOtpInvalid =>
+      'The OTP code is incorrect or has expired. Please try again.';
+
+  @override
+  String get authErrorNetwork =>
+      'Can\'t connect. Check your network and try again.';
+
+  @override
+  String get authErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
   String get discoveryDeckTitle => 'Singing pairs';
 
   @override

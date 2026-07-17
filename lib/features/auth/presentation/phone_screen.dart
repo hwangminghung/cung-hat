@@ -153,11 +153,13 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                   ),
                   if (state.phase == AuthPhase.error) ...[
                     const SizedBox(height: AppSpacing.md),
+                    // Vòng cuối UI review: chỉ render message đã map từ
+                    // AuthErrorKind — không bao giờ là exception.toString().
                     _ErrorBanner(
-                      message:
-                          state.error ??
-                          l10n?.authSendOtpError ??
-                          'Không gửi được mã',
+                      message: authErrorMessage(
+                        state.error ?? AuthErrorKind.sendFailed,
+                        l10n,
+                      ),
                     ),
                   ],
                   const SizedBox(height: AppSpacing.xl),

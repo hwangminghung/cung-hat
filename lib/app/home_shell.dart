@@ -211,7 +211,7 @@ class _ProfileTab extends ConsumerWidget {
                   title: l10n?.storeTitle ?? 'Nâng cấp',
                   subtitle:
                       l10n?.shellTileUpgradeSub ??
-                      'Pro, boost kèo và bộ lọc nâng cao',
+                      'Pro, tăng hiển thị kèo và bộ lọc nâng cao',
                   onTap: () => context.push('/store'),
                 ),
                 _ProfileTile(

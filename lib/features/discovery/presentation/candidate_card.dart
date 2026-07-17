@@ -221,7 +221,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
   }
 
   /// Panel dưới tên: <2 ảnh (không có gì để xoay theo) → khối "khoảng cách +
-  /// bài tủ" cố định, kèm hàng "Online hôm nay" bên trái (nếu activeToday)
+  /// bài tủ" cố định, kèm hàng "Trực tuyến hôm nay" bên trái (nếu activeToday)
   /// và chip thể loại chung bên phải (mockup 07, Task P3); ≥2 ảnh → xoay
   /// theo [_photoIndex] như cũ qua [_infoChips].
   Widget _buildPanelBody(
@@ -258,7 +258,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                     const SizedBox(width: AppSpacing.xs),
                     Flexible(
                       child: Text(
-                        _l10n?.candidateOnlineToday ?? 'Online hôm nay',
+                        _l10n?.candidateOnlineToday ?? 'Trực tuyến hôm nay',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -350,7 +350,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
       Text(
         candidate.bio?.trim().isNotEmpty == true
             ? candidate.bio!.trim()
-            : (_l10n?.candidateNoBio ?? 'Chưa có giới thiệu — hỏi thử khi match nhé!'),
+            : (_l10n?.candidateNoBio ?? 'Chưa có giới thiệu — hỏi thử khi ghép đôi nhé!'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: Theme.of(

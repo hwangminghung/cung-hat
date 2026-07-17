@@ -376,7 +376,7 @@ class _ReasonChip extends StatelessWidget {
         'evening_slot' => l10n?.keoMatchReasonEveningSlot ?? 'Giờ đẹp',
         'open_join' => l10n?.keoMatchReasonOpenJoin ?? 'Vào nhanh',
         'available_slots' => l10n?.keoMatchReasonAvailableSlots ?? 'Còn chỗ',
-        'active_host' => l10n?.keoMatchReasonActiveHost ?? 'Chủ kèo đang online',
+        'active_host' => l10n?.keoMatchReasonActiveHost ?? 'Chủ kèo đang trực tuyến',
         _ => code,
       };
 
