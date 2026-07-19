@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cung_hat/core/theme/app_colors.dart';
+import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/discovery/presentation/match_celebration.dart';
 import 'package:cung_hat/features/onboarding/application/reference_providers.dart';
 import 'package:cung_hat/features/onboarding/domain/music_ref.dart';
@@ -121,9 +122,71 @@ void main() {
       );
       await tester.pump();
 
+      expect(
+        find.byKey(const Key('screen_09_match_celebration')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('match_identity_my')), findsOneWidget);
+      expect(find.byKey(const Key('match_identity_other')), findsOneWidget);
+      expect(find.byKey(const Key('match_chat_btn')), findsOneWidget);
+      expect(find.byKey(const Key('match_continue_btn')), findsOneWidget);
       expect(find.textContaining('Linh'), findsWidgets);
       await tester.tap(find.byKey(const Key('match_chat_btn')));
       expect(chat, isTrue);
+    },
+  );
+
+  testWidgets(
+    'hierarchy stays visible across required widths and text scales',
+    (tester) async {
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      for (final width in const [360.0, 393.0, 430.0]) {
+        for (final scale in const [1.0, 1.2, 1.4]) {
+          await tester.binding.setSurfaceSize(Size(width, 844));
+          final platform = width == 393 && scale == 1.4
+              ? TargetPlatform.iOS
+              : TargetPlatform.android;
+
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                songsProvider.overrideWith((ref) async => const <Song>[]),
+              ],
+              child: MediaQuery(
+                data: MediaQueryData(
+                  size: Size(width, 844),
+                  textScaler: TextScaler.linear(scale),
+                  disableAnimations: true,
+                ),
+                child: MaterialApp(
+                  theme: AppTheme.light().copyWith(platform: platform),
+                  home: MatchCelebration(
+                    otherName: 'Linh',
+                    myName: 'Minh',
+                    sharedBaitu: const ['s5'],
+                    onChat: () {},
+                    onContinue: () {},
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pump();
+
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '${width}dp ×$scale on $platform',
+          );
+          expect(
+            find.byKey(const Key('screen_09_match_celebration')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('match_chat_btn')), findsOneWidget);
+          expect(find.byKey(const Key('match_continue_btn')), findsOneWidget);
+        }
+      }
     },
   );
 }

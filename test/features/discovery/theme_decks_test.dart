@@ -195,6 +195,12 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        expect(
+          find.byKey(const Key('screen_10_explore_themes')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('theme_card_ballad')), findsOneWidget);
+        expect(find.byKey(const Key('theme_brand_plaque')), findsOneWidget);
         expect(find.text('Đêm Ballad'), findsOneWidget);
         expect(find.text('12 người đang hát'), findsOneWidget);
       },
@@ -258,6 +264,66 @@ void main() {
 
       expect(find.text('GENRE DECK ballad'), findsOneWidget);
     });
+
+    testWidgets(
+      'board stays responsive across required widths and text scales',
+      (tester) async {
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+
+        for (final width in const [360.0, 393.0, 430.0]) {
+          for (final scale in const [1.0, 1.2, 1.4]) {
+            await tester.binding.setSurfaceSize(Size(width, 844));
+            final platform = width == 393 && scale == 1.4
+                ? TargetPlatform.iOS
+                : TargetPlatform.android;
+            final router = boardRouter();
+
+            await tester.pumpWidget(
+              ProviderScope(
+                overrides: [
+                  themeDeckCountsProvider.overrideWith(
+                    (ref) async => {
+                      'ballad': 12,
+                      'rap_vn': 3,
+                      'bolero': 0,
+                      'kpop': 1,
+                      'vpop': 7,
+                    },
+                  ),
+                ],
+                child: MediaQuery(
+                  data: MediaQueryData(
+                    size: Size(width, 844),
+                    textScaler: TextScaler.linear(scale),
+                    disableAnimations: true,
+                  ),
+                  child: MaterialApp.router(
+                    theme: AppTheme.light().copyWith(platform: platform),
+                    routerConfig: router,
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '${width}dp ×$scale on $platform',
+            );
+            expect(
+              find.byKey(const Key('screen_10_explore_themes')),
+              findsOneWidget,
+            );
+            expect(find.byKey(const Key('theme_card_ballad')), findsOneWidget);
+            expect(find.byKey(const Key('theme_brand_plaque')), findsOneWidget);
+
+            await tester.pumpWidget(const SizedBox.shrink());
+            router.dispose();
+          }
+        }
+      },
+    );
   });
 
   group('DoiDeckScreen — genre mode header', () {

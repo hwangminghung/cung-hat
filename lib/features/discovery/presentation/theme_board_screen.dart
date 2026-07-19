@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/pressable.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../application/discovery_providers.dart';
@@ -23,9 +25,13 @@ class ThemeBoardScreen extends ConsumerWidget {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final indexedThemes = musicThemes.indexed.toList(growable: false);
     final canPop = Navigator.of(context).canPop();
+    final duration = MediaQuery.maybeDisableAnimationsOf(context) == true
+        ? Duration.zero
+        : AppMotion.slow;
 
     return Scaffold(
-      body: SafeArea(
+      body: ResponsiveFrame(
+        key: const Key('screen_10_explore_themes'),
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -75,6 +81,7 @@ class ThemeBoardScreen extends ConsumerWidget {
                           .where((entry) => entry.$1.isEven)
                           .toList(growable: false),
                       counts: counts.value,
+                      entranceDuration: duration,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -86,6 +93,7 @@ class ThemeBoardScreen extends ConsumerWidget {
                             .where((entry) => entry.$1.isOdd)
                             .toList(growable: false),
                         counts: counts.value,
+                        entranceDuration: duration,
                       ),
                     ),
                   ),
@@ -93,34 +101,43 @@ class ThemeBoardScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.xxl),
               Center(
-                child: Container(
-                  key: const Key('theme_brand_plaque'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xl,
-                    vertical: AppSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border.all(color: AppColors.ink, width: 2),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                    boxShadow: const [AppShadows.hard],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.graphic_eq_rounded),
-                      const SizedBox(width: AppSpacing.md),
-                      Text(
-                        l10n?.discoveryExploreBrand ?? 'CÙNG HÁT',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.ink,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
-                        ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 328),
+                  child: Container(
+                    key: const Key('theme_brand_plaque'),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.md,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.ink, width: 2),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusCard,
                       ),
-                      const SizedBox(width: AppSpacing.md),
-                      const Icon(Icons.graphic_eq_rounded),
-                    ],
+                      boxShadow: const [AppShadows.hard],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.graphic_eq_rounded),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            l10n?.discoveryExploreBrand ?? 'CÙNG HÁT',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  color: AppColors.ink,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 2,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        const Icon(Icons.graphic_eq_rounded),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -133,23 +150,42 @@ class ThemeBoardScreen extends ConsumerWidget {
 }
 
 class _ThemeColumn extends StatelessWidget {
-  const _ThemeColumn({required this.entries, required this.counts});
+  const _ThemeColumn({
+    required this.entries,
+    required this.counts,
+    required this.entranceDuration,
+  });
 
   final List<(int, MusicTheme)> entries;
   final Map<String, int>? counts;
+  final Duration entranceDuration;
 
   @override
   Widget build(BuildContext context) {
     const heights = [256.0, 240.0, 244.0, 264.0, 252.0];
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final scaledHeightAllowance = textScale > 1 ? (textScale - 1) * 140 : 0.0;
     return Column(
       children: [
         for (final entry in entries) ...[
-          SizedBox(
-            height: heights[entry.$1],
-            child: _ThemeCard(
-              theme: entry.$2,
-              liveCount: counts?[entry.$2.genreId],
-              onTap: () => context.push('/explore/${entry.$2.genreId}'),
+          TweenAnimationBuilder<double>(
+            duration: entranceDuration,
+            curve: AppMotion.enterCurve,
+            tween: Tween(begin: 0, end: 1),
+            builder: (context, value, child) => Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 18 * (1 - value)),
+                child: child,
+              ),
+            ),
+            child: SizedBox(
+              height: heights[entry.$1] + scaledHeightAllowance,
+              child: _ThemeCard(
+                theme: entry.$2,
+                liveCount: counts?[entry.$2.genreId],
+                onTap: () => context.push('/explore/${entry.$2.genreId}'),
+              ),
             ),
           ),
           if (entry != entries.last) const SizedBox(height: AppSpacing.md),

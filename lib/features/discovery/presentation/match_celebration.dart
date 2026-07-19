@@ -101,6 +101,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
     final titleById = {for (final s in songs) s.id: s.title};
 
     return Scaffold(
+      key: const Key('screen_09_match_celebration'),
       backgroundColor: AppColors.background,
       body: Container(
         key: const Key('match_cream_surface'),
@@ -240,7 +241,8 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                           if (widget.sharedBaitu.isNotEmpty)
                             StampChip(
                               leadingIcon: Icons.music_note_rounded,
-                              label: l10n?.celebrateSharedBaitu(
+                              label:
+                                  l10n?.celebrateSharedBaitu(
                                     widget.sharedBaitu
                                         .take(2)
                                         .map((id) => titleById[id] ?? id)
@@ -268,7 +270,9 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                             key: const Key('match_chat_btn'),
                             onPressed: widget.onChat,
                             icon: Icons.chat_bubble_rounded,
-                            child: Text(l10n?.celebrateChatNow ?? 'Nhắn tin ngay'),
+                            child: Text(
+                              l10n?.celebrateChatNow ?? 'Nhắn tin ngay',
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
@@ -283,7 +287,9 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                             ),
                           ),
                           onPressed: widget.onContinue,
-                          child: Text(l10n?.celebrateContinue ?? 'Tiếp tục khám phá'),
+                          child: Text(
+                            l10n?.celebrateContinue ?? 'Tiếp tục khám phá',
+                          ),
                         ),
                       ],
                     ),
