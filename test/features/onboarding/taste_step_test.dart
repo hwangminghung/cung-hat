@@ -93,10 +93,14 @@ void main() {
       find.byKey(const Key('chip_vpop')),
     );
     expect(selected.selected, isTrue);
-    expect(selected.selectedColor, AppColors.ink);
-    expect(selected.checkmarkColor, AppColors.secondary);
+    expect(selected.selectedColor, AppColors.secondary);
+    expect(selected.checkmarkColor, AppColors.ink);
     expect(selected.showCheckmark, isTrue);
     expect(selected.side, const BorderSide(color: AppColors.ink, width: 2));
+    expect(
+      tester.getSize(find.byKey(const Key('chip_vpop'))).height,
+      greaterThanOrEqualTo(44),
+    );
 
     final unselected = tester.widget<FilterChip>(
       find.byKey(const Key('chip_rap')),
@@ -104,5 +108,9 @@ void main() {
     expect(unselected.selected, isFalse);
     expect(unselected.backgroundColor, AppColors.surface);
     expect(unselected.side, const BorderSide(color: AppColors.ink, width: 2));
+    expect(
+      tester.getSize(find.byKey(const Key('chip_rap'))).height,
+      greaterThanOrEqualTo(44),
+    );
   });
 }

@@ -27,13 +27,16 @@ class TasteChips<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      final l10n =
-          Localizations.of<AppLocalizations>(context, AppLocalizations);
+      final l10n = Localizations.of<AppLocalizations>(
+        context,
+        AppLocalizations,
+      );
       return EmptyState(
         key: const Key('taste_empty'),
         icon: Icons.library_music_outlined,
         title: l10n?.onbTasteEmptyTitle ?? 'Chưa có dữ liệu gu nhạc',
-        subtitle: l10n?.onbTasteEmptySub ??
+        subtitle:
+            l10n?.onbTasteEmptySub ??
             'Kiểm tra dữ liệu mẫu hoặc thử tải lại sau ít phút.',
       );
     }
@@ -57,37 +60,38 @@ class TasteChips<T> extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                     boxShadow: const [AppShadows.hard],
                   ),
-                  child: FilterChip(
-                    key: Key('chip_${idOf(item)}'),
-                    label: SizedBox(
-                      width: double.infinity,
-                      child: Text(labelOf(item)),
-                    ),
-                    selected: selected.contains(idOf(item)),
-                    showCheckmark: true,
-                    checkmarkColor: AppColors.secondary,
-                    backgroundColor: AppColors.surface,
-                    selectedColor: AppColors.ink,
-                    side: const BorderSide(color: AppColors.ink, width: 2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusCard,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    child: FilterChip(
+                      key: Key('chip_${idOf(item)}'),
+                      label: SizedBox(
+                        width: double.infinity,
+                        child: Text(labelOf(item)),
                       ),
-                    ),
-                    labelStyle: Theme.of(context).textTheme.labelLarge
-                        ?.copyWith(
-                          color: selected.contains(idOf(item))
-                              ? AppColors.surface
-                              : AppColors.ink,
-                          fontWeight: FontWeight.w700,
+                      selected: selected.contains(idOf(item)),
+                      showCheckmark: true,
+                      checkmarkColor: AppColors.ink,
+                      backgroundColor: AppColors.surface,
+                      selectedColor: AppColors.secondary,
+                      side: const BorderSide(color: AppColors.ink, width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusCard,
                         ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.md,
+                      ),
+                      labelStyle: Theme.of(context).textTheme.labelLarge
+                          ?.copyWith(
+                            color: AppColors.ink,
+                            fontWeight: FontWeight.w700,
+                          ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.md,
+                      ),
+                      elevation: 0,
+                      pressElevation: 0,
+                      onSelected: (_) => onToggle(idOf(item)),
                     ),
-                    elevation: 0,
-                    pressElevation: 0,
-                    onSelected: (_) => onToggle(idOf(item)),
                   ),
                 ),
               ),

@@ -234,6 +234,10 @@ void main() {
     expect(find.text('Bước 3/4'), findsOneWidget);
     expect(find.text('Thiết lập hồ sơ'), findsNWidgets(2));
     expect(find.text('Bạn muốn mọi người gọi mình là gì?'), findsOneWidget);
+    expect(
+      find.byKey(const Key('screen_05_onboarding_profile')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('onb_profile_preview')), findsOneWidget);
     expect(find.text('Cùng Hát'), findsOneWidget);
     expect(find.text('Mixtape Sáng'), findsNothing);
@@ -284,7 +288,14 @@ void main() {
     expect(find.text('Thể loại'), findsOneWidget);
     expect(find.text('Nghệ sĩ'), findsOneWidget);
     expect(find.text('Bài tủ'), findsOneWidget);
+    expect(
+      find.byKey(const Key('screen_06_onboarding_music_taste')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('onb_finish')), findsOneWidget);
+    expect(find.byKey(const Key('taste_genres_section')), findsOneWidget);
+    expect(find.byKey(const Key('taste_artists_section')), findsOneWidget);
+    expect(find.byKey(const Key('taste_songs_section')), findsOneWidget);
     expect(find.text('Hoàn tất'), findsOneWidget);
   });
 

@@ -9,13 +9,13 @@ import '../application/onboarding_controller.dart';
 import '../application/reference_providers.dart';
 import '../domain/music_ref.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import 'consent_step.dart';
 import 'dob_step.dart';
+import 'profile_step.dart';
 import 'taste_step.dart';
 
 /// Index of the consent step in the flow (DOB=0, consent=1).
@@ -113,6 +113,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   }
 
   Widget _tasteSection<T>({
+    required Key key,
     required String label,
     required AsyncValue<List<T>> async,
     required String Function(T) labelOf,
@@ -121,6 +122,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   }) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Column(
+      key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _TasteSectionHeader(label),
@@ -173,80 +175,53 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           onChanged: (key, value) => setState(() => _consents[key] = value),
         ),
       ),
-      2 => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n?.onbStepProfile ?? 'Thiết lập hồ sơ',
-            style: Theme.of(context).textTheme.displaySmall,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _ProfilePreview(
-            key: const Key('onb_profile_preview'),
-            controller: _nameCtrl,
-            brand: l10n?.appTitle ?? 'Cùng Hát',
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text(
-            l10n?.onbProfileQuestion ?? 'Bạn muốn mọi người gọi mình là gì?',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          TextField(
-            key: const Key('onb_name'),
-            controller: _nameCtrl,
-            decoration: InputDecoration(
-              labelText: l10n?.onbNameLabel ?? 'Tên hiển thị',
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          TextField(
-            key: const Key('onb_bio'),
-            controller: _bioCtrl,
-            minLines: 3,
-            maxLines: 4,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(
-              labelText: l10n?.onbBioLabel ?? 'Giới thiệu',
-            ),
-          ),
-        ],
+      2 => ProfileStep(
+        key: const Key('screen_05_onboarding_profile'),
+        nameController: _nameCtrl,
+        bioController: _bioCtrl,
+        brand: l10n?.appTitle ?? 'Cùng Hát',
       ),
-      _ => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n?.onbStepTaste ?? 'Gu nhạc',
-            style: Theme.of(context).textTheme.displaySmall,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l10n?.onbTasteSubtitle ?? 'Chọn vài thứ bạn hay nghe',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _tasteSection<Genre>(
-            label: l10n?.onbTasteGenres ?? 'Thể loại',
-            async: genres,
-            labelOf: (genre) => genre.nameVi,
-            idOf: (genre) => genre.id,
-            selected: _genreSel,
-          ),
-          _tasteSection<Artist>(
-            label: l10n?.onbTasteArtists ?? 'Nghệ sĩ',
-            async: artists,
-            labelOf: (artist) => artist.name,
-            idOf: (artist) => artist.id,
-            selected: _artistSel,
-          ),
-          _tasteSection<Song>(
-            label: l10n?.onbBaitu ?? 'Bài tủ',
-            async: songs,
-            labelOf: (song) => song.title,
-            idOf: (song) => song.id,
-            selected: _songSel,
-          ),
-        ],
+      _ => KeyedSubtree(
+        key: const Key('screen_06_onboarding_music_taste'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n?.onbStepTaste ?? 'Gu nhạc',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n?.onbTasteSubtitle ?? 'Chọn vài thứ bạn hay nghe',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _tasteSection<Genre>(
+              key: const Key('taste_genres_section'),
+              label: l10n?.onbTasteGenres ?? 'Thể loại',
+              async: genres,
+              labelOf: (genre) => genre.nameVi,
+              idOf: (genre) => genre.id,
+              selected: _genreSel,
+            ),
+            _tasteSection<Artist>(
+              key: const Key('taste_artists_section'),
+              label: l10n?.onbTasteArtists ?? 'Nghệ sĩ',
+              async: artists,
+              labelOf: (artist) => artist.name,
+              idOf: (artist) => artist.id,
+              selected: _artistSel,
+            ),
+            _tasteSection<Song>(
+              key: const Key('taste_songs_section'),
+              label: l10n?.onbBaitu ?? 'Bài tủ',
+              async: songs,
+              labelOf: (song) => song.title,
+              idOf: (song) => song.id,
+              selected: _songSel,
+            ),
+          ],
+        ),
       ),
     };
   }
@@ -447,97 +422,6 @@ class _OnboardingProgress extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ProfilePreview extends StatelessWidget {
-  const _ProfilePreview({
-    super.key,
-    required this.controller,
-    required this.brand,
-  });
-
-  final TextEditingController controller;
-  final String brand;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 220,
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.ink, width: 2),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        boxShadow: const [AppShadows.hard],
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: ValueListenableBuilder<TextEditingValue>(
-              valueListenable: controller,
-              builder: (context, value, _) {
-                final trimmed = value.text.trim();
-                final monogram = trimmed.isEmpty
-                    ? 'M'
-                    : String.fromCharCode(trimmed.runes.first).toUpperCase();
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 128,
-                      height: 128,
-                      decoration: const BoxDecoration(
-                        color: AppColors.surfaceMuted,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    Text(
-                      monogram,
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: AppColors.ink,
-                        fontSize: 82,
-                        height: 1,
-                      ),
-                    ),
-                    const Positioned(
-                      left: AppSpacing.xl,
-                      top: AppSpacing.xs,
-                      child: Icon(
-                        Icons.auto_awesome,
-                        color: AppColors.secondaryDark,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          Row(
-            children: [
-              const Expanded(
-                child: WaveDivider(
-                  height: AppSpacing.xxl,
-                  color: AppColors.ink,
-                  strokeWidth: 2,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              const Icon(Icons.language, color: AppColors.ink, size: 22),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                brand,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: AppColors.ink),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
