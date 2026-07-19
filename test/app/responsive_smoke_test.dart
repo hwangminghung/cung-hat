@@ -14,6 +14,8 @@ import 'package:cung_hat/features/keo/application/keo_providers.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/app/home_shell.dart';
 import 'package:cung_hat/features/profile/application/profile_providers.dart';
+import 'package:cung_hat/features/profile/domain/profile_completion.dart';
+import 'package:cung_hat/features/profile/presentation/profile_screen.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
 
@@ -57,6 +59,9 @@ void main() {
           inboxProvider.overrideWith((ref) => Future.value(<MatchSummary>[])),
           entitlementsProvider.overrideWith((ref) async => <String>{}),
           myProfileProvider.overrideWith((ref) => Future.value(null)),
+          myTasteCountsProvider.overrideWith(
+            (ref) => Future.value(const TasteCounts(0, 0, 0)),
+          ),
         ],
         child: MaterialApp(theme: AppTheme.light(), home: const HomeShell()),
       ),
@@ -64,7 +69,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  for (final width in [360.0, 393.0, 412.0]) {
+  for (final width in [360.0, 393.0, 430.0]) {
     for (final scale in [1.0, 1.2]) {
       testWidgets('4 tab không overflow @ ${width.toInt()}dp ×$scale', (
         tester,
@@ -90,6 +95,27 @@ void main() {
 
         await tester.tap(find.text('Hồ sơ'));
         await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
+
+  for (final width in [360.0, 393.0, 430.0]) {
+    for (final scale in [1.0, 1.2, 1.4]) {
+      testWidgets('profile shell không overflow @ ${width.toInt()}dp ×$scale', (
+        tester,
+      ) async {
+        await tester.binding.setSurfaceSize(Size(width, 800));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+        await pumpShell(tester);
+        await tester.tap(find.text('Hồ sơ'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ProfileScreen), findsOneWidget);
+        expect(find.byKey(const Key('screen_18_profile')), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }

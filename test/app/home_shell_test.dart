@@ -15,6 +15,7 @@ import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/profile/application/profile_providers.dart';
 import 'package:cung_hat/features/profile/domain/profile.dart';
 import 'package:cung_hat/features/profile/domain/profile_completion.dart';
+import 'package:cung_hat/features/profile/presentation/profile_screen.dart';
 import 'package:cung_hat/shared/widgets/stamp_chip.dart';
 import 'package:cung_hat/shared/widgets/wave_progress.dart';
 
@@ -173,6 +174,8 @@ void main() {
     await tester.tap(find.text('Hồ sơ'));
     await tester.pumpAndSettle();
 
+    expect(find.byType(ProfileScreen), findsOneWidget);
+    expect(find.byKey(const Key('screen_18_profile')), findsOneWidget);
     expect(find.widgetWithText(StampChip, 'PRO'), findsOneWidget);
   });
 
