@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/features/billing/application/billing_providers.dart';
 import 'package:cung_hat/features/billing/data/billing_repository.dart';
 import 'package:cung_hat/features/billing/presentation/store_screen.dart';
+import 'package:cung_hat/shared/widgets/empty_state.dart';
+import 'package:cung_hat/shared/widgets/hard_card.dart';
+import 'package:cung_hat/shared/widgets/skeleton.dart';
 
 const _catalog = <StoreProduct>[
   StoreProduct(
@@ -32,6 +37,32 @@ const _catalog = <StoreProduct>[
   ),
 ];
 
+Future<void> _pumpStore(
+  WidgetTester tester, {
+  required Size size,
+  required double textScale,
+  TargetPlatform platform = TargetPlatform.android,
+}) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1;
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [storeProductsProvider.overrideWith((ref) async => _catalog)],
+      child: MaterialApp(
+        theme: ThemeData(platform: platform),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        home: const StoreScreen(),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets(
     'store lists Pro, boost and premium upgrades with catalog pricing',
@@ -46,6 +77,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const Key('screen_21_store')), findsOneWidget);
+      expect(find.byKey(const Key('store_pro_hero')), findsOneWidget);
+      expect(find.byKey(const Key('store_product_pro')), findsOneWidget);
+      expect(
+        tester.widget(find.byKey(const Key('store_product_pro'))),
+        isA<HardCard>(),
+      );
       expect(find.text('Nâng cấp Pro'), findsOneWidget);
       expect(find.text('Đẩy kèo lên top'), findsOneWidget);
       expect(find.text('Xem ai đã thích bạn'), findsOneWidget);
@@ -61,6 +99,25 @@ void main() {
       expect(find.text('Mua'), findsNWidgets(4));
     },
   );
+
+  testWidgets('loading state uses store card skeletons', (tester) async {
+    final catalog = Completer<List<StoreProduct>>();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storeProductsProvider.overrideWith((ref) => catalog.future),
+        ],
+        child: const MaterialApp(home: StoreScreen()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('screen_21_store')), findsOneWidget);
+    expect(find.byType(SkeletonCard), findsWidgets);
+
+    catalog.complete(_catalog);
+    await tester.pumpAndSettle();
+  });
 
   testWidgets('error state shows retry button that reloads the catalog', (
     tester,
@@ -85,6 +142,8 @@ void main() {
 
     expect(find.text('Không tải được cửa hàng'), findsOneWidget);
     expect(find.text('Thử lại'), findsOneWidget);
+    final emptyState = tester.widget<EmptyState>(find.byType(EmptyState));
+    expect(emptyState.onAction, isNotNull);
 
     await tester.tap(find.text('Thử lại'));
     await tester.pumpAndSettle();
@@ -160,5 +219,40 @@ void main() {
             '${titlesInExpectedOrder[i]} phai nam TREN ${titlesInExpectedOrder[i + 1]}',
       );
     }
+  });
+
+  testWidgets('store stays usable at required widths and text scales', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final width in <double>[360, 393, 430]) {
+      for (final scale in <double>[1, 1.2, 1.4]) {
+        await _pumpStore(tester, size: Size(width, 800), textScale: scale);
+
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: 'Store overflowed at ${width}dp and ${scale}x text',
+        );
+        expect(find.byKey(const Key('screen_21_store')), findsOneWidget);
+      }
+    }
+  });
+
+  testWidgets('store renders its presentation on iOS', (tester) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await _pumpStore(
+      tester,
+      size: const Size(430, 800),
+      textScale: 1.4,
+      platform: TargetPlatform.iOS,
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('store_product_pro')), findsOneWidget);
   });
 }
