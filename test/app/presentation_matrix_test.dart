@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cung_hat/core/analytics/analytics_service.dart';
 import 'package:cung_hat/features/auth/application/auth_controller.dart';
 import 'package:cung_hat/features/auth/application/auth_providers.dart';
@@ -314,6 +316,7 @@ Future<void> _pumpCandidateDetail(
   WidgetTester tester,
   _PresentationConfig config,
 ) async {
+  const hostKey = Key('candidate_detail_host');
   await _pump(
     tester,
     config,
@@ -324,17 +327,22 @@ Future<void> _pumpCandidateDetail(
         ).overrideWith((ref) async => const <String>[]),
         songsProvider.overrideWith((ref) async => _songs),
       ],
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: CandidateDetailSheet(
-            candidate: _candidate,
-            onPass: () {},
-            onLike: () {},
-          ),
+      child: Navigator(
+        onGenerateRoute: (_) => MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: SizedBox(key: hostKey)),
         ),
       ),
     ),
   );
+  unawaited(
+    CandidateDetailSheet.show(
+      tester.element(find.byKey(hostKey)),
+      candidate: _candidate,
+      onPass: () {},
+      onLike: () {},
+    ),
+  );
+  await tester.pumpAndSettle();
 }
 
 Future<void> _pumpCelebration(
@@ -807,6 +815,31 @@ final _targets = <_PresentationTarget>[
   ),
 ];
 
+const _canonicalScreenKeys = <int, Key>{
+  1: Key('screen_01_login'),
+  2: Key('screen_02_otp'),
+  3: Key('screen_03_onboarding_dob'),
+  4: Key('screen_04_onboarding_consent'),
+  5: Key('screen_05_onboarding_profile'),
+  6: Key('screen_06_onboarding_music_taste'),
+  7: Key('screen_07_doi_deck'),
+  8: Key('screen_08_doi_profile_detail'),
+  9: Key('screen_09_match_celebration'),
+  10: Key('screen_10_explore_themes'),
+  11: Key('screen_11_keo_board'),
+  12: Key('screen_12_keo_auto_match'),
+  13: Key('screen_13_create_keo'),
+  14: Key('screen_14_keo_detail'),
+  15: Key('screen_15_inbox'),
+  16: Key('screen_16_chat_1to1'),
+  17: Key('screen_17_keo_group_chat'),
+  18: Key('screen_18_profile'),
+  19: Key('screen_19_plan'),
+  20: Key('screen_20_booking_payment'),
+  21: Key('screen_21_store'),
+  22: Key('screen_22_settings'),
+};
+
 Future<void> _makePrimaryActionReachable(
   WidgetTester tester,
   _PresentationTarget target,
@@ -859,12 +892,124 @@ void _expectProductionPlatform(
   );
 }
 
+bool _focusBelongsToScreen(FocusNode? focus, Element screenElement) {
+  final context = focus?.context;
+  if (context == null || !context.mounted) return false;
+  if (identical(context, screenElement)) return true;
+
+  var belongsToScreen = false;
+  context.visitAncestorElements((ancestor) {
+    if (identical(ancestor, screenElement)) {
+      belongsToScreen = true;
+      return false;
+    }
+    return true;
+  });
+  return belongsToScreen;
+}
+
+Future<void> _traverseKeyboardInto(WidgetTester tester, Key screenKey) async {
+  final screenElement = find.byKey(screenKey).evaluate().single;
+  for (var step = 0; step < 40; step++) {
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    if (_focusBelongsToScreen(
+      FocusManager.instance.primaryFocus,
+      screenElement,
+    )) {
+      return;
+    }
+  }
+}
+
+void _expectKeyboardFocusWithin(Key screenKey, {required String label}) {
+  final focus = FocusManager.instance.primaryFocus;
+  expect(focus, isNotNull, reason: '$label has no keyboard-reachable control');
+  expect(
+    focus,
+    isNot(same(FocusManager.instance.rootScope)),
+    reason: '$label left keyboard focus at the root scope',
+  );
+
+  final focusContext = focus!.context;
+  expect(
+    focusContext,
+    isNotNull,
+    reason: '$label focused a node without an attached context',
+  );
+  expect(
+    focusContext!.mounted,
+    isTrue,
+    reason: '$label focused a detached element',
+  );
+
+  final screenElement = find.byKey(screenKey).evaluate().single;
+  expect(
+    _focusBelongsToScreen(focus, screenElement),
+    isTrue,
+    reason: '$label focused an element outside its production screen',
+  );
+}
+
 void main() {
+  testWidgets('keyboard audit rejects the root focus scope mutation', (
+    tester,
+  ) async {
+    const screenKey = Key('mutation_screen');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: KeyedSubtree(key: screenKey, child: SizedBox()),
+      ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    FocusManager.instance.rootScope.requestFocus();
+    await tester.pump();
+
+    final focus = FocusManager.instance.primaryFocus;
+    expect(focus, isNotNull, reason: 'the old non-null assertion would pass');
+    expect(
+      focus,
+      same(FocusManager.instance.rootScope),
+      reason: 'mutation fixture must leave focus at the root scope',
+    );
+    expect(
+      () => _expectKeyboardFocusWithin(screenKey, label: 'mutation screen'),
+      throwsA(isA<TestFailure>()),
+      reason: 'the strengthened audit must reject the old false positive',
+    );
+  });
+
+  testWidgets('screen_08 fixture uses the production modal sheet path', (
+    tester,
+  ) async {
+    const config = _PresentationConfig(
+      width: 393,
+      textScale: 1,
+      platform: TargetPlatform.iOS,
+    );
+    await _pumpCandidateDetail(tester, config);
+
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.byType(DraggableScrollableSheet), findsOneWidget);
+    expect(
+      find.byKey(const Key('screen_08_doi_profile_detail')),
+      findsOneWidget,
+    );
+  });
+
   test('coverage registry contains every approved screen exactly once', () {
     expect(_targets, hasLength(22));
     expect([
       for (final target in _targets) target.number,
     ], List<int>.generate(22, (index) => index + 1));
+    expect(
+      {for (final target in _targets) target.number: target.key},
+      _canonicalScreenKeys,
+      reason: 'presentation registry drifted from the canonical coverage map',
+    );
     expect(
       {for (final target in _targets) target.key}.length,
       22,
@@ -920,13 +1065,8 @@ void main() {
       await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
       await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
-      expect(
-        FocusManager.instance.primaryFocus,
-        isNotNull,
-        reason: '${target.label} has no keyboard-reachable control',
-      );
+      await _traverseKeyboardInto(tester, target.key);
+      _expectKeyboardFocusWithin(target.key, label: target.label);
       expect(tester.takeException(), isNull);
       semantics.dispose();
     });

@@ -35,18 +35,29 @@ class _PressableState extends State<Pressable> {
     final pressDuration = MediaQuery.maybeOf(context)?.disableAnimations == true
         ? Duration.zero
         : AppMotion.fast;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: interactive ? (_) => _set(true) : null,
-      onTapUp: interactive ? (_) => _set(false) : null,
-      onTapCancel: interactive ? () => _set(false) : null,
-      onTap: interactive ? widget.onTap : null,
-      onLongPress: interactive ? widget.onLongPress : null,
-      child: AnimatedScale(
-        scale: _pressed ? AppMotion.pressScale : 1.0,
-        duration: pressDuration,
-        curve: AppMotion.enterCurve,
-        child: widget.child,
+    return FocusableActionDetector(
+      enabled: interactive,
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onTap?.call();
+            return null;
+          },
+        ),
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: interactive ? (_) => _set(true) : null,
+        onTapUp: interactive ? (_) => _set(false) : null,
+        onTapCancel: interactive ? () => _set(false) : null,
+        onTap: interactive ? widget.onTap : null,
+        onLongPress: interactive ? widget.onLongPress : null,
+        child: AnimatedScale(
+          scale: _pressed ? AppMotion.pressScale : 1.0,
+          duration: pressDuration,
+          curve: AppMotion.enterCurve,
+          child: widget.child,
+        ),
       ),
     );
   }
