@@ -4,12 +4,122 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cung_hat/core/l10n/locale_controller.dart';
+import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import 'package:cung_hat/features/settings/application/settings_providers.dart';
 import 'package:cung_hat/features/settings/data/settings_repository.dart';
 import 'package:cung_hat/features/settings/presentation/settings_screen.dart';
 
 class _MockSettingsRepo extends Mock implements SettingsRepository {}
+
+Future<void> _pumpResponsiveSettings(
+  WidgetTester tester, {
+  required double width,
+  required double textScale,
+  TargetPlatform platform = TargetPlatform.android,
+}) async {
+  tester.view.physicalSize = Size(width, 800);
+  tester.view.devicePixelRatio = 1;
+  SharedPreferences.setMockInitialValues({});
+
+  final repo = _MockSettingsRepo();
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        settingsRepositoryProvider.overrideWithValue(repo),
+        myConsentsProvider.overrideWith(
+          (ref) async => const <String, bool>{
+            'location': true,
+            'photos': true,
+            'matching': true,
+            'marketing': false,
+            'cross_border': true,
+          },
+        ),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.light().copyWith(platform: platform),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        home: const SettingsScreen(),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _expectReachable(
+  WidgetTester tester,
+  Finder target, {
+  required String reason,
+}) async {
+  expect(target, findsOneWidget, reason: reason);
+  await tester.dragUntilVisible(
+    target,
+    find.byType(ListView),
+    const Offset(0, -160),
+    maxIteration: 30,
+  );
+  await tester.pumpAndSettle();
+  expect(target.hitTestable(), findsOneWidget, reason: reason);
+}
+
+Future<void> _verifyResponsiveSettings(
+  WidgetTester tester, {
+  required double width,
+  required double textScale,
+  TargetPlatform platform = TargetPlatform.android,
+}) async {
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+  await _pumpResponsiveSettings(
+    tester,
+    width: width,
+    textScale: textScale,
+    platform: platform,
+  );
+
+  for (final key in <Key>[
+    const Key('screen_22_settings'),
+    const Key('settings_privacy_section'),
+    const Key('settings_language_section'),
+    const Key('settings_account_section'),
+    const Key('settings_legal_section'),
+  ]) {
+    expect(
+      find.byKey(key),
+      findsOneWidget,
+      reason: '$key missing at ${width}dp, ${textScale}x, $platform',
+    );
+  }
+
+  final controls = <Finder>[
+    find.byKey(const Key('consent_location')),
+    find.byKey(const Key('lang_en')),
+    find.widgetWithText(ListTile, 'Tải dữ liệu của tôi'),
+    find.widgetWithText(ListTile, 'Đăng xuất'),
+    find.widgetWithText(ListTile, 'Xóa tài khoản'),
+    find.widgetWithText(ListTile, 'Chính sách bảo mật'),
+    find.widgetWithText(ListTile, 'Điều khoản'),
+  ];
+  for (final control in controls) {
+    await _expectReachable(
+      tester,
+      control,
+      reason: '$control not reachable at ${width}dp, ${textScale}x, $platform',
+    );
+  }
+
+  expect(
+    tester.takeException(),
+    isNull,
+    reason: 'Settings overflowed at ${width}dp, ${textScale}x, $platform',
+  );
+}
 
 void main() {
   testWidgets(
@@ -99,5 +209,29 @@ void main() {
     // Nhãn consent 'location' theo l10n EN, không còn hardcode VI.
     expect(find.text('Dùng vị trí để gợi ý người/kèo gần bạn'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  for (final width in <double>[360, 393, 430]) {
+    for (final textScale in <double>[1, 1.2, 1.4]) {
+      testWidgets(
+        'Settings stays reachable at ${width}dp and ${textScale}x text',
+        (tester) => _verifyResponsiveSettings(
+          tester,
+          width: width,
+          textScale: textScale,
+        ),
+      );
+    }
+  }
+
+  testWidgets('Settings renders its full hierarchy on iOS at 393dp and 1.4x', (
+    tester,
+  ) {
+    return _verifyResponsiveSettings(
+      tester,
+      width: 393,
+      textScale: 1.4,
+      platform: TargetPlatform.iOS,
+    );
   });
 }
