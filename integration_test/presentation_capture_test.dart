@@ -1,4 +1,5 @@
 import 'package:cung_hat/core/analytics/analytics_service.dart';
+import 'package:cung_hat/core/theme/app_colors.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/auth/application/auth_controller.dart';
 import 'package:cung_hat/features/auth/application/auth_providers.dart';
@@ -202,13 +203,15 @@ Widget _phoneFixture() {
   );
 }
 
-Future<Widget> _otpFixture() async {
+Future<Widget> _otpFixture({bool registerTestTearDown = true}) async {
   final container = ProviderContainer(
     overrides: [
       authRepositoryProvider.overrideWithValue(_InMemoryAuthRepository()),
     ],
   );
-  addTearDown(container.dispose);
+  if (registerTestTearDown) {
+    addTearDown(container.dispose);
+  }
   await container.read(authControllerProvider.notifier).sendOtp('+84900000001');
   return _captureApp(
     UncontrolledProviderScope(container: container, child: const OtpScreen()),
@@ -326,10 +329,12 @@ Widget _keoBoardFixture() {
 
 Widget _keoMatchFixture() {
   return _captureApp(
-    KeoMatchSheet(
-      suggestions: const [_suggestion],
-      onJoin: (_) async {},
-      onCreate: (_) async {},
+    Scaffold(
+      body: KeoMatchSheet(
+        suggestions: const [_suggestion],
+        onJoin: (_) async {},
+        onCreate: (_) async {},
+      ),
     ),
   );
 }
@@ -389,7 +394,7 @@ Widget _inboxFixture() {
           (ref) async => const Profile(id: 'viewer', displayName: 'Minh'),
         ),
       ],
-      child: const InboxScreen(onFindKeo: _noop),
+      child: const Scaffold(body: InboxScreen(onFindKeo: _noop)),
     ),
   );
 }
@@ -449,7 +454,7 @@ Widget _profileFixture() {
         ),
         entitlementsProvider.overrideWith((ref) async => const <String>{}),
       ],
-      child: const ProfileScreen(),
+      child: const Scaffold(body: ProfileScreen()),
     ),
   );
 }
@@ -534,6 +539,63 @@ Widget _settingsFixture() {
   );
 }
 
+const presentationFixtureTitles = <int, String>{
+  1: 'screen_01_login',
+  2: 'screen_02_otp',
+  3: 'screen_03_onboarding_dob',
+  4: 'screen_04_onboarding_consent',
+  5: 'screen_05_onboarding_profile',
+  6: 'screen_06_onboarding_music_taste',
+  7: 'screen_07_doi_deck',
+  8: 'screen_08_doi_profile_detail',
+  9: 'screen_09_match_celebration',
+  10: 'screen_10_explore_themes',
+  11: 'screen_11_keo_board',
+  12: 'screen_12_keo_auto_match',
+  13: 'screen_13_create_keo',
+  14: 'screen_14_keo_detail',
+  15: 'screen_15_inbox',
+  16: 'screen_16_chat_1to1',
+  17: 'screen_17_keo_group_chat',
+  18: 'screen_18_profile',
+  19: 'screen_19_plan',
+  20: 'screen_20_booking_payment',
+  21: 'screen_21_store',
+  22: 'screen_22_settings',
+};
+
+Future<Widget> buildPresentationFixture(int number) async {
+  final title = presentationFixtureTitles[number];
+  if (title == null) {
+    throw ArgumentError.value(number, 'number', 'must be between 1 and 22');
+  }
+
+  final fixture = switch (number) {
+    1 => _phoneFixture(),
+    2 => await _otpFixture(registerTestTearDown: false),
+    >= 3 && <= 6 => _onboardingFixture(),
+    7 => _deckFixture(),
+    8 => _candidateDetailFixture(),
+    9 => _celebrationFixture(),
+    10 => _themesFixture(),
+    11 => _keoBoardFixture(),
+    12 => _keoMatchFixture(),
+    13 => _createKeoFixture(),
+    14 => _keoDetailFixture(),
+    15 => _inboxFixture(),
+    16 => _chatFixture(),
+    17 => _keoChatFixture(),
+    18 => _profileFixture(),
+    19 => _planFixture(),
+    20 => _paymentFixture(),
+    21 => _storeFixture(),
+    22 => _settingsFixture(),
+    _ => throw StateError('unreachable fixture number $number'),
+  };
+
+  return Title(title: title, color: AppColors.primary, child: fixture);
+}
+
 void _noop() {}
 
 void main() {
@@ -573,6 +635,19 @@ void main() {
       await tester.pumpAndSettle();
     }
     await capture(tester, name: name, app: app, screen: find.byKey(screenKey));
+  }
+
+  void expectLightProductionHost(WidgetTester tester, Key screenKey) {
+    final host = find.ancestor(
+      of: find.byKey(screenKey),
+      matching: find.byType(Scaffold),
+    );
+    expect(host, findsOneWidget);
+    final scaffold = tester.widget<Scaffold>(host);
+    final color =
+        scaffold.backgroundColor ??
+        Theme.of(tester.element(host)).scaffoldBackgroundColor;
+    expect(color, AppColors.background);
   }
 
   testWidgets('captures 01-login from its production screen root', (
@@ -705,6 +780,7 @@ void main() {
       app: _keoMatchFixture(),
       screen: find.byKey(const Key('screen_12_keo_auto_match')),
     );
+    expectLightProductionHost(tester, const Key('screen_12_keo_auto_match'));
   });
 
   testWidgets('captures 13-create-keo from its production screen root', (
@@ -738,6 +814,7 @@ void main() {
       app: _inboxFixture(),
       screen: find.byKey(const Key('screen_15_inbox')),
     );
+    expectLightProductionHost(tester, const Key('screen_15_inbox'));
   });
 
   testWidgets('captures 16-chat-1to1 from its production screen root', (
@@ -771,6 +848,7 @@ void main() {
       app: _profileFixture(),
       screen: find.byKey(const Key('screen_18_profile')),
     );
+    expectLightProductionHost(tester, const Key('screen_18_profile'));
   });
 
   testWidgets('captures 19-plan from its production screen root', (
