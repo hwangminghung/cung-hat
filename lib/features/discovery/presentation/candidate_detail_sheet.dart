@@ -101,6 +101,7 @@ class CandidateDetailSheet extends ConsumerWidget {
     );
 
     return Padding(
+      key: const Key('screen_08_doi_profile_detail'),
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -129,6 +129,8 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('card_photo_area')), findsOneWidget);
+    expect(find.byKey(const Key('card_detail_btn')), findsOneWidget);
     await tester.tap(find.byKey(const Key('card_detail_btn')));
     expect(opened, isTrue);
   });

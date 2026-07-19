@@ -237,68 +237,89 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
     }
 
     final chips = candidate.sharedGenres.take(2).toList();
-    return Row(
+    final facts = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
+        if (candidate.activeToday) ...[
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.secondary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
+                child: Text(
+                  _l10n?.candidateOnlineToday ?? 'Trực tuyến hôm nay',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+        _InfoLine(
+          icon: Icons.place_rounded,
+          label: _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
+              'Cách ${candidate.distanceBand ?? '?'} km',
+          color: AppColors.primary,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        _InfoLine(
+          icon: Icons.music_note_rounded,
+          label: _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
+              'cùng ${candidate.sharedBaitu.length} bài tủ',
+          color: AppColors.teal,
+        ),
+      ],
+    );
+    final genres = Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      children: [
+        for (final genre in chips)
+          StampChip(label: '#$genre', tone: StampChipTone.teal),
+      ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final stackFactsAndGenres =
+            constraints.maxWidth < 300 || textScale > 1;
+        if (stackFactsAndGenres) {
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (candidate.activeToday) ...[
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.secondary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Flexible(
-                      child: Text(
-                        _l10n?.candidateOnlineToday ?? 'Trực tuyến hôm nay',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.ink,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
+              facts,
+              if (chips.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.sm),
+                genres,
               ],
-              _InfoLine(
-                icon: Icons.place_rounded,
-                label: _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
-                    'Cách ${candidate.distanceBand ?? '?'} km',
-                color: AppColors.primary,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              _InfoLine(
-                icon: Icons.music_note_rounded,
-                label: _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
-                    'cùng ${candidate.sharedBaitu.length} bài tủ',
-                color: AppColors.teal,
-              ),
             ],
-          ),
-        ),
-        if (chips.isNotEmpty) ...[
-          const SizedBox(width: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: [
-              for (final genre in chips)
-                StampChip(label: '#$genre', tone: StampChipTone.teal),
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: facts),
+            if (chips.isNotEmpty) ...[
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(child: genres),
             ],
-          ),
-        ],
-      ],
+          ],
+        );
+      },
     );
   }
 

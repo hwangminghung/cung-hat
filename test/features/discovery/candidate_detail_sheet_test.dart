@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/discovery/presentation/candidate_detail_sheet.dart';
 import 'package:cung_hat/features/onboarding/application/reference_providers.dart';
@@ -51,7 +52,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(
+        find.byKey(const Key('screen_08_doi_profile_detail')),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('detail_sheet_handle')), findsOneWidget);
+      expect(find.byType(PhotoCarousel), findsOneWidget);
       expect(find.byType(WaveDivider), findsAtLeastNWidgets(2));
       expect(find.byType(StampChip), findsNWidgets(2));
       expect(
@@ -60,6 +66,71 @@ void main() {
       );
     },
   );
+
+  for (final width in [360.0, 393.0, 430.0]) {
+    for (final scale in [1.0, 1.2, 1.4]) {
+      testWidgets(
+        'profile detail stays actionable @ ${width.toInt()}dp ×$scale',
+        (tester) async {
+          await tester.binding.setSurfaceSize(Size(width, 800));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.platformDispatcher.clearAllTestValues);
+          final platform = width == 393 && scale == 1.4
+              ? TargetPlatform.iOS
+              : TargetPlatform.android;
+          var liked = false;
+
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                signedUrlsProvider(
+                  'u1',
+                ).overrideWith((ref) async => const <String>[]),
+                songsProvider.overrideWith((ref) async => _songs),
+              ],
+              child: MaterialApp(
+                theme: AppTheme.light().copyWith(platform: platform),
+                home: Scaffold(
+                  body: SingleChildScrollView(
+                    child: CandidateDetailSheet(
+                      candidate: c,
+                      onPass: () {},
+                      onLike: () => liked = true,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('screen_08_doi_profile_detail')),
+            findsOneWidget,
+          );
+          expect(
+            Theme.of(
+              tester.element(
+                find.byKey(const Key('screen_08_doi_profile_detail')),
+              ),
+            ).platform,
+            platform,
+          );
+          expect(find.byKey(const Key('detail_sheet_handle')), findsOneWidget);
+          expect(find.byType(PhotoCarousel), findsOneWidget);
+          expect(tester.takeException(), isNull);
+
+          final likeButton = find.byKey(const Key('detail_like_btn'));
+          await tester.ensureVisible(likeButton);
+          expect(likeButton.hitTestable(), findsOneWidget);
+          await tester.tap(likeButton);
+          expect(liked, isTrue);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
 
   testWidgets(
     'hiện đủ tên tuổi, khoảng cách, gu chung, bài tủ chung (TÊN bài, không phải id)',

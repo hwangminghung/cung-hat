@@ -14,6 +14,34 @@ double _scaleOf(WidgetTester tester, Key key) {
 }
 
 void main() {
+  testWidgets('4 nút quyết định đạt 44×44 và gọi được không cần vuốt', (
+    tester,
+  ) async {
+    final calls = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DeckActionBar(
+            rewindEnabled: true,
+            onRewind: () => calls.add('rewind'),
+            onPass: () => calls.add('pass'),
+            onSuperLike: () => calls.add('super'),
+            onLike: () => calls.add('like'),
+          ),
+        ),
+      ),
+    );
+
+    for (final action in ['rewind', 'pass', 'super', 'like']) {
+      final button = find.byKey(Key('deck_${action}_btn'));
+      expect(button, findsOneWidget);
+      expect(tester.getSize(button).width, greaterThanOrEqualTo(44));
+      expect(tester.getSize(button).height, greaterThanOrEqualTo(44));
+      await tester.tap(button);
+    }
+    expect(calls, ['rewind', 'pass', 'super', 'like']);
+  });
+
   testWidgets('hiện 4 nhãn hành động tiếng Việt bên dưới đúng thứ tự', (
     tester,
   ) async {

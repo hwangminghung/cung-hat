@@ -62,6 +62,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const Key('screen_07_doi_deck')), findsOneWidget);
       // Empty-deck (radius=50, chưa hết 100km) hiện nút mở rộng + switch tự
       // mở rộng thay vì EmptyState/'Làm mới gợi ý' cũ (Tinder-parity mục 2).
       expect(find.text('Chưa có bạn hát quanh đây'), findsOneWidget);
@@ -69,6 +70,77 @@ void main() {
       expect(find.byKey(const Key('auto_expand_switch')), findsOneWidget);
     },
   );
+
+  for (final width in [360.0, 393.0, 430.0]) {
+    for (final scale in [1.0, 1.2, 1.4]) {
+      testWidgets(
+        'deck hierarchy stays actionable @ ${width.toInt()}dp ×$scale',
+        (tester) async {
+          await tester.binding.setSurfaceSize(Size(width, 800));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.platformDispatcher.clearAllTestValues);
+          final platform = width == 393 && scale == 1.4
+              ? TargetPlatform.iOS
+              : TargetPlatform.android;
+          SharedPreferences.setMockInitialValues({
+            'deck_swipe_coach_seen': true,
+          });
+
+          final locationService = _FakeLocationService();
+          when(
+            () => locationService.captureAndPush(),
+          ).thenAnswer((_) async => LocationCaptureStatus.success);
+
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                photoRepositoryProvider.overrideWithValue(
+                  _FakePhotoRepository(),
+                ),
+                candidatesProvider(null).overrideWith(
+                  (ref) async => const [
+                    Candidate(
+                      id: 'c1',
+                      displayName: 'Linh',
+                      age: 22,
+                      activeToday: true,
+                      sharedGenres: ['ballad', 'vpop'],
+                      sharedBaitu: ['s1', 's2'],
+                    ),
+                  ],
+                ),
+                locationServiceProvider.overrideWithValue(locationService),
+                entitlementsProvider.overrideWith((ref) async => <String>{}),
+              ],
+              child: MaterialApp(
+                theme: AppTheme.light().copyWith(platform: platform),
+                home: const DoiDeckScreen(),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('screen_07_doi_deck')), findsOneWidget);
+          expect(
+            Theme.of(
+              tester.element(find.byKey(const Key('screen_07_doi_deck'))),
+            ).platform,
+            platform,
+          );
+          expect(find.byKey(const Key('card_photo_area')), findsOneWidget);
+          expect(find.byKey(const Key('card_detail_btn')), findsOneWidget);
+          for (final action in ['rewind', 'pass', 'super', 'like']) {
+            final button = find.byKey(Key('deck_${action}_btn'));
+            expect(button.hitTestable(), findsOneWidget);
+            expect(tester.getSize(button).width, greaterThanOrEqualTo(44));
+            expect(tester.getSize(button).height, greaterThanOrEqualTo(44));
+          }
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
 
   // Vòng cuối UI review: header tab Đôi phải LUÔN hiện — empty/loading/error
   // không được nuốt mất tiêu đề + 4 action.

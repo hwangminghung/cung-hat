@@ -17,6 +17,7 @@ import '../../../shared/widgets/tab_header.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../billing/application/billing_providers.dart';
 import '../../profile/application/profile_providers.dart';
 import '../application/discovery_providers.dart';
@@ -221,21 +222,24 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
     // (loading/error/rỗng/có card) — trước đây empty state thay cả màn làm
     // mất nhận diện + 4 action; phần dưới mới đổi theo itemsAsync.
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.sm,
+      body: ResponsiveFrame(
+        child: KeyedSubtree(
+          key: const Key('screen_07_doi_deck'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                ),
+                child: _buildHeader(context, l10n),
               ),
-              child: _buildHeader(context, l10n),
-            ),
-            Expanded(child: _buildDeckBody(context, l10n, itemsAsync)),
-          ],
+              Expanded(child: _buildDeckBody(context, l10n, itemsAsync)),
+            ],
+          ),
         ),
       ),
     );
