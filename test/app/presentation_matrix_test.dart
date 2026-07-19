@@ -895,7 +895,6 @@ void _expectProductionPlatform(
 bool _focusBelongsToScreen(FocusNode? focus, Element screenElement) {
   final context = focus?.context;
   if (context == null || !context.mounted) return false;
-  if (identical(context, screenElement)) return true;
 
   var belongsToScreen = false;
   context.visitAncestorElements((ancestor) {
@@ -979,6 +978,43 @@ void main() {
       () => _expectKeyboardFocusWithin(screenKey, label: 'mutation screen'),
       throwsA(isA<TestFailure>()),
       reason: 'the strengthened audit must reject the old false positive',
+    );
+  });
+
+  testWidgets('keyboard audit rejects focus owned by the keyed screen root', (
+    tester,
+  ) async {
+    const screenKey = Key('focusable_mutation_screen');
+    final rootFocus = FocusNode(debugLabel: 'focusable mutation screen');
+    addTearDown(rootFocus.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Focus(
+          key: screenKey,
+          focusNode: rootFocus,
+          child: const SizedBox(),
+        ),
+      ),
+    );
+
+    rootFocus.requestFocus();
+    await tester.pump();
+
+    final focus = FocusManager.instance.primaryFocus;
+    expect(focus, same(rootFocus));
+    expect(
+      focus!.context,
+      same(tester.element(find.byKey(screenKey))),
+      reason: 'mutation fixture must attach focus to the keyed root itself',
+    );
+    expect(
+      () => _expectKeyboardFocusWithin(
+        screenKey,
+        label: 'focusable mutation screen',
+      ),
+      throwsA(isA<TestFailure>()),
+      reason: 'the strict audit must require a descendant control',
     );
   });
 
