@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:cung_hat/core/theme/app_colors.dart';
+import 'package:cung_hat/core/theme/app_shadows.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/billing/application/billing_providers.dart';
 import 'package:cung_hat/features/billing/application/iap_controller.dart';
@@ -15,6 +16,26 @@ import 'package:cung_hat/shared/widgets/hard_card.dart';
 import 'package:cung_hat/shared/widgets/skeleton.dart';
 
 class _MockIapController extends Mock implements IapController {}
+
+Finder _hardShadowAncestorOf(Finder button) => find.ancestor(
+  of: button,
+  matching: find.byWidgetPredicate((widget) {
+    if (widget is! DecoratedBox) return false;
+    final decoration = widget.decoration;
+    return decoration is BoxDecoration &&
+        decoration.boxShadow?.contains(AppShadows.hard) == true;
+  }),
+);
+
+void _expectButtonHardShadow(WidgetTester tester, Finder button) {
+  final shadowAncestors = _hardShadowAncestorOf(button);
+  expect(shadowAncestors, findsWidgets);
+  final shadowSizes = <Size>[
+    for (var index = 0; index < shadowAncestors.evaluate().length; index++)
+      tester.getSize(shadowAncestors.at(index)),
+  ];
+  expect(shadowSizes, contains(tester.getSize(button)));
+}
 
 const _catalog = <StoreProduct>[
   StoreProduct(
@@ -154,9 +175,11 @@ void main() {
     expect(find.text('Thử lại'), findsOneWidget);
     final emptyState = tester.widget<EmptyState>(find.byType(EmptyState));
     expect(emptyState.onAction, isNotNull);
-    final retryFinder = find.byKey(const Key('store_retry_button'));
+    expect(find.byKey(const Key('store_retry_button')), findsNothing);
+    final retryFinder = find.widgetWithText(FilledButton, 'Thử lại');
     expect(retryFinder, findsOneWidget);
-    expect(tester.getSize(retryFinder).height, greaterThanOrEqualTo(44));
+    expect(tester.getSize(retryFinder).height, 52);
+    _expectButtonHardShadow(tester, retryFinder);
     expect(
       tester.getSemantics(find.bySemanticsLabel('Thử lại')),
       isSemantics(label: 'Thử lại', isButton: true, hasTapAction: true),
@@ -210,9 +233,11 @@ void main() {
     ]) {
       final buyButton = find.descendant(
         of: find.byKey(Key('store_product_$type')),
-        matching: find.text('Mua'),
+        matching: find.byType(FilledButton),
       );
       expect(buyButton, findsOneWidget);
+      expect(tester.getSize(buyButton).height, 52);
+      _expectButtonHardShadow(tester, buyButton);
       await tester.ensureVisible(buyButton);
       await tester.pumpAndSettle();
       await tester.tap(buyButton);
@@ -249,7 +274,7 @@ void main() {
 
     final boostBuy = find.descendant(
       of: find.byKey(const Key('store_product_boost')),
-      matching: find.text('Mua'),
+      matching: find.byType(FilledButton),
     );
     await tester.ensureVisible(boostBuy);
     await tester.pumpAndSettle();

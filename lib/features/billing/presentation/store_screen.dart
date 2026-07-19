@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -257,28 +258,51 @@ class _StoreErrorState extends StatelessWidget {
             button: true,
             onTap: onRetry,
             excludeSemantics: true,
-            child: FilledButton(
-              key: const Key('store_retry_button'),
-              onPressed: onRetry,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                minimumSize: const Size(0, AppSpacing.buttonHeight),
-                textStyle: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w700,
-                  height: 1.05,
-                ),
-                side: const BorderSide(color: AppColors.ink, width: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+            child: _StoreButtonShadow(
+              child: SizedBox(
+                height: AppSpacing.buttonHeight,
+                child: FilledButton(
+                  onPressed: onRetry,
+                  style: _storeCtaStyle(),
+                  child: Text(retryLabel),
                 ),
               ),
-              child: Text(retryLabel),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+ButtonStyle _storeCtaStyle() => FilledButton.styleFrom(
+  backgroundColor: AppColors.primary,
+  foregroundColor: AppColors.onPrimary,
+  minimumSize: const Size(0, AppSpacing.buttonHeight),
+  textStyle: const TextStyle(
+    fontSize: 19,
+    fontWeight: FontWeight.w700,
+    height: 1.05,
+  ),
+  side: const BorderSide(color: AppColors.ink, width: 2),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+  ),
+);
+
+class _StoreButtonShadow extends StatelessWidget {
+  const _StoreButtonShadow({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+        boxShadow: const [AppShadows.hard],
+      ),
+      child: child,
     );
   }
 }
@@ -365,11 +389,14 @@ class _UpgradeTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  height: 48,
-                  child: FilledButton(
-                    onPressed: onBuy,
-                    child: const Text('Mua'),
+                _StoreButtonShadow(
+                  child: SizedBox(
+                    height: AppSpacing.buttonHeight,
+                    child: FilledButton(
+                      onPressed: onBuy,
+                      style: _storeCtaStyle(),
+                      child: const Text('Mua'),
+                    ),
                   ),
                 ),
               ],
