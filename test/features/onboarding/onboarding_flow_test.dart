@@ -299,6 +299,52 @@ void main() {
     expect(find.text('Hoàn tất'), findsOneWidget);
   });
 
+  for (final width in [360.0, 393.0, 430.0]) {
+    for (final scale in [1.0, 1.2, 1.4]) {
+      testWidgets(
+        'profile and taste stay actionable @ ${width.toInt()}dp ×$scale',
+        (tester) async {
+          await tester.binding.setSurfaceSize(Size(width, 800));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+
+          await pumpFlow(tester, textScaler: TextScaler.linear(scale));
+
+          for (var step = 0; step < 2; step++) {
+            expect(
+              find.byKey(const Key('onb_continue')).hitTestable(),
+              findsOneWidget,
+            );
+            await tester.tap(find.byKey(const Key('onb_continue')));
+            await tester.pump();
+          }
+
+          expect(
+            find.byKey(const Key('screen_05_onboarding_profile')),
+            findsOneWidget,
+          );
+          expect(tester.takeException(), isNull);
+          expect(
+            find.byKey(const Key('onb_continue')).hitTestable(),
+            findsOneWidget,
+          );
+
+          await tester.tap(find.byKey(const Key('onb_continue')));
+          await tester.pump();
+
+          expect(
+            find.byKey(const Key('screen_06_onboarding_music_taste')),
+            findsOneWidget,
+          );
+          expect(tester.takeException(), isNull);
+          expect(
+            find.byKey(const Key('onb_finish')).hitTestable(),
+            findsOneWidget,
+          );
+        },
+      );
+    }
+  }
+
   testWidgets('log onboarding_step_x khi vào bước, chỉ đếm CHIỀU TIẾN (P0-3)', (
     tester,
   ) async {
