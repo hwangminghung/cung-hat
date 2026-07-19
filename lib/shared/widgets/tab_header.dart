@@ -30,51 +30,54 @@ class TabHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        0,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppColors.ink,
-                    fontWeight: FontWeight.w900,
+    return ColoredBox(
+      color: AppColors.background,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          0,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (leading != null) ...[
+                  leading!,
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
-              ),
-              for (final action in actions) ...[
-                const SizedBox(width: AppSpacing.sm),
-                action,
+                for (final action in actions) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  action,
+                ],
               ],
-            ],
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              subtitle!,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                subtitle!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+            if (showDivider) const WaveDivider(height: AppSpacing.md),
           ],
-          if (showDivider) const WaveDivider(height: AppSpacing.md),
-        ],
+        ),
       ),
     );
   }

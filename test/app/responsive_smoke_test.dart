@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/billing/application/billing_providers.dart';
 import 'package:cung_hat/features/chat/application/inbox_providers.dart';
 import 'package:cung_hat/features/chat/data/match_inbox.dart';
@@ -17,11 +16,13 @@ import 'package:cung_hat/features/profile/application/profile_providers.dart';
 import 'package:cung_hat/features/profile/domain/profile_completion.dart';
 import 'package:cung_hat/features/profile/presentation/profile_screen.dart';
 
+import '../support/presentation_harness.dart';
+
 class _FakeLocationService extends Mock implements LocationService {}
 
-/// UI review 2026-07-16: smoke responsive — 4 tab render ở 360/393/412dp và
-/// text scale 1.0/1.2 KHÔNG overflow (overflow trong widget test là
-/// FlutterError → test fail), kèm kèo tiêu đề dài để ép clamp 2 dòng.
+/// Shell-level companion to the per-screen presentation matrix. It verifies
+/// that all four lazily mounted tabs remain reachable without losing their
+/// production screen anchors while width, text scale, and platform change.
 void main() {
   final longKeo = Keo(
     id: 'k-long',
@@ -42,13 +43,23 @@ void main() {
     memberNames: const ['Minh', 'Trang'],
   );
 
-  Future<void> pumpShell(WidgetTester tester) async {
+  Future<void> pumpShell(
+    WidgetTester tester, {
+    required double width,
+    required double textScale,
+    required TargetPlatform platform,
+  }) async {
     final fakeLoc = _FakeLocationService();
     when(
       () => fakeLoc.captureAndPush(),
     ).thenAnswer((_) async => LocationCaptureStatus.success);
-    await tester.pumpWidget(
-      ProviderScope(
+    await pumpPresentation(
+      tester,
+      size: Size(width, 852),
+      textScale: textScale,
+      platform: platform,
+      disableAnimations: true,
+      child: ProviderScope(
         overrides: [
           candidatesProvider(
             null,
@@ -63,61 +74,51 @@ void main() {
             (ref) => Future.value(const TasteCounts(0, 0, 0)),
           ),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const HomeShell()),
+        child: const HomeShell(),
       ),
     );
     await tester.pumpAndSettle();
   }
 
-  for (final width in [360.0, 393.0, 430.0]) {
-    for (final scale in [1.0, 1.2]) {
-      testWidgets('4 tab không overflow @ ${width.toInt()}dp ×$scale', (
-        tester,
-      ) async {
-        await tester.binding.setSurfaceSize(Size(width, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-        tester.platformDispatcher.textScaleFactorTestValue = scale;
-        addTearDown(tester.platformDispatcher.clearAllTestValues);
+  for (final platform in presentationPlatforms) {
+    for (final width in presentationWidths) {
+      for (final scale in presentationTextScales) {
+        testWidgets(
+          '4 tab anchors @ ${width.toInt()}dp ×$scale on ${platform.name}',
+          (tester) async {
+            await pumpShell(
+              tester,
+              width: width,
+              textScale: scale,
+              platform: platform,
+            );
 
-        await pumpShell(tester);
-        // Đôi (tab 0 mặc định) — deck rỗng + header 4 nút.
-        expect(tester.takeException(), isNull);
+            expect(find.byKey(const Key('screen_07_doi_deck')), findsOneWidget);
+            expect(tester.takeException(), isNull);
 
-        await tester.tap(find.text('Kèo'));
-        await tester.pumpAndSettle();
-        expect(find.textContaining('Kèo hát K-Pop'), findsOneWidget);
-        expect(tester.takeException(), isNull);
+            await tester.tap(find.text('Kèo'));
+            await tester.pumpAndSettle();
+            expect(find.textContaining('Kèo hát K-Pop'), findsOneWidget);
+            expect(
+              find.byKey(const Key('screen_11_keo_board')),
+              findsOneWidget,
+            );
+            expect(tester.takeException(), isNull);
 
-        await tester.tap(find.text('Tin nhắn'));
-        await tester.pumpAndSettle();
-        expect(find.text('Chưa có cuộc trò chuyện'), findsOneWidget);
-        expect(tester.takeException(), isNull);
+            await tester.tap(find.text('Tin nhắn'));
+            await tester.pumpAndSettle();
+            expect(find.text('Chưa có cuộc trò chuyện'), findsOneWidget);
+            expect(find.byKey(const Key('screen_15_inbox')), findsOneWidget);
+            expect(tester.takeException(), isNull);
 
-        await tester.tap(find.text('Hồ sơ'));
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-      });
-    }
-  }
-
-  for (final width in [360.0, 393.0, 430.0]) {
-    for (final scale in [1.0, 1.2, 1.4]) {
-      testWidgets('profile shell không overflow @ ${width.toInt()}dp ×$scale', (
-        tester,
-      ) async {
-        await tester.binding.setSurfaceSize(Size(width, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-        tester.platformDispatcher.textScaleFactorTestValue = scale;
-        addTearDown(tester.platformDispatcher.clearAllTestValues);
-
-        await pumpShell(tester);
-        await tester.tap(find.text('Hồ sơ'));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(ProfileScreen), findsOneWidget);
-        expect(find.byKey(const Key('screen_18_profile')), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      });
+            await tester.tap(find.text('Hồ sơ'));
+            await tester.pumpAndSettle();
+            expect(find.byType(ProfileScreen), findsOneWidget);
+            expect(find.byKey(const Key('screen_18_profile')), findsOneWidget);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
     }
   }
 }

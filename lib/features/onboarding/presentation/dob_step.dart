@@ -253,28 +253,31 @@ class _DobField extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextField(
-            key: fieldKey,
-            controller: controller,
-            focusNode: focusNode,
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(maxLength),
-            ],
-            style: Theme.of(context).textTheme.headlineMedium,
-            decoration: InputDecoration(
-              hintText: hint,
-              counterText: '',
-              isDense: true,
-              filled: false,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
+          SizedBox(
+            height: 44,
+            child: TextField(
+              key: fieldKey,
+              controller: controller,
+              focusNode: focusNode,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(maxLength),
+              ],
+              style: Theme.of(context).textTheme.headlineMedium,
+              decoration: InputDecoration(
+                hintText: hint,
+                counterText: '',
+                isDense: true,
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              onChanged: onChanged,
             ),
-            onChanged: onChanged,
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(label, style: Theme.of(context).textTheme.labelLarge),

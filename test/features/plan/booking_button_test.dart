@@ -7,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart' show FunctionException;
 import 'package:cung_hat/features/plan/application/plan_providers.dart';
 import 'package:cung_hat/features/plan/data/plan_repository.dart';
 import 'package:cung_hat/features/plan/presentation/booking_button.dart';
+import 'package:cung_hat/core/theme/app_theme.dart';
+import '../../support/presentation_harness.dart';
 
 class _MockPlanRepository extends Mock implements PlanRepository {}
 
@@ -15,8 +17,9 @@ void main() {
 
   Widget wrap() => ProviderScope(
     overrides: [planRepositoryProvider.overrideWithValue(repo)],
-    child: const MaterialApp(
-      home: Scaffold(
+    child: MaterialApp(
+      theme: AppTheme.light(),
+      home: const Scaffold(
         body: BookingButton(planId: 'p1', venueId: 'v1'),
       ),
     ),
@@ -108,5 +111,41 @@ void main() {
         gateway: any(named: 'gateway'),
       ),
     );
+  });
+
+  testWidgets('payment sheet stays usable on the compact iOS target', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+
+    await pumpPresentation(
+      tester,
+      child: ProviderScope(
+        overrides: [planRepositoryProvider.overrideWithValue(repo)],
+        child: const Scaffold(
+          body: BookingButton(planId: 'p1', venueId: 'v1'),
+        ),
+      ),
+      size: const Size(360, 640),
+      textScale: 1.4,
+      platform: TargetPlatform.iOS,
+      disableAnimations: true,
+    );
+    await tester.tap(find.byType(BookingButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('screen_20_booking_payment')), findsOneWidget);
+    for (final key in const [
+      Key('booking_gw_momo'),
+      Key('booking_gw_zalopay'),
+    ]) {
+      final target = find.byKey(key);
+      expect(target.hitTestable(), findsOneWidget);
+      expect(tester.getSize(target).height, greaterThanOrEqualTo(44));
+    }
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 }

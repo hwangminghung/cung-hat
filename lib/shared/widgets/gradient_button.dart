@@ -56,7 +56,8 @@ class GradientButton extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: AppColors.onPrimary,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
                           height: 1.05,
                         ),
                         child: child,

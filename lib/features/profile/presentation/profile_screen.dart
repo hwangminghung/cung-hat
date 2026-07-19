@@ -75,6 +75,10 @@ class _ProfileList extends ConsumerWidget {
         ? profile!.bio!.trim()
         : (l10n?.shellProfileSub ??
               'Quản lý lượt thích, gói nâng cấp và cài đặt.');
+    final completion = profile == null || taste == null
+        ? null
+        : profileCompletion(profile!, taste!, l10n: l10n);
+    final showCompletion = completion != null && completion.percent < 100;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -138,11 +142,13 @@ class _ProfileList extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        _CompletionCard(profile: profile, taste: taste),
-        if (profile != null && taste != null) ...[
+        if (showCompletion) ...[
           const SizedBox(height: AppSpacing.lg),
+          _CompletionCard(result: completion),
         ],
+        // Keep one section gap whether the optional completion card is shown
+        // or suppressed for a fully completed profile.
+        const SizedBox(height: AppSpacing.lg),
         _ProfileTile(
           icon: Icons.favorite_rounded,
           title: l10n?.shellTileLikes ?? 'Ai đã thích bạn',
@@ -211,20 +217,13 @@ class _ProfileList extends ConsumerWidget {
 }
 
 class _CompletionCard extends StatelessWidget {
-  const _CompletionCard({required this.profile, required this.taste});
+  const _CompletionCard({required this.result});
 
-  final Profile? profile;
-  final TasteCounts? taste;
+  final CompletionResult result;
 
   @override
   Widget build(BuildContext context) {
-    final profile = this.profile;
-    final taste = this.taste;
-    if (profile == null || taste == null) return const SizedBox.shrink();
-
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-    final result = profileCompletion(profile, taste, l10n: l10n);
-    if (result.percent >= 100) return const SizedBox.shrink();
 
     return HardCard(
       key: const Key('completion_card'),

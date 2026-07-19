@@ -47,7 +47,9 @@ class DeckActionBar extends StatelessWidget {
       children: [
         Expanded(
           child: Opacity(
-            opacity: rewindEnabled ? 1 : 0.45,
+            // The free-user rewind remains actionable (it opens the Pro
+            // explanation), so keep its label above normal-text contrast.
+            opacity: rewindEnabled ? 1 : 0.8,
             child: _ActionItem(
               key: const Key('deck_rewind_btn'),
               icon: Icons.fast_rewind_rounded,
@@ -119,52 +121,61 @@ class _ActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Transform.scale(
-          scale: 1 + 0.15 * emphasis,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Color.lerp(
-                accent,
-                accent.withValues(alpha: 0.72),
-                emphasis,
-              ),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-              border: Border.all(color: AppColors.ink, width: 2 + emphasis),
-              boxShadow: const [AppShadows.hard],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  onTap();
-                },
-                child: SizedBox.square(
-                  dimension: 54,
-                  child: Icon(icon, color: foreground, size: 28),
+    void activate() {
+      HapticFeedback.lightImpact();
+      onTap();
+    }
+
+    return Semantics(
+      label: label,
+      button: true,
+      onTap: activate,
+      child: ExcludeSemantics(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Transform.scale(
+              scale: 1 + 0.15 * emphasis,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Color.lerp(
+                    accent,
+                    accent.withValues(alpha: 0.72),
+                    emphasis,
+                  ),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+                  border: Border.all(color: AppColors.ink, width: 2 + emphasis),
+                  boxShadow: const [AppShadows.hard],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: activate,
+                    child: SizedBox.square(
+                      dimension: 54,
+                      child: Icon(icon, color: foreground, size: 28),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+            const SizedBox(height: AppSpacing.sm),
+            // UI review: nhãn 11px khó đọc — nâng lên labelMedium (12px+) và giữ
+            // 1 dòng; khoảng cách dưới do padding của bar trong doi_deck lo.
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.visible,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        // UI review: nhãn 11px khó đọc — nâng lên labelMedium (12px+) và giữ
-        // 1 dòng; khoảng cách dưới do padding của bar trong doi_deck lo.
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.visible,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: AppColors.ink,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:cung_hat/shared/widgets/responsive_frame.dart';
+import 'package:cung_hat/core/theme/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,5 +52,51 @@ void main() {
       find.byType(AnimatedPadding),
     );
     expect(padding.padding, const EdgeInsets.only(bottom: 240));
+    expect(padding.duration, AppMotion.base);
+  });
+
+  testWidgets('does not apply the keyboard inset when avoidance is disabled', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 240)),
+          child: ResponsiveFrame(
+            avoidKeyboard: false,
+            child: SizedBox(key: Key('content'), height: 100),
+          ),
+        ),
+      ),
+    );
+
+    final padding = tester.widget<AnimatedPadding>(
+      find.byType(AnimatedPadding),
+    );
+    expect(padding.padding, EdgeInsets.zero);
+  });
+
+  testWidgets('removes the keyboard transition when motion is reduced', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: 240),
+            disableAnimations: true,
+          ),
+          child: ResponsiveFrame(
+            child: SizedBox(key: Key('content'), height: 100),
+          ),
+        ),
+      ),
+    );
+
+    final padding = tester.widget<AnimatedPadding>(
+      find.byType(AnimatedPadding),
+    );
+    expect(padding.padding, const EdgeInsets.only(bottom: 240));
+    expect(padding.duration, Duration.zero);
   });
 }

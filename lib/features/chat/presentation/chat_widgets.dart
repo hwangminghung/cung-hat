@@ -166,6 +166,7 @@ class ChatComposer extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             IconButton.filled(
               key: const Key('send_btn'),
+              tooltip: l10n?.send ?? 'Gửi',
               onPressed: sending ? null : onSend,
               icon: sending
                   ? const SizedBox.square(

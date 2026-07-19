@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:cung_hat/app/home_shell.dart';
+import 'package:cung_hat/core/theme/app_spacing.dart';
 import 'package:cung_hat/features/discovery/application/discovery_providers.dart';
 import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
@@ -11,6 +12,7 @@ import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/profile/application/profile_providers.dart';
 import 'package:cung_hat/features/profile/domain/profile_completion.dart';
 import 'package:cung_hat/features/profile/domain/profile.dart';
+import 'package:cung_hat/shared/widgets/hard_card.dart';
 
 class _FakeLocationService extends Mock implements LocationService {}
 
@@ -20,12 +22,15 @@ Future<void> _pumpProfileTab(
   required TasteCounts taste,
 }) async {
   final fakeLoc = _FakeLocationService();
-  when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+  when(
+    () => fakeLoc.captureAndPush(),
+  ).thenAnswer((_) async => LocationCaptureStatus.success);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        candidatesProvider(null)
-            .overrideWith((ref) => Future.value(<Candidate>[])),
+        candidatesProvider(
+          null,
+        ).overrideWith((ref) => Future.value(<Candidate>[])),
         locationServiceProvider.overrideWithValue(fakeLoc),
         openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
         myProfileProvider.overrideWith((ref) => Future.value(profile)),
@@ -83,7 +88,9 @@ void main() {
     );
   });
 
-  testWidgets('thẻ ẩn khi hồ sơ đã 100%', (tester) async {
+  testWidgets('thẻ ẩn khi hồ sơ đã 100% without leaving a double gap', (
+    tester,
+  ) async {
     final full = empty.copyWith(
       bio: 'x',
       photoPaths: ['a', 'b', 'c'],
@@ -98,5 +105,13 @@ void main() {
       taste: const TasteCounts(3, 1, 3),
     );
     expect(find.byKey(const Key('completion_card')), findsNothing);
+
+    final cards = find.descendant(
+      of: find.byKey(const Key('screen_18_profile')),
+      matching: find.byType(HardCard),
+    );
+    final identityBottom = tester.getBottomLeft(cards.at(0)).dy;
+    final firstActionTop = tester.getTopLeft(cards.at(1)).dy;
+    expect(firstActionTop - identityBottom, AppSpacing.lg);
   });
 }

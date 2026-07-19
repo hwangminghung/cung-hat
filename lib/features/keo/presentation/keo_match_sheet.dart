@@ -100,190 +100,193 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
     final timeWindow = _formatSuggestionTimeWindow(suggestion);
 
     return SafeArea(
-      child: KeyedSubtree(
-        key: const Key('screen_12_keo_auto_match'),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.lg,
-              AppSpacing.xxxl,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusPill,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
+      child: ColoredBox(
+        color: AppColors.surface,
+        child: KeyedSubtree(
+          key: const Key('screen_12_keo_auto_match'),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                AppSpacing.xxxl,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.secondary,
-                        border: Border.all(color: AppColors.ink, width: 2),
+                        color: AppColors.border,
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusPill,
                         ),
                       ),
-                      child: const Icon(
-                        Icons.auto_awesome_rounded,
-                        color: AppColors.ink,
-                        size: 22,
-                      ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
-                    ),
-                    IconButton.outlined(
-                      tooltip: l10n?.commonClose ?? 'Đóng',
-                      onPressed: _submitting
-                          ? null
-                          : () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                const WaveDivider(),
-                const SizedBox(height: AppSpacing.md),
-                TicketCard(
-                  showPerforation: false,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (timeWindow != null) ...[
-                        _SuggestionMetaRow(
-                          icon: Icons.schedule_rounded,
-                          label: timeWindow,
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary,
+                          border: Border.all(color: AppColors.ink, width: 2),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusPill,
+                          ),
                         ),
-                        const SizedBox(height: AppSpacing.sm),
-                      ],
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: AppColors.secondary,
-                              border: Border.all(
-                                color: AppColors.ink,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusPill,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.mic_external_on_outlined,
-                              color: AppColors.ink,
-                              size: 28,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: Text(
-                              _displayTitle(suggestion.title),
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      _SuggestionMeta(suggestion: suggestion),
-                      const SizedBox(height: AppSpacing.md),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: [
-                          for (final genre in suggestion.genres)
-                            StampChip(label: genre, tone: StampChipTone.teal),
-                          _SuggestionJoinModeStamp(
-                            joinMode: suggestion.joinMode,
-                          ),
-                        ],
-                      ),
-                      if (suggestion.hostName != null) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        _SuggestionMetaRow(
-                          icon: Icons.person_outline,
-                          label: suggestion.hostName!,
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: AppColors.ink,
+                          size: 22,
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.headlineLarge,
+                        ),
+                      ),
+                      IconButton.outlined(
+                        tooltip: l10n?.commonClose ?? 'Đóng',
+                        onPressed: _submitting
+                            ? null
+                            : () => Navigator.of(context).maybePop(),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
                     ],
                   ),
-                ),
-                if (suggestion.reasonLabels.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  SizedBox(
-                    key: const Key('keo_match_reason_grid'),
-                    width: double.infinity,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final itemWidth =
-                            (constraints.maxWidth - AppSpacing.sm) / 2;
-                        return Wrap(
+                  const SizedBox(height: AppSpacing.md),
+                  const WaveDivider(),
+                  const SizedBox(height: AppSpacing.md),
+                  TicketCard(
+                    showPerforation: false,
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (timeWindow != null) ...[
+                          _SuggestionMetaRow(
+                            icon: Icons.schedule_rounded,
+                            label: timeWindow,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                        ],
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: AppColors.secondary,
+                                border: Border.all(
+                                  color: AppColors.ink,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusPill,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.mic_external_on_outlined,
+                                color: AppColors.ink,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Text(
+                                _displayTitle(suggestion.title),
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _SuggestionMeta(suggestion: suggestion),
+                        const SizedBox(height: AppSpacing.md),
+                        Wrap(
                           spacing: AppSpacing.sm,
                           runSpacing: AppSpacing.sm,
                           children: [
-                            for (final reason in suggestion.reasonLabels)
-                              SizedBox(
-                                width: itemWidth,
-                                child: _ReasonChip(code: reason),
-                              ),
+                            for (final genre in suggestion.genres)
+                              StampChip(label: genre, tone: StampChipTone.teal),
+                            _SuggestionJoinModeStamp(
+                              joinMode: suggestion.joinMode,
+                            ),
                           ],
-                        );
-                      },
+                        ),
+                        if (suggestion.hostName != null) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          _SuggestionMetaRow(
+                            icon: Icons.person_outline,
+                            label: suggestion.hostName!,
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                ],
-                const SizedBox(height: AppSpacing.xl),
-                if (isExisting)
-                  SizedBox(
-                    width: double.infinity,
-                    child: GradientButton(
-                      key: const Key('keo_match_join_btn'),
-                      onPressed: _submitting
-                          ? null
-                          : () => _submit(widget.onJoin, suggestion),
-                      icon: Icons.login_rounded,
-                      child: _PrimaryButtonChild(
-                        submitting: _submitting,
-                        label: 'Tham gia',
+                  if (suggestion.reasonLabels.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      key: const Key('keo_match_reason_grid'),
+                      width: double.infinity,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final itemWidth =
+                              (constraints.maxWidth - AppSpacing.sm) / 2;
+                          return Wrap(
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.sm,
+                            children: [
+                              for (final reason in suggestion.reasonLabels)
+                                SizedBox(
+                                  width: itemWidth,
+                                  child: _ReasonChip(code: reason),
+                                ),
+                            ],
+                          );
+                        },
                       ),
                     ),
-                  )
-                else
-                  _ProposalActions(
-                    submitting: _submitting,
-                    onLater: _submitting
-                        ? null
-                        : () => Navigator.of(context).maybePop(),
-                    onCreate: _submitting
-                        ? null
-                        : () => _submit(widget.onCreate, suggestion),
-                  ),
-              ],
+                  ],
+                  const SizedBox(height: AppSpacing.xl),
+                  if (isExisting)
+                    SizedBox(
+                      width: double.infinity,
+                      child: GradientButton(
+                        key: const Key('keo_match_join_btn'),
+                        onPressed: _submitting
+                            ? null
+                            : () => _submit(widget.onJoin, suggestion),
+                        icon: Icons.login_rounded,
+                        child: _PrimaryButtonChild(
+                          submitting: _submitting,
+                          label: 'Tham gia',
+                        ),
+                      ),
+                    )
+                  else
+                    _ProposalActions(
+                      submitting: _submitting,
+                      onLater: _submitting
+                          ? null
+                          : () => Navigator.of(context).maybePop(),
+                      onCreate: _submitting
+                          ? null
+                          : () => _submit(widget.onCreate, suggestion),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
