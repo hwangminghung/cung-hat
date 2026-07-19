@@ -2,10 +2,12 @@
 
 ## Outcome
 
-All 22 approved presentation states passed deterministic Android capture,
+Twenty-one approved presentation states passed deterministic Android capture,
 manual image inspection, and a live Chrome gallery audit at 360, 393, and
-430dp. The evidence directory contains exactly 22 non-empty `1080 × 2340` PNGs
-with the approved basenames and expected `screen_XX_*` production roots.
+430dp. State 19 is **Pass with follow-up**: its share CTA wraps to three lines
+at 360dp but remains reachable and overflow-free. The evidence directory
+contains exactly 22 non-empty `1080 × 2340` PNGs with the approved basenames
+and expected `screen_XX_*` production roots.
 
 The first captures of states 12, 15, and 18 exposed the unpainted engine surface
 because their transparent roots were mounted without the `Scaffold` supplied
@@ -82,23 +84,31 @@ browser matrix.
 
 The bounded live alternative is
 `integration_test/presentation_gallery.dart`. It imports the same 22 in-memory
-capture fixture builders, selects `?state=01..22`, and sets an invisible
-canonical DOM marker after the first Flutter frame. It is not part of the
-production app or router. Onboarding 04–06 is reached sequentially through the
-real `onb_continue` control. State 20 remains the real `BookingButton` path.
+capture fixture builders and uses `?state=01..22` only to select the fixture.
+After `runApp`, a bounded post-frame probe walks the mounted Flutter element
+tree. It sets the invisible canonical DOM marker only after the expected
+`screen_XX_*` root key is genuinely present; a missing root reports a distinct
+timeout/error state instead. The harness is not part of the production app or
+router. Onboarding 04–06 is reached sequentially through the real
+`onb_continue` control. State 20 remains the real `BookingButton` path.
 
 | Command/check | Outcome |
 |---|---|
 | `flutter build web --release -t integration_test/presentation_gallery.dart` | Pass — built the isolated gallery. |
-| `python -m http.server 7360 --directory build/web` | Pass — served the static artifact locally for connected Chrome. |
-| 22 states at `360 × 800` | Pass — 22/22 canonical states; document/body width 360; no horizontal overflow. |
-| 22 states at `393 × 852` | Pass — 22/22 canonical states; document/body width 393; no horizontal overflow. |
-| 22 states at `430 × 932` | Pass — 22/22 canonical states; document/body width 430; no horizontal overflow. |
+| Fresh local static server | Pass — isolated gallery artifact served to connected Chrome. |
+| 22 states at `360 × 800` | Pass — 22/22 actual-root markers; document/body width 360; no horizontal overflow. |
+| 22 states at `393 × 852` | Pass — 22/22 actual-root markers; document/body width 393; no horizontal overflow. |
+| 22 states at `430 × 932` | Pass — 22/22 actual-root markers; document/body width 430; no horizontal overflow. |
 | Manual 360dp canvas review | Pass — all 22 settled canvases were opened and checked for identity and legibility. |
 
-The live audit passed 66/66 state/viewport cases, each with one Flutter view
-and an exact canonical state marker. Representative pointer, focus, and
-keyboard checks passed for:
+The repeated live audit passed 66/66 state/viewport cases, each with an exact
+canonical marker produced by a mounted root, not by the query string. For
+states 04–06, the marker was absent initially and appeared only after the real
+`onb_continue` control had been pressed one, two, or three times respectively.
+For state 20, it was absent initially and appeared only after the real
+`BookingButton` opened its private payment sheet. This is a regression proof
+against the prior splash/initial-step false positive. Representative pointer,
+focus, and keyboard checks passed for:
 
 - login phone entry (`INPUT`, value `900000001`);
 - onboarding 03→04→05→06 at all three widths;
@@ -138,10 +148,9 @@ network, or RPC operation. The required forbidden-path audit reports
 
 ## Final follow-up verification
 
-After the light-host corrections and refreshed captures, the final pre-commit
-checks passed:
+After the light-host corrections, refreshed captures, and actual-root marker
+hardening, the final verification records:
 
-- `flutter build web` passed for the production entry point.
 - `flutter build web --release -t integration_test/presentation_gallery.dart`
   passed for the isolated live-audit entry point.
 - The exact PNG inventory found exactly 22 non-empty approved basenames and no
@@ -151,7 +160,5 @@ checks passed:
 - The forbidden-path audit was rerun over committed, staged, working-tree, and
   untracked paths and again returned `Frontend-only boundary clean.`
 
-At this point the only unstaged redesign changes are this report, the capture
-harness, `presentation_gallery.dart`, and refreshed Task 17 captures. The
-pre-existing user-owned untracked mockups, research, decision note, and scripts
-remain unmodified and are excluded from the evidence commit.
+The evidence commits exclude the pre-existing user-owned untracked mockups,
+research, decision note, and scripts; they remain unmodified.
