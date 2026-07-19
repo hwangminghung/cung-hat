@@ -8,6 +8,7 @@ import 'package:cung_hat/shared/widgets/otp_input.dart';
 import 'package:cung_hat/shared/widgets/pressable.dart';
 import 'package:cung_hat/shared/widgets/skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -121,6 +122,39 @@ void main() {
       tester.widget<AnimatedScale>(find.byType(AnimatedScale)).duration,
       Duration.zero,
     );
+  });
+
+  testWidgets('pressable paints a visible ring for keyboard focus', (
+    tester,
+  ) async {
+    final previousStrategy = FocusManager.instance.highlightStrategy;
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
+    addTearDown(() {
+      FocusManager.instance.highlightStrategy = previousStrategy;
+    });
+
+    await tester.pumpWidget(
+      host(Pressable(onTap: () {}, child: const Text('Press'))),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    final focusPaint = find.descendant(
+      of: find.byType(Pressable),
+      matching: find.byType(AnimatedContainer),
+    );
+    expect(focusPaint, findsOneWidget);
+
+    final decoration =
+        tester.widget<AnimatedContainer>(focusPaint).foregroundDecoration
+            as BoxDecoration;
+    final border = decoration.border! as Border;
+    expect(border.top.color, AppColors.ink);
+    expect(border.top.width, 3);
+    expect(decoration.boxShadow, const <BoxShadow>[
+      BoxShadow(color: AppColors.secondary, spreadRadius: 2),
+    ]);
   });
 
   testWidgets('loading skeleton uses a flat fill without a gradient', (

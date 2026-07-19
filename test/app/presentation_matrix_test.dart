@@ -151,7 +151,7 @@ const _suggestion = KeoMatchSuggestion(
   slotsFilled: 2,
   genres: ['vpop'],
   hostName: 'Minh',
-  reasonLabels: ['same_genre', 'nearby'],
+  reasonLabels: ['shared_genres', 'near_you'],
 );
 
 const _catalog = <StoreProduct>[

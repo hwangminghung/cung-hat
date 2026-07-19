@@ -84,6 +84,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(sendButton.hitTestable(), findsOneWidget);
+
+    final framePadding = find.ancestor(
+      of: find.byKey(const Key('screen_01_login')),
+      matching: find.byType(AnimatedPadding),
+    );
+    expect(framePadding, findsOneWidget);
+    final animatedPadding = tester.widget<AnimatedPadding>(framePadding);
+    final usableHeight =
+        tester.getSize(framePadding).height - animatedPadding.padding.vertical;
+    expect(
+      usableHeight,
+      380,
+      reason:
+          'The 260px keyboard inset must reduce a 640px viewport exactly once.',
+    );
   });
 
   testWidgets('entering a number and tapping send calls sendOtp', (

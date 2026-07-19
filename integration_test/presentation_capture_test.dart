@@ -145,7 +145,7 @@ const _suggestion = KeoMatchSuggestion(
   slotsFilled: 2,
   genres: ['vpop'],
   hostName: 'Minh',
-  reasonLabels: ['same_genre', 'nearby'],
+  reasonLabels: ['shared_genres', 'near_you'],
 );
 
 const _catalog = <StoreProduct>[
@@ -780,6 +780,10 @@ void main() {
       app: _keoMatchFixture(),
       screen: find.byKey(const Key('screen_12_keo_auto_match')),
     );
+    expect(find.text('Hợp gu nhạc'), findsOneWidget);
+    expect(find.text('Gần bạn'), findsOneWidget);
+    expect(find.text('same_genre'), findsNothing);
+    expect(find.text('nearby'), findsNothing);
     expectLightProductionHost(tester, const Key('screen_12_keo_auto_match'));
   });
 

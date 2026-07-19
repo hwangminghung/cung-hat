@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_motion.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// Tap wrapper with a subtle scale-down press feedback (0.97).
 /// Uses Transform.scale so layout bounds never shift.
@@ -23,9 +25,16 @@ class Pressable extends StatefulWidget {
 
 class _PressableState extends State<Pressable> {
   bool _pressed = false;
+  bool _showFocusHighlight = false;
 
   void _set(bool v) {
     if (_pressed != v) setState(() => _pressed = v);
+  }
+
+  void _setFocusHighlight(bool value) {
+    if (_showFocusHighlight != value) {
+      setState(() => _showFocusHighlight = value);
+    }
   }
 
   @override
@@ -37,6 +46,7 @@ class _PressableState extends State<Pressable> {
         : AppMotion.fast;
     return FocusableActionDetector(
       enabled: interactive,
+      onShowFocusHighlight: _setFocusHighlight,
       actions: {
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
@@ -45,18 +55,31 @@ class _PressableState extends State<Pressable> {
           },
         ),
       },
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: interactive ? (_) => _set(true) : null,
-        onTapUp: interactive ? (_) => _set(false) : null,
-        onTapCancel: interactive ? () => _set(false) : null,
-        onTap: interactive ? widget.onTap : null,
-        onLongPress: interactive ? widget.onLongPress : null,
-        child: AnimatedScale(
-          scale: _pressed ? AppMotion.pressScale : 1.0,
-          duration: pressDuration,
-          curve: AppMotion.enterCurve,
-          child: widget.child,
+      child: AnimatedContainer(
+        duration: pressDuration,
+        curve: AppMotion.enterCurve,
+        foregroundDecoration: _showFocusHighlight
+            ? BoxDecoration(
+                border: Border.all(color: AppColors.ink, width: 3),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                boxShadow: const <BoxShadow>[
+                  BoxShadow(color: AppColors.secondary, spreadRadius: 2),
+                ],
+              )
+            : const BoxDecoration(),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: interactive ? (_) => _set(true) : null,
+          onTapUp: interactive ? (_) => _set(false) : null,
+          onTapCancel: interactive ? () => _set(false) : null,
+          onTap: interactive ? widget.onTap : null,
+          onLongPress: interactive ? widget.onLongPress : null,
+          child: AnimatedScale(
+            scale: _pressed ? AppMotion.pressScale : 1.0,
+            duration: pressDuration,
+            curve: AppMotion.enterCurve,
+            child: widget.child,
+          ),
         ),
       ),
     );
