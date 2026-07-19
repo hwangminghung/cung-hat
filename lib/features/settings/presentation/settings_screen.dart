@@ -10,9 +10,18 @@ import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/hard_card.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../onboarding/presentation/consent_step.dart';
 import '../application/settings_providers.dart';
+
+const settingsSectionKeys = <String, Key>{
+  'privacy': Key('settings_privacy_section'),
+  'language': Key('settings_language_section'),
+  'account': Key('settings_account_section'),
+  'legal': Key('settings_legal_section'),
+};
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -35,119 +44,138 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(_l10n?.settingsTitle ?? 'Cài đặt')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.xxxl,
-        ),
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: WaveDivider(),
-          ),
-          _Section(
-            title: _l10n?.settingsSectionPrivacy ?? 'Quyền riêng tư',
-            child: consentsAsync.isLoading
-                ? const Padding(
-                    padding: EdgeInsets.all(AppSpacing.lg),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                : Column(
-                    children: [
-                      for (final purpose in consentPurposes)
-                        SwitchListTile(
-                          key: Key('consent_$purpose'),
-                          title: Text(consentLabel(purpose, _l10n)),
-                          value: consents[purpose] ?? false,
-                          onChanged: (value) =>
-                              _handleToggleConsent(purpose, value),
-                        ),
-                    ],
+      body: ResponsiveFrame(
+        child: KeyedSubtree(
+          key: const Key('screen_22_settings'),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.xxxl,
+            ),
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    child: WaveDivider(),
                   ),
+                  _Section(
+                    key: settingsSectionKeys['privacy'],
+                    title: _l10n?.settingsSectionPrivacy ?? 'Quyền riêng tư',
+                    child: consentsAsync.isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.all(AppSpacing.lg),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        : Column(
+                            children: [
+                              for (final purpose in consentPurposes)
+                                SwitchListTile(
+                                  key: Key('consent_$purpose'),
+                                  title: Text(consentLabel(purpose, _l10n)),
+                                  value: consents[purpose] ?? false,
+                                  onChanged: (value) =>
+                                      _handleToggleConsent(purpose, value),
+                                ),
+                            ],
+                          ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _Section(
+                    key: settingsSectionKeys['language'],
+                    title: _l10n?.settingsLanguage ?? 'Ngôn ngữ',
+                    child: Column(
+                      children: [
+                        _LanguageTile(
+                          key: const Key('lang_system'),
+                          label:
+                              _l10n?.settingsLangSystem ??
+                              'Mặc định (Tiếng Việt)',
+                          selected: ref.watch(localeControllerProvider) == null,
+                          onTap: () => ref
+                              .read(localeControllerProvider.notifier)
+                              .set(null),
+                        ),
+                        _LanguageTile(
+                          key: const Key('lang_vi'),
+                          // Tên ngôn ngữ hiển thị bằng chính ngôn ngữ đó — không l10n.
+                          label: 'Tiếng Việt',
+                          selected:
+                              ref.watch(localeControllerProvider) ==
+                              const Locale('vi'),
+                          onTap: () => ref
+                              .read(localeControllerProvider.notifier)
+                              .set(const Locale('vi')),
+                        ),
+                        _LanguageTile(
+                          key: const Key('lang_en'),
+                          label: 'English',
+                          selected:
+                              ref.watch(localeControllerProvider) ==
+                              const Locale('en'),
+                          onTap: () => ref
+                              .read(localeControllerProvider.notifier)
+                              .set(const Locale('en')),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _Section(
+                    title: _l10n?.settingsSectionData ?? 'Dữ liệu của tôi',
+                    child: _SettingsTile(
+                      icon: Icons.download_rounded,
+                      title: _l10n?.exportData ?? 'Tải dữ liệu của tôi',
+                      onTap: _exportData,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _Section(
+                    key: settingsSectionKeys['account'],
+                    title: _l10n?.settingsSectionAccount ?? 'Tài khoản',
+                    child: Column(
+                      children: [
+                        _SettingsTile(
+                          icon: Icons.logout_rounded,
+                          title: _l10n?.settingsSignOut ?? 'Đăng xuất',
+                          onTap: _signOut,
+                        ),
+                        _SettingsTile(
+                          icon: Icons.delete_forever_rounded,
+                          title: _l10n?.deleteAccount ?? 'Xóa tài khoản',
+                          danger: true,
+                          onTap: _deleting ? null : _deleteAccount,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _Section(
+                    key: settingsSectionKeys['legal'],
+                    title: _l10n?.settingsSectionLegal ?? 'Pháp lý',
+                    child: Column(
+                      children: [
+                        _SettingsTile(
+                          icon: Icons.privacy_tip_rounded,
+                          title: _l10n?.privacyTitle ?? 'Chính sách bảo mật',
+                          onTap: () => context.push('/legal/privacy'),
+                        ),
+                        _SettingsTile(
+                          icon: Icons.description_rounded,
+                          title: _l10n?.settingsTerms ?? 'Điều khoản',
+                          onTap: () => context.push('/legal/tos'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          _Section(
-            title: _l10n?.settingsLanguage ?? 'Ngôn ngữ',
-            child: Column(
-              children: [
-                _LanguageTile(
-                  key: const Key('lang_system'),
-                  label: _l10n?.settingsLangSystem ?? 'Mặc định (Tiếng Việt)',
-                  selected: ref.watch(localeControllerProvider) == null,
-                  onTap: () =>
-                      ref.read(localeControllerProvider.notifier).set(null),
-                ),
-                _LanguageTile(
-                  key: const Key('lang_vi'),
-                  // Tên ngôn ngữ hiển thị bằng chính ngôn ngữ đó — không l10n.
-                  label: 'Tiếng Việt',
-                  selected:
-                      ref.watch(localeControllerProvider) == const Locale('vi'),
-                  onTap: () => ref
-                      .read(localeControllerProvider.notifier)
-                      .set(const Locale('vi')),
-                ),
-                _LanguageTile(
-                  key: const Key('lang_en'),
-                  label: 'English',
-                  selected:
-                      ref.watch(localeControllerProvider) == const Locale('en'),
-                  onTap: () => ref
-                      .read(localeControllerProvider.notifier)
-                      .set(const Locale('en')),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _Section(
-            title: _l10n?.settingsSectionData ?? 'Dữ liệu của tôi',
-            child: _SettingsTile(
-              icon: Icons.download_rounded,
-              title: _l10n?.exportData ?? 'Tải dữ liệu của tôi',
-              onTap: _exportData,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _Section(
-            title: _l10n?.settingsSectionAccount ?? 'Tài khoản',
-            child: Column(
-              children: [
-                _SettingsTile(
-                  icon: Icons.logout_rounded,
-                  title: _l10n?.settingsSignOut ?? 'Đăng xuất',
-                  onTap: _signOut,
-                ),
-                _SettingsTile(
-                  icon: Icons.delete_forever_rounded,
-                  title: _l10n?.deleteAccount ?? 'Xóa tài khoản',
-                  danger: true,
-                  onTap: _deleting ? null : _deleteAccount,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _Section(
-            title: _l10n?.settingsSectionLegal ?? 'Pháp lý',
-            child: Column(
-              children: [
-                _SettingsTile(
-                  icon: Icons.privacy_tip_rounded,
-                  title: _l10n?.privacyTitle ?? 'Chính sách bảo mật',
-                  onTap: () => context.push('/legal/privacy'),
-                ),
-                _SettingsTile(
-                  icon: Icons.description_rounded,
-                  title: _l10n?.settingsTerms ?? 'Điều khoản',
-                  onTap: () => context.push('/legal/tos'),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -248,19 +276,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 }
 
 class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
+  const _Section({Key? key, required this.title, required this.child})
+    : _sectionKey = key;
 
+  final Key? _sectionKey;
   final String title;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        border: Border.all(color: AppColors.border),
-      ),
+    return HardCard(
+      key: _sectionKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
