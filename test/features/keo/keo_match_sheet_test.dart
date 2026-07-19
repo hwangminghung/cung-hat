@@ -137,6 +137,121 @@ void main() {
     expect(created, isTrue);
   });
 
+  testWidgets('suggestion ticket maps join mode from suggestion data', (
+    tester,
+  ) async {
+    for (final mode in const ['open', 'approval']) {
+      final suggestion = KeoMatchSuggestion(
+        suggestionType: 'existing_keo',
+        title: 'Kèo kiểm tra chế độ',
+        joinMode: mode,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: KeoMatchSheet(
+              suggestions: [suggestion],
+              onJoin: (_) async {},
+              onCreate: (_) async {},
+            ),
+          ),
+        ),
+      );
+
+      final expected = mode == 'open' ? 'Mở · vào là tham gia' : 'Cần duyệt';
+      final other = mode == 'open' ? 'Cần duyệt' : 'Mở · vào là tham gia';
+      final ticket = find.byType(TicketCard);
+
+      expect(
+        find.descendant(of: ticket, matching: find.text(expected)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: ticket, matching: find.text(other)),
+        findsNothing,
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+  });
+
+  testWidgets('suggestion ticket follows the Screen 12 metadata hierarchy', (
+    tester,
+  ) async {
+    const suggestion = KeoMatchSuggestion(
+      suggestionType: 'existing_keo',
+      title: 'Ballad tối nay',
+      areaLabel: 'Music Box Thủ Đức',
+      distanceBand: '1-3',
+      sizeTarget: 5,
+      slotsFilled: 3,
+      genres: ['Ballad'],
+      hostName: 'Chủ kèo Minh',
+      joinMode: 'open',
+      timeWindowStart: '2026-07-17T20:00:00',
+      timeWindowEnd: '2026-07-17T22:00:00',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: Scaffold(
+          body: KeoMatchSheet(
+            suggestions: const [suggestion],
+            onJoin: (_) async {},
+            onCreate: (_) async {},
+          ),
+        ),
+      ),
+    );
+
+    final ticket = find.byType(TicketCard);
+    Finder ticketText(String value) =>
+        find.descendant(of: ticket, matching: find.text(value));
+
+    final time = ticketText(
+      expectedLocalWindow(
+        suggestion.timeWindowStart!,
+        suggestion.timeWindowEnd!,
+      ),
+    );
+    final title = ticketText(suggestion.title);
+    final area = ticketText(suggestion.areaLabel!);
+    final distance = ticketText('${suggestion.distanceBand} km');
+    final capacity = ticketText('3/5 người');
+    final genre = ticketText('Ballad');
+    final joinMode = ticketText('Mở · vào là tham gia');
+    final host = ticketText(suggestion.hostName!);
+
+    expect(time, findsOneWidget);
+    expect(title, findsOneWidget);
+    expect(area, findsOneWidget);
+    expect(distance, findsOneWidget);
+    expect(capacity, findsOneWidget);
+    expect(genre, findsOneWidget);
+    expect(host, findsOneWidget);
+
+    final timeY = tester.getTopLeft(time).dy;
+    final titleY = tester.getTopLeft(title).dy;
+    final areaY = tester.getTopLeft(area).dy;
+    final distanceY = tester.getTopLeft(distance).dy;
+    final capacityY = tester.getTopLeft(capacity).dy;
+    final genreY = tester.getTopLeft(genre).dy;
+    final hostY = tester.getTopLeft(host).dy;
+
+    expect(timeY, lessThan(titleY));
+    expect(titleY, lessThan(areaY));
+    expect(areaY, lessThan(distanceY));
+    expect(distanceY, lessThan(capacityY));
+    expect(capacityY, lessThan(genreY));
+    expect(genreY, lessThan(hostY));
+
+    expect(joinMode, findsOneWidget);
+    expect(tester.getTopLeft(joinMode).dy, lessThan(hostY));
+  });
+
   testWidgets('empty suggestions show fallback', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

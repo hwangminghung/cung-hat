@@ -97,6 +97,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
     final title = isExisting
         ? (l10n?.keoMatchExistingTitle ?? 'Kèo hợp với bạn')
         : (l10n?.keoMatchNewTitle ?? 'Đã tìm thấy nhóm phù hợp');
+    final timeWindow = _formatSuggestionTimeWindow(suggestion);
 
     return SafeArea(
       child: KeyedSubtree(
@@ -170,6 +171,13 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (timeWindow != null) ...[
+                        _SuggestionMetaRow(
+                          icon: Icons.schedule_rounded,
+                          label: timeWindow,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -203,15 +211,23 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       _SuggestionMeta(suggestion: suggestion),
-                      if (suggestion.genres.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: [
+                          for (final genre in suggestion.genres)
+                            StampChip(label: genre, tone: StampChipTone.teal),
+                          _SuggestionJoinModeStamp(
+                            joinMode: suggestion.joinMode,
+                          ),
+                        ],
+                      ),
+                      if (suggestion.hostName != null) ...[
                         const SizedBox(height: AppSpacing.md),
-                        Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.sm,
-                          children: [
-                            for (final genre in suggestion.genres)
-                              StampChip(label: genre, tone: StampChipTone.teal),
-                          ],
+                        _SuggestionMetaRow(
+                          icon: Icons.person_outline,
+                          label: suggestion.hostName!,
                         ),
                       ],
                     ],
@@ -287,9 +303,7 @@ class _SuggestionMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeWindow = _formatTimeWindow(suggestion);
     final details = <_MetaItem>[
-      if (timeWindow != null) _MetaItem(Icons.schedule_rounded, timeWindow),
       if (suggestion.areaLabel != null)
         _MetaItem(Icons.place_outlined, suggestion.areaLabel!),
       if (suggestion.distanceBand != null)
@@ -302,73 +316,131 @@ class _SuggestionMeta extends StatelessWidget {
             )?.keoCardPeople(suggestion.slotsFilled, suggestion.sizeTarget) ??
             '${suggestion.slotsFilled}/${suggestion.sizeTarget} người',
       ),
-      if (suggestion.hostName != null)
-        _MetaItem(Icons.person_outline, suggestion.hostName!),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final detail in details)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-            child: Row(
-              children: [
-                Icon(detail.icon, size: 18, color: AppColors.teal),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    detail.label,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.ink,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _SuggestionMetaRow(icon: detail.icon, label: detail.label),
       ],
     );
   }
-
-  String? _formatTimeWindow(KeoMatchSuggestion suggestion) {
-    final isExisting = suggestion.suggestionType == 'existing_keo';
-    final start = isExisting
-        ? suggestion.timeWindowStart
-        : suggestion.proposedStart;
-    final end = isExisting ? suggestion.timeWindowEnd : suggestion.proposedEnd;
-    if (start == null || end == null) return null;
-
-    try {
-      final startLocal = DateTime.parse(start).toLocal();
-      final endLocal = DateTime.parse(end).toLocal();
-      final sameDate =
-          startLocal.year == endLocal.year &&
-          startLocal.month == endLocal.month &&
-          startLocal.day == endLocal.day;
-      if (sameDate) {
-        return '${_time(startLocal)} - ${_time(endLocal)}';
-      }
-      return '${_dateTime(startLocal)} - ${_dateTime(endLocal)}';
-    } on FormatException {
-      return '$start - $end';
-    }
-  }
-
-  String _dateTime(DateTime value) {
-    return '${_fourDigits(value.year)}-${_twoDigits(value.month)}-${_twoDigits(value.day)} '
-        '${_twoDigits(value.hour)}:${_twoDigits(value.minute)}';
-  }
-
-  String _time(DateTime value) {
-    return '${_twoDigits(value.hour)}:${_twoDigits(value.minute)}';
-  }
-
-  String _fourDigits(int value) => value.toString().padLeft(4, '0');
-
-  String _twoDigits(int value) => value.toString().padLeft(2, '0');
 }
+
+class _SuggestionMetaRow extends StatelessWidget {
+  const _SuggestionMetaRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppColors.teal),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SuggestionJoinModeStamp extends StatelessWidget {
+  const _SuggestionJoinModeStamp({required this.joinMode});
+
+  final String joinMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final isOpen = joinMode == 'open';
+    final label = isOpen
+        ? (l10n?.keoModeOpen ?? 'Mở · vào là tham gia')
+        : (l10n?.keoModeApproval ?? 'Cần duyệt');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: isOpen ? AppColors.secondary : AppColors.teal,
+        border: Border.all(color: AppColors.ink, width: 2),
+        borderRadius: BorderRadius.circular(AppSpacing.xs),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isOpen ? Icons.lock_open_rounded : Icons.verified_user_outlined,
+            size: 16,
+            color: AppColors.ink,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String? _formatSuggestionTimeWindow(KeoMatchSuggestion suggestion) {
+  final isExisting = suggestion.suggestionType == 'existing_keo';
+  final start = isExisting
+      ? suggestion.timeWindowStart
+      : suggestion.proposedStart;
+  final end = isExisting ? suggestion.timeWindowEnd : suggestion.proposedEnd;
+  if (start == null || end == null) return null;
+
+  try {
+    final startLocal = DateTime.parse(start).toLocal();
+    final endLocal = DateTime.parse(end).toLocal();
+    final sameDate =
+        startLocal.year == endLocal.year &&
+        startLocal.month == endLocal.month &&
+        startLocal.day == endLocal.day;
+    if (sameDate) {
+      return '${_suggestionTime(startLocal)} - ${_suggestionTime(endLocal)}';
+    }
+    return '${_suggestionDateTime(startLocal)} - '
+        '${_suggestionDateTime(endLocal)}';
+  } on FormatException {
+    return '$start - $end';
+  }
+}
+
+String _suggestionDateTime(DateTime value) {
+  return '${_fourDigits(value.year)}-${_twoDigits(value.month)}-'
+      '${_twoDigits(value.day)} ${_suggestionTime(value)}';
+}
+
+String _suggestionTime(DateTime value) {
+  return '${_twoDigits(value.hour)}:${_twoDigits(value.minute)}';
+}
+
+String _fourDigits(int value) => value.toString().padLeft(4, '0');
+
+String _twoDigits(int value) => value.toString().padLeft(2, '0');
 
 class _MetaItem {
   const _MetaItem(this.icon, this.label);
