@@ -82,6 +82,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('screen_14_keo_detail')), findsOneWidget);
     expect(find.text('Mai'), findsOneWidget);
     expect(find.byKey(const ValueKey('u1')), findsOneWidget);
     expect(find.byType(TicketCard), findsOneWidget);
@@ -226,7 +227,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.byTooltip('Duyệt'));
+    await tester.scrollUntilVisible(
+      find.byTooltip('Duyệt'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
 
     final approveTop = tester.getTopLeft(find.byTooltip('Duyệt'));
@@ -234,6 +239,63 @@ void main() {
     expect(approveTop.dy, lessThan(declineTop.dy));
     expect(tester.takeException(), isNull);
     expect(find.byType(ListView), findsOneWidget);
+  });
+
+  testWidgets('join action stays reachable at 360dp and 1.4x text', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repo = _MockRepo();
+    when(() => repo.roster('k1')).thenAnswer(
+      (_) async => const [
+        KeoMember(
+          userId: 'host',
+          displayName: 'Mai',
+          role: 'host',
+          joinStatus: 'approved',
+        ),
+        KeoMember(
+          userId: 'member',
+          displayName: 'Nguyễn Hoàng An',
+          joinStatus: 'approved',
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          keoRepositoryProvider.overrideWithValue(repo),
+          myProfileProvider.overrideWith((ref) => Future<Profile?>.value(null)),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(360, 844),
+              textScaler: TextScaler.linear(1.4),
+              disableAnimations: true,
+            ),
+            child: KeoDetailScreen(keoId: 'k1', title: 'Hát tối thứ Bảy'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final joinButton = find.byKey(const Key('request_join_btn'));
+    await tester.scrollUntilVisible(
+      joinButton,
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('screen_14_keo_detail')), findsOneWidget);
+    expect(joinButton.hitTestable(), findsOneWidget);
   });
 
   testWidgets(

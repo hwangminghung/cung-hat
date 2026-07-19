@@ -71,6 +71,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const Key('screen_13_create_keo')), findsOneWidget);
       final titleField = find.byKey(const Key('create_keo_title_field'));
       expect(titleField, findsOneWidget);
       expect(titleField.evaluate().single.widget, isA<TextField>());
@@ -99,9 +100,12 @@ void main() {
     },
   );
 
-  testWidgets('create form remains scrollable at 320px with large text', (
+  testWidgets('create primary action stays reachable at 360dp and 1.4x text', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [genresProvider.overrideWith((ref) async => [])],
@@ -109,8 +113,9 @@ void main() {
           theme: AppTheme.light(),
           home: const MediaQuery(
             data: MediaQueryData(
-              size: Size(320, 700),
-              textScaler: TextScaler.linear(2),
+              size: Size(360, 844),
+              textScaler: TextScaler.linear(1.4),
+              disableAnimations: true,
             ),
             child: CreateKeoScreen(),
           ),
@@ -119,8 +124,58 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final createButton = find.byKey(const Key('create_keo_btn'));
+    final createScrollView = find
+        .descendant(
+          of: find.byType(SingleChildScrollView),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('create_keo_join_open')),
+      180,
+      scrollable: createScrollView,
+    );
+    await tester.pumpAndSettle();
+
     expect(tester.takeException(), isNull);
     expect(find.byType(SingleChildScrollView), findsOneWidget);
-    expect(find.byKey(const Key('create_keo_btn')), findsOneWidget);
+    expect(find.byKey(const Key('screen_13_create_keo')), findsOneWidget);
+    expect(createButton.hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('create CTA remains reachable above a compact keyboard', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [genresProvider.overrideWith((ref) async => [])],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(360, 700),
+              textScaler: TextScaler.linear(1.4),
+              viewInsets: EdgeInsets.only(bottom: 240),
+              disableAnimations: true,
+            ),
+            child: CreateKeoScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.showKeyboard(find.byKey(const Key('create_keo_title_field')));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(
+      find.byKey(const Key('create_keo_btn')).hitTestable(),
+      findsOneWidget,
+    );
   });
 }

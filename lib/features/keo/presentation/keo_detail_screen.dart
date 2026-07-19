@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/ticket_card.dart';
@@ -22,6 +23,9 @@ import '../application/keo_providers.dart';
 import '../data/keo_errors.dart';
 import '../domain/keo.dart';
 import '../domain/keo_member.dart';
+
+const sectionGap = SizedBox(height: AppSpacing.lg);
+const fieldGap = SizedBox(height: AppSpacing.md);
 
 class KeoDetailScreen extends ConsumerWidget {
   const KeoDetailScreen({super.key, required this.keoId, required this.title});
@@ -84,18 +88,25 @@ class KeoDetailScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: rosterAsync.when(
-        data: (roster) => _buildBody(context, ref, roster),
-        loading: () => ListView(
-          padding: const EdgeInsets.only(top: AppSpacing.lg),
-          children: const [SkeletonTile(), SkeletonTile(), SkeletonTile()],
-        ),
-        error: (e, _) => EmptyState(
-          icon: Icons.wifi_off_rounded,
-          title: l10n?.keoSharedLoadError ?? 'Không tải được kèo',
-          subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
-          actionLabel: l10n?.commonRetry ?? 'Thử lại',
-          onAction: () => ref.invalidate(keoRosterProvider(keoId)),
+      body: ResponsiveFrame(
+        child: KeyedSubtree(
+          key: const Key('screen_14_keo_detail'),
+          child: rosterAsync.when(
+            data: (roster) => _buildBody(context, ref, roster),
+            loading: () => ListView(
+              padding: const EdgeInsets.only(top: AppSpacing.lg),
+              children: const [SkeletonTile(), SkeletonTile(), SkeletonTile()],
+            ),
+            error: (e, _) => EmptyState(
+              icon: Icons.wifi_off_rounded,
+              title: l10n?.keoSharedLoadError ?? 'Không tải được kèo',
+              subtitle:
+                  l10n?.commonCheckConnection ??
+                  'Kiểm tra kết nối rồi thử lại.',
+              actionLabel: l10n?.commonRetry ?? 'Thử lại',
+              onAction: () => ref.invalidate(keoRosterProvider(keoId)),
+            ),
+          ),
         ),
       ),
     );
@@ -110,7 +121,8 @@ class KeoDetailScreen extends ConsumerWidget {
       final link = 'cunghat://keo/shared/$token';
       await SharePlus.instance.share(
         ShareParams(
-          text: l10n?.keoDetailShareMessage(title, link) ??
+          text:
+              l10n?.keoDetailShareMessage(title, link) ??
               'Kèo "$title" đang tuyển giọng ca — vào Cùng Hát xin một chỗ: $link',
         ),
       );
@@ -118,7 +130,9 @@ class KeoDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n?.keoDetailShareError ?? 'Không tạo được liên kết, thử lại.'),
+            content: Text(
+              l10n?.keoDetailShareError ?? 'Không tạo được liên kết, thử lại.',
+            ),
           ),
         );
       }
@@ -149,20 +163,16 @@ class KeoDetailScreen extends ConsumerWidget {
       ),
       children: [
         _Header(title: title, count: approvedCount, info: headerInfo),
-        const SizedBox(height: AppSpacing.xl),
-        Row(
-          children: [
-            Text(
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.keoDetailMembers ??
-                  'Thành viên',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(width: AppSpacing.md),
-            const Expanded(child: WaveDivider()),
-          ],
+        sectionGap,
+        _RosterHeader(
+          title:
+              Localizations.of<AppLocalizations>(
+                context,
+                AppLocalizations,
+              )?.keoDetailMembers ??
+              'Thành viên',
         ),
-        const SizedBox(height: AppSpacing.md),
+        fieldGap,
         for (final member in roster)
           _RosterTile(
             key: ValueKey(member.userId),
@@ -175,7 +185,7 @@ class KeoDetailScreen extends ConsumerWidget {
             onApprove: () => _approve(context, ref, member),
             onDecline: () => _decline(context, ref, member),
           ),
-        const SizedBox(height: AppSpacing.xl),
+        sectionGap,
         _ActionPanel(
           notMember: notMember,
           isApproved: isApproved,
@@ -205,8 +215,10 @@ class KeoDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         _snack(
           context,
-          Localizations.of<AppLocalizations>(context, AppLocalizations)
-                  ?.keoDetailApproveError ??
+          Localizations.of<AppLocalizations>(
+                context,
+                AppLocalizations,
+              )?.keoDetailApproveError ??
               'Không duyệt được',
         );
       }
@@ -225,8 +237,10 @@ class KeoDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         _snack(
           context,
-          Localizations.of<AppLocalizations>(context, AppLocalizations)
-                  ?.keoDetailDeclineError ??
+          Localizations.of<AppLocalizations>(
+                context,
+                AppLocalizations,
+              )?.keoDetailDeclineError ??
               'Không từ chối được',
         );
       }
@@ -262,8 +276,10 @@ class KeoDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         _snack(
           context,
-          Localizations.of<AppLocalizations>(context, AppLocalizations)
-                  ?.keoDetailConfirmError ??
+          Localizations.of<AppLocalizations>(
+                context,
+                AppLocalizations,
+              )?.keoDetailConfirmError ??
               'Không xác nhận được',
         );
       }
@@ -278,12 +294,39 @@ class KeoDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         _snack(
           context,
-          Localizations.of<AppLocalizations>(context, AppLocalizations)
-                  ?.keoDetailLeaveError ??
+          Localizations.of<AppLocalizations>(
+                context,
+                AppLocalizations,
+              )?.keoDetailLeaveError ??
               'Không rời kèo được',
         );
       }
     }
+  }
+}
+
+class _RosterHeader extends StatelessWidget {
+  const _RosterHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final heading = Text(
+      title,
+      style: Theme.of(context).textTheme.headlineMedium,
+    );
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    if (textScale > 1.3) {
+      return heading;
+    }
+    return Row(
+      children: [
+        Flexible(child: heading),
+        const SizedBox(width: AppSpacing.md),
+        const Expanded(child: WaveDivider()),
+      ],
+    );
   }
 }
 
@@ -332,10 +375,10 @@ class _Header extends StatelessWidget {
               const Icon(Icons.auto_awesome_outlined, color: AppColors.ink),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          fieldGap,
           const WaveDivider(),
           if (timeLabel != null) ...[
-            const SizedBox(height: AppSpacing.md),
+            fieldGap,
             _InfoRow(
               key: const Key('keo_header_time'),
               icon: Icons.schedule_outlined,
@@ -350,7 +393,7 @@ class _Header extends StatelessWidget {
               label: areaLabel,
             ),
           ],
-          const SizedBox(height: AppSpacing.md),
+          fieldGap,
           Row(
             children: [
               Container(
@@ -366,8 +409,10 @@ class _Header extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
-                  Localizations.of<AppLocalizations>(context, AppLocalizations)
-                          ?.keoDetailMemberCount(count) ??
+                  Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.keoDetailMemberCount(count) ??
                       '$count người trong kèo',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
@@ -428,8 +473,9 @@ class _RosterTile extends StatelessWidget {
         member.displayName ?? (l10n?.keoSharedAnonymous ?? 'Ẩn danh');
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
     final isHost = member.role == 'host';
-    final stampLabel =
-        isHost ? (l10n?.keoDetailHostChip ?? 'Chủ kèo') : statusText;
+    final stampLabel = isHost
+        ? (l10n?.keoDetailHostChip ?? 'Chủ kèo')
+        : statusText;
     final stampTone = isHost || member.joinStatus == 'requested'
         ? StampChipTone.lime
         : StampChipTone.teal;
@@ -505,14 +551,16 @@ class _RosterTile extends StatelessWidget {
             ],
           ),
           if (isHostViewer && member.joinStatus == 'requested') ...[
-            const SizedBox(height: AppSpacing.md),
+            fieldGap,
             LayoutBuilder(
               builder: (context, constraints) {
                 final stackActions =
                     constraints.maxWidth < 360 ||
                     MediaQuery.textScalerOf(context).scale(1) > 1.3;
                 final l10n = Localizations.of<AppLocalizations>(
-                    context, AppLocalizations);
+                  context,
+                  AppLocalizations,
+                );
                 final approveLabel = l10n?.keoDetailApprove ?? 'Duyệt';
                 final declineLabel = l10n?.keoDetailDecline ?? 'Từ chối';
                 final approve = Tooltip(
@@ -612,7 +660,7 @@ class _ActionPanel extends StatelessWidget {
             icon: const Icon(Icons.check_circle_rounded),
             label: Text(l10n?.keoDetailConfirmJoin ?? 'Đồng ý tham gia'),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          fieldGap,
         ],
         if (isApproved && !isHost && isConfirmed) ...[
           OutlinedButton.icon(
@@ -625,7 +673,7 @@ class _ActionPanel extends StatelessWidget {
             icon: const Icon(Icons.check_rounded),
             label: Text(l10n?.keoDetailConfirmed ?? 'Đã xác nhận tham gia'),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          fieldGap,
         ],
         if (isApproved) ...[
           GradientButton(
@@ -634,7 +682,7 @@ class _ActionPanel extends StatelessWidget {
             icon: Icons.chat_bubble_outline_rounded,
             child: Text(l10n?.keoDetailOpenChat ?? 'Mở trò chuyện nhóm'),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          fieldGap,
         ],
         if (isHost)
           OutlinedButton.icon(
@@ -651,7 +699,7 @@ class _ActionPanel extends StatelessWidget {
             label: Text(l10n?.keoDetailViewPlan ?? 'Xem kế hoạch'),
           ),
         if (isApproved && !isHost) ...[
-          const SizedBox(height: AppSpacing.sm),
+          fieldGap,
           TextButton(
             onPressed: onLeave,
             child: Text(l10n?.keoDetailLeave ?? 'Rời kèo'),

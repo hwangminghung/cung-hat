@@ -7,12 +7,16 @@ import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../onboarding/application/reference_providers.dart';
 import '../application/keo_providers.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../data/keo_errors.dart';
+
+const sectionGap = SizedBox(height: AppSpacing.lg);
+const fieldGap = SizedBox(height: AppSpacing.md);
 
 class CreateKeoScreen extends ConsumerStatefulWidget {
   const CreateKeoScreen({super.key});
@@ -160,104 +164,36 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.xxxl,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary,
-                    border: Border.all(color: AppColors.ink, width: 2),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  ),
-                  child: const Icon(
-                    Icons.music_note_rounded,
-                    color: AppColors.ink,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _l10n?.keoCreateHeadline ?? 'Rủ một nhóm đi hát',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        _l10n?.keoCreateSubtitle ??
-                            'Chọn thời gian, gu nhạc và cách duyệt thành viên.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const WaveDivider(),
-            const SizedBox(height: AppSpacing.md),
-            _FormSection(
-              children: [
-                TextField(
-                  key: const Key('create_keo_title_field'),
-                  controller: _titleCtrl,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.mic_external_on_outlined),
-                    labelText: _l10n?.keoCreateNameLabel ?? 'Tên kèo',
-                    hintText: _l10n?.keoCreateNameHint ?? 'V-Pop tối nay',
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextField(
-                  key: const Key('create_keo_area_field'),
-                  controller: _areaCtrl,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.place_outlined),
-                    labelText: _l10n?.keoCreateAreaLabel ?? 'Khu vực',
-                    hintText: _l10n?.keoCreateAreaHint ?? 'Quận 1, Hồ Chí Minh',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Container(
-              key: const Key('create_keo_venue_hint'),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.ink, width: 2),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                boxShadow: const [AppShadows.hard],
-              ),
-              child: Row(
+      body: ResponsiveFrame(
+        child: SingleChildScrollView(
+          key: const Key('screen_13_create_keo'),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.xxxl,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
                       color: AppColors.secondary,
                       border: Border.all(color: AppColors.ink, width: 2),
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusPill,
+                      ),
                     ),
                     child: const Icon(
-                      Icons.storefront_outlined,
+                      Icons.music_note_rounded,
                       color: AppColors.ink,
+                      size: 28,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -266,14 +202,14 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _l10n?.keoCreateVenueLater ?? 'Chọn quán sau khi tạo kèo',
-                          style: Theme.of(context).textTheme.titleSmall,
+                          _l10n?.keoCreateHeadline ?? 'Rủ một nhóm đi hát',
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          _l10n?.keoCreateVenueLaterSub ??
-                              'Chủ kèo sẽ chốt quán ở màn Kế hoạch.',
-                          style: Theme.of(context).textTheme.bodySmall
+                          _l10n?.keoCreateSubtitle ??
+                              'Chọn thời gian, gu nhạc và cách duyệt thành viên.',
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
@@ -281,143 +217,239 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const WaveDivider(),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton.icon(
-              onPressed: _submitting
-                  ? null
-                  : () async {
-                      final dt = await _pickDateTime(_start);
-                      if (dt != null) setState(() => _start = dt);
-                    },
-              icon: const Icon(Icons.schedule_rounded),
-              label: Text(
-                _l10n?.keoCreateStart(_fmt(_start)) ?? 'Bắt đầu: ${_fmt(_start)}',
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            OutlinedButton.icon(
-              onPressed: _submitting
-                  ? null
-                  : () async {
-                      final dt = await _pickDateTime(_end);
-                      if (dt != null) setState(() => _end = dt);
-                    },
-              icon: const Icon(Icons.flag_rounded),
-              label: Text(
-                _l10n?.keoCreateEnd(_fmt(_end)) ?? 'Kết thúc: ${_fmt(_end)}',
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const WaveDivider(),
-            const SizedBox(height: AppSpacing.md),
-            _FormSection(
-              children: [
-                DropdownButtonFormField<int>(
-                  initialValue: _size,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.groups_outlined),
-                    labelText: _l10n?.keoCreateSize ?? 'Số người',
+              sectionGap,
+              const WaveDivider(),
+              sectionGap,
+              _FormSection(
+                children: [
+                  TextField(
+                    key: const Key('create_keo_title_field'),
+                    controller: _titleCtrl,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.mic_external_on_outlined),
+                      labelText: _l10n?.keoCreateNameLabel ?? 'Tên kèo',
+                      hintText: _l10n?.keoCreateNameHint ?? 'V-Pop tối nay',
+                    ),
                   ),
-                  items: [
-                    for (final n in const [2, 3, 4, 5])
-                      DropdownMenuItem(
-                        value: n,
-                        child: Text(_l10n?.keoCreateSizeN(n) ?? '$n người'),
-                      ),
-                  ],
-                  onChanged: _submitting
-                      ? null
-                      : (value) {
-                          if (value != null) setState(() => _size = value);
-                        },
-                ),
-                const SizedBox(height: AppSpacing.md),
-                const WaveDivider(),
-                const SizedBox(height: AppSpacing.md),
-                Text(_l10n?.keoCreateGenres ?? 'Thể loại',
-                    style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: AppSpacing.sm),
-                genresAsync.when(
-                  data: (genres) => LayoutBuilder(
-                    key: const Key('create_keo_genre_grid'),
-                    builder: (context, constraints) {
-                      final textScale =
-                          MediaQuery.textScalerOf(context).scale(12) / 12;
-                      final twoColumns =
-                          constraints.maxWidth >= 280 && textScale <= 1.35;
-                      final itemWidth = twoColumns
-                          ? (constraints.maxWidth - AppSpacing.sm) / 2
-                          : constraints.maxWidth;
-                      return Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: [
-                          for (final genre in genres)
-                            SizedBox(
-                              width: itemWidth,
-                              child: FilterChip(
-                                key: Key('keo_genre_${genre.id}'),
-                                avatar: const Icon(
-                                  Icons.music_note_outlined,
-                                  color: AppColors.ink,
-                                ),
-                                label: Text(genre.nameVi),
-                                selected: _genreIds.contains(genre.id),
-                                selectedColor: AppColors.secondary,
-                                backgroundColor: AppColors.surface,
-                                side: const BorderSide(
-                                  color: AppColors.ink,
-                                  width: 2,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppSpacing.radiusCard,
+                ],
+              ),
+              sectionGap,
+              _FormSection(
+                children: [
+                  TextField(
+                    key: const Key('create_keo_area_field'),
+                    controller: _areaCtrl,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.place_outlined),
+                      labelText: _l10n?.keoCreateAreaLabel ?? 'Khu vực',
+                      hintText:
+                          _l10n?.keoCreateAreaHint ?? 'Quận 1, Hồ Chí Minh',
+                    ),
+                  ),
+                  fieldGap,
+                  _VenueHint(
+                    title:
+                        _l10n?.keoCreateVenueLater ??
+                        'Chọn quán sau khi tạo kèo',
+                    subtitle:
+                        _l10n?.keoCreateVenueLaterSub ??
+                        'Chủ kèo sẽ chốt quán ở màn Kế hoạch.',
+                  ),
+                  fieldGap,
+                  const WaveDivider(),
+                  fieldGap,
+                  OutlinedButton.icon(
+                    onPressed: _submitting
+                        ? null
+                        : () async {
+                            final dt = await _pickDateTime(_start);
+                            if (dt != null) setState(() => _start = dt);
+                          },
+                    icon: const Icon(Icons.schedule_rounded),
+                    label: Text(
+                      _l10n?.keoCreateStart(_fmt(_start)) ??
+                          'Bắt đầu: ${_fmt(_start)}',
+                    ),
+                  ),
+                  fieldGap,
+                  OutlinedButton.icon(
+                    onPressed: _submitting
+                        ? null
+                        : () async {
+                            final dt = await _pickDateTime(_end);
+                            if (dt != null) setState(() => _end = dt);
+                          },
+                    icon: const Icon(Icons.flag_rounded),
+                    label: Text(
+                      _l10n?.keoCreateEnd(_fmt(_end)) ??
+                          'Kết thúc: ${_fmt(_end)}',
+                    ),
+                  ),
+                ],
+              ),
+              sectionGap,
+              _FormSection(
+                children: [
+                  Text(
+                    _l10n?.keoCreateGenres ?? 'Thể loại',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  fieldGap,
+                  genresAsync.when(
+                    data: (genres) => LayoutBuilder(
+                      key: const Key('create_keo_genre_grid'),
+                      builder: (context, constraints) {
+                        final textScale =
+                            MediaQuery.textScalerOf(context).scale(12) / 12;
+                        final twoColumns =
+                            constraints.maxWidth >= 280 && textScale <= 1.35;
+                        final itemWidth = twoColumns
+                            ? (constraints.maxWidth - AppSpacing.sm) / 2
+                            : constraints.maxWidth;
+                        return Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: [
+                            for (final genre in genres)
+                              SizedBox(
+                                width: itemWidth,
+                                child: FilterChip(
+                                  key: Key('keo_genre_${genre.id}'),
+                                  avatar: const Icon(
+                                    Icons.music_note_outlined,
+                                    color: AppColors.ink,
                                   ),
+                                  label: Text(genre.nameVi),
+                                  selected: _genreIds.contains(genre.id),
+                                  selectedColor: AppColors.secondary,
+                                  backgroundColor: AppColors.surface,
+                                  side: const BorderSide(
+                                    color: AppColors.ink,
+                                    width: 2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusCard,
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.sm,
+                                    vertical: AppSpacing.md,
+                                  ),
+                                  onSelected: _submitting
+                                      ? null
+                                      : (selected) => setState(() {
+                                          if (selected) {
+                                            _genreIds.add(genre.id);
+                                          } else {
+                                            _genreIds.remove(genre.id);
+                                          }
+                                        }),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.sm,
-                                  vertical: AppSpacing.md,
-                                ),
-                                onSelected: _submitting
-                                    ? null
-                                    : (selected) => setState(() {
-                                        if (selected) {
-                                          _genreIds.add(genre.id);
-                                        } else {
-                                          _genreIds.remove(genre.id);
-                                        }
-                                      }),
                               ),
-                            ),
-                        ],
-                      );
-                    },
+                          ],
+                        );
+                      },
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Text(
+                      _l10n?.keoCreateGenresError ?? 'Không tải được thể loại',
+                    ),
                   ),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (e, _) =>
-                      Text(_l10n?.keoCreateGenresError ?? 'Không tải được thể loại'),
+                ],
+              ),
+              sectionGap,
+              _FormSection(
+                children: [
+                  DropdownButtonFormField<int>(
+                    initialValue: _size,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.groups_outlined),
+                      labelText: _l10n?.keoCreateSize ?? 'Số người',
+                    ),
+                    items: [
+                      for (final n in const [2, 3, 4, 5])
+                        DropdownMenuItem(
+                          value: n,
+                          child: Text(_l10n?.keoCreateSizeN(n) ?? '$n người'),
+                        ),
+                    ],
+                    onChanged: _submitting
+                        ? null
+                        : (value) {
+                            if (value != null) setState(() => _size = value);
+                          },
+                  ),
+                  fieldGap,
+                  const WaveDivider(),
+                  fieldGap,
+                  Text(
+                    _l10n?.keoCreateJoinMode ?? 'Chế độ tham gia',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _JoinModeChoices(
+                    selected: _joinMode,
+                    enabled: !_submitting,
+                    onSelected: (value) => setState(() => _joinMode = value),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VenueHint extends StatelessWidget {
+  const _VenueHint({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('create_keo_venue_hint'),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        border: Border.all(color: AppColors.ink, width: 2),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: const [AppShadows.hard],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.secondary,
+              border: Border.all(color: AppColors.ink, width: 2),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
+            ),
+            child: const Icon(Icons.storefront_outlined, color: AppColors.ink),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
-            const WaveDivider(),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              _l10n?.keoCreateJoinMode ?? 'Chế độ tham gia',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            _JoinModeChoices(
-              selected: _joinMode,
-              enabled: !_submitting,
-              onSelected: (value) => setState(() => _joinMode = value),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
