@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/otp_input.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../application/auth_controller.dart';
 
@@ -106,201 +107,199 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xxl,
-            AppSpacing.lg,
-            AppSpacing.xxl,
-            AppSpacing.xxxl,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _BrandHeader(brand: l10n?.appTitle ?? 'Cùng Hát'),
-                  const SizedBox(height: AppSpacing.xxxl),
-                  Text(
-                    l10n?.otpTitle ?? 'Nhập mã OTP',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+      body: _presentationFrame(
+        screenKey: const Key('screen_02_otp'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _BrandHeader(brand: l10n?.appTitle ?? 'Cùng Hát'),
+            const SizedBox(height: AppSpacing.xxxl),
+            Text(
+              l10n?.otpTitle ?? 'Nhập mã OTP',
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w900,
+                height: 1,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            const Align(alignment: Alignment.center, child: _TicketHero()),
+            const SizedBox(height: AppSpacing.xxl),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 13,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.ink, width: 1.5),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Text(
+                    l10n?.authCheckMessages ?? 'Kiểm tra tin nhắn',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: AppColors.ink,
-                      fontWeight: FontWeight.w900,
-                      height: 1,
+                      fontWeight: FontWeight.w800,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  const Align(
-                    alignment: Alignment.center,
-                    child: _TicketHero(),
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Semantics(
+              label:
+                  l10n?.authOtpSentTo(displayPhone) ??
+                  'Mã đã gửi tới $displayPhone',
+              child: ExcludeSemantics(
+                child: Text.rich(
+                  key: const Key('otp_phone_text'),
+                  TextSpan(
                     children: [
-                      Container(
-                        width: 13,
-                        height: 13,
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.ink, width: 1.5),
+                      TextSpan(
+                        text: l10n?.authOtpSentPrefix ?? 'Mã đã gửi tới ',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Flexible(
-                        child: Text(
-                          l10n?.authCheckMessages ?? 'Kiểm tra tin nhắn',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                color: AppColors.ink,
-                                fontWeight: FontWeight.w800,
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Semantics(
-                    label:
-                        l10n?.authOtpSentTo(displayPhone) ??
-                        'Mã đã gửi tới $displayPhone',
-                    child: ExcludeSemantics(
-                      child: Text.rich(
-                        key: const Key('otp_phone_text'),
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: l10n?.authOtpSentPrefix ?? 'Mã đã gửi tới ',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: AppColors.textSecondary),
-                            ),
-                            TextSpan(
-                              text: displayPhone,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.ink,
-                                    backgroundColor: AppColors.teal,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  OtpInput(
-                    semanticLabel: l10n?.otpLabel ?? 'Mã 6 số',
-                    onChanged: (value) {
-                      _ctrl.text = value;
-                      _submitted = false;
-                    },
-                    onCompleted: _submit,
-                  ),
-                  if (state.phase == AuthPhase.error) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    // Vòng cuối UI review: chỉ render message đã map từ
-                    // AuthErrorKind — không bao giờ là exception.toString().
-                    _ErrorBanner(
-                      message: authErrorMessage(
-                        state.error ?? AuthErrorKind.otpInvalid,
-                        l10n,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.xxl),
-                  GradientButton(
-                    key: const Key('verify_otp_btn'),
-                    icon: Icons.check_rounded,
-                    onPressed:
-                        _resendInFlight ||
-                            state.phase == AuthPhase.verifying ||
-                            state.phase == AuthPhase.sending
-                        ? null
-                        : () => _submit(_ctrl.text),
-                    child: state.phase == AuthPhase.verifying
-                        ? const SizedBox.square(
-                            dimension: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.onPrimary,
-                            ),
-                          )
-                        : Text(l10n?.verify ?? 'Xác nhận'),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SizedBox(
-                    key: const Key('resend_slot'),
-                    height: AppSpacing.buttonHeight,
-                    child: Center(
-                      child: _secondsRemaining > 0
-                          ? Text(
-                              l10n?.authResendCountdown(_secondsRemaining) ??
-                                  'Gửi lại mã sau ${_secondsRemaining}s',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                              textAlign: TextAlign.center,
-                            )
-                          : TextButton(
-                              key: const Key('resend_otp_btn'),
-                              onPressed:
-                                  state.phone == null ||
-                                      _resendInFlight ||
-                                      _submitted ||
-                                      state.phase == AuthPhase.sending ||
-                                      state.phase == AuthPhase.verifying
-                                  ? null
-                                  : () => _resendOtp(state.phone),
-                              child: Text(l10n?.authResend ?? 'Gửi lại mã'),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: AppColors.teal,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.ink, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
+                      TextSpan(
+                        text: displayPhone,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.ink,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Flexible(
-                        child: Text(
-                          l10n?.authOtpHelp ??
-                              'Không nhận được mã? Quay lại để kiểm tra số điện thoại.',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.4,
-                              ),
+                          backgroundColor: AppColors.teal,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
                   ),
-                ],
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: AppSpacing.xxl),
+            OtpInput(
+              semanticLabel: l10n?.otpLabel ?? 'Mã 6 số',
+              onChanged: (value) {
+                _ctrl.text = value;
+                _submitted = false;
+              },
+              onCompleted: _submit,
+            ),
+            if (state.phase == AuthPhase.error) ...[
+              const SizedBox(height: AppSpacing.md),
+              // Vòng cuối UI review: chỉ render message đã map từ
+              // AuthErrorKind — không bao giờ là exception.toString().
+              _ErrorBanner(
+                message: authErrorMessage(
+                  state.error ?? AuthErrorKind.otpInvalid,
+                  l10n,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xxl),
+            GradientButton(
+              key: const Key('verify_otp_btn'),
+              icon: Icons.check_rounded,
+              onPressed:
+                  _resendInFlight ||
+                      state.phase == AuthPhase.verifying ||
+                      state.phase == AuthPhase.sending
+                  ? null
+                  : () => _submit(_ctrl.text),
+              child: state.phase == AuthPhase.verifying
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.onPrimary,
+                      ),
+                    )
+                  : Text(l10n?.verify ?? 'Xác nhận'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              key: const Key('resend_slot'),
+              height: AppSpacing.buttonHeight,
+              child: Center(
+                child: _secondsRemaining > 0
+                    ? Text(
+                        l10n?.authResendCountdown(_secondsRemaining) ??
+                            'Gửi lại mã sau ${_secondsRemaining}s',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                    : TextButton(
+                        key: const Key('resend_otp_btn'),
+                        onPressed:
+                            state.phone == null ||
+                                _resendInFlight ||
+                                _submitted ||
+                                state.phase == AuthPhase.sending ||
+                                state.phase == AuthPhase.verifying
+                            ? null
+                            : () => _resendOtp(state.phone),
+                        child: Text(l10n?.authResend ?? 'Gửi lại mã'),
+                      ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppColors.teal,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.ink, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.question_mark_rounded,
+                    color: AppColors.ink,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Text(
+                    l10n?.authOtpHelp ??
+                        'Không nhận được mã? Quay lại để kiểm tra số điện thoại.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _presentationFrame({required Key screenKey, required Widget child}) {
+    return ResponsiveFrame(
+      maxWidth: 430,
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.xxxl,
+        ),
+        child: KeyedSubtree(key: screenKey, child: child),
       ),
     );
   }

@@ -8,6 +8,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/gradient_button.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../application/auth_controller.dart';
 
@@ -47,175 +48,174 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xxl,
-            AppSpacing.lg,
-            AppSpacing.xxl,
-            AppSpacing.xxxl,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: _presentationFrame(
+        screenKey: const Key('screen_01_login'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppLogo(tagline: l10n?.authTagline ?? 'Kết bạn qua những bài hát'),
+            const SizedBox(height: AppSpacing.xl),
+            // UI review: hạ minh họa để khối nhập liệu + nút chính
+            // không bị đẩy quá thấp khi bàn phím mở trên màn phổ biến.
+            const _MusicBoxHero(),
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              l10n?.authPhoneTitle ?? 'Đăng nhập bằng số điện thoại',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w800,
+                height: 1.1,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n?.authPhoneBody ??
+                  'Nhập số của bạn để nhận mã OTP. Tụi mình chỉ dùng để giữ tài khoản an toàn.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.45,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Container(
+              key: const Key('phone_input_frame'),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
+                border: Border.all(color: AppColors.ink, width: 2),
+                boxShadow: const [AppShadows.hard],
+              ),
+              child: Row(
                 children: [
-                  AppLogo(
-                    tagline: l10n?.authTagline ?? 'Kết bạn qua những bài hát',
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  // UI review: hạ minh họa để khối nhập liệu + nút chính
-                  // không bị đẩy quá thấp khi bàn phím mở trên màn phổ biến.
-                  const _MusicBoxHero(),
-                  const SizedBox(height: AppSpacing.xl),
-                  Text(
-                    l10n?.authPhoneTitle ?? 'Đăng nhập bằng số điện thoại',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppColors.ink,
-                      fontWeight: FontWeight.w800,
-                      height: 1.1,
+                  const Padding(
+                    padding: EdgeInsets.only(left: AppSpacing.lg),
+                    child: Text(
+                      '+84',
+                      style: TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    l10n?.authPhoneBody ??
-                        'Nhập số của bạn để nhận mã OTP. Tụi mình chỉ dùng để giữ tài khoản an toàn.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.45,
-                    ),
-                    textAlign: TextAlign.center,
+                  const SizedBox(width: AppSpacing.xs),
+                  const Icon(
+                    Icons.expand_more_rounded,
+                    color: AppColors.ink,
+                    size: 20,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
                   Container(
-                    key: const Key('phone_input_frame'),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusInput,
-                      ),
-                      border: Border.all(color: AppColors.ink, width: 2),
-                      boxShadow: const [AppShadows.hard],
+                    width: 2,
+                    height: 38,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
                     ),
-                    child: Row(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: AppSpacing.lg),
-                          child: Text(
-                            '+84',
-                            style: TextStyle(
-                              color: AppColors.ink,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        const Icon(
-                          Icons.expand_more_rounded,
-                          color: AppColors.ink,
-                          size: 20,
-                        ),
-                        Container(
-                          width: 2,
-                          height: 38,
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                          ),
-                          color: AppColors.ink,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: _ctrl,
-                            keyboardType: TextInputType.phone,
-                            textInputAction: TextInputAction.done,
-                            decoration: InputDecoration(
-                              labelText: l10n?.phoneLabel ?? 'Số điện thoại',
-                              hintText: l10n?.authPhoneHint ?? '901 234 567',
-                              filled: false,
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: const EdgeInsets.fromLTRB(
-                                0,
-                                AppSpacing.sm,
-                                AppSpacing.lg,
-                                AppSpacing.sm,
-                              ),
-                            ),
-                            onSubmitted: (_) => _sendOtp(state),
-                          ),
-                        ),
-                      ],
-                    ),
+                    color: AppColors.ink,
                   ),
-                  if (state.phase == AuthPhase.error) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    // Vòng cuối UI review: chỉ render message đã map từ
-                    // AuthErrorKind — không bao giờ là exception.toString().
-                    _ErrorBanner(
-                      message: authErrorMessage(
-                        state.error ?? AuthErrorKind.sendFailed,
-                        l10n,
+                  Expanded(
+                    child: TextField(
+                      controller: _ctrl,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: l10n?.phoneLabel ?? 'Số điện thoại',
+                        hintText: l10n?.authPhoneHint ?? '901 234 567',
+                        filled: false,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.fromLTRB(
+                          0,
+                          AppSpacing.sm,
+                          AppSpacing.lg,
+                          AppSpacing.sm,
+                        ),
                       ),
+                      onSubmitted: (_) => _sendOtp(state),
                     ),
-                  ],
-                  const SizedBox(height: AppSpacing.xl),
-                  GradientButton(
-                    key: const Key('send_otp_btn'),
-                    icon: Icons.arrow_forward_rounded,
-                    onPressed: state.phase == AuthPhase.sending
-                        ? null
-                        : () => _sendOtp(state),
-                    child: state.phase == AuthPhase.sending
-                        ? const SizedBox.square(
-                            dimension: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.onPrimary,
-                            ),
-                          )
-                        : Text(l10n?.onbContinue ?? 'Tiếp tục'),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.ink, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.verified_user_outlined,
-                          color: AppColors.ink,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Text(
-                          l10n?.authResponsibility ??
-                              'Bằng việc tiếp tục, bạn đồng ý dùng Cùng Hát có trách nhiệm và tôn trọng người khác.',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.4,
-                              ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
             ),
-          ),
+            if (state.phase == AuthPhase.error) ...[
+              const SizedBox(height: AppSpacing.md),
+              // Vòng cuối UI review: chỉ render message đã map từ
+              // AuthErrorKind — không bao giờ là exception.toString().
+              _ErrorBanner(
+                message: authErrorMessage(
+                  state.error ?? AuthErrorKind.sendFailed,
+                  l10n,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xl),
+            GradientButton(
+              key: const Key('send_otp_btn'),
+              icon: Icons.arrow_forward_rounded,
+              onPressed: state.phase == AuthPhase.sending
+                  ? null
+                  : () => _sendOtp(state),
+              child: state.phase == AuthPhase.sending
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.onPrimary,
+                      ),
+                    )
+                  : Text(l10n?.onbContinue ?? 'Tiếp tục'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.ink, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.verified_user_outlined,
+                    color: AppColors.ink,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    l10n?.authResponsibility ??
+                        'Bằng việc tiếp tục, bạn đồng ý dùng Cùng Hát có trách nhiệm và tôn trọng người khác.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _presentationFrame({required Key screenKey, required Widget child}) {
+    return ResponsiveFrame(
+      maxWidth: 430,
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.xxxl,
+        ),
+        child: KeyedSubtree(key: screenKey, child: child),
       ),
     );
   }
