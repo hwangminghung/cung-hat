@@ -1,14 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:cung_hat/core/theme/app_colors.dart';
+import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/billing/application/billing_providers.dart';
+import 'package:cung_hat/features/billing/application/iap_controller.dart';
 import 'package:cung_hat/features/billing/data/billing_repository.dart';
 import 'package:cung_hat/features/billing/presentation/store_screen.dart';
 import 'package:cung_hat/shared/widgets/empty_state.dart';
 import 'package:cung_hat/shared/widgets/hard_card.dart';
 import 'package:cung_hat/shared/widgets/skeleton.dart';
+
+class _MockIapController extends Mock implements IapController {}
 
 const _catalog = <StoreProduct>[
   StoreProduct(
@@ -41,15 +47,18 @@ Future<void> _pumpStore(
   WidgetTester tester, {
   required Size size,
   required double textScale,
-  TargetPlatform platform = TargetPlatform.android,
+  TargetPlatform? platformOverride,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
+  final theme = platformOverride == null
+      ? AppTheme.light()
+      : AppTheme.light().copyWith(platform: platformOverride);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [storeProductsProvider.overrideWith((ref) async => _catalog)],
       child: MaterialApp(
-        theme: ThemeData(platform: platform),
+        theme: theme,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(
             context,
@@ -122,6 +131,7 @@ void main() {
   testWidgets('error state shows retry button that reloads the catalog', (
     tester,
   ) async {
+    final semantics = tester.ensureSemantics();
     // StateError (an Error, not a plain Exception) skips Riverpod's default
     // auto-retry-with-backoff so the AsyncError surfaces on the next frame
     // instead of only after several seconds of retry attempts.
@@ -135,7 +145,7 @@ void main() {
             return _catalog;
           }),
         ],
-        child: const MaterialApp(home: StoreScreen()),
+        child: MaterialApp(theme: AppTheme.light(), home: const StoreScreen()),
       ),
     );
     await tester.pumpAndSettle();
@@ -144,12 +154,110 @@ void main() {
     expect(find.text('Thử lại'), findsOneWidget);
     final emptyState = tester.widget<EmptyState>(find.byType(EmptyState));
     expect(emptyState.onAction, isNotNull);
+    final retryFinder = find.byKey(const Key('store_retry_button'));
+    expect(retryFinder, findsOneWidget);
+    expect(tester.getSize(retryFinder).height, greaterThanOrEqualTo(44));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Thử lại')),
+      isSemantics(label: 'Thử lại', isButton: true, hasTapAction: true),
+    );
+    final retryButton = tester.widget<FilledButton>(retryFinder);
+    const enabled = <WidgetState>{};
+    expect(
+      retryButton.style?.backgroundColor?.resolve(enabled),
+      AppColors.primary,
+    );
+    expect(
+      retryButton.style?.foregroundColor?.resolve(enabled),
+      AppColors.onPrimary,
+    );
+    expect(retryButton.style?.textStyle?.resolve(enabled)?.fontSize, 19);
+    expect(
+      retryButton.style?.textStyle?.resolve(enabled)?.fontWeight,
+      FontWeight.w700,
+    );
+    expect(retryButton.style?.textStyle?.resolve(enabled)?.height, 1.05);
 
-    await tester.tap(find.text('Thử lại'));
+    await tester.tap(retryFinder);
     await tester.pumpAndSettle();
 
     expect(find.text('Không tải được cửa hàng'), findsNothing);
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
+    semantics.dispose();
+  });
+
+  testWidgets('each catalog CTA buys its exact product type and completes', (
+    tester,
+  ) async {
+    final iap = _MockIapController();
+    when(() => iap.buy(any())).thenAnswer((_) async => true);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storeProductsProvider.overrideWith((ref) async => _catalog),
+          iapControllerProvider.overrideWithValue(iap),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const StoreScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final type in <String>[
+      'pro',
+      'boost',
+      'see_likes',
+      'premium_filters',
+    ]) {
+      final buyButton = find.descendant(
+        of: find.byKey(Key('store_product_$type')),
+        matching: find.text('Mua'),
+      );
+      expect(buyButton, findsOneWidget);
+      await tester.ensureVisible(buyButton);
+      await tester.pumpAndSettle();
+      await tester.tap(buyButton);
+      await tester.pumpAndSettle();
+    }
+
+    final boughtTypes = verify(
+      () => iap.buy(captureAny()),
+    ).captured.cast<String>();
+    expect(boughtTypes, <String>[
+      'pro',
+      'boost',
+      'see_likes',
+      'premium_filters',
+    ]);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('false purchase completion shows the store failure SnackBar', (
+    tester,
+  ) async {
+    final iap = _MockIapController();
+    when(() => iap.buy('boost')).thenAnswer((_) async => false);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storeProductsProvider.overrideWith((ref) async => _catalog),
+          iapControllerProvider.overrideWithValue(iap),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), home: const StoreScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final boostBuy = find.descendant(
+      of: find.byKey(const Key('store_product_boost')),
+      matching: find.text('Mua'),
+    );
+    await tester.ensureVisible(boostBuy);
+    await tester.pumpAndSettle();
+    await tester.tap(boostBuy);
+    await tester.pump();
+
+    verify(() => iap.buy('boost')).called(1);
+    expect(find.text('Không mở được cửa hàng. Thử lại sau.'), findsOneWidget);
   });
 
   testWidgets('tiles giu thu tu _order du catalog xao tron; type la xuong cuoi '
@@ -249,7 +357,7 @@ void main() {
       tester,
       size: const Size(430, 800),
       textScale: 1.4,
-      platform: TargetPlatform.iOS,
+      platformOverride: TargetPlatform.iOS,
     );
 
     expect(tester.takeException(), isNull);

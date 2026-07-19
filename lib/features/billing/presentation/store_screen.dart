@@ -214,12 +214,11 @@ class StoreScreen extends ConsumerWidget {
                           SkeletonCard(),
                         ],
                       ),
-                      error: (error, stackTrace) => EmptyState(
-                        icon: Icons.wifi_off_rounded,
+                      error: (error, stackTrace) => _StoreErrorState(
                         title:
                             l10n?.storeLoadError ?? 'Không tải được cửa hàng',
-                        actionLabel: l10n?.commonRetry ?? 'Thử lại',
-                        onAction: () => ref.invalidate(storeProductsProvider),
+                        retryLabel: l10n?.commonRetry ?? 'Thử lại',
+                        onRetry: () => ref.invalidate(storeProductsProvider),
                       ),
                     ),
               ],
@@ -227,6 +226,59 @@ class StoreScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _StoreErrorState extends StatelessWidget {
+  const _StoreErrorState({
+    required this.title,
+    required this.retryLabel,
+    required this.onRetry,
+  });
+
+  final String title;
+  final String retryLabel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        EmptyState(
+          icon: Icons.wifi_off_rounded,
+          title: title,
+          onAction: onRetry,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+          child: Semantics(
+            label: retryLabel,
+            button: true,
+            onTap: onRetry,
+            excludeSemantics: true,
+            child: FilledButton(
+              key: const Key('store_retry_button'),
+              onPressed: onRetry,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                minimumSize: const Size(0, AppSpacing.buttonHeight),
+                textStyle: const TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  height: 1.05,
+                ),
+                side: const BorderSide(color: AppColors.ink, width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+                ),
+              ),
+              child: Text(retryLabel),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
