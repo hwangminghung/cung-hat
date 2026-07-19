@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/hard_card.dart';
+import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/tab_header.dart';
@@ -32,18 +34,21 @@ class InboxScreen extends ConsumerWidget {
     final keos = ref.watch(myKeosProvider).value ?? const <Keo>[];
     // UI review: header "Tin nhắn" LUÔN hiện (cả loading/lỗi/rỗng) theo quy
     // tắc chung 4 tab — trước đây màn rỗng bắt đầu bằng khoảng trắng lớn.
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TabHeader(
-            title: l10n?.inboxTitle ?? 'Tin nhắn',
-            subtitle:
-                l10n?.inboxSubtitle ??
-                'Nơi giữ các cuộc trò chuyện sau khi chung gu.',
-          ),
-          Expanded(child: _buildBody(context, ref, l10n, async, keos)),
-        ],
+    return ResponsiveFrame(
+      child: KeyedSubtree(
+        key: const Key('screen_15_inbox'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TabHeader(
+              title: l10n?.inboxTitle ?? 'Tin nhắn',
+              subtitle:
+                  l10n?.inboxSubtitle ??
+                  'Nơi giữ các cuộc trò chuyện sau khi chung gu.',
+            ),
+            Expanded(child: _buildBody(context, ref, l10n, async, keos)),
+          ],
+        ),
       ),
     );
   }
@@ -93,45 +98,41 @@ class InboxScreen extends ConsumerWidget {
           ),
           children: [
             if (keos.isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: AppSpacing.lg,
-                  bottom: AppSpacing.sm,
-                ),
-                child: _SectionLabel(l10n?.inboxSectionKeo ?? 'Kèo của bạn'),
+              _InboxSection(
+                key: const Key('inbox_keo_section'),
+                title: l10n?.inboxSectionKeo ?? 'Kèo của bạn',
+                children: [
+                  for (final keo in keos)
+                    _KeoInboxTile(
+                      key: ValueKey('my_keo_${keo.id}'),
+                      keo: keo,
+                      onTap: () async {
+                        await context.push(
+                          '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
+                        );
+                        if (context.mounted) {
+                          ref.invalidate(myKeosProvider);
+                          ref.invalidate(inboxProvider);
+                        }
+                      },
+                    ),
+                ],
               ),
-              ..._withWaveDividers([
-                for (final keo in keos)
-                  _KeoInboxTile(
-                    key: ValueKey('my_keo_${keo.id}'),
-                    keo: keo,
-                    onTap: () async {
-                      await context.push(
-                        '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
-                      );
-                      if (context.mounted) {
-                        ref.invalidate(myKeosProvider);
-                        ref.invalidate(inboxProvider);
-                      }
-                    },
-                  ),
-              ]),
             ],
-            if (matches.isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: AppSpacing.lg,
-                  bottom: AppSpacing.sm,
-                ),
-                child: _SectionLabel(
-                  l10n?.inboxSectionMatches ?? 'Tin nhắn đôi',
-                ),
+            if (keos.isNotEmpty && matches.isNotEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: WaveDivider(),
               ),
-              ..._withWaveDividers([
-                for (final match in matches)
-                  _buildMatchTile(context, ref, match, myId),
-              ]),
-            ],
+            if (matches.isNotEmpty)
+              _InboxSection(
+                key: const Key('inbox_match_section'),
+                title: l10n?.inboxSectionMatches ?? 'Tin nhắn đôi',
+                children: [
+                  for (final match in matches)
+                    _buildMatchTile(context, ref, match, myId),
+                ],
+              ),
           ],
         );
       },
@@ -168,19 +169,33 @@ class InboxScreen extends ConsumerWidget {
       },
     );
   }
+}
 
-  /// Chèn WaveDivider giữa các hàng (không chèn sau hàng cuối).
-  static List<Widget> _withWaveDividers(List<Widget> tiles) {
-    return [
-      for (var i = 0; i < tiles.length; i++) ...[
-        tiles[i],
-        if (i < tiles.length - 1)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: WaveDivider(),
+class _InboxSection extends StatelessWidget {
+  const _InboxSection({super.key, required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            top: AppSpacing.lg,
+            bottom: AppSpacing.sm,
           ),
+          child: _SectionLabel(title),
+        ),
+        for (var index = 0; index < children.length; index++) ...[
+          children[index],
+          if (index < children.length - 1)
+            const SizedBox(height: AppSpacing.md),
+        ],
       ],
-    ];
+    );
   }
 }
 
@@ -202,13 +217,12 @@ class _InboxTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Material(
-      type: MaterialType.transparency,
+    return HardCard(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -328,89 +342,111 @@ class _KeoInboxTile extends StatelessWidget {
     final subtitle = area == null || area.isEmpty
         ? _statusLabel(keo.status, l10n)
         : '${_statusLabel(keo.status, l10n)} · $area';
-    return Material(
-      type: MaterialType.transparency,
+    final ticket = Container(
+      width: 64,
+      height: 64,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.teal,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border, width: 2),
+      ),
+      child: const Icon(
+        Icons.confirmation_number_outlined,
+        color: AppColors.ink,
+        size: 30,
+      ),
+    );
+    final count = Container(
+      key: const Key('my_keo_count'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.ink, width: 1.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        '${keo.slotsFilled}/${keo.sizeTarget}',
+        style: textTheme.labelMedium?.copyWith(
+          color: AppColors.ink,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+
+    Widget details({required bool countBesideTitle}) => Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (countBesideTitle)
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  keo.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleLarge?.copyWith(color: AppColors.ink),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              count,
+            ],
+          )
+        else
+          Text(
+            keo.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleLarge?.copyWith(color: AppColors.ink),
+          ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          subtitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+        ),
+        if (keo.isMine) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: StampChip(
+              label: l10n?.keoDetailHostChip ?? 'Chủ kèo',
+              tone: StampChipTone.lime,
+              leadingIcon: Icons.auto_awesome_outlined,
+            ),
+          ),
+        ],
+      ],
+    );
+    return HardCard(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.teal,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.border, width: 2),
-                ),
-                child: const Icon(
-                  Icons.confirmation_number_outlined,
-                  color: AppColors.ink,
-                  size: 30,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      keo.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.titleLarge?.copyWith(
-                        color: AppColors.ink,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    if (keo.isMine) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: StampChip(
-                          label: l10n?.keoDetailHostChip ?? 'Chủ kèo',
-                          tone: StampChipTone.lime,
-                          leadingIcon: Icons.auto_awesome_outlined,
-                        ),
-                      ),
-                    ],
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final useCompactLayout =
+                  constraints.maxWidth < 320 &&
+                  MediaQuery.textScalerOf(context).scale(1) > 1.2;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ticket,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: details(countBesideTitle: useCompactLayout)),
+                  if (!useCompactLayout) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    count,
                   ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Container(
-                key: const Key('my_keo_count'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.ink, width: 1.5),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  '${keo.slotsFilled}/${keo.sizeTarget}',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: AppColors.ink,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),
