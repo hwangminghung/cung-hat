@@ -1,5 +1,6 @@
 import 'package:cung_hat/core/theme/app_colors.dart';
 import 'package:cung_hat/core/theme/app_shadows.dart';
+import 'package:cung_hat/core/theme/app_spacing.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/shared/widgets/empty_state.dart';
 import 'package:cung_hat/shared/widgets/gradient_button.dart';
@@ -53,11 +54,16 @@ void main() {
     final decorations = boxes
         .map((box) => box.decoration)
         .whereType<BoxDecoration>();
+    final hardSurface = decorations.singleWhere(
+      (box) => box.boxShadow?.contains(AppShadows.hard) ?? false,
+    );
+    final border = hardSurface.border! as Border;
+    expect(hardSurface.color, AppColors.surface);
+    expect(border.top.color, AppColors.ink);
+    expect(border.top.width, 2);
     expect(
-      decorations.any(
-        (box) => box.boxShadow?.contains(AppShadows.hard) ?? false,
-      ),
-      isTrue,
+      hardSurface.borderRadius,
+      BorderRadius.circular(AppSpacing.radiusCard),
     );
     expect(
       decorations
@@ -73,6 +79,7 @@ void main() {
     final cells = tester.widgetList<AnimatedContainer>(
       find.byType(AnimatedContainer),
     );
+    expect(cells, hasLength(6));
     for (final cell in cells) {
       final box = cell.decoration! as BoxDecoration;
       expect((box.border! as Border).top.width, 2);
@@ -91,9 +98,11 @@ void main() {
       host(OtpInput(onChanged: (_) {}), disableAnimations: true),
     );
 
-    for (final cell in tester.widgetList<AnimatedContainer>(
+    final cells = tester.widgetList<AnimatedContainer>(
       find.byType(AnimatedContainer),
-    )) {
+    );
+    expect(cells, hasLength(6));
+    for (final cell in cells) {
       expect(cell.duration, Duration.zero);
     }
   });
@@ -131,5 +140,52 @@ void main() {
     expect(decoration.color, isNotNull);
     expect(decoration.gradient, isNull);
     expect(decoration.boxShadow, isNull);
+  });
+
+  testWidgets('loading skeleton stops and resumes with motion preference', (
+    tester,
+  ) async {
+    final disableAnimations = ValueNotifier(false);
+    addTearDown(disableAnimations.dispose);
+    const skeletonKey = Key('motion_skeleton');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: ValueListenableBuilder<bool>(
+          valueListenable: disableAnimations,
+          builder: (context, disabled, _) => MediaQuery(
+            data: MediaQueryData(disableAnimations: disabled),
+            child: const Scaffold(body: Skeleton(key: skeletonKey, width: 120)),
+          ),
+        ),
+      ),
+    );
+
+    Color color() {
+      final container = tester.widget<Container>(
+        find.descendant(
+          of: find.byKey(skeletonKey),
+          matching: find.byType(Container),
+        ),
+      );
+      return (container.decoration! as BoxDecoration).color!;
+    }
+
+    final enabledStart = color();
+    await tester.pump(const Duration(milliseconds: 75));
+    expect(color(), isNot(enabledStart));
+
+    disableAnimations.value = true;
+    await tester.pump();
+    final disabledColor = color();
+    await tester.pump(const Duration(milliseconds: 75));
+    expect(color(), disabledColor);
+
+    disableAnimations.value = false;
+    await tester.pump();
+    final resumedStart = color();
+    await tester.pump(const Duration(milliseconds: 75));
+    expect(color(), isNot(resumedStart));
   });
 }
