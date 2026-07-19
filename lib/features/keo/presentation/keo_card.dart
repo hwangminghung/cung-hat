@@ -19,49 +19,57 @@ class KeoCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final time = _formatTime(keo.timeWindowStart, keo.timeWindowEnd);
     final textScale = MediaQuery.textScalerOf(context).scale(12) / 12;
-    final stackTime = textScale > 1.35;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.md,
-        AppSpacing.sm,
-      ),
-      child: Pressable(
-        onTap: onTap,
-        child: TicketCard(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          showPerforation: time != null && !stackTime,
-          // UI review: đặt đường đục lỗ theo dp (giữa cột giờ 58dp và nội
-          // dung) — fraction theo bề rộng màn làm nó cắt xuyên chữ/chip/avatar
-          // ở màn hẹp.
-          perforationOffset: AppSpacing.md + 58 + AppSpacing.lg / 2,
-          child: time != null && !stackTime
-              ? IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(width: 58, child: _TimeStub(time: time)),
-                      const SizedBox(width: AppSpacing.lg),
-                      Expanded(
-                        child: _KeoDetails(keo: keo, text: text),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final stackTime = availableWidth < 420 || textScale > 1;
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            AppSpacing.sm,
+          ),
+          child: Pressable(
+            onTap: onTap,
+            child: TicketCard(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              showPerforation: time != null && !stackTime,
+              // UI review: đặt đường đục lỗ theo dp (giữa cột giờ 58dp và nội
+              // dung) — fraction theo bề rộng màn làm nó cắt xuyên chữ/chip/avatar
+              // ở màn hẹp.
+              perforationOffset: AppSpacing.md + 58 + AppSpacing.lg / 2,
+              child: time != null && !stackTime
+                  ? IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(width: 58, child: _TimeStub(time: time)),
+                          const SizedBox(width: AppSpacing.lg),
+                          Expanded(
+                            child: _KeoDetails(keo: keo, text: text),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (time != null) ...[
-                      _CompactTime(time: time),
-                      const SizedBox(height: AppSpacing.md),
-                    ],
-                    _KeoDetails(keo: keo, text: text),
-                  ],
-                ),
-        ),
-      ),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (time != null) ...[
+                          _CompactTime(time: time),
+                          const SizedBox(height: AppSpacing.md),
+                        ],
+                        _KeoDetails(keo: keo, text: text),
+                      ],
+                    ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -113,12 +121,18 @@ class _CompactTime extends StatelessWidget {
       children: [
         const Icon(Icons.schedule_outlined, color: AppColors.ink),
         const SizedBox(width: AppSpacing.sm),
-        Text(time.start, style: Theme.of(context).textTheme.titleMedium),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          child: Text('—'),
+        Expanded(
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(time.start, style: Theme.of(context).textTheme.titleMedium),
+              Text('—', style: Theme.of(context).textTheme.titleSmall),
+              Text(time.end, style: Theme.of(context).textTheme.titleMedium),
+            ],
+          ),
         ),
-        Text(time.end, style: Theme.of(context).textTheme.titleMedium),
       ],
     );
   }
@@ -159,53 +173,27 @@ class _KeoDetails extends StatelessWidget {
             ),
           ],
         ),
+        if (keo.areaLabel != null || keo.distanceBand != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.xs,
+            children: [
+              if (keo.areaLabel != null)
+                _Meta(Icons.place_outlined, keo.areaLabel!),
+              if (keo.distanceBand != null)
+                _Meta(
+                  Icons.near_me_outlined,
+                  Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.keoCardDistance(keo.distanceBand!) ??
+                      'cách ${keo.distanceBand} km',
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            StampChip(
-              label: keo.joinMode == 'open'
-                  ? (Localizations.of<AppLocalizations>(
-                          context,
-                          AppLocalizations,
-                        )?.keoModeOpen ??
-                        'Mở · vào là tham gia')
-                  : (Localizations.of<AppLocalizations>(
-                          context,
-                          AppLocalizations,
-                        )?.keoModeApproval ??
-                        'Cần duyệt'),
-              tone: keo.joinMode == 'open'
-                  ? StampChipTone.lime
-                  : StampChipTone.teal,
-              leadingIcon: keo.joinMode == 'open'
-                  ? Icons.lock_open_rounded
-                  : Icons.verified_user_outlined,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        // UI review: metadata nhóm thành 2 hàng dễ quét — (địa điểm +
-        // khoảng cách) rồi (số người + chủ kèo); hàng tự wrap khi chật.
-        Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.xs,
-          children: [
-            if (keo.areaLabel != null)
-              _Meta(Icons.place_outlined, keo.areaLabel!),
-            if (keo.distanceBand != null)
-              _Meta(
-                Icons.near_me_outlined,
-                Localizations.of<AppLocalizations>(
-                      context,
-                      AppLocalizations,
-                    )?.keoCardDistance(keo.distanceBand!) ??
-                    'cách ${keo.distanceBand} km',
-              ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xs),
         Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.xs,
@@ -218,26 +206,83 @@ class _KeoDetails extends StatelessWidget {
                   )?.keoCardPeople(keo.slotsFilled, keo.sizeTarget) ??
                   '${keo.slotsFilled}/${keo.sizeTarget} người',
             ),
-            if (keo.hostName != null)
-              _Meta(Icons.person_outline, keo.hostName!),
           ],
         ),
-        if (keo.genres.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
-              for (final genre in keo.genres)
-                StampChip(label: genre, tone: StampChipTone.teal),
-            ],
-          ),
-        ],
         if (keo.memberNames.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           _MemberStrip(names: keo.memberNames, sizeTarget: keo.sizeTarget),
         ],
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final genre in keo.genres)
+              StampChip(label: genre, tone: StampChipTone.teal),
+            if (keo.joinMode == 'open')
+              _OpenJoinModeStamp(
+                label:
+                    Localizations.of<AppLocalizations>(
+                      context,
+                      AppLocalizations,
+                    )?.keoModeOpen ??
+                    'Mở · vào là tham gia',
+              )
+            else
+              StampChip(
+                label:
+                    Localizations.of<AppLocalizations>(
+                      context,
+                      AppLocalizations,
+                    )?.keoModeApproval ??
+                    'Cần duyệt',
+                tone: StampChipTone.teal,
+                leadingIcon: Icons.verified_user_outlined,
+              ),
+          ],
+        ),
+        if (keo.hostName != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          Wrap(children: [_Meta(Icons.person_outline, keo.hostName!)]),
+        ],
       ],
+    );
+  }
+}
+
+class _OpenJoinModeStamp extends StatelessWidget {
+  const _OpenJoinModeStamp({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        border: Border.all(color: AppColors.ink, width: 2),
+        borderRadius: BorderRadius.circular(AppSpacing.xs),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.lock_open_rounded, size: 16, color: AppColors.ink),
+          const SizedBox(width: AppSpacing.xs),
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

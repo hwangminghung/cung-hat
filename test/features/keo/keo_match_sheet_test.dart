@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/keo/domain/keo_match_suggestion.dart';
 import 'package:cung_hat/features/keo/presentation/keo_match_sheet.dart';
 import 'package:cung_hat/shared/widgets/gradient_button.dart';
@@ -20,7 +21,9 @@ String expectedLocalWindow(String startIso, String endIso) {
   String dateTime(DateTime v) =>
       '${v.year.toString().padLeft(4, '0')}-${two(v.month)}-${two(v.day)} ${time(v)}';
   final sameDate =
-      start.year == end.year && start.month == end.month && start.day == end.day;
+      start.year == end.year &&
+      start.month == end.month &&
+      start.day == end.day;
   if (sameDate) return '${time(start)} - ${time(end)}';
   return '${dateTime(start)} - ${dateTime(end)}';
 }
@@ -58,7 +61,15 @@ void main() {
 
     expect(find.text('Kèo hợp với bạn'), findsOneWidget);
     expect(find.text('V-Pop toi nay'), findsOneWidget);
-    expect(find.text(expectedLocalWindow(suggestion.timeWindowStart!, suggestion.timeWindowEnd!)), findsOneWidget);
+    expect(
+      find.text(
+        expectedLocalWindow(
+          suggestion.timeWindowStart!,
+          suggestion.timeWindowEnd!,
+        ),
+      ),
+      findsOneWidget,
+    );
     expect(find.textContaining('UTC'), findsNothing);
     expect(find.text('Hợp gu nhạc'), findsOneWidget);
     expect(find.text('Gần bạn'), findsOneWidget);
@@ -67,6 +78,7 @@ void main() {
     expect(find.byType(TicketCard), findsOneWidget);
     expect(find.byType(WaveDivider), findsOneWidget);
     expect(find.widgetWithText(StampChip, 'vpop'), findsOneWidget);
+    expect(find.byKey(const Key('screen_12_keo_auto_match')), findsOneWidget);
     expect(find.byKey(const Key('keo_match_reason_grid')), findsOneWidget);
     expect(find.byKey(const Key('keo_match_join_btn')), findsOneWidget);
     expect(find.byType(GradientButton), findsOneWidget);
@@ -110,7 +122,12 @@ void main() {
     expect(created, isFalse);
     expect(find.text('Đã tìm thấy nhóm phù hợp'), findsOneWidget);
     expect(find.text('Kèo gợi ý tối nay'), findsOneWidget);
-    expect(find.text(expectedLocalWindow(suggestion.proposedStart!, suggestion.proposedEnd!)), findsOneWidget);
+    expect(
+      find.text(
+        expectedLocalWindow(suggestion.proposedStart!, suggestion.proposedEnd!),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Giờ đẹp'), findsOneWidget);
     expect(find.text('Vào nhanh'), findsOneWidget);
 
@@ -133,6 +150,7 @@ void main() {
       ),
     );
 
+    expect(find.byKey(const Key('screen_12_keo_auto_match')), findsOneWidget);
     expect(
       find.text('Chưa tìm được kèo phù hợp. Thử lại sau.'),
       findsOneWidget,
@@ -330,4 +348,80 @@ void main() {
     expect(enabledLaterButton.onPressed, isNotNull);
     expect(createCalls, 1);
   });
+
+  testWidgets(
+    'auto-match result stays responsive across required widths and text scales',
+    (tester) async {
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      const suggestion = KeoMatchSuggestion(
+        suggestionType: 'existing_keo',
+        keoId: 'responsive',
+        title: 'V-Pop tối nay cùng hội bạn',
+        areaLabel: 'Music Box Thủ Đức',
+        distanceBand: '1-3',
+        sizeTarget: 5,
+        slotsFilled: 3,
+        genres: ['V-Pop', 'Ballad'],
+        hostName: 'Minh',
+        joinMode: 'open',
+        reasonLabels: [
+          'shared_genres',
+          'near_you',
+          'evening_slot',
+          'available_slots',
+        ],
+        timeWindowStart: '2026-07-17T20:00:00',
+        timeWindowEnd: '2026-07-17T22:00:00',
+      );
+
+      for (final width in const [360.0, 393.0, 430.0]) {
+        for (final scale in const [1.0, 1.2, 1.4]) {
+          await tester.binding.setSurfaceSize(Size(width, 844));
+          final platform = width == 393 && scale == 1.4
+              ? TargetPlatform.iOS
+              : TargetPlatform.android;
+
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: AppTheme.light().copyWith(platform: platform),
+              home: MediaQuery(
+                data: MediaQueryData(
+                  size: Size(width, 844),
+                  textScaler: TextScaler.linear(scale),
+                  disableAnimations: true,
+                ),
+                child: Scaffold(
+                  body: KeoMatchSheet(
+                    suggestions: const [suggestion],
+                    onJoin: (_) async {},
+                    onCreate: (_) async {},
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '${width}dp ×$scale on $platform',
+          );
+          expect(
+            find.byKey(const Key('screen_12_keo_auto_match')),
+            findsOneWidget,
+          );
+          expect(find.byType(TicketCard), findsOneWidget);
+          expect(
+            find.byKey(const Key('keo_match_reason_grid')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('keo_match_join_btn')), findsOneWidget);
+
+          await tester.pumpWidget(const SizedBox.shrink());
+        }
+      }
+    },
+  );
 }

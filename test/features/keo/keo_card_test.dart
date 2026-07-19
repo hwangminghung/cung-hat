@@ -118,6 +118,48 @@ void main() {
     expect(find.text('Minh'), findsOneWidget);
   });
 
+  testWidgets('KeoCard metadata follows the ticket hierarchy', (tester) async {
+    const keo = Keo(
+      id: 'hierarchy',
+      title: 'Ballad sau giờ học',
+      areaLabel: 'IU Music Box',
+      distanceBand: '1-3',
+      sizeTarget: 4,
+      slotsFilled: 2,
+      genres: ['Ballad'],
+      memberNames: ['Linh', 'An'],
+      hostName: 'Chủ kèo Linh',
+      joinMode: 'open',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: const Scaffold(
+          body: SingleChildScrollView(child: KeoCard(keo: keo)),
+        ),
+      ),
+    );
+
+    final titleY = tester.getTopLeft(find.text(keo.title)).dy;
+    final areaY = tester.getTopLeft(find.text(keo.areaLabel!)).dy;
+    final capacityY = tester.getTopLeft(find.text('2/4 người')).dy;
+    final membersY = tester
+        .getTopLeft(find.byKey(const Key('keo_member_strip')))
+        .dy;
+    final joinModeY = tester.getTopLeft(find.text('Mở · vào là tham gia')).dy;
+    final genreY = tester.getTopLeft(find.text('Ballad')).dy;
+    final hostY = tester.getTopLeft(find.text(keo.hostName!)).dy;
+
+    expect(titleY, lessThan(areaY));
+    expect(areaY, lessThan(capacityY));
+    expect(capacityY, lessThan(membersY));
+    expect(membersY, lessThan(joinModeY));
+    expect(membersY, lessThan(genreY));
+    expect(joinModeY, lessThan(hostY));
+    expect(genreY, lessThan(hostY));
+  });
+
   testWidgets('KeoCard stays readable at 320px with large text', (
     tester,
   ) async {

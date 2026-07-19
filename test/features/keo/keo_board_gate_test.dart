@@ -13,6 +13,7 @@ import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/keo/domain/keo_match_suggestion.dart';
 import 'package:cung_hat/features/keo/presentation/keo_board_screen.dart';
 import 'package:cung_hat/shared/widgets/gradient_button.dart';
+import 'package:cung_hat/shared/widgets/ticket_card.dart';
 
 class _FakeKeoRepository implements KeoRepository {
   _FakeKeoRepository({this.suggestions = const [], this.openKeos = const []});
@@ -75,8 +76,14 @@ ProviderScope _wrap(
   );
 }
 
-Keo _openKeo({String id = 'open-1', String title = 'Open keo'}) =>
-    Keo(id: id, title: title, sizeTarget: 4, slotsFilled: 1, joinMode: 'open');
+Keo _openKeo({String id = 'open-1', String title = 'Open keo'}) => Keo(
+  id: id,
+  title: title,
+  sizeTarget: 4,
+  slotsFilled: 1,
+  memberNames: const ['Minh'],
+  joinMode: 'open',
+);
 
 GoRouter _boardRouter() => GoRouter(
   initialLocation: '/',
@@ -113,6 +120,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.byKey(const Key('screen_11_keo_board')), findsOneWidget);
+    expect(find.byType(TicketCard), findsWidgets);
+    expect(find.byKey(const Key('keo_member_strip')), findsOneWidget);
     expect(find.text('Tạo kèo'), findsOneWidget);
     expect(find.byType(GradientButton), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
@@ -277,5 +287,66 @@ void main() {
       findsOneWidget,
     );
     expect(repo.createCalls, 0);
+  });
+
+  testWidgets('board stays responsive across required widths and text scales', (
+    tester,
+  ) async {
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    const keo = Keo(
+      id: 'responsive',
+      title: 'V-Pop tối nay cùng hội bạn',
+      areaLabel: 'Music Box Thủ Đức',
+      distanceBand: '1-3',
+      timeWindowStart: '2026-07-17T20:00:00',
+      timeWindowEnd: '2026-07-17T22:00:00',
+      sizeTarget: 5,
+      slotsFilled: 3,
+      genres: ['V-Pop'],
+      memberNames: ['Minh', 'Linh', 'An'],
+      hostName: 'Minh',
+      joinMode: 'open',
+    );
+
+    for (final width in const [360.0, 393.0, 430.0]) {
+      for (final scale in const [1.0, 1.2, 1.4]) {
+        await tester.binding.setSurfaceSize(Size(width, 844));
+        final platform = width == 393 && scale == 1.4
+            ? TargetPlatform.iOS
+            : TargetPlatform.android;
+
+        await tester.pumpWidget(
+          _wrap(
+            MediaQuery(
+              data: MediaQueryData(
+                size: Size(width, 844),
+                textScaler: TextScaler.linear(scale),
+                disableAnimations: true,
+              ),
+              child: MaterialApp(
+                theme: AppTheme.light().copyWith(platform: platform),
+                home: const KeoBoardScreen(),
+              ),
+            ),
+            entitlements: const <String>{'pro'},
+            repo: _FakeKeoRepository(openKeos: const [keo]),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: '${width}dp ×$scale on $platform',
+        );
+        expect(find.byKey(const Key('screen_11_keo_board')), findsOneWidget);
+        expect(find.byType(TicketCard), findsOneWidget);
+        expect(find.byKey(const Key('keo_member_strip')), findsOneWidget);
+        expect(find.byType(GradientButton), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
+    }
   });
 }
