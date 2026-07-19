@@ -161,7 +161,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(_l10n?.chatUnmatchTitle ?? 'Huỷ ghép?'),
         content: Text(
-          _l10n?.chatUnmatchBody ?? 'Hai bạn sẽ không nhắn tin được với nhau nữa.',
+          _l10n?.chatUnmatchBody ??
+              'Hai bạn sẽ không nhắn tin được với nhau nữa.',
         ),
         actions: [
           TextButton(
@@ -271,75 +272,83 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            // [AUDIT M3] Lỗi tải history phải khác "thread trống": có nút
-            // Thử lại; tin realtime đã tới (messages non-empty) thì ưu tiên
-            // hiển thị tin thay vì che bằng error.
-            child: historyAsync.hasError && messages.isEmpty
-                ? EmptyState(
-                    icon: Icons.wifi_off_rounded,
-                    title: _l10n?.chatHistoryError ?? 'Không tải được tin nhắn',
-                    subtitle: _l10n?.commonCheckConnection ??
-                        'Kiểm tra kết nối rồi thử lại.',
-                    actionLabel: _l10n?.commonRetry ?? 'Thử lại',
-                    onAction: () => ref.invalidate(
-                      messageHistoryProvider(widget.matchId),
-                    ),
-                  )
-                : messages.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.xxl),
-                      child: Text(
-                        _l10n?.chatEmptyMatch ??
-                            'Chưa có tin nhắn. Rủ nhau bằng một bài tủ đi.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+      body: KeyedSubtree(
+        key: const Key('screen_16_chat_1to1'),
+        child: Column(
+          children: [
+            Expanded(
+              child: KeyedSubtree(
+                key: const Key('chat_timeline'),
+                // [AUDIT M3] Lỗi tải history phải khác "thread trống": có nút
+                // Thử lại; tin realtime đã tới (messages non-empty) thì ưu tiên
+                // hiển thị tin thay vì che bằng error.
+                child: historyAsync.hasError && messages.isEmpty
+                    ? EmptyState(
+                        icon: Icons.wifi_off_rounded,
+                        title:
+                            _l10n?.chatHistoryError ??
+                            'Không tải được tin nhắn',
+                        subtitle:
+                            _l10n?.commonCheckConnection ??
+                            'Kiểm tra kết nối rồi thử lại.',
+                        actionLabel: _l10n?.commonRetry ?? 'Thử lại',
+                        onAction: () => ref.invalidate(
+                          messageHistoryProvider(widget.matchId),
                         ),
-                        textAlign: TextAlign.center,
+                      )
+                    : messages.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.xxl),
+                          child: Text(
+                            _l10n?.chatEmptyMatch ??
+                                'Chưa có tin nhắn. Rủ nhau bằng một bài tủ đi.',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppColors.textSecondary),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          AppSpacing.md,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          final dayLabel = dayLabelBetween(
+                            index == 0 ? null : messages[index - 1].createdAt,
+                            message.createdAt,
+                            DateTime.now(),
+                            today: _l10n?.chatToday ?? 'Hôm nay',
+                          );
+                          final bubble = MessageBubble(
+                            message: message,
+                            mine: message.senderId == myUid,
+                          );
+                          if (dayLabel == null) return bubble;
+                          return Column(
+                            children: [
+                              DayDivider(label: dayLabel),
+                              bubble,
+                            ],
+                          );
+                        },
                       ),
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      AppSpacing.md,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                    ),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      final dayLabel = dayLabelBetween(
-                        index == 0 ? null : messages[index - 1].createdAt,
-                        message.createdAt,
-                        DateTime.now(),
-                        today: _l10n?.chatToday ?? 'Hôm nay',
-                      );
-                      final bubble = MessageBubble(
-                        message: message,
-                        mine: message.senderId == myUid,
-                      );
-                      if (dayLabel == null) return bubble;
-                      return Column(
-                        children: [
-                          DayDivider(label: dayLabel),
-                          bubble,
-                        ],
-                      );
-                    },
-                  ),
-          ),
-          ChatComposer(
-            controller: _controller,
-            sending: _sending,
-            onSend: _send,
-            onShareSong: _shareSong,
-          ),
-        ],
+              ),
+            ),
+            ChatComposer(
+              controller: _controller,
+              sending: _sending,
+              onSend: _send,
+              onShareSong: _shareSong,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -356,4 +365,3 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 }
-

@@ -38,12 +38,14 @@ class _SongShareSheet extends ConsumerWidget {
         body = Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Text(
-            Localizations.of<AppLocalizations>(context, AppLocalizations)
-                    ?.songShareEmpty ??
+            Localizations.of<AppLocalizations>(
+                  context,
+                  AppLocalizations,
+                )?.songShareEmpty ??
                 'Bạn chưa chọn bài tủ nào. Vào Hồ sơ để thêm nhé.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         );
@@ -93,8 +95,10 @@ class _SongShareSheet extends ConsumerWidget {
               AppSpacing.sm,
             ),
             child: Text(
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.chatShareSongTooltip ??
+              Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.chatShareSongTooltip ??
                   'Gửi bài tủ',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
@@ -117,7 +121,7 @@ class SongShareContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onColor = mine ? AppColors.onPrimary : AppColors.ink;
+    const onColor = AppColors.ink;
     return Row(
       key: const Key('song_share_content'),
       mainAxisSize: MainAxisSize.min,

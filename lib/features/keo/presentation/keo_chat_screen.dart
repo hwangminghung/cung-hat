@@ -173,77 +173,87 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          const _GroupRulesBanner(),
-          Expanded(
-            // [AUDIT M3] Lỗi tải history phải khác "thread trống": có nút
-            // Thử lại; tin realtime đã tới thì ưu tiên hiển thị tin.
-            child: historyAsync.hasError && messages.isEmpty
-                ? EmptyState(
-                    icon: Icons.wifi_off_rounded,
-                    title: _l10n?.chatHistoryError ?? 'Không tải được tin nhắn',
-                    subtitle: _l10n?.commonCheckConnection ??
-                        'Kiểm tra kết nối rồi thử lại.',
-                    actionLabel: _l10n?.commonRetry ?? 'Thử lại',
-                    onAction: () => ref.invalidate(
-                      keoMessageHistoryProvider(widget.keoId),
-                    ),
-                  )
-                : messages.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.xxl),
-                      child: Text(
-                        _l10n?.chatEmptyKeo ??
-                            'Chưa có tin nhắn. Mở lời bằng một bài tủ của bạn.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+      body: KeyedSubtree(
+        key: const Key('screen_17_keo_group_chat'),
+        child: Column(
+          children: [
+            const _GroupRulesBanner(),
+            Expanded(
+              child: KeyedSubtree(
+                key: const Key('chat_timeline'),
+                // [AUDIT M3] Lỗi tải history phải khác "thread trống": có nút
+                // Thử lại; tin realtime đã tới thì ưu tiên hiển thị tin.
+                child: historyAsync.hasError && messages.isEmpty
+                    ? EmptyState(
+                        icon: Icons.wifi_off_rounded,
+                        title:
+                            _l10n?.chatHistoryError ??
+                            'Không tải được tin nhắn',
+                        subtitle:
+                            _l10n?.commonCheckConnection ??
+                            'Kiểm tra kết nối rồi thử lại.',
+                        actionLabel: _l10n?.commonRetry ?? 'Thử lại',
+                        onAction: () => ref.invalidate(
+                          keoMessageHistoryProvider(widget.keoId),
                         ),
-                        textAlign: TextAlign.center,
+                      )
+                    : messages.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.xxl),
+                          child: Text(
+                            _l10n?.chatEmptyKeo ??
+                                'Chưa có tin nhắn. Mở lời bằng một bài tủ của bạn.',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppColors.textSecondary),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          AppSpacing.sm,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          final mine = message.senderId == myUid;
+                          final dayLabel = dayLabelBetween(
+                            index == 0 ? null : messages[index - 1].createdAt,
+                            message.createdAt,
+                            DateTime.now(),
+                            today: _l10n?.chatToday ?? 'Hôm nay',
+                          );
+                          final bubble = MessageBubble(
+                            message: message,
+                            mine: mine,
+                            senderName: mine
+                                ? null
+                                : nameById[message.senderId],
+                          );
+                          if (dayLabel == null) return bubble;
+                          return Column(
+                            children: [
+                              DayDivider(label: dayLabel),
+                              bubble,
+                            ],
+                          );
+                        },
                       ),
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      AppSpacing.sm,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                    ),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      final mine = message.senderId == myUid;
-                      final dayLabel = dayLabelBetween(
-                        index == 0 ? null : messages[index - 1].createdAt,
-                        message.createdAt,
-                        DateTime.now(),
-                        today: _l10n?.chatToday ?? 'Hôm nay',
-                      );
-                      final bubble = MessageBubble(
-                        message: message,
-                        mine: mine,
-                        senderName: mine ? null : nameById[message.senderId],
-                      );
-                      if (dayLabel == null) return bubble;
-                      return Column(
-                        children: [
-                          DayDivider(label: dayLabel),
-                          bubble,
-                        ],
-                      );
-                    },
-                  ),
-          ),
-          ChatComposer(
-            controller: _controller,
-            sending: _sending,
-            onSend: _send,
-            onShareSong: _shareSong,
-          ),
-        ],
+              ),
+            ),
+            ChatComposer(
+              controller: _controller,
+              sending: _sending,
+              onSend: _send,
+              onShareSong: _shareSong,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -268,6 +278,7 @@ class _GroupRulesBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Padding(
+      key: const Key('group_rules_banner'),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
@@ -281,7 +292,10 @@ class _GroupRulesBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
         clipBehavior: Clip.antiAlias,
         child: ExpansionTile(
-          leading: const Icon(Icons.info_rounded, color: AppColors.secondaryDark),
+          leading: const Icon(
+            Icons.info_rounded,
+            color: AppColors.secondaryDark,
+          ),
           iconColor: AppColors.secondaryDark,
           collapsedIconColor: AppColors.secondaryDark,
           title: Text(l10n?.chatGroupRules ?? 'Luật nhóm'),
@@ -305,4 +319,3 @@ class _GroupRulesBanner extends StatelessWidget {
     );
   }
 }
-

@@ -66,7 +66,7 @@ class MessageBubble extends StatelessWidget {
         ),
         constraints: const BoxConstraints(maxWidth: 292),
         decoration: BoxDecoration(
-          color: mine ? AppColors.primary : AppColors.surface,
+          color: mine ? AppColors.primaryTint : AppColors.surface,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
             topRight: const Radius.circular(18),
@@ -96,18 +96,16 @@ class MessageBubble extends StatelessWidget {
             else
               Text(
                 message.body,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: mine ? AppColors.onPrimary : AppColors.textPrimary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
               ),
             const SizedBox(height: 2),
             Text(
               bubbleTime(message.createdAt),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontSize: 10.5,
-                color: mine
-                    ? AppColors.onPrimary.withValues(alpha: 0.72)
-                    : AppColors.textSecondary,
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -135,6 +133,7 @@ class ChatComposer extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return SafeArea(
+      key: const Key('chat_composer'),
       top: false,
       child: Container(
         padding: const EdgeInsets.fromLTRB(
