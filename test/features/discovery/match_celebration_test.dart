@@ -101,6 +101,19 @@ void main() {
     'reduced motion: nhảy thẳng tới trạng thái cuối, vẫn tương tác được',
     (tester) async {
       var chat = false;
+
+      T closestAncestor<T extends Widget>(Finder finder) {
+        T? result;
+        tester.element(finder).visitAncestorElements((element) {
+          if (element.widget case final T widget) {
+            result = widget;
+            return false;
+          }
+          return true;
+        });
+        return result!;
+      }
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -120,14 +133,33 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
 
       expect(
         find.byKey(const Key('screen_09_match_celebration')),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('match_identity_my')), findsOneWidget);
-      expect(find.byKey(const Key('match_identity_other')), findsOneWidget);
+      for (final key in const [
+        Key('match_identity_my'),
+        Key('match_identity_other'),
+      ]) {
+        final card = find.byKey(key);
+        expect(card, findsOneWidget);
+        final transforms = tester.widgetList<Transform>(
+          find.ancestor(of: card, matching: find.byType(Transform)),
+        );
+        expect(
+          transforms.map((transform) => transform.transform.entry(0, 3)),
+          everyElement(closeTo(0, 0.001)),
+          reason: '$key must be at its final horizontal position',
+        );
+      }
+
+      final title = find.text('Hợp cạ rồi!');
+      final titleFade = closestAncestor<FadeTransition>(title);
+      final titleScale = closestAncestor<ScaleTransition>(title);
+      expect(titleFade.opacity.value, 1);
+      expect(titleScale.scale.value, 1);
+
       expect(find.byKey(const Key('match_chat_btn')), findsOneWidget);
       expect(find.byKey(const Key('match_continue_btn')), findsOneWidget);
       expect(find.textContaining('Linh'), findsWidgets);
