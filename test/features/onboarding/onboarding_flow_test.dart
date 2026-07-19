@@ -48,13 +48,33 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(Stepper), findsNothing);
     expect(find.byType(WaveDivider), findsNWidgets(4));
+    expect(find.byKey(const Key('screen_03_onboarding_dob')), findsOneWidget);
     expect(find.text('Bước 1/4'), findsOneWidget);
     expect(find.text('Ngày sinh'), findsOneWidget);
     expect(find.text('Bạn sinh ngày nào?'), findsOneWidget);
     expect(find.text('Chọn ngày sinh'), findsNothing);
     expect(find.byKey(const Key('pick_dob_btn')), findsOneWidget);
+    expect(find.byKey(const Key('dob_day')), findsOneWidget);
+    expect(find.byKey(const Key('dob_month')), findsOneWidget);
+    expect(find.byKey(const Key('dob_year')), findsOneWidget);
     expect(find.text('Tiếp tục'), findsOneWidget);
   });
+
+  testWidgets(
+    'DOB remains overflow-free and actionable at 360dp and 1.4x text',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await pumpFlow(tester, textScaler: const TextScaler.linear(1.4));
+
+      expect(
+        find.byKey(const Key('onb_continue')).hitTestable(),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('continue control remains reachable on a compact screen', (
     tester,
@@ -164,6 +184,12 @@ void main() {
     await tester.tap(find.byKey(const Key('onb_continue')));
     await tester.pump();
 
+    expect(
+      find.byKey(const Key('screen_04_onboarding_consent')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('consent_all_btn')), findsOneWidget);
+    expect(find.text('Bắt buộc'), findsNWidgets(4));
     expect(find.text('Bước 2/4'), findsOneWidget);
     expect(find.text('Quyền riêng tư'), findsOneWidget);
     expect(find.text('Đồng ý & tiếp tục'), findsOneWidget);

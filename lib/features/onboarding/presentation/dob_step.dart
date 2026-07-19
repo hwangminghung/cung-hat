@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/hard_card.dart';
 
 bool isAdult(DateTime dob, {DateTime? now}) {
   final n = now ?? DateTime.now();
@@ -77,88 +77,71 @@ class _DobStepState extends State<DobStep> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: AppSpacing.lg),
-        const _DobArt(),
-        const SizedBox(height: AppSpacing.lg),
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.ink, width: 2),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            boxShadow: const [AppShadows.hard],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 18,
-                height: 18,
-                decoration: const BoxDecoration(
-                  color: AppColors.secondary,
-                  shape: BoxShape.circle,
+        HardCard(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              children: [
+                const _DobArt(),
+                _AgeNotice(
+                  label:
+                      l10n?.onbUnder18 ??
+                      'Bạn phải đủ 18 tuổi để dùng ứng dụng.',
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  l10n?.onbUnder18 ?? 'Bạn phải đủ 18 tuổi để dùng ứng dụng.',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                const SizedBox(height: AppSpacing.md),
+                // Key 'pick_dob_btn' GIỮ NGUYÊN làm mỏ neo cho
+                // integration_test (app_test.dart chỉ find, không tap).
+                Row(
+                  key: const Key('pick_dob_btn'),
+                  children: [
+                    Expanded(
+                      child: _DobField(
+                        fieldKey: const Key('dob_day'),
+                        controller: _day,
+                        label: l10n?.onbDobDay ?? 'Ngày',
+                        hint: '--',
+                        maxLength: 2,
+                        onChanged: (v) {
+                          if (v.length == 2) _monthFocus.requestFocus();
+                          _tryPick();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: _DobField(
+                        fieldKey: const Key('dob_month'),
+                        controller: _month,
+                        focusNode: _monthFocus,
+                        label: l10n?.onbDobMonth ?? 'Tháng',
+                        hint: '--',
+                        maxLength: 2,
+                        onChanged: (v) {
+                          if (v.length == 2) _yearFocus.requestFocus();
+                          _tryPick();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: _DobField(
+                        fieldKey: const Key('dob_year'),
+                        controller: _year,
+                        focusNode: _yearFocus,
+                        label: l10n?.onbDobYear ?? 'Năm',
+                        hint: '----',
+                        maxLength: 4,
+                        onChanged: (v) {
+                          if (v.length == 4) _yearFocus.unfocus();
+                          _tryPick();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        // Key 'pick_dob_btn' GIỮ NGUYÊN làm mỏ neo cho integration_test
-        // (app_test.dart chỉ find, không tap).
-        Row(
-          key: const Key('pick_dob_btn'),
-          children: [
-            Expanded(
-              child: _DobField(
-                fieldKey: const Key('dob_day'),
-                controller: _day,
-                label: l10n?.onbDobDay ?? 'Ngày',
-                hint: '--',
-                maxLength: 2,
-                onChanged: (v) {
-                  if (v.length == 2) _monthFocus.requestFocus();
-                  _tryPick();
-                },
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _DobField(
-                fieldKey: const Key('dob_month'),
-                controller: _month,
-                focusNode: _monthFocus,
-                label: l10n?.onbDobMonth ?? 'Tháng',
-                hint: '--',
-                maxLength: 2,
-                onChanged: (v) {
-                  if (v.length == 2) _yearFocus.requestFocus();
-                  _tryPick();
-                },
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _DobField(
-                fieldKey: const Key('dob_year'),
-                controller: _year,
-                focusNode: _yearFocus,
-                label: l10n?.onbDobYear ?? 'Năm',
-                hint: '----',
-                maxLength: 4,
-                onChanged: (v) {
-                  if (v.length == 4) _yearFocus.unfocus();
-                  _tryPick();
-                },
-              ),
-            ),
-          ],
         ),
         if (widget.dob != null && !ok)
           Padding(
@@ -181,24 +164,55 @@ class _DobArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 190,
-        height: 104,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.ink, width: 2),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          boxShadow: const [AppShadows.hard],
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.calendar_month_outlined, color: AppColors.ink, size: 52),
-            SizedBox(width: AppSpacing.lg),
-            Icon(Icons.mic_none_rounded, color: AppColors.primary, size: 56),
-          ],
-        ),
+    return const SizedBox(
+      height: 104,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.calendar_month_outlined, color: AppColors.ink, size: 52),
+          SizedBox(width: AppSpacing.lg),
+          Icon(Icons.mic_none_rounded, color: AppColors.primary, size: 56),
+        ],
+      ),
+    );
+  }
+}
+
+class _AgeNotice extends StatelessWidget {
+  const _AgeNotice({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.secondaryTint,
+        border: Border.all(color: AppColors.ink, width: 2),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            decoration: const BoxDecoration(
+              color: AppColors.secondary,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -235,7 +249,6 @@ class _DobField extends StatelessWidget {
         color: AppColors.surface,
         border: Border.all(color: AppColors.ink, width: 2),
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        boxShadow: const [AppShadows.hard],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

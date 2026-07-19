@@ -159,20 +159,19 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     required AsyncValue<List<Song>> songs,
   }) {
     return switch (_step) {
-      0 => DobStep(dob: _dob, onPick: (date) => setState(() => _dob = date)),
-      1 => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n?.onbConsentTitle ?? 'Quyền riêng tư',
-            style: Theme.of(context).textTheme.displaySmall,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          ConsentStep(
-            values: _consents,
-            onChanged: (key, value) => setState(() => _consents[key] = value),
-          ),
-        ],
+      0 => KeyedSubtree(
+        key: const Key('screen_03_onboarding_dob'),
+        child: DobStep(
+          dob: _dob,
+          onPick: (date) => setState(() => _dob = date),
+        ),
+      ),
+      1 => KeyedSubtree(
+        key: const Key('screen_04_onboarding_consent'),
+        child: ConsentStep(
+          values: _consents,
+          onChanged: (key, value) => setState(() => _consents[key] = value),
+        ),
       ),
       2 => Column(
         crossAxisAlignment: CrossAxisAlignment.start,

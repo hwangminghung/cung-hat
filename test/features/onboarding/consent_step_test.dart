@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/onboarding/presentation/consent_step.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import 'package:cung_hat/shared/widgets/hard_card.dart';
 
 const _allOff = {
   'location': false,
@@ -81,6 +82,24 @@ void main() {
     }
   });
 
+  testWidgets('groups required and optional consent rows in one calm list', (
+    tester,
+  ) async {
+    await pumpConsentStep(tester, onChanged: (_, _) {});
+
+    final list = find.byType(HardCard);
+    expect(list, findsOneWidget);
+    for (final purpose in consentPurposes) {
+      expect(
+        find.descendant(
+          of: list,
+          matching: find.byKey(Key('consent_$purpose')),
+        ),
+        findsOneWidget,
+      );
+    }
+  });
+
   testWidgets('P2-b: Đồng ý tất cả bật toàn bộ consent một chạm', (
     tester,
   ) async {
@@ -96,7 +115,11 @@ void main() {
 
     // Mọi purpose (kể cả marketing) được bật — user vẫn tắt lại từng cái được.
     for (final purpose in consentPurposes) {
-      expect(changes[purpose], isTrue, reason: 'purpose $purpose phải được bật');
+      expect(
+        changes[purpose],
+        isTrue,
+        reason: 'purpose $purpose phải được bật',
+      );
     }
   });
 }

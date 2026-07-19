@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/onboarding/presentation/dob_step.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
+import 'package:cung_hat/shared/widgets/hard_card.dart';
 
 void main() {
   test('isAdult true for >=18', () {
@@ -45,7 +46,10 @@ void main() {
 
     // Giá trị dob có sẵn hiển thị trong 3 ô nhập.
     expect(
-      tester.widget<TextField>(find.byKey(const Key('dob_day'))).controller?.text,
+      tester
+          .widget<TextField>(find.byKey(const Key('dob_day')))
+          .controller
+          ?.text,
       '12',
     );
     expect(
@@ -56,7 +60,10 @@ void main() {
       '09',
     );
     expect(
-      tester.widget<TextField>(find.byKey(const Key('dob_year'))).controller?.text,
+      tester
+          .widget<TextField>(find.byKey(const Key('dob_year')))
+          .controller
+          ?.text,
       '2004',
     );
     expect(find.text('Ngày'), findsOneWidget);
@@ -69,6 +76,34 @@ void main() {
     await tester.tap(find.byKey(const Key('dob_day')));
     await tester.pumpAndSettle();
     expect(find.byType(DatePickerDialog), findsNothing);
+  });
+
+  testWidgets('groups DOB art and date fields in one hard card', (
+    tester,
+  ) async {
+    await pumpStep(tester, dob: DateTime(2004, 9, 12));
+
+    final card = find.byType(HardCard);
+    expect(card, findsOneWidget);
+    expect(
+      find.descendant(
+        of: card,
+        matching: find.byKey(const Key('pick_dob_btn')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: card, matching: find.byKey(const Key('dob_day'))),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: card, matching: find.byKey(const Key('dob_month'))),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: card, matching: find.byKey(const Key('dob_year'))),
+      findsOneWidget,
+    );
   });
 
   testWidgets('P2-a: nhập đủ 3 ô hợp lệ → onPick nhận đúng ngày', (

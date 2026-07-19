@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/hard_card.dart';
 
 const consentPurposes = [
   'location',
@@ -74,6 +74,11 @@ class ConsentStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
+          l10n?.onbConsentTitle ?? 'Quyền riêng tư',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
           l10n?.onbConsentSubtitle ?? 'Bạn chọn cách Cùng Hát dùng dữ liệu',
           style: Theme.of(context).textTheme.titleLarge,
         ),
@@ -91,37 +96,32 @@ class ConsentStep extends StatelessWidget {
           label: Text(l10n?.onbConsentAll ?? 'Đồng ý tất cả'),
         ),
         const SizedBox(height: AppSpacing.md),
-        for (final purpose in _requiredConsentOrder) ...[
-          _RequiredConsentRow(
-            key: Key('consent_$purpose'),
-            icon: _iconFor(purpose),
-            label: labelFor(purpose),
-            requiredLabel: l10n?.onbRequired ?? 'Bắt buộc',
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.ink, width: 2),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            boxShadow: const [AppShadows.hard],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            clipBehavior: Clip.antiAlias,
-            child: SwitchListTile(
-              key: const Key('consent_marketing'),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
+        HardCard(
+          child: Column(
+            children: [
+              for (final purpose in _requiredConsentOrder) ...[
+                _RequiredConsentRow(
+                  key: Key('consent_$purpose'),
+                  icon: _iconFor(purpose),
+                  label: labelFor(purpose),
+                  requiredLabel: l10n?.onbRequired ?? 'Bắt buộc',
+                ),
+                const Divider(height: 2),
+              ],
+              SwitchListTile(
+                key: const Key('consent_marketing'),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                secondary: const _ConsentIcon(
+                  icon: Icons.notifications_outlined,
+                ),
+                title: Text(labelFor('marketing')),
+                value: values['marketing'] ?? false,
+                onChanged: (value) => onChanged('marketing', value),
               ),
-              secondary: const _ConsentIcon(icon: Icons.notifications_outlined),
-              title: Text(labelFor('marketing')),
-              value: values['marketing'] ?? false,
-              onChanged: (value) => onChanged('marketing', value),
-            ),
+            ],
           ),
         ),
         Padding(
@@ -168,14 +168,8 @@ class _RequiredConsentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.ink, width: 2),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        boxShadow: const [AppShadows.hard],
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
