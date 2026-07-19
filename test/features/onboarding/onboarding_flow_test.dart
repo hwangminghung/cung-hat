@@ -61,13 +61,26 @@ void main() {
   });
 
   testWidgets(
-    'DOB remains overflow-free and actionable at 360dp and 1.4x text',
+    'DOB and consent remain overflow-free and actionable at 360dp and 1.4x text',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(360, 800));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       await pumpFlow(tester, textScaler: const TextScaler.linear(1.4));
 
+      expect(
+        find.byKey(const Key('onb_continue')).hitTestable(),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.byKey(const Key('onb_continue')));
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('screen_04_onboarding_consent')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const Key('onb_continue')).hitTestable(),
         findsOneWidget,
