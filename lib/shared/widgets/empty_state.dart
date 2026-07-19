@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_motion.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_spacing.dart';
 import 'gradient_button.dart';
 
@@ -29,34 +30,20 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final hardSurface = BoxDecoration(
+      color: AppColors.surface,
+      border: Border.all(color: AppColors.ink, width: 2),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      boxShadow: const <BoxShadow>[AppShadows.hard],
+    );
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 96,
           height: 96,
-          decoration: BoxDecoration(
-            color: AppColors.primaryTint,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadow.withValues(alpha: 0.12),
-                blurRadius: 26,
-                offset: const Offset(0, 14),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                gradient: AppColors.brandGradient,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(icon, color: AppColors.onPrimary, size: 30),
-            ),
-          ),
+          decoration: hardSurface,
+          child: Icon(icon, color: AppColors.primary, size: 36),
         ),
         const SizedBox(height: AppSpacing.lg),
         ConstrainedBox(

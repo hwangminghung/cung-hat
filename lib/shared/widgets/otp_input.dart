@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_spacing.dart';
 
 /// Six separate single-digit boxes backed by one hidden TextField.
@@ -120,27 +121,23 @@ class _DigitBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isFilled || isActive
-        ? AppColors.primary
-        : AppColors.border;
+    final otpBorder = Border.all(
+      color: isFilled || isActive ? AppColors.primary : AppColors.ink,
+      width: 2,
+    );
+    final transitionDuration =
+        MediaQuery.maybeOf(context)?.disableAnimations == true
+        ? Duration.zero
+        : AppMotion.exit;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 140),
+      duration: transitionDuration,
       width: width,
       height: AppSpacing.inputHeight,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
-        border: Border.all(color: borderColor, width: isFilled ? 1.5 : 1),
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
+        border: otpBorder,
       ),
       child: Text(value, style: Theme.of(context).textTheme.titleLarge),
     );

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_spacing.dart';
 import 'hard_card.dart';
 
-/// Shimmering placeholder block for loading states.
+/// Flat placeholder block for loading states.
 /// Prefer these over spinners for content that takes >300ms to load.
 class Skeleton extends StatefulWidget {
   const Skeleton({
@@ -31,8 +32,8 @@ class _SkeletonState extends State<Skeleton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1200),
-  )..repeat();
+    duration: AppMotion.slow,
+  )..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -46,25 +47,18 @@ class _SkeletonState extends State<Skeleton>
     if (reduceMotion && _controller.isAnimating) _controller.stop();
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, _) {
-        final t = _controller.value;
-        return Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.radius),
-            gradient: LinearGradient(
-              begin: Alignment(-1 + 2 * t, 0),
-              end: Alignment(1 + 2 * t, 0),
-              colors: const [
-                AppColors.surfaceAlt,
-                AppColors.border,
-                AppColors.surfaceAlt,
-              ],
-            ),
+      builder: (context, _) => Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: Color.lerp(
+            AppColors.surfaceAlt,
+            AppColors.surfaceMuted,
+            _controller.value,
           ),
-        );
-      },
+          borderRadius: BorderRadius.circular(widget.radius),
+        ),
+      ),
     );
   }
 }

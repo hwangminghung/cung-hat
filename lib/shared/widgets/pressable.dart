@@ -32,6 +32,9 @@ class _PressableState extends State<Pressable> {
   Widget build(BuildContext context) {
     final interactive =
         widget.enabled && (widget.onTap != null || widget.onLongPress != null);
+    final pressDuration = MediaQuery.maybeOf(context)?.disableAnimations == true
+        ? Duration.zero
+        : AppMotion.fast;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: interactive ? (_) => _set(true) : null,
@@ -41,7 +44,7 @@ class _PressableState extends State<Pressable> {
       onLongPress: interactive ? widget.onLongPress : null,
       child: AnimatedScale(
         scale: _pressed ? AppMotion.pressScale : 1.0,
-        duration: AppMotion.fast,
+        duration: pressDuration,
         curve: AppMotion.enterCurve,
         child: widget.child,
       ),
