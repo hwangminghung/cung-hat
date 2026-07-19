@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:cung_hat/core/theme/app_colors.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/chat/application/chat_providers.dart';
 import 'package:cung_hat/features/chat/data/chat_repository.dart';
@@ -259,6 +260,10 @@ void main() {
       // Tên người gửi hiện trên bubble của người khác (uid mình = null trong
       // test vì Supabase chưa init → mọi bubble đều "người khác").
       expect(find.text('QA Linh Ballad'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.text('QA Linh Ballad')).style?.color,
+        AppColors.ink,
+      );
       expect(find.text('Toi nay hat nhe'), findsOneWidget);
     },
   );
