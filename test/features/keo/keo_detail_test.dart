@@ -188,6 +188,9 @@ void main() {
   testWidgets('detail stays scrollable at 320px with large text', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     final repo = _MockRepo();
     when(() => repo.roster('k1')).thenAnswer(
       (_) async => const [

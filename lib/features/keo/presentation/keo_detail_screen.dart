@@ -487,10 +487,9 @@ class _RosterTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final avatar = Container(
                 width: 52,
                 height: 52,
                 alignment: Alignment.center,
@@ -506,49 +505,63 @@ class _RosterTile extends StatelessWidget {
                     context,
                   ).textTheme.titleMedium?.copyWith(color: AppColors.ink),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
+              );
+              final identity = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (member.verified) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 18,
+                          color: AppColors.ink,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    children: [
+                      StampChip(
+                        label: stampLabel,
+                        tone: stampTone,
+                        leadingIcon: isHost
+                            ? Icons.auto_awesome_outlined
+                            : member.joinStatus == 'requested'
+                            ? Icons.schedule_outlined
+                            : Icons.check_rounded,
+                      ),
+                    ],
+                  ),
+                ],
+              );
+              final stackIdentity =
+                  constraints.maxWidth < 280 ||
+                  MediaQuery.textScalerOf(context).scale(1) > 1.6;
+              if (stackIdentity) {
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            displayName,
-                            style: Theme.of(context).textTheme.titleMedium,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (member.verified) ...[
-                          const SizedBox(width: AppSpacing.xs),
-                          const Icon(
-                            Icons.verified_rounded,
-                            size: 18,
-                            color: AppColors.ink,
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      children: [
-                        StampChip(
-                          label: stampLabel,
-                          tone: stampTone,
-                          leadingIcon: isHost
-                              ? Icons.auto_awesome_outlined
-                              : member.joinStatus == 'requested'
-                              ? Icons.schedule_outlined
-                              : Icons.check_rounded,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                  children: [avatar, fieldGap, identity],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  avatar,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: identity),
+                ],
+              );
+            },
           ),
           if (isHostViewer && member.joinStatus == 'requested') ...[
             fieldGap,

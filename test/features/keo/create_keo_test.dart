@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:cung_hat/core/theme/app_colors.dart';
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/keo/presentation/create_keo_screen.dart';
 import 'package:cung_hat/features/keo/application/keo_providers.dart';
@@ -81,7 +82,11 @@ void main() {
         'V-Pop tối nay',
       );
 
-      expect(find.byKey(const Key('create_keo_venue_hint')), findsOneWidget);
+      final venueHint = find.byKey(const Key('create_keo_venue_hint'));
+      expect(venueHint, findsOneWidget);
+      final venueDecoration =
+          tester.widget<Container>(venueHint).decoration! as BoxDecoration;
+      expect(venueDecoration.color, AppColors.surface);
       expect(find.byKey(const Key('create_keo_genre_grid')), findsOneWidget);
       expect(find.byKey(const Key('keo_genre_vpop')), findsOneWidget);
       final approvalChoice = find.byKey(const Key('create_keo_join_approval'));

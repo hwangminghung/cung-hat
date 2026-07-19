@@ -416,7 +416,7 @@ class _VenueHint extends StatelessWidget {
       key: const Key('create_keo_venue_hint'),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surfaceAlt,
+        color: AppColors.surface,
         border: Border.all(color: AppColors.ink, width: 2),
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         boxShadow: const [AppShadows.hard],
