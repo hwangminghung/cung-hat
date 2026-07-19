@@ -6,11 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../application/plan_providers.dart';
 
 class BookingButton extends ConsumerStatefulWidget {
-  const BookingButton({
-    super.key,
-    required this.planId,
-    required this.venueId,
-  });
+  const BookingButton({super.key, required this.planId, required this.venueId});
 
   final String planId;
   final String venueId;
@@ -29,6 +25,7 @@ class _BookingButtonState extends ConsumerState<BookingButton> {
     final gateway = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
+        key: const Key('screen_20_booking_payment'),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -42,8 +39,10 @@ class _BookingButtonState extends ConsumerState<BookingButton> {
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: Text(
-                  Localizations.of<AppLocalizations>(ctx, AppLocalizations)
-                          ?.bookingPickGateway ??
+                  Localizations.of<AppLocalizations>(
+                        ctx,
+                        AppLocalizations,
+                      )?.bookingPickGateway ??
                       'Chọn cổng thanh toán',
                   style: Theme.of(ctx).textTheme.titleMedium,
                 ),
@@ -68,21 +67,30 @@ class _BookingButtonState extends ConsumerState<BookingButton> {
     if (gateway == null || !mounted) return;
     setState(() => _busy = true);
     try {
-      final url = await ref.read(planRepositoryProvider).startVenuePayment(
-          planId: widget.planId, venueId: widget.venueId, gateway: gateway);
+      final url = await ref
+          .read(planRepositoryProvider)
+          .startVenuePayment(
+            planId: widget.planId,
+            venueId: widget.venueId,
+            gateway: gateway,
+          );
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
       if (mounted) {
-        final l10n =
-            Localizations.of<AppLocalizations>(context, AppLocalizations);
+        final l10n = Localizations.of<AppLocalizations>(
+          context,
+          AppLocalizations,
+        );
         final msg = e.toString().contains('not_configured')
-            ? (l10n?.bookingNotConfigured ?? 'Cổng thanh toán chưa được cấu hình')
+            ? (l10n?.bookingNotConfigured ??
+                  'Cổng thanh toán chưa được cấu hình')
             : (l10n?.bookingCreateError ?? 'Không tạo được thanh toán');
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
