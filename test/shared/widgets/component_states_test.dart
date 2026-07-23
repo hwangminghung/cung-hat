@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:cung_hat/core/theme/app_colors.dart';
 import 'package:cung_hat/core/theme/app_shadows.dart';
 import 'package:cung_hat/core/theme/app_spacing.dart';
@@ -8,6 +11,7 @@ import 'package:cung_hat/shared/widgets/otp_input.dart';
 import 'package:cung_hat/shared/widgets/pressable.dart';
 import 'package:cung_hat/shared/widgets/skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -134,27 +138,63 @@ void main() {
       FocusManager.instance.highlightStrategy = previousStrategy;
     });
 
+    const boundaryKey = Key('focused_pressable_boundary');
     await tester.pumpWidget(
-      host(Pressable(onTap: () {}, child: const Text('Press'))),
+      host(
+        RepaintBoundary(
+          key: boundaryKey,
+          child: Pressable(
+            onTap: () {},
+            child: const SizedBox(
+              width: 80,
+              height: 48,
+              child: ColoredBox(
+                color: AppColors.primary,
+                child: Center(
+                  child: SizedBox.square(
+                    dimension: 12,
+                    child: ColoredBox(color: AppColors.onPrimary),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    final focusPaint = find.descendant(
-      of: find.byType(Pressable),
-      matching: find.byType(AnimatedContainer),
+    final boundary = tester.renderObject<RenderRepaintBoundary>(
+      find.byKey(boundaryKey),
     );
-    expect(focusPaint, findsOneWidget);
+    late ui.Image image;
+    await tester.runAsync(() async {
+      image = await boundary.toImage(pixelRatio: 1);
+    });
+    addTearDown(image.dispose);
+    late ByteData bytes;
+    await tester.runAsync(() async {
+      bytes = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+    });
 
-    final decoration =
-        tester.widget<AnimatedContainer>(focusPaint).foregroundDecoration
-            as BoxDecoration;
-    final border = decoration.border! as Border;
-    expect(border.top.color, AppColors.ink);
-    expect(border.top.width, 3);
-    expect(decoration.boxShadow, const <BoxShadow>[
-      BoxShadow(color: AppColors.secondary, spreadRadius: 2),
-    ]);
+    Color pixelAt(int x, int y) {
+      final offset = (y * image.width + x) * 4;
+      return Color.fromARGB(
+        bytes.getUint8(offset + 3),
+        bytes.getUint8(offset),
+        bytes.getUint8(offset + 1),
+        bytes.getUint8(offset + 2),
+      );
+    }
+
+    expect(
+      pixelAt(40, 24),
+      AppColors.onPrimary,
+      reason: 'The focus paint must not cover the focused child content.',
+    );
+    expect(pixelAt(1, 24), AppColors.secondary);
+    expect(pixelAt(4, 24), AppColors.ink);
   });
 
   testWidgets('loading skeleton uses a flat fill without a gradient', (

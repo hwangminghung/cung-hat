@@ -85,7 +85,7 @@ browser matrix.
 The bounded live alternative is
 `integration_test/presentation_gallery.dart`. It imports the same 22 in-memory
 capture fixture builders and uses `?state=01..22` only to select the fixture.
-After `runApp`, a bounded post-frame probe walks the mounted Flutter element
+After `runApp`, a bounded timer-based probe walks the mounted Flutter element
 tree. It sets the invisible canonical DOM marker only after the expected
 `screen_XX_*` root key is genuinely present; a missing root reports a distinct
 timeout/error state instead. The harness is not part of the production app or

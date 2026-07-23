@@ -55,18 +55,10 @@ class _PressableState extends State<Pressable> {
           },
         ),
       },
-      child: AnimatedContainer(
-        duration: pressDuration,
-        curve: AppMotion.enterCurve,
-        foregroundDecoration: _showFocusHighlight
-            ? BoxDecoration(
-                border: Border.all(color: AppColors.ink, width: 3),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                boxShadow: const <BoxShadow>[
-                  BoxShadow(color: AppColors.secondary, spreadRadius: 2),
-                ],
-              )
-            : const BoxDecoration(),
+      child: CustomPaint(
+        foregroundPainter: _showFocusHighlight
+            ? const _FocusRingPainter()
+            : null,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: interactive ? (_) => _set(true) : null,
@@ -84,4 +76,42 @@ class _PressableState extends State<Pressable> {
       ),
     );
   }
+}
+
+class _FocusRingPainter extends CustomPainter {
+  const _FocusRingPainter();
+
+  static const _strokeWidth = 2.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final outerPaint = Paint()
+      ..color = AppColors.secondary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _strokeWidth
+      ..isAntiAlias = false;
+    final innerPaint = Paint()
+      ..color = AppColors.ink
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _strokeWidth
+      ..isAntiAlias = false;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Offset.zero & size,
+        const Radius.circular(AppSpacing.radiusCard),
+      ).deflate(1),
+      outerPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Offset.zero & size,
+        const Radius.circular(AppSpacing.radiusCard),
+      ).deflate(4),
+      innerPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _FocusRingPainter oldDelegate) => false;
 }
