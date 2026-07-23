@@ -34,7 +34,7 @@ router, Supabase, HTTP, or an RPC.
 | 09 | `docs/redesign-mockups/09-match-celebration.png` | `after/09-match-celebration.png` | Pass | Deterministic Minh/Linh monograms and one existing shared song replace remote photos. |
 | 10 | `docs/redesign-mockups/10-explore-themes.png` | `after/10-explore-themes.png` | Pass | Uses production motifs and provider-derived counts of 12. |
 | 11 | `docs/redesign-mockups/11-keo-board.png` | `after/11-keo-board.png` | Pass | Shows one real fixture kèo and the production auto-match promotion. |
-| 12 | `docs/redesign-mockups/12-keo-auto-match.png` | `after/12-keo-auto-match.png` | Pass | The real sheet is mounted inside its focused-test light `Scaffold`; reason values remain `same_genre` and `nearby`; no black host region remains. |
+| 12 | `docs/redesign-mockups/12-keo-auto-match.png` | `after/12-keo-auto-match.png` | Pass | The real sheet is mounted inside its focused-test light `Scaffold`; canonical reason codes `shared_genres` and `near_you` render as localized labels; no black host region remains. |
 | 13 | `docs/redesign-mockups/13-create-keo.png` | `after/13-create-keo.png` | Pass | Shows the real blank form and available V-Pop option. |
 | 14 | `docs/redesign-mockups/14-keo-detail.png` | `after/14-keo-detail.png` | Pass | The safe roster is empty and the viewer sees the production join CTA. |
 | 15 | `docs/redesign-mockups/15-inbox.png` | `after/15-inbox.png` | Pass | One group and one pair thread are hosted by the same light `Scaffold` relationship as `HomeShell`; no black host region remains. |
@@ -124,6 +124,14 @@ requires the repository's existing
 surface also passed connected-Chrome checks at 360/393/430. No environment
 file was changed.
 
+The audit is reproducible from
+`docs/redesign-validation/web-audit-procedure.md`. It records the exact build
+and server commands, viewport dimensions, gated interactions, DOM attribute
+selectors, pass criteria, canonical root inventory, and the bounded
+missing-root regression. The corresponding machine-readable 66-case outcome
+is committed at `docs/redesign-validation/web-audit-result.json` and is tied
+to the audited source commit.
+
 ## Widget-test, iOS, and analyzer evidence
 
 - The native widget suite includes the 22-state presentation matrix at
@@ -153,6 +161,10 @@ hardening, the final verification records:
 
 - `flutter build web --release -t integration_test/presentation_gallery.dart`
   passed for the isolated live-audit entry point.
+- The missing-root browser regression reached `timeout` with
+  `expected-root-missing` within the documented 5.5-second bound.
+- The reproducible browser matrix output records 66/66 passes and zero
+  application console errors.
 - The exact PNG inventory found exactly 22 non-empty approved basenames and no
   extra PNGs in `after/`.
 - `git diff --check e3f1f389..HEAD` and the working-tree `git diff --check`
