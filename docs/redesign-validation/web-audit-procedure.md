@@ -4,7 +4,7 @@
 
 - Gallery entry point: `integration_test/presentation_gallery.dart`
 - Fixture source: `integration_test/presentation_capture_test.dart`
-- Audited source commit: `ba17963b2f61909ffb8fee085f4cc29dff7a5650`
+- Audited source commit: `b2051ac1b1b8a7db9faa9fd7e7b2f9f177e6eb3d`
 - Machine-readable result: `docs/redesign-validation/web-audit-result.json`
 - Required viewports: `360 × 800`, `393 × 852`, and `430 × 932`
 
