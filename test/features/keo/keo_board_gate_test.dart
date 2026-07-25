@@ -11,6 +11,7 @@ import 'package:cung_hat/features/keo/application/keo_providers.dart';
 import 'package:cung_hat/features/keo/data/keo_repository.dart';
 import 'package:cung_hat/features/keo/domain/keo.dart';
 import 'package:cung_hat/features/keo/domain/keo_match_suggestion.dart';
+import 'package:cung_hat/features/keo/domain/keo_member.dart';
 import 'package:cung_hat/features/keo/presentation/keo_board_screen.dart';
 import 'package:cung_hat/shared/widgets/gradient_button.dart';
 import 'package:cung_hat/shared/widgets/ticket_card.dart';
@@ -29,6 +30,10 @@ class _FakeKeoRepository implements KeoRepository {
   @override
   Future<List<KeoMatchSuggestion>> suggestMatch({int limit = 3}) async =>
       suggestions;
+
+  // Sheet gio fetch roster cho dong "Đang có mặt" — fake tra rong la du.
+  @override
+  Future<List<KeoMember>> roster(String keoId) async => const [];
 
   @override
   Future<void> requestJoin(String keoId) async {

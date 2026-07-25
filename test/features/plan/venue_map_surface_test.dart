@@ -101,3 +101,6 @@ void main() {
     expect(find.byKey(const Key('midpoint_marker')), findsOneWidget);
   });
 }
+
+// Ghi chu: test "Đang có mặt" cua KeoMatchSheet nam o
+// test/features/keo/keo_match_sheet_test.dart (cung file voi cac test sheet).

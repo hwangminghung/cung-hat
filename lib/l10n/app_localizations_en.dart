@@ -1157,6 +1157,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planConfirmCta => 'Approve the plan';
 
   @override
+  String get planCancelCta => 'Cancel plan';
+
+  @override
+  String get planCancelConfirmTitle => 'Cancel this plan?';
+
+  @override
+  String get planCancelConfirmBody =>
+      'The group returns to venue planning so you can propose again.';
+
+  @override
+  String get planCancelError => 'Couldn\'t cancel the plan';
+
+  @override
+  String planConfirmedCount(int n, int total) {
+    return 'Confirmed $n/$total';
+  }
+
+  @override
   String get planConfirmError => 'Couldn\'t approve';
 
   @override
@@ -1234,6 +1252,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSignOut => 'Sign out';
+
+  @override
+  String get settingsSectionSafety => 'Safety';
+
+  @override
+  String get settingsBlocked => 'Blocked users';
+
+  @override
+  String get settingsAdmin => 'Moderation';
+
+  @override
+  String get blockedEmptyTitle => 'No blocked users';
+
+  @override
+  String get blockedEmptySubtitle => 'People you block will appear here.';
+
+  @override
+  String get blockedUnblock => 'Unblock';
+
+  @override
+  String get blockedUnblockError => 'Couldn\'t unblock. Please try again.';
+
+  @override
+  String get blockedLoadError => 'Couldn\'t load the list. Please try again.';
 
   @override
   String get settingsSectionLegal => 'Legal';

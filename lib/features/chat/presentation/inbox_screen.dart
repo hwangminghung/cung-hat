@@ -46,7 +46,20 @@ class InboxScreen extends ConsumerWidget {
                   l10n?.inboxSubtitle ??
                   'Nơi giữ các cuộc trò chuyện sau khi chung gu.',
             ),
-            Expanded(child: _buildBody(context, ref, l10n, async, keos)),
+            Expanded(
+              // [DEBT] Keo-de-lam-moi: tin nhan la man "cho" nhieu nhat ma
+              // truoc day chi lam moi duoc bang cach doi tab.
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(inboxProvider);
+                  ref.invalidate(myKeosProvider);
+                  try {
+                    await ref.read(inboxProvider.future);
+                  } catch (_) {}
+                },
+                child: _buildBody(context, ref, l10n, async, keos),
+              ),
+            ),
           ],
         ),
       ),
@@ -90,6 +103,7 @@ class InboxScreen extends ConsumerWidget {
         }
 
         return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
             AppSpacing.sm,

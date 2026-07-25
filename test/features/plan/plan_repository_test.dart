@@ -29,6 +29,17 @@ void main() {
     expect(list.single.lng, 106.7);
   });
 
+  test('cancelPlan calls cancel_keo_plan', () async {
+    final client = MockSupabaseClient();
+    when(
+      () => client.rpc('cancel_keo_plan', params: any(named: 'params')),
+    ).thenAnswer((_) => rpcOk(null));
+    await PlanRepository(client).cancelPlan('p1');
+    verify(
+      () => client.rpc('cancel_keo_plan', params: {'p_plan': 'p1'}),
+    ).called(1);
+  });
+
   test('proposePlan calls propose_keo_plan', () async {
     final client = MockSupabaseClient();
     when(

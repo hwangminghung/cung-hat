@@ -153,6 +153,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
+                  // [DEBT] Truoc day chan xong la het duong quay lai: khong
+                  // co danh sach "Da chan" nen bo chan la bat kha thi.
+                  _Section(
+                    title: _l10n?.settingsSectionSafety ?? 'An toàn',
+                    child: _SettingsTile(
+                      key: const Key('settings_blocked_tile'),
+                      icon: Icons.block_rounded,
+                      title: _l10n?.settingsBlocked ?? 'Đã chặn',
+                      onTap: () => context.push('/settings/blocked'),
+                    ),
+                  ),
+                  // [DEBT] /admin la route mo coi — console moderation ton tai
+                  // ma khong loi vao nao tren UI. Chi admin (RPC is_admin_self)
+                  // moi thay tile; user thuong khong biet no ton tai.
+                  if (ref.watch(isAdminProvider).value ?? false) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    _Section(
+                      title: _l10n?.settingsAdmin ?? 'Khu quản trị',
+                      child: _SettingsTile(
+                        key: const Key('settings_admin_tile'),
+                        icon: Icons.admin_panel_settings_rounded,
+                        title: _l10n?.settingsAdmin ?? 'Khu quản trị',
+                        onTap: () => context.push('/admin'),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.md),
                   _Section(
                     key: settingsSectionKeys['legal'],
                     title: _l10n?.settingsSectionLegal ?? 'Pháp lý',
@@ -313,6 +340,7 @@ class _Section extends StatelessWidget {
 
 class _SettingsTile extends StatelessWidget {
   const _SettingsTile({
+    super.key,
     required this.icon,
     required this.title,
     required this.onTap,

@@ -9,6 +9,7 @@ import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/ticket_card.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../domain/keo_match_suggestion.dart';
+import '../domain/keo_member.dart';
 
 class KeoMatchSheet extends StatefulWidget {
   const KeoMatchSheet({
@@ -17,6 +18,7 @@ class KeoMatchSheet extends StatefulWidget {
     required this.onJoin,
     required this.onCreate,
     this.onViewDetail,
+    this.membersOf,
   });
 
   final List<KeoMatchSuggestion> suggestions;
@@ -27,12 +29,23 @@ class KeoMatchSheet extends StatefulWidget {
   /// co router) thi an nut, tranh bay ra mot nut bam khong lam gi ca.
   final void Function(KeoMatchSuggestion suggestion)? onViewDetail;
 
+  /// [DEBT] Lay roster cho dong "Đang có mặt" — suggestion khong mang du lieu
+  /// thanh vien. Null = an dong nay (widget thuan cho test/preview).
+  final Future<List<KeoMember>> Function(String keoId)? membersOf;
+
   @override
   State<KeoMatchSheet> createState() => _KeoMatchSheetState();
 }
 
 class _KeoMatchSheetState extends State<KeoMatchSheet> {
   var _submitting = false;
+
+  /// Cache roster theo keoId: FutureBuilder rebuild (setState/_index) khong
+  /// duoc phep refetch — vua nhay UI vua ton request.
+  final _rosterCache = <String, Future<List<KeoMember>>>{};
+
+  Future<List<KeoMember>> _rosterFor(String keoId) =>
+      _rosterCache.putIfAbsent(keoId, () => widget.membersOf!(keoId));
 
   /// [AUDIT keo-match] Truoc day sheet chi doc `suggestions.first`: tu choi
   /// goi y dau = dong sheet, moi goi y con lai bi vut. Bam ghep lai thuong ra
@@ -232,6 +245,16 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                             label: suggestion.hostName!,
                           ),
                         ],
+                        // [DEBT] "Đang có mặt" — model suggestion khong mang
+                        // du lieu thanh vien; roster fetch qua callback
+                        // membersOf de sheet van la widget thuan (test khong
+                        // can ProviderScope, khong can mock repo).
+                        if (widget.membersOf != null &&
+                            suggestion.keoId != null)
+                          _MembersRow(
+                            key: Key('keo_match_members_${suggestion.keoId}'),
+                            roster: _rosterFor(suggestion.keoId!),
+                          ),
                       ],
                     ),
                   ),
@@ -711,6 +734,43 @@ class _PrimaryButtonChild extends StatelessWidget {
         strokeWidth: 2,
         color: AppColors.onPrimary,
       ),
+    );
+  }
+}
+
+/// "Đang có mặt: A, B, C" — thành viên đã được duyệt của kèo gợi ý.
+///
+/// Lỗi/đang tải thì ẩn im lặng: đây là thông tin phụ giúp quyết định tham
+/// gia, không đáng chặn sheet hay hiện spinner riêng.
+class _MembersRow extends StatelessWidget {
+  const _MembersRow({super.key, required this.roster});
+
+  final Future<List<KeoMember>> roster;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    return FutureBuilder<List<KeoMember>>(
+      future: roster,
+      builder: (context, snap) {
+        final members = [
+          for (final m in snap.data ?? const <KeoMember>[])
+            if (m.joinStatus == 'approved') m,
+        ];
+        if (members.isEmpty) return const SizedBox.shrink();
+        final names = members
+            .map(
+              (m) => m.displayName ?? (l10n?.keoSharedAnonymous ?? 'Ẩn danh'),
+            )
+            .join(', ');
+        return Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.md),
+          child: _SuggestionMetaRow(
+            icon: Icons.groups_outlined,
+            label: '${l10n?.keoMatchMembersLabel ?? 'Đang có mặt'}: $names',
+          ),
+        );
+      },
     );
   }
 }

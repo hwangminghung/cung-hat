@@ -80,6 +80,9 @@ class PlanRepository {
         .from('plans')
         .select()
         .eq('keo_id', keoId)
+        // [DEBT] Khong loc thi sau khi huy, ban 'cancelled' van la ban moi
+        // nhat -> man Ke hoach hien ke hoach da huy thay vi danh sach quan.
+        .neq('status', 'cancelled')
         .order('created_at', ascending: false)
         .limit(1)
         .maybeSingle();
@@ -88,6 +91,25 @@ class PlanRepository {
 
   Future<void> confirmPlan(String planId) async {
     await _client.rpc('confirm_keo_plan', params: {'p_plan': planId});
+  }
+
+  /// Host huy plan proposed/confirmed. Server (cancel_keo_plan) tra keo
+  /// 'confirmed' ve 'planning' de chot lai quan/gio.
+  Future<void> cancelPlan(String planId) async {
+    await _client.rpc('cancel_keo_plan', params: {'p_plan': planId});
+  }
+
+  /// user_id cua nhung nguoi DA xac nhan plan (policy plan_conf_member_read).
+  /// Ten hien thi lay tu roster keo phia caller — bang nay chi co id.
+  Future<Set<String>> planConfirmations(String planId) async {
+    final rows = await _client
+        .from('plan_confirmations')
+        .select('user_id')
+        .eq('plan_id', planId);
+    return {
+      for (final r in (rows as List))
+        (r as Map<String, dynamic>)['user_id'] as String,
+    };
   }
 
   Future<void> checkInArrived(String planId) async {

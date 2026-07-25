@@ -2198,6 +2198,36 @@ abstract class AppLocalizations {
   /// **'Approve the plan'**
   String get planConfirmCta;
 
+  /// No description provided for @planCancelCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel plan'**
+  String get planCancelCta;
+
+  /// No description provided for @planCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this plan?'**
+  String get planCancelConfirmTitle;
+
+  /// No description provided for @planCancelConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The group returns to venue planning so you can propose again.'**
+  String get planCancelConfirmBody;
+
+  /// No description provided for @planCancelError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t cancel the plan'**
+  String get planCancelError;
+
+  /// No description provided for @planConfirmedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed {n}/{total}'**
+  String planConfirmedCount(int n, int total);
+
   /// No description provided for @planConfirmError.
   ///
   /// In en, this message translates to:
@@ -2347,6 +2377,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign out'**
   String get settingsSignOut;
+
+  /// No description provided for @settingsSectionSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get settingsSectionSafety;
+
+  /// No description provided for @settingsBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked users'**
+  String get settingsBlocked;
+
+  /// No description provided for @settingsAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderation'**
+  String get settingsAdmin;
+
+  /// No description provided for @blockedEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocked users'**
+  String get blockedEmptyTitle;
+
+  /// No description provided for @blockedEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'People you block will appear here.'**
+  String get blockedEmptySubtitle;
+
+  /// No description provided for @blockedUnblock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get blockedUnblock;
+
+  /// No description provided for @blockedUnblockError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t unblock. Please try again.'**
+  String get blockedUnblockError;
+
+  /// No description provided for @blockedLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the list. Please try again.'**
+  String get blockedLoadError;
 
   /// No description provided for @settingsSectionLegal.
   ///

@@ -322,6 +322,11 @@ class PlanScreen extends ConsumerWidget {
                 l10n?.planStatus(_statusLabel(plan.status, l10n)) ??
                     'Trạng thái: ${_statusLabel(plan.status, l10n)}',
               ),
+              // [DEBT] "Ai da dong y?" tung la cau khong tra loi duoc — bang
+              // plan_confirmations chi cho doc row cua chinh minh truoc
+              // migration debt_batch. Ten lay tu roster keo, id tu bang
+              // confirmations; ca hai da co provider san.
+              _ConfirmationsRow(keoId: keoId, plan: plan),
               const SizedBox(height: 12),
               if (plan.status != 'confirmed')
                 FilledButton(
@@ -380,14 +385,74 @@ class PlanScreen extends ConsumerWidget {
                   },
                   child: Text(l10n?.planDirections ?? 'Chỉ đường'),
                 ),
-                const SizedBox(height: 12),
-                SafetyToolkit(planId: plan.id),
+              ],
+              // [DEBT] SafetyToolkit tung chi hien khi status=='confirmed' —
+              // giai doan 'proposed' dang can nhac gap nguoi la thi khong co
+              // gi. Gio plan ton tai la co loi an toan.
+              const SizedBox(height: 12),
+              SafetyToolkit(planId: plan.id),
+              // [DEBT] Khong co duong huy: "sua" = propose ban moi va ban cu
+              // mo coi. Chi host thay nut; server con chan them lan nua.
+              if (isHost && plan.status != 'cancelled') ...[
+                const SizedBox(height: 4),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TextButton(
+                    key: const Key('cancel_plan_btn'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                    onPressed: () => _cancelPlan(context, ref, plan.id),
+                    child: Text(l10n?.planCancelCta ?? 'Huỷ kế hoạch'),
+                  ),
+                ),
               ],
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _cancelPlan(
+    BuildContext context,
+    WidgetRef ref,
+    String planId,
+  ) async {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n?.planCancelConfirmTitle ?? 'Huỷ kế hoạch này?'),
+        content: Text(
+          l10n?.planCancelConfirmBody ??
+              'Kèo sẽ quay lại bước chốt quán để cả nhóm đề xuất lại.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n?.cancel ?? 'Huỷ'),
+          ),
+          FilledButton(
+            key: const Key('cancel_plan_confirm_btn'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n?.planCancelCta ?? 'Huỷ kế hoạch'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await ref.read(planRepositoryProvider).cancelPlan(planId);
+      // Keo co the vua roi 'confirmed' ve 'planning' — moi thu doc tu keo/plan
+      // tren man nay phai fetch lai.
+      ref.invalidate(currentPlanProvider(keoId));
+      ref.invalidate(planConfirmationsProvider(planId));
+    } catch (_) {
+      if (context.mounted) {
+        _snack(context, l10n?.planCancelError ?? 'Không huỷ được kế hoạch');
+      }
+    }
   }
 
   Widget _buildVenueCard(
@@ -481,5 +546,53 @@ class PlanScreen extends ConsumerWidget {
         );
       }
     }
+  }
+}
+
+/// "Đã xác nhận n/tổng · tên những người đã đồng ý" dưới dòng trạng thái.
+///
+/// [DEBT] Trước migration debt_batch, bảng plan_confirmations chỉ cho đọc row
+/// của chính mình nên câu "ai đã đồng ý?" là không trả lời được từ client.
+/// Tên lấy từ roster kèo (đã có provider), bảng confirmations chỉ có user_id.
+class _ConfirmationsRow extends ConsumerWidget {
+  const _ConfirmationsRow({required this.keoId, required this.plan});
+
+  final String keoId;
+  final Plan plan;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final confirmations = ref.watch(planConfirmationsProvider(plan.id)).value;
+    final roster = ref.watch(keoRosterProvider(keoId)).value;
+    // Đang tải / lỗi: ẩn im lặng — hàng này là thông tin phụ, không đáng
+    // chiếm chỗ bằng spinner hay câu lỗi riêng.
+    if (confirmations == null || roster == null) {
+      return const SizedBox.shrink();
+    }
+    final members = [
+      for (final m in roster)
+        if (m.joinStatus == 'approved' && m.confirmed) m,
+    ];
+    if (members.isEmpty) return const SizedBox.shrink();
+    final confirmedMembers = [
+      for (final m in members)
+        if (confirmations.contains(m.userId)) m,
+    ];
+    final names = confirmedMembers
+        .map((m) => m.displayName ?? (l10n?.keoSharedAnonymous ?? 'Ẩn danh'))
+        .join(', ');
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Text(
+        key: const Key('plan_confirmations_row'),
+        [
+          l10n?.planConfirmedCount(confirmedMembers.length, members.length) ??
+              'Đã xác nhận ${confirmedMembers.length}/${members.length}',
+          if (names.isNotEmpty) names,
+        ].join(' · '),
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+    );
   }
 }

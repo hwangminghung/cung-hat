@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/keo/domain/keo_match_suggestion.dart';
+import 'package:cung_hat/features/keo/domain/keo_member.dart';
 import 'package:cung_hat/features/keo/presentation/keo_match_sheet.dart';
 import 'package:cung_hat/shared/widgets/gradient_button.dart';
 import 'package:cung_hat/shared/widgets/stamp_chip.dart';
@@ -539,4 +540,84 @@ void main() {
       }
     },
   );
+
+  // [DEBT] keoMatchMembersLabel co trong ARB tu dot BANGIAO nhung chua man
+  // nao dung — suggestion khong mang du lieu thanh vien, roster fetch qua
+  // callback membersOf.
+  testWidgets('membersOf co -> hien "Đang có mặt" voi thanh vien approved', (
+    tester,
+  ) async {
+    const suggestion = KeoMatchSuggestion(
+      suggestionType: 'existing_keo',
+      keoId: 'k1',
+      title: 'V-Pop toi nay',
+      sizeTarget: 4,
+      slotsFilled: 2,
+      joinMode: 'open',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: Scaffold(
+          body: KeoMatchSheet(
+            suggestions: const [suggestion],
+            onJoin: (_) async {},
+            onCreate: (_) async {},
+            membersOf: (keoId) async => const [
+              KeoMember(
+                userId: 'u1',
+                displayName: 'Linh',
+                joinStatus: 'approved',
+              ),
+              KeoMember(
+                userId: 'u2',
+                displayName: 'Mai',
+                joinStatus: 'approved',
+              ),
+              // requested thi CHUA co mat — khong duoc liet ke.
+              KeoMember(
+                userId: 'u3',
+                displayName: 'Đang Chờ',
+                joinStatus: 'requested',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Đang có mặt: Linh, Mai'), findsOneWidget);
+    expect(find.textContaining('Đang Chờ'), findsNothing);
+  });
+
+  testWidgets('khong co membersOf -> khong co dong thanh vien (widget thuan)', (
+    tester,
+  ) async {
+    const suggestion = KeoMatchSuggestion(
+      suggestionType: 'existing_keo',
+      keoId: 'k1',
+      title: 'V-Pop toi nay',
+      sizeTarget: 4,
+      slotsFilled: 2,
+      joinMode: 'open',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: Scaffold(
+          body: KeoMatchSheet(
+            suggestions: const [suggestion],
+            onJoin: (_) async {},
+            onCreate: (_) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Đang có mặt'), findsNothing);
+  });
 }

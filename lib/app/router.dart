@@ -22,6 +22,7 @@ import '../features/plan/presentation/plan_screen.dart';
 import '../features/plan/presentation/shared_plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
 import '../features/profile/domain/profile.dart';
+import '../features/settings/presentation/blocked_users_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import 'home_shell.dart';
 
@@ -91,6 +92,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/admin', builder: (_, _) => const ModerationScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+      GoRoute(
+        path: '/settings/blocked',
+        builder: (_, _) => const BlockedUsersScreen(),
+      ),
       GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),
       GoRoute(path: '/likes', builder: (_, _) => const LikesScreen()),
       GoRoute(

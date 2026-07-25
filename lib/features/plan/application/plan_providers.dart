@@ -24,3 +24,11 @@ final resolveShareProvider =
     FutureProvider.family<Map<String, dynamic>, String>(
       (ref, token) => ref.watch(planRepositoryProvider).resolveShare(token),
     );
+
+/// Ai da xac nhan plan nay. autoDispose: mo lai man phai thay so moi —
+/// nguoi khac vua bam "Dong y" trong luc minh roi man.
+final planConfirmationsProvider = FutureProvider.autoDispose
+    .family<Set<String>, String>(
+      (ref, planId) =>
+          ref.watch(planRepositoryProvider).planConfirmations(planId),
+    );

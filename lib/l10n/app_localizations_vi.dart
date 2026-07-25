@@ -1152,6 +1152,24 @@ class AppLocalizationsVi extends AppLocalizations {
   String get planConfirmCta => 'Đồng ý kế hoạch';
 
   @override
+  String get planCancelCta => 'Huỷ kế hoạch';
+
+  @override
+  String get planCancelConfirmTitle => 'Huỷ kế hoạch này?';
+
+  @override
+  String get planCancelConfirmBody =>
+      'Kèo sẽ quay lại bước chốt quán để cả nhóm đề xuất lại.';
+
+  @override
+  String get planCancelError => 'Không huỷ được kế hoạch';
+
+  @override
+  String planConfirmedCount(int n, int total) {
+    return 'Đã xác nhận $n/$total';
+  }
+
+  @override
   String get planConfirmError => 'Không đồng ý được';
 
   @override
@@ -1229,6 +1247,30 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get settingsSignOut => 'Đăng xuất';
+
+  @override
+  String get settingsSectionSafety => 'An toàn';
+
+  @override
+  String get settingsBlocked => 'Đã chặn';
+
+  @override
+  String get settingsAdmin => 'Khu quản trị';
+
+  @override
+  String get blockedEmptyTitle => 'Chưa chặn ai';
+
+  @override
+  String get blockedEmptySubtitle => 'Người bạn chặn sẽ xuất hiện ở đây.';
+
+  @override
+  String get blockedUnblock => 'Bỏ chặn';
+
+  @override
+  String get blockedUnblockError => 'Không bỏ chặn được. Thử lại nhé.';
+
+  @override
+  String get blockedLoadError => 'Không tải được danh sách. Thử lại nhé.';
 
   @override
   String get settingsSectionLegal => 'Pháp lý';

@@ -38,106 +38,122 @@ class KeoBoardScreen extends ConsumerWidget {
           child: Column(
             children: [
               Expanded(
-                child: keosAsync.when(
-                  loading: () => ListView(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-                    children: [
-                      _boardHeader(context),
-                      _matchBanner(context, ref),
-                      const SkeletonCard(),
-                      const SkeletonCard(),
-                      const SkeletonCard(),
-                    ],
-                  ),
-                  error: (err, _) => EmptyState(
-                    icon: Icons.wifi_off_rounded,
-                    title:
-                        Localizations.of<AppLocalizations>(
-                          context,
-                          AppLocalizations,
-                        )?.keoBoardLoadError ??
-                        'Không tải được danh sách kèo',
-                    subtitle:
-                        Localizations.of<AppLocalizations>(
-                          context,
-                          AppLocalizations,
-                        )?.commonCheckConnection ??
-                        'Kiểm tra kết nối rồi thử lại.',
-                    actionLabel:
-                        Localizations.of<AppLocalizations>(
-                          context,
-                          AppLocalizations,
-                        )?.commonRetry ??
-                        'Thử lại',
-                    onAction: () => ref.invalidate(openKeosProvider),
-                  ),
-                  data: (keos) {
-                    if (keos.isEmpty) {
-                      // P0-1: board rỗng VÌ THIẾU VỊ TRÍ (list_open_keos cần vị
-                      // trí đã lưu) phải nói đúng nguyên nhân thay vì "chưa có
-                      // kèo". Status do deck Đôi (tab 0, mount trước) ghi.
-                      final locStatus = ref.watch(locationStatusProvider);
-                      final locationBlocked =
-                          locStatus != null &&
-                          locStatus != LocationCaptureStatus.success;
-                      return ListView(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-                        children: [
-                          _boardHeader(context),
-                          _matchBanner(context, ref),
-                          if (locationBlocked)
-                            LocationErrorState(
-                              status: locStatus,
-                              onRetry: () => _retryLocation(ref),
-                              onOpenSettings: () => ref
-                                  .read(locationServiceProvider)
-                                  .openSettingsFor(locStatus),
-                            )
-                          else
-                            // P2: board rỗng thật → "Ghép nhóm cho tôi" là CTA
-                            // chính (một chạm ra gợi ý/proposal thay vì ngõ cụt).
-                            EmptyState(
-                              icon: Icons.groups_rounded,
-                              title:
-                                  Localizations.of<AppLocalizations>(
-                                    context,
-                                    AppLocalizations,
-                                  )?.keoBoardEmptyTitle ??
-                                  'Chưa có kèo quanh đây',
-                              subtitle:
-                                  Localizations.of<AppLocalizations>(
-                                    context,
-                                    AppLocalizations,
-                                  )?.keoBoardEmptySub ??
-                                  'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
-                              actionLabel:
-                                  Localizations.of<AppLocalizations>(
-                                    context,
-                                    AppLocalizations,
-                                  )?.keoBoardMatchMe ??
-                                  'Ghép nhóm cho tôi',
-                              onAction: () => _runAutoMatch(context, ref),
-                            ),
-                        ],
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-                      itemCount: keos.length + 2,
-                      itemBuilder: (context, index) {
-                        if (index == 0) return _boardHeader(context);
-                        if (index == 1) return _matchBanner(context, ref);
-                        final keo = keos[index - 2];
-                        return KeoCard(
-                          keo: keo,
-                          onTap: () => context.push(
-                            '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
-                          ),
-                        );
-                      },
-                    );
+                // [DEBT] Toan app tung khong co keo-de-lam-moi — cach duy nhat
+                // thay keo moi la doi tab qua lai. Loi refresh duoc nuot: keo
+                // indicator dung lai la du, loi that da co error state cua when.
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(openKeosProvider);
+                    try {
+                      await ref.read(openKeosProvider.future);
+                    } catch (_) {}
                   },
+                  child: keosAsync.when(
+                    loading: () => ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                      children: [
+                        _boardHeader(context),
+                        _matchBanner(context, ref),
+                        const SkeletonCard(),
+                        const SkeletonCard(),
+                        const SkeletonCard(),
+                      ],
+                    ),
+                    error: (err, _) => EmptyState(
+                      icon: Icons.wifi_off_rounded,
+                      title:
+                          Localizations.of<AppLocalizations>(
+                            context,
+                            AppLocalizations,
+                          )?.keoBoardLoadError ??
+                          'Không tải được danh sách kèo',
+                      subtitle:
+                          Localizations.of<AppLocalizations>(
+                            context,
+                            AppLocalizations,
+                          )?.commonCheckConnection ??
+                          'Kiểm tra kết nối rồi thử lại.',
+                      actionLabel:
+                          Localizations.of<AppLocalizations>(
+                            context,
+                            AppLocalizations,
+                          )?.commonRetry ??
+                          'Thử lại',
+                      onAction: () => ref.invalidate(openKeosProvider),
+                    ),
+                    data: (keos) {
+                      if (keos.isEmpty) {
+                        // P0-1: board rỗng VÌ THIẾU VỊ TRÍ (list_open_keos cần vị
+                        // trí đã lưu) phải nói đúng nguyên nhân thay vì "chưa có
+                        // kèo". Status do deck Đôi (tab 0, mount trước) ghi.
+                        final locStatus = ref.watch(locationStatusProvider);
+                        final locationBlocked =
+                            locStatus != null &&
+                            locStatus != LocationCaptureStatus.success;
+                        return ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(
+                            bottom: AppSpacing.xxl,
+                          ),
+                          children: [
+                            _boardHeader(context),
+                            _matchBanner(context, ref),
+                            if (locationBlocked)
+                              LocationErrorState(
+                                status: locStatus,
+                                onRetry: () => _retryLocation(ref),
+                                onOpenSettings: () => ref
+                                    .read(locationServiceProvider)
+                                    .openSettingsFor(locStatus),
+                              )
+                            else
+                              // P2: board rỗng thật → "Ghép nhóm cho tôi" là CTA
+                              // chính (một chạm ra gợi ý/proposal thay vì ngõ cụt).
+                              EmptyState(
+                                icon: Icons.groups_rounded,
+                                title:
+                                    Localizations.of<AppLocalizations>(
+                                      context,
+                                      AppLocalizations,
+                                    )?.keoBoardEmptyTitle ??
+                                    'Chưa có kèo quanh đây',
+                                subtitle:
+                                    Localizations.of<AppLocalizations>(
+                                      context,
+                                      AppLocalizations,
+                                    )?.keoBoardEmptySub ??
+                                    'Bấm ghép nhóm để tìm kèo hợp gu hoặc tự tạo một kèo mới.',
+                                actionLabel:
+                                    Localizations.of<AppLocalizations>(
+                                      context,
+                                      AppLocalizations,
+                                    )?.keoBoardMatchMe ??
+                                    'Ghép nhóm cho tôi',
+                                onAction: () => _runAutoMatch(context, ref),
+                              ),
+                          ],
+                        );
+                      }
+
+                      return ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                        itemCount: keos.length + 2,
+                        itemBuilder: (context, index) {
+                          if (index == 0) return _boardHeader(context);
+                          if (index == 1) return _matchBanner(context, ref);
+                          final keo = keos[index - 2];
+                          return KeoCard(
+                            keo: keo,
+                            onTap: () => context.push(
+                              '/keo/${keo.id}?title=${Uri.encodeComponent(keo.title)}',
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
               Padding(
@@ -362,6 +378,8 @@ class KeoBoardScreen extends ConsumerWidget {
           // sheet, khong co duong nao o giua.
           onViewDetail: (suggestion) =>
               _viewSuggestionDetail(context, sheetContext, suggestion),
+          // [DEBT] Dong "Đang có mặt" — roster fetch lazy theo keoId.
+          membersOf: (keoId) => ref.read(keoRepositoryProvider).roster(keoId),
         ),
       );
     } catch (e) {
