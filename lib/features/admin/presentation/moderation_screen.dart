@@ -22,8 +22,10 @@ class ModerationScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.adminActionFailed ??
+              Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.adminActionFailed ??
                   'Thao tác thất bại',
             ),
           ),
@@ -41,7 +43,9 @@ class ModerationScreen extends ConsumerWidget {
       body: reportsAsync.when(
         data: (reports) {
           if (reports.isEmpty) {
-            return Center(child: Text(l10n?.adminEmpty ?? 'Không có báo cáo nào'));
+            return Center(
+              child: Text(l10n?.adminEmpty ?? 'Không có báo cáo nào'),
+            );
           }
           return ListView(
             children: [
@@ -78,8 +82,9 @@ class ModerationScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) =>
-            Center(child: Text(l10n?.adminLoadError ?? 'Không tải được báo cáo')),
+        error: (e, _) => Center(
+          child: Text(l10n?.adminLoadError ?? 'Không tải được báo cáo'),
+        ),
       ),
     );
   }

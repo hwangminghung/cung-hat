@@ -6,13 +6,15 @@ class DiscoveryRepository {
   DiscoveryRepository(this._client);
   final SupabaseClient _client;
 
-  Future<List<Candidate>> getCandidates(
-      {int limit = 20, int radiusKm = 50, String? genre}) async {
-    final rows = await _client.rpc('get_discovery_candidates', params: {
-      'p_limit': limit,
-      'p_radius_km': radiusKm,
-      'p_genre': genre,
-    });
+  Future<List<Candidate>> getCandidates({
+    int limit = 20,
+    int radiusKm = 50,
+    String? genre,
+  }) async {
+    final rows = await _client.rpc(
+      'get_discovery_candidates',
+      params: {'p_limit': limit, 'p_radius_km': radiusKm, 'p_genre': genre},
+    );
     return (rows as List)
         .map((e) => Candidate.fromJson(Map<String, dynamic>.from(e)))
         .toList();
@@ -20,8 +22,10 @@ class DiscoveryRepository {
 
   /// Đếm người active-7-ngày quanh 50km theo từng genre (cho board Khám Phá).
   Future<Map<String, int>> getThemeDeckCounts(List<String> genreIds) async {
-    final rows = await _client
-        .rpc('get_theme_deck_counts', params: {'p_genres': genreIds});
+    final rows = await _client.rpc(
+      'get_theme_deck_counts',
+      params: {'p_genres': genreIds},
+    );
     return {
       for (final r in (rows as List))
         (r as Map)['genre_id'] as String: (r['live_count'] as int?) ?? 0,
@@ -41,7 +45,8 @@ class DiscoveryRepository {
   Future<({bool autoExpand, int radiusKm})> getDiscoveryPrefs() async {
     final res = await _client.rpc('get_discovery_prefs');
     final m = Map<String, dynamic>.from(
-        res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
+      res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map,
+    );
     return (
       autoExpand: m['auto_expand'] == true,
       radiusKm: (m['radius_km'] as num?)?.toInt() ?? 50,
@@ -64,18 +69,25 @@ class DiscoveryRepository {
 
   /// Returns true if a mutual match was created.
   Future<bool> recordSwipe(String targetId, String direction) async {
-    final res = await _client.rpc('record_swipe',
-        params: {'p_target': targetId, 'p_direction': direction});
+    final res = await _client.rpc(
+      'record_swipe',
+      params: {'p_target': targetId, 'p_direction': direction},
+    );
     return res == true;
   }
 
   Future<void> updateMyLocation(double lat, double lng, {String? area}) async {
-    await _client.rpc('update_my_location',
-        params: {'p_lat': lat, 'p_lng': lng, 'p_area': area});
+    await _client.rpc(
+      'update_my_location',
+      params: {'p_lat': lat, 'p_lng': lng, 'p_area': area},
+    );
   }
 
   Future<void> reportUser(String targetId, String reason) async {
-    await _client.rpc('report_user', params: {'p_target': targetId, 'p_reason': reason});
+    await _client.rpc(
+      'report_user',
+      params: {'p_target': targetId, 'p_reason': reason},
+    );
   }
 
   Future<void> blockUser(String targetId) async {
@@ -97,19 +109,24 @@ class DiscoveryRepository {
 
   /// Match id đang active với [otherId], null nếu chưa match.
   Future<String?> getMatchIdWith(String otherId) async {
-    final res =
-        await _client.rpc('get_match_id_with', params: {'p_other': otherId});
+    final res = await _client.rpc(
+      'get_match_id_with',
+      params: {'p_other': otherId},
+    );
     return res as String?;
   }
 
   /// Hồ sơ người ĐÃ match (icebreaker trong chat). null = RPC không trả gì,
   /// hoặc đối phương đã xoá tài khoản (composite null-row, id null).
   Future<Candidate?> getMatchProfile(String matchId) async {
-    final res =
-        await _client.rpc('get_match_profile', params: {'p_match': matchId});
+    final res = await _client.rpc(
+      'get_match_profile',
+      params: {'p_match': matchId},
+    );
     if (res == null) return null;
     final m = Map<String, dynamic>.from(
-        res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
+      res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map,
+    );
     if (m['id'] == null) return null; // composite null-row (đối phương xoá mem)
     return Candidate.fromJson(m);
   }

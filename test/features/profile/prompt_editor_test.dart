@@ -29,10 +29,7 @@ void main() {
     await repo.setMyPrompts(prompts);
 
     verify(
-      () => client.rpc(
-        'set_my_prompts',
-        params: {'p_prompts': prompts},
-      ),
+      () => client.rpc('set_my_prompts', params: {'p_prompts': prompts}),
     ).called(1);
   });
 
@@ -46,17 +43,11 @@ void main() {
           profileRepositoryProvider.overrideWithValue(repo),
           myProfileProvider.overrideWith(
             (ref) => Future.value(
-              Profile(
-                id: 'me',
-                ageVerified: true,
-                prompts: existingPrompts,
-              ),
+              Profile(id: 'me', ageVerified: true, prompts: existingPrompts),
             ),
           ),
         ],
-        child: const MaterialApp(
-          home: Scaffold(body: PromptEditorSheet()),
-        ),
+        child: const MaterialApp(home: Scaffold(body: PromptEditorSheet())),
       );
     }
 
@@ -112,9 +103,9 @@ void main() {
         await tester.tap(find.byKey(const Key('save_prompts_btn')));
         await tester.pumpAndSettle();
 
-        final captured = verify(() => repo.setMyPrompts(captureAny()))
-            .captured
-            .single as List<Map<String, String>>;
+        final captured =
+            verify(() => repo.setMyPrompts(captureAny())).captured.single
+                as List<Map<String, String>>;
         expect(captured.length, 3);
         expect(captured[0], {
           'prompt_id': 'p1',
@@ -227,9 +218,7 @@ void main() {
               profileRepositoryProvider.overrideWithValue(repo),
               myProfileProvider.overrideWith((ref) => completer.future),
             ],
-            child: const MaterialApp(
-              home: Scaffold(body: PromptEditorSheet()),
-            ),
+            child: const MaterialApp(home: Scaffold(body: PromptEditorSheet())),
           ),
         );
         await tester.pump();

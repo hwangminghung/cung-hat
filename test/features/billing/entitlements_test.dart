@@ -4,9 +4,11 @@ import 'package:cung_hat/features/billing/application/billing_providers.dart';
 
 void main() {
   test('pro is a superset: unlocks any feature, and isPro is true', () {
-    final c = ProviderContainer(overrides: [
-      entitlementsProvider.overrideWith((ref) async => {'pro'}),
-    ]);
+    final c = ProviderContainer(
+      overrides: [
+        entitlementsProvider.overrideWith((ref) async => {'pro'}),
+      ],
+    );
     addTearDown(c.dispose);
     // Resolve the async provider.
     return c.read(entitlementsProvider.future).then((_) {
@@ -17,9 +19,11 @@ void main() {
   });
 
   test('non-pro only unlocks owned features', () {
-    final c = ProviderContainer(overrides: [
-      entitlementsProvider.overrideWith((ref) async => {'see_likes'}),
-    ]);
+    final c = ProviderContainer(
+      overrides: [
+        entitlementsProvider.overrideWith((ref) async => {'see_likes'}),
+      ],
+    );
     addTearDown(c.dispose);
     return c.read(entitlementsProvider.future).then((_) {
       expect(c.read(isProProvider), isFalse);

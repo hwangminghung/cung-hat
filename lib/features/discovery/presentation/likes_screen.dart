@@ -24,7 +24,9 @@ class LikesScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.favorite_rounded,
               title: l10n?.likesEmptyTitle ?? 'Chưa có ai thích bạn',
-              subtitle: l10n?.likesEmptySub ?? 'Cứ hát hết mình, người hợp gu sẽ tới.',
+              subtitle:
+                  l10n?.likesEmptySub ??
+                  'Cứ hát hết mình, người hợp gu sẽ tới.',
             );
           }
           return ListView(
@@ -58,7 +60,9 @@ class LikesScreen extends ConsumerWidget {
                             ?.copyWith(color: AppColors.onPrimary),
                       ),
                     ),
-                    title: Text(person.displayName ?? (l10n?.likesAnonymous ?? 'Ẩn danh')),
+                    title: Text(
+                      person.displayName ?? (l10n?.likesAnonymous ?? 'Ẩn danh'),
+                    ),
                   ),
                 ),
             ],

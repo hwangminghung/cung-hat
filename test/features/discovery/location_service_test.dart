@@ -135,15 +135,18 @@ void main() {
       expect(status, LocationCaptureStatus.permissionDenied);
     });
 
-    test('quyền bị chặn vĩnh viễn (deniedForever) → permissionDenied', () async {
-      GeolocatorPlatform.instance = _FakeGeolocatorPlatform(
-        checkResult: LocationPermission.deniedForever,
-      );
+    test(
+      'quyền bị chặn vĩnh viễn (deniedForever) → permissionDenied',
+      () async {
+        GeolocatorPlatform.instance = _FakeGeolocatorPlatform(
+          checkResult: LocationPermission.deniedForever,
+        );
 
-      final status = await LocationService(_MockRepo()).captureAndPush();
+        final status = await LocationService(_MockRepo()).captureAndPush();
 
-      expect(status, LocationCaptureStatus.permissionDenied);
-    });
+        expect(status, LocationCaptureStatus.permissionDenied);
+      },
+    );
 
     test('không bắt được fix và không có vị trí cache → noFix', () async {
       GeolocatorPlatform.instance = _FakeGeolocatorPlatform(
@@ -197,8 +200,9 @@ void main() {
       final fake = _FakeGeolocatorPlatform();
       GeolocatorPlatform.instance = fake;
 
-      await LocationService(_MockRepo())
-          .openSettingsFor(LocationCaptureStatus.serviceDisabled);
+      await LocationService(
+        _MockRepo(),
+      ).openSettingsFor(LocationCaptureStatus.serviceDisabled);
 
       expect(fake.openedLocationSettings, isTrue);
       expect(fake.openedAppSettings, isFalse);
@@ -208,8 +212,9 @@ void main() {
       final fake = _FakeGeolocatorPlatform();
       GeolocatorPlatform.instance = fake;
 
-      await LocationService(_MockRepo())
-          .openSettingsFor(LocationCaptureStatus.permissionDenied);
+      await LocationService(
+        _MockRepo(),
+      ).openSettingsFor(LocationCaptureStatus.permissionDenied);
 
       expect(fake.openedAppSettings, isTrue);
       expect(fake.openedLocationSettings, isFalse);

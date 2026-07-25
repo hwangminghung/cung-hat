@@ -16,11 +16,11 @@ class LikeTeaser {
   final String? sharedGenre;
 
   factory LikeTeaser.fromJson(Map<String, dynamic> j) => LikeTeaser(
-        teaserUrl: j['teaser_url'] as String?,
-        age: (j['age'] as num?)?.toInt(),
-        verified: j['verified'] == true,
-        sharedGenre: j['shared_genre'] as String?,
-      );
+    teaserUrl: j['teaser_url'] as String?,
+    age: (j['age'] as num?)?.toInt(),
+    verified: j['verified'] == true,
+    sharedGenre: j['shared_genre'] as String?,
+  );
 
   /// Doi origin cua [teaserUrl] ve origin storage cua client (fix kong:8000
   /// local — cung ly do voi PhotoRepository.signedUrlsOf).

@@ -3,7 +3,10 @@ import 'package:cung_hat/core/config/app_config.dart';
 
 void main() {
   test('AppConfig reads supabase values from dart-define', () {
-    const cfg = AppConfig(supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k');
+    const cfg = AppConfig(
+      supabaseUrl: 'https://x.supabase.co',
+      supabaseAnonKey: 'k',
+    );
     expect(cfg.supabaseUrl, 'https://x.supabase.co');
     expect(cfg.supabaseAnonKey, 'k');
     expect(cfg.isConfigured, isTrue);

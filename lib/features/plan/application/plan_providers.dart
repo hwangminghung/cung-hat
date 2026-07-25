@@ -3,17 +3,24 @@ import '../../../core/providers/supabase_providers.dart';
 import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
 
-final planRepositoryProvider =
-    Provider((ref) => PlanRepository(ref.watch(supabaseClientProvider)));
+final planRepositoryProvider = Provider(
+  (ref) => PlanRepository(ref.watch(supabaseClientProvider)),
+);
 
-final nearestVenuesProvider = FutureProvider.family<List<VenueSuggestion>, String>(
-    (ref, keoId) => ref.watch(planRepositoryProvider).nearestVenues(keoId));
+final nearestVenuesProvider =
+    FutureProvider.family<List<VenueSuggestion>, String>(
+      (ref, keoId) => ref.watch(planRepositoryProvider).nearestVenues(keoId),
+    );
 
 final currentPlanProvider = FutureProvider.family<Plan?, String>(
-    (ref, keoId) => ref.watch(planRepositoryProvider).currentPlan(keoId));
+  (ref, keoId) => ref.watch(planRepositoryProvider).currentPlan(keoId),
+);
 
 final keoMidpointProvider = FutureProvider.family<MapPoint?, String>(
-    (ref, keoId) => ref.watch(planRepositoryProvider).getKeoMidpoint(keoId));
+  (ref, keoId) => ref.watch(planRepositoryProvider).getKeoMidpoint(keoId),
+);
 
-final resolveShareProvider = FutureProvider.family<Map<String, dynamic>, String>(
-    (ref, token) => ref.watch(planRepositoryProvider).resolveShare(token));
+final resolveShareProvider =
+    FutureProvider.family<Map<String, dynamic>, String>(
+      (ref, token) => ref.watch(planRepositoryProvider).resolveShare(token),
+    );

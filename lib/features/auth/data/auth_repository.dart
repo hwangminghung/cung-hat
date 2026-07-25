@@ -4,7 +4,8 @@ class AuthRepository {
   AuthRepository(this._client);
   final SupabaseClient _client;
 
-  Future<void> sendOtp(String phone) => _client.auth.signInWithOtp(phone: phone);
+  Future<void> sendOtp(String phone) =>
+      _client.auth.signInWithOtp(phone: phone);
 
   Future<AuthResponse> verifyOtp(String phone, String token) =>
       _client.auth.verifyOTP(phone: phone, token: token, type: OtpType.sms);

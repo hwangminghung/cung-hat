@@ -29,17 +29,17 @@ class _FakePhotoRepository extends Mock implements PhotoRepository {
 }
 
 GoRouter _deckRouter() => GoRouter(
-      initialLocation: '/',
-      routes: [
-        GoRoute(path: '/', builder: (context, state) => const DoiDeckScreen()),
-        GoRoute(
-          path: '/keo/:id',
-          builder: (context, state) => Scaffold(
-              body: Center(
-                  child: Text('KEO DETAIL ${state.pathParameters['id']}'))),
-        ),
-      ],
-    );
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => const DoiDeckScreen()),
+    GoRoute(
+      path: '/keo/:id',
+      builder: (context, state) => Scaffold(
+        body: Center(child: Text('KEO DETAIL ${state.pathParameters['id']}')),
+      ),
+    ),
+  ],
+);
 
 void main() {
   test('chèn 1 kèo sau mỗi 5 candidate, tối đa 2, bỏ kèo của mình', () {
@@ -58,21 +58,27 @@ void main() {
 
   test('deck ngắn hơn 5 hoặc không có kèo → không promo', () {
     expect(
-        interleaveDeck(candidates: [c('1'), c('2')], keos: [k('b')])
-            .whereType<KeoPromoItem>(),
-        isEmpty);
+      interleaveDeck(
+        candidates: [c('1'), c('2')],
+        keos: [k('b')],
+      ).whereType<KeoPromoItem>(),
+      isEmpty,
+    );
     expect(
-        interleaveDeck(
-                candidates: [for (var i = 0; i < 8; i++) c('$i')], keos: [])
-            .whereType<KeoPromoItem>(),
-        isEmpty);
+      interleaveDeck(
+        candidates: [for (var i = 0; i < 8; i++) c('$i')],
+        keos: [],
+      ).whereType<KeoPromoItem>(),
+      isEmpty,
+    );
   });
 
   group('KeoPromoCard trong DoiDeckScreen', () {
     testWidgets('hiện thẻ quảng bá Kèo ở đầu deck', (tester) async {
       final locationService = _FakeLocationService();
-      when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => LocationCaptureStatus.success);
+      when(
+        () => locationService.captureAndPush(),
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -80,10 +86,9 @@ void main() {
             photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
             // Promo TRƯỚC candidate: top card là promo, nhưng hasCandidates
             // vẫn true (có 1 CandidateItem) nên deck không rơi vào empty-state.
-            deckItemsProvider(null).overrideWith((ref) async => [
-                  KeoPromoItem(k('b')),
-                  CandidateItem(c('1')),
-                ]),
+            deckItemsProvider(null).overrideWith(
+              (ref) async => [KeoPromoItem(k('b')), CandidateItem(c('1'))],
+            ),
             locationServiceProvider.overrideWithValue(locationService),
             entitlementsProvider.overrideWith((ref) async => <String>{}),
           ],
@@ -99,43 +104,45 @@ void main() {
     });
 
     testWidgets(
-        'vuốt phải thẻ quảng bá → mở KeoDetail, KHÔNG gọi recordSwipe',
-        (tester) async {
-      final locationService = _FakeLocationService();
-      when(() => locationService.captureAndPush())
-          .thenAnswer((_) async => LocationCaptureStatus.success);
-      final repo = _MockDiscoveryRepository();
-      when(() => repo.recordSwipe(any(), any()))
-          .thenAnswer((_) async => false);
+      'vuốt phải thẻ quảng bá → mở KeoDetail, KHÔNG gọi recordSwipe',
+      (tester) async {
+        final locationService = _FakeLocationService();
+        when(
+          () => locationService.captureAndPush(),
+        ).thenAnswer((_) async => LocationCaptureStatus.success);
+        final repo = _MockDiscoveryRepository();
+        when(
+          () => repo.recordSwipe(any(), any()),
+        ).thenAnswer((_) async => false);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            discoveryRepositoryProvider.overrideWithValue(repo),
-            photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-            deckItemsProvider(null).overrideWith((ref) async => [
-                  KeoPromoItem(k('b')),
-                  CandidateItem(c('1')),
-                ]),
-            locationServiceProvider.overrideWithValue(locationService),
-            entitlementsProvider.overrideWith((ref) async => <String>{}),
-          ],
-          child: MaterialApp.router(
-            theme: AppTheme.light(),
-            routerConfig: _deckRouter(),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              discoveryRepositoryProvider.overrideWithValue(repo),
+              photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+              deckItemsProvider(null).overrideWith(
+                (ref) async => [KeoPromoItem(k('b')), CandidateItem(c('1'))],
+              ),
+              locationServiceProvider.overrideWithValue(locationService),
+              entitlementsProvider.overrideWith((ref) async => <String>{}),
+            ],
+            child: MaterialApp.router(
+              theme: AppTheme.light(),
+              routerConfig: _deckRouter(),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      await tester.drag(
-        find.textContaining('Kèo gần bạn'),
-        const Offset(400, 0),
-      );
-      await tester.pumpAndSettle();
+        await tester.drag(
+          find.textContaining('Kèo gần bạn'),
+          const Offset(400, 0),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('KEO DETAIL b'), findsOneWidget);
-      verifyNever(() => repo.recordSwipe(any(), any()));
-    });
+        expect(find.text('KEO DETAIL b'), findsOneWidget);
+        verifyNever(() => repo.recordSwipe(any(), any()));
+      },
+    );
   });
 }

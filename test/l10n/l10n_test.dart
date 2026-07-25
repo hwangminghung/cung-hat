@@ -15,8 +15,7 @@ void main() {
   // Việt thấy tiếng Anh lẫn; thiếu EN thì gen-l10n fail (en là template).
   test('app_en.arb và app_vi.arb có cùng bộ key', () {
     Set<String> keysOf(String path) =>
-        (jsonDecode(File(path).readAsStringSync()) as Map<String, dynamic>)
-            .keys
+        (jsonDecode(File(path).readAsStringSync()) as Map<String, dynamic>).keys
             .where((k) => !k.startsWith('@'))
             .toSet();
     final en = keysOf('lib/l10n/app_en.arb');

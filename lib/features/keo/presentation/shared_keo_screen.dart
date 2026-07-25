@@ -44,7 +44,8 @@ class SharedKeoScreen extends ConsumerWidget {
         error: (e, _) => EmptyState(
           icon: Icons.wifi_off_rounded,
           title: l10n?.keoSharedLoadError ?? 'Không tải được kèo',
-          subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+          subtitle:
+              l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
           actionLabel: l10n?.commonRetry ?? 'Thử lại',
           onAction: () => ref.invalidate(sharedKeoProvider(token)),
         ),
@@ -53,7 +54,9 @@ class SharedKeoScreen extends ConsumerWidget {
             return EmptyState(
               icon: Icons.link_off_rounded,
               title: l10n?.keoSharedNotFound ?? 'Không tìm thấy kèo',
-              subtitle: l10n?.keoSharedNotFoundSub ?? 'Liên kết không đúng hoặc kèo đã bị xoá.',
+              subtitle:
+                  l10n?.keoSharedNotFoundSub ??
+                  'Liên kết không đúng hoặc kèo đã bị xoá.',
             );
           }
           if (keo.expired) {
@@ -176,7 +179,8 @@ class _SharedKeoBody extends ConsumerWidget {
                   Text(
                     l10n != null
                         ? l10n.keoSharedHost(
-                            keo.hostName ?? l10n.keoSharedAnonymous)
+                            keo.hostName ?? l10n.keoSharedAnonymous,
+                          )
                         : 'Chủ kèo: ${keo.hostName ?? 'Ẩn danh'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,

@@ -48,8 +48,10 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
       ref.read(deckRadiusProvider.notifier).state = null;
       ref.invalidate(candidatesProvider(null));
       if (mounted) {
-        final l10n =
-            Localizations.of<AppLocalizations>(context, AppLocalizations);
+        final l10n = Localizations.of<AppLocalizations>(
+          context,
+          AppLocalizations,
+        );
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n?.filterApplied ?? 'Đã áp dụng bộ lọc.')),
@@ -57,10 +59,14 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
       }
     } catch (_) {
       if (mounted) {
-        final l10n =
-            Localizations.of<AppLocalizations>(context, AppLocalizations);
+        final l10n = Localizations.of<AppLocalizations>(
+          context,
+          AppLocalizations,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n?.filterSaveError ?? 'Không lưu được, thử lại.')),
+          SnackBar(
+            content: Text(l10n?.filterSaveError ?? 'Không lưu được, thử lại.'),
+          ),
         );
       }
     } finally {
@@ -96,8 +102,10 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text(l10n?.filterTitle ?? 'Bộ lọc',
-                  style: Theme.of(context).textTheme.headlineSmall),
+              Text(
+                l10n?.filterTitle ?? 'Bộ lọc',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
               const SizedBox(height: AppSpacing.lg),
               Text(
                 l10n?.filterRadius ?? 'Bán kính tìm quanh',
@@ -106,9 +114,9 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               Text(
                 '$_km km',
                 key: const Key('filter_radius_value'),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               Slider(
                 key: const Key('filter_radius_slider'),
@@ -125,9 +133,13 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               SwitchListTile(
                 key: const Key('filter_auto_expand_switch'),
                 contentPadding: EdgeInsets.zero,
-                title: Text(l10n?.deckAutoExpandTitle ?? 'Tự mở rộng khi hết người'),
-                subtitle:
-                    Text(l10n?.filterAutoExpandSub ?? 'Tự tìm quanh 100 km khi hết gợi ý'),
+                title: Text(
+                  l10n?.deckAutoExpandTitle ?? 'Tự mở rộng khi hết người',
+                ),
+                subtitle: Text(
+                  l10n?.filterAutoExpandSub ??
+                      'Tự tìm quanh 100 km khi hết gợi ý',
+                ),
                 value: _autoExpand,
                 onChanged: !_seeded
                     ? null

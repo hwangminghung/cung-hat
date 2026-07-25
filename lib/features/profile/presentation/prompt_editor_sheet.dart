@@ -71,8 +71,10 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            Localizations.of<AppLocalizations>(context, AppLocalizations)
-                    ?.promptMax(maxPrompts) ??
+            Localizations.of<AppLocalizations>(
+                  context,
+                  AppLocalizations,
+                )?.promptMax(maxPrompts) ??
                 'Tối đa $maxPrompts thẻ',
           ),
         ),
@@ -117,8 +119,10 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.filterSaveError ??
+              Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.filterSaveError ??
                   'Không lưu được, thử lại.',
             ),
           ),
@@ -162,19 +166,23 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                Localizations.of<AppLocalizations>(context, AppLocalizations)
-                        ?.shellTilePrompts ??
+                Localizations.of<AppLocalizations>(
+                      context,
+                      AppLocalizations,
+                    )?.shellTilePrompts ??
                     'Thẻ hỏi-đáp',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                Localizations.of<AppLocalizations>(context, AppLocalizations)
-                        ?.promptSubMax(maxPrompts) ??
+                Localizations.of<AppLocalizations>(
+                      context,
+                      AppLocalizations,
+                    )?.promptSubMax(maxPrompts) ??
                     'Chọn tối đa $maxPrompts câu để hồ sơ có chuyện mà bắt.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSpacing.lg),
               // Dimmed while the profile hasn't resolved — paired with the
@@ -347,9 +355,11 @@ class _PromptRowState extends State<_PromptRow> {
                 maxLines: 2,
                 onChanged: onChanged,
                 decoration: InputDecoration(
-                  hintText: Localizations.of<AppLocalizations>(
-                              context, AppLocalizations)
-                          ?.promptAnswerHint ??
+                  hintText:
+                      Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.promptAnswerHint ??
                       'Câu trả lời của bạn…',
                   isDense: true,
                 ),

@@ -9,11 +9,14 @@ class OnboardingRepository {
     required bool granted,
     required String policyVersion,
   }) async {
-    await _client.rpc('record_consent', params: {
-      'p_purpose': purpose,
-      'p_granted': granted,
-      'p_policy_version': policyVersion,
-    });
+    await _client.rpc(
+      'record_consent',
+      params: {
+        'p_purpose': purpose,
+        'p_granted': granted,
+        'p_policy_version': policyVersion,
+      },
+    );
   }
 
   Future<void> saveTaste({
@@ -21,10 +24,13 @@ class OnboardingRepository {
     required List<String> artistIds,
     required List<String> songIds,
   }) async {
-    await _client.rpc('upsert_my_taste', params: {
-      'p_genre_ids': genreIds,
-      'p_artist_ids': artistIds,
-      'p_song_ids': songIds,
-    });
+    await _client.rpc(
+      'upsert_my_taste',
+      params: {
+        'p_genre_ids': genreIds,
+        'p_artist_ids': artistIds,
+        'p_song_ids': songIds,
+      },
+    );
   }
 }

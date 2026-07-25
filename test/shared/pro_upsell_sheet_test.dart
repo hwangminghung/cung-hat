@@ -5,18 +5,23 @@ import 'package:cung_hat/shared/widgets/pro_upsell_sheet.dart';
 
 void main() {
   Widget host(ProUpsellVariant variant) {
-    final router = GoRouter(routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => Builder(
-          builder: (context) => TextButton(
-            onPressed: () => ProUpsellSheet.show(context, variant: variant),
-            child: const Text('open'),
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Builder(
+            builder: (context) => TextButton(
+              onPressed: () => ProUpsellSheet.show(context, variant: variant),
+              child: const Text('open'),
+            ),
           ),
         ),
-      ),
-      GoRoute(path: '/store', builder: (context, state) => const Text('STORE')),
-    ]);
+        GoRoute(
+          path: '/store',
+          builder: (context, state) => const Text('STORE'),
+        ),
+      ],
+    );
     return MaterialApp.router(routerConfig: router);
   }
 
@@ -29,8 +34,9 @@ void main() {
     (ProUpsellVariant.likeQuota, 'Hết lượt thích hôm nay'),
     (ProUpsellVariant.superQuota, 'Hết lượt Siêu thích hôm nay'),
   ]) {
-    testWidgets('variant $variant: đúng headline, không giá, CTA về store',
-        (tester) async {
+    testWidgets('variant $variant: đúng headline, không giá, CTA về store', (
+      tester,
+    ) async {
       await tester.pumpWidget(host(variant));
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();

@@ -35,49 +35,54 @@ class KeoPromoCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
             decoration: BoxDecoration(
               color: AppColors.onPrimary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
             ),
-            child: Text(l10n?.promoKeoNearby ?? '🎤 Kèo gần bạn',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium
-                    ?.copyWith(color: AppColors.onPrimary)),
+            child: Text(
+              l10n?.promoKeoNearby ?? '🎤 Kèo gần bạn',
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: AppColors.onPrimary),
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(keo.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(color: AppColors.onPrimary)),
+          Text(
+            keo.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: AppColors.onPrimary),
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             '${l10n?.promoSeats(keo.slotsFilled, keo.sizeTarget) ?? '${keo.slotsFilled}/${keo.sizeTarget} chỗ'}'
             ' · ${_hhmm(keo.timeWindowStart)}'
             '${keo.distanceBand != null ? ' · ${l10n?.promoDistanceKm(keo.distanceBand!) ?? 'cách ${keo.distanceBand} km'}' : ''}',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: AppColors.onPrimary.withValues(alpha: 0.9)),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.onPrimary.withValues(alpha: 0.9),
+            ),
           ),
           if (keo.genres.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Text(keo.genres.take(3).map((g) => '#$g').join('  '),
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium
-                    ?.copyWith(color: AppColors.onPrimary)),
+            Text(
+              keo.genres.take(3).map((g) => '#$g').join('  '),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: AppColors.onPrimary),
+            ),
           ],
           const SizedBox(height: AppSpacing.md),
-          Text(l10n?.promoSwipeRight ?? 'Vuốt phải để xem kèo →',
-              style: Theme.of(context)
-                  .textTheme
-                  .labelMedium
-                  ?.copyWith(color: AppColors.onPrimary.withValues(alpha: 0.85))),
+          Text(
+            l10n?.promoSwipeRight ?? 'Vuốt phải để xem kèo →',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppColors.onPrimary.withValues(alpha: 0.85),
+            ),
+          ),
         ],
       ),
     );

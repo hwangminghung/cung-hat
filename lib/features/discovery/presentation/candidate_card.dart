@@ -76,7 +76,8 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
   Widget build(BuildContext context) {
     final candidate = widget.candidate;
     final name =
-        candidate.displayName ?? (_l10n?.candidateFallbackName ?? 'Bạn hát mới');
+        candidate.displayName ??
+        (_l10n?.candidateFallbackName ?? 'Bạn hát mới');
     final monogram = name.isEmpty ? '?' : name.characters.first.toUpperCase();
     final title = candidate.age == null ? name : '$name, ${candidate.age}';
     final photoCount =
@@ -269,14 +270,16 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
         ],
         _InfoLine(
           icon: Icons.place_rounded,
-          label: _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
+          label:
+              _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
               'Cách ${candidate.distanceBand ?? '?'} km',
           color: AppColors.primary,
         ),
         const SizedBox(height: AppSpacing.xs),
         _InfoLine(
           icon: Icons.music_note_rounded,
-          label: _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
+          label:
+              _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
               'cùng ${candidate.sharedBaitu.length} bài tủ',
           color: AppColors.teal,
         ),
@@ -294,8 +297,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final textScale = MediaQuery.textScalerOf(context).scale(1);
-        final stackFactsAndGenres =
-            constraints.maxWidth < 300 || textScale > 1;
+        final stackFactsAndGenres = constraints.maxWidth < 300 || textScale > 1;
         if (stackFactsAndGenres) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,14 +332,16 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
       return [
         _InfoLine(
           icon: Icons.place_rounded,
-          label: _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
+          label:
+              _l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
               'Cách ${candidate.distanceBand ?? '?'} km',
           color: AppColors.primary,
         ),
         const SizedBox(height: AppSpacing.xs),
         _InfoLine(
           icon: Icons.music_note_rounded,
-          label: _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
+          label:
+              _l10n?.candidateSharedBaitu(candidate.sharedBaitu.length) ??
               'cùng ${candidate.sharedBaitu.length} bài tủ',
           color: AppColors.teal,
         ),
@@ -371,7 +375,8 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
       Text(
         candidate.bio?.trim().isNotEmpty == true
             ? candidate.bio!.trim()
-            : (_l10n?.candidateNoBio ?? 'Chưa có giới thiệu — hỏi thử khi ghép đôi nhé!'),
+            : (_l10n?.candidateNoBio ??
+                  'Chưa có giới thiệu — hỏi thử khi ghép đôi nhé!'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: Theme.of(

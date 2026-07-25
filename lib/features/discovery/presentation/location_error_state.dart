@@ -29,7 +29,8 @@ class LocationErrorState extends StatelessWidget {
       LocationCaptureStatus.permissionDenied => EmptyState(
         icon: Icons.location_off_rounded,
         title: l10n?.locationPermissionTitle ?? 'Cần quyền vị trí',
-        subtitle: l10n?.locationPermissionSub ??
+        subtitle:
+            l10n?.locationPermissionSub ??
             'Cho phép truy cập vị trí để tìm bạn hát và kèo quanh bạn.',
         actionLabel: l10n?.locationOpenSettings ?? 'Mở cài đặt',
         onAction: onOpenSettings,
@@ -49,7 +50,8 @@ class LocationErrorState extends StatelessWidget {
       LocationCaptureStatus.noFix => EmptyState(
         icon: Icons.gps_off_rounded,
         title: l10n?.locationNoFixTitle ?? 'Không lấy được vị trí',
-        subtitle: l10n?.locationNoFixSub ??
+        subtitle:
+            l10n?.locationNoFixSub ??
             'Không bắt được tín hiệu định vị — thử lại sau giây lát.',
         actionLabel: retryLabel,
         onAction: onRetry,

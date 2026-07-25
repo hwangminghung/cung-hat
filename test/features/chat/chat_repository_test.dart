@@ -121,32 +121,34 @@ void main() {
     ).called(1);
   });
 
-  test('keoHistory lấy trang MỚI nhất (desc+limit) rồi đảo về cũ→mới',
-      () async {
-    final client = MockSupabaseClient();
-    final stubs = stubTableSelect(client, 'messages', [
-      _twoDayRows[1],
-      _twoDayRows[0],
-    ]);
+  test(
+    'keoHistory lấy trang MỚI nhất (desc+limit) rồi đảo về cũ→mới',
+    () async {
+      final client = MockSupabaseClient();
+      final stubs = stubTableSelect(client, 'messages', [
+        _twoDayRows[1],
+        _twoDayRows[0],
+      ]);
 
-    final msgs = await ChatRepository(client).keoHistory('k1');
+      final msgs = await ChatRepository(client).keoHistory('k1');
 
-    expect(msgs.map((m) => m.id).toList(), ['m-cu', 'm-moi']);
-    verify(
-      () => stubs.fb.order(
-        'created_at',
-        ascending: false,
-        nullsFirst: any(named: 'nullsFirst'),
-        referencedTable: any(named: 'referencedTable'),
-      ),
-    ).called(1);
-    verify(
-      () => stubs.ob.limit(
-        ChatRepository.historyPageSize,
-        referencedTable: any(named: 'referencedTable'),
-      ),
-    ).called(1);
-  });
+      expect(msgs.map((m) => m.id).toList(), ['m-cu', 'm-moi']);
+      verify(
+        () => stubs.fb.order(
+          'created_at',
+          ascending: false,
+          nullsFirst: any(named: 'nullsFirst'),
+          referencedTable: any(named: 'referencedTable'),
+        ),
+      ).called(1);
+      verify(
+        () => stubs.ob.limit(
+          ChatRepository.historyPageSize,
+          referencedTable: any(named: 'referencedTable'),
+        ),
+      ).called(1);
+    },
+  );
 
   test('messageFromBroadcast unwraps the frame payload envelope', () {
     final frame = <String, dynamic>{

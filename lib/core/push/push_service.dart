@@ -5,7 +5,9 @@ class PushService {
   final SupabaseClient _client;
 
   Future<void> registerToken(String token, String platform) async {
-    await _client.rpc('register_device_token',
-        params: {'p_token': token, 'p_platform': platform});
+    await _client.rpc(
+      'register_device_token',
+      params: {'p_token': token, 'p_platform': platform},
+    );
   }
 }

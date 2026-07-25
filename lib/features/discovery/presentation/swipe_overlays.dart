@@ -37,23 +37,25 @@ class SwipeOverlays extends StatelessWidget {
 
   static final Map<String, Widget> _stampCache = {};
   static Widget _stamp(String label, Color color) => _stampCache.putIfAbsent(
-      '$label-${color.toARGB32()}', () => _stampContent(label, color));
+    '$label-${color.toARGB32()}',
+    () => _stampContent(label, color),
+  );
 
   static Widget _stampContent(String label, Color color) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: 4),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.display(
-            fontSize: 32,
-            fontWeight: FontWeight.w700,
-            color: color,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+    decoration: BoxDecoration(
+      border: Border.all(color: color, width: 4),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Text(
+      label,
+      style: AppTypography.display(
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+        color: color,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +67,7 @@ class SwipeOverlays extends StatelessWidget {
     final nope = (-hProgress).clamp(0.0, 1.0);
     // Kéo chéo: ưu tiên hướng ngang — siêu thích chỉ rõ khi kéo thẳng lên.
     final superLike = showSuper
-        ? ((-vProgress).clamp(0.0, 1.0) *
-            (1 - hProgress.abs()).clamp(0.0, 1.0))
+        ? ((-vProgress).clamp(0.0, 1.0) * (1 - hProgress.abs()).clamp(0.0, 1.0))
         : 0.0;
 
     return Stack(
@@ -127,10 +128,7 @@ class _Stamp extends StatelessWidget {
           alignment: alignment,
           child: Padding(
             padding: const EdgeInsets.all(28),
-            child: Transform.rotate(
-              angle: angle,
-              child: child,
-            ),
+            child: Transform.rotate(angle: angle, child: child),
           ),
         ),
       ),

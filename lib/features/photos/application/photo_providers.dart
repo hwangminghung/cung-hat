@@ -23,7 +23,7 @@ final myPhotoPathsProvider = Provider<List<String>>(
 /// expired token and 400s into the monogram fallback. Dropping the cache when
 /// unwatched forces a fresh mint on the next open. `invalidate` (see
 /// `photo_manager_sheet`) still works to refresh in place after up/delete.
-final signedUrlsProvider =
-    FutureProvider.autoDispose.family<List<String>, String>(
-  (ref, userId) => ref.watch(photoRepositoryProvider).signedUrlsOf(userId),
-);
+final signedUrlsProvider = FutureProvider.autoDispose
+    .family<List<String>, String>(
+      (ref, userId) => ref.watch(photoRepositoryProvider).signedUrlsOf(userId),
+    );

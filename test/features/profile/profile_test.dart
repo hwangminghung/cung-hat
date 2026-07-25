@@ -4,8 +4,13 @@ import 'package:cung_hat/features/profile/domain/profile.dart';
 void main() {
   test('Profile.fromJson maps the sanitized RPC shape', () {
     final p = Profile.fromJson({
-      'id': 'u1', 'display_name': 'Mai', 'full_name': 'Tran Mai',
-      'dob': '2000-01-01', 'age_verified': true, 'bio': 'hi', 'language': 'vi',
+      'id': 'u1',
+      'display_name': 'Mai',
+      'full_name': 'Tran Mai',
+      'dob': '2000-01-01',
+      'age_verified': true,
+      'bio': 'hi',
+      'language': 'vi',
     });
     expect(p.id, 'u1');
     expect(p.displayName, 'Mai');

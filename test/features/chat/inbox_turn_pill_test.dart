@@ -9,9 +9,7 @@ import 'package:cung_hat/features/profile/application/profile_providers.dart';
 import 'package:cung_hat/features/profile/domain/profile.dart';
 
 void main() {
-  Widget host({
-    required MatchSummary match,
-  }) {
+  Widget host({required MatchSummary match}) {
     return ProviderScope(
       overrides: [
         inboxProvider.overrideWith((ref) async => [match]),
@@ -26,10 +24,11 @@ void main() {
     );
   }
 
-  testWidgets(
-    'brand-new match with no messages shows "Nhắn trước đi" pill',
-    (tester) async {
-      await tester.pumpWidget(host(
+  testWidgets('brand-new match with no messages shows "Nhắn trước đi" pill', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
         match: MatchSummary(
           matchId: 't1',
           otherId: 'other-id',
@@ -37,19 +36,20 @@ void main() {
           unread: 0,
           lastSenderId: null,
         ),
-      ));
-      await tester.pump();
+      ),
+    );
+    await tester.pump();
 
-      expect(find.text('Nhắn trước đi'), findsOneWidget);
-      expect(find.text('Đến lượt bạn'), findsNothing);
-      expect(find.text('Sẵn sàng rủ đi hát'), findsNothing);
-    },
-  );
+    expect(find.text('Nhắn trước đi'), findsOneWidget);
+    expect(find.text('Đến lượt bạn'), findsNothing);
+    expect(find.text('Sẵn sàng rủ đi hát'), findsNothing);
+  });
 
-  testWidgets(
-    'last message from the other person shows "Đến lượt bạn" pill',
-    (tester) async {
-      await tester.pumpWidget(host(
+  testWidgets('last message from the other person shows "Đến lượt bạn" pill', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
         match: MatchSummary(
           matchId: 't2',
           otherId: 'other-id',
@@ -57,19 +57,20 @@ void main() {
           unread: 1,
           lastSenderId: 'other-id',
         ),
-      ));
-      await tester.pump();
+      ),
+    );
+    await tester.pump();
 
-      expect(find.text('Đến lượt bạn'), findsOneWidget);
-      expect(find.text('Nhắn trước đi'), findsNothing);
-      expect(find.text('Sẵn sàng rủ đi hát'), findsNothing);
-    },
-  );
+    expect(find.text('Đến lượt bạn'), findsOneWidget);
+    expect(find.text('Nhắn trước đi'), findsNothing);
+    expect(find.text('Sẵn sàng rủ đi hát'), findsNothing);
+  });
 
-  testWidgets(
-    'last message from me shows the default subtitle and no pill',
-    (tester) async {
-      await tester.pumpWidget(host(
+  testWidgets('last message from me shows the default subtitle and no pill', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
         match: MatchSummary(
           matchId: 't3',
           otherId: 'other-id',
@@ -77,13 +78,13 @@ void main() {
           unread: 0,
           lastSenderId: 'me',
         ),
-      ));
-      await tester.pump();
+      ),
+    );
+    await tester.pump();
 
-      expect(find.text('Sẵn sàng rủ đi hát'), findsOneWidget);
-      expect(find.text('Đến lượt bạn'), findsNothing);
-      expect(find.text('Nhắn trước đi'), findsNothing);
-      expect(find.byKey(const Key('turn_pill')), findsNothing);
-    },
-  );
+    expect(find.text('Sẵn sàng rủ đi hát'), findsOneWidget);
+    expect(find.text('Đến lượt bạn'), findsNothing);
+    expect(find.text('Nhắn trước đi'), findsNothing);
+    expect(find.byKey(const Key('turn_pill')), findsNothing);
+  });
 }

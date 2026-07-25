@@ -22,20 +22,20 @@ const _messages = <String, String>{
 };
 
 String? _localized(String? code, AppLocalizations? l10n) => switch (code) {
-      'pro_required' => l10n?.keoErrorProRequired,
-      'free_host_limit' => l10n?.keoErrorFreeHostLimit,
-      'free_join_limit' => l10n?.keoErrorFreeJoinLimit,
-      'keo_full' => l10n?.keoErrorFull,
-      'already_declined' => l10n?.keoErrorAlreadyDeclined,
-      'keo_not_open' => l10n?.keoErrorNotOpen,
-      'blocked' => l10n?.keoErrorBlocked,
-      'location_required' => l10n?.keoErrorNoLocation,
-      'age_not_verified' => l10n?.keoErrorAgeNotVerified,
-      'no_matchable_keo' => l10n?.keoErrorNoMatchableKeo,
-      'invalid_time_window' => l10n?.keoErrorInvalidTimeWindow,
-      'invalid_group_size' => l10n?.keoErrorInvalidGroupSize,
-      _ => null,
-    };
+  'pro_required' => l10n?.keoErrorProRequired,
+  'free_host_limit' => l10n?.keoErrorFreeHostLimit,
+  'free_join_limit' => l10n?.keoErrorFreeJoinLimit,
+  'keo_full' => l10n?.keoErrorFull,
+  'already_declined' => l10n?.keoErrorAlreadyDeclined,
+  'keo_not_open' => l10n?.keoErrorNotOpen,
+  'blocked' => l10n?.keoErrorBlocked,
+  'location_required' => l10n?.keoErrorNoLocation,
+  'age_not_verified' => l10n?.keoErrorAgeNotVerified,
+  'no_matchable_keo' => l10n?.keoErrorNoMatchableKeo,
+  'invalid_time_window' => l10n?.keoErrorInvalidTimeWindow,
+  'invalid_group_size' => l10n?.keoErrorInvalidGroupSize,
+  _ => null,
+};
 
 String? keoErrorCode(Object error) {
   final text = error.toString();

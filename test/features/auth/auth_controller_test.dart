@@ -18,9 +18,9 @@ void main() {
   test('sendOtp moves phase idle -> codeSent', () async {
     final repo = _MockRepo();
     when(() => repo.sendOtp(any())).thenAnswer((_) async {});
-    final container = ProviderContainer(overrides: [
-      authRepositoryProvider.overrideWithValue(repo),
-    ]);
+    final container = ProviderContainer(
+      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+    );
     addTearDown(container.dispose);
     final ctrl = container.read(authControllerProvider.notifier);
     await ctrl.sendOtp('+84900000001');
@@ -31,13 +31,16 @@ void main() {
   test('verifyOtp thành công → log event login (P0-3)', () async {
     final repo = _MockRepo();
     when(() => repo.sendOtp(any())).thenAnswer((_) async {});
-    when(() => repo.verifyOtp(any(), any()))
-        .thenAnswer((_) async => AuthResponse());
+    when(
+      () => repo.verifyOtp(any(), any()),
+    ).thenAnswer((_) async => AuthResponse());
     final analytics = RecordingAnalytics();
-    final container = ProviderContainer(overrides: [
-      authRepositoryProvider.overrideWithValue(repo),
-      analyticsProvider.overrideWithValue(analytics),
-    ]);
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repo),
+        analyticsProvider.overrideWithValue(analytics),
+      ],
+    );
     addTearDown(container.dispose);
     final ctrl = container.read(authControllerProvider.notifier);
     await ctrl.sendOtp('+84900000001');
@@ -48,12 +51,16 @@ void main() {
   test('verifyOtp lỗi → KHÔNG log login (P0-3)', () async {
     final repo = _MockRepo();
     when(() => repo.sendOtp(any())).thenAnswer((_) async {});
-    when(() => repo.verifyOtp(any(), any())).thenThrow(Exception('otp_expired'));
+    when(
+      () => repo.verifyOtp(any(), any()),
+    ).thenThrow(Exception('otp_expired'));
     final analytics = RecordingAnalytics();
-    final container = ProviderContainer(overrides: [
-      authRepositoryProvider.overrideWithValue(repo),
-      analyticsProvider.overrideWithValue(analytics),
-    ]);
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repo),
+        analyticsProvider.overrideWithValue(analytics),
+      ],
+    );
     addTearDown(container.dispose);
     final ctrl = container.read(authControllerProvider.notifier);
     await ctrl.sendOtp('+84900000001');
@@ -64,25 +71,30 @@ void main() {
 
   // UI review vòng cuối: state KHÔNG bao giờ giữ e.toString() — chỉ giữ
   // AuthErrorKind đã phân loại để UI map sang message VI thân thiện.
-  test('sendOtp ném AuthApiException → error = sendFailed (không raw)', () async {
-    final repo = _MockRepo();
-    when(() => repo.sendOtp(any())).thenThrow(
-      AuthApiException(
-        'Error sending confirmation OTP to provider: see '
-        'https://www.twilio.com/docs/errors/60203',
-        statusCode: '422',
-        code: 'sms_send_failed',
-      ),
-    );
-    final container = ProviderContainer(overrides: [
-      authRepositoryProvider.overrideWithValue(repo),
-    ]);
-    addTearDown(container.dispose);
-    await container.read(authControllerProvider.notifier).sendOtp('+84900000001');
-    final state = container.read(authControllerProvider);
-    expect(state.phase, AuthPhase.error);
-    expect(state.error, AuthErrorKind.sendFailed);
-  });
+  test(
+    'sendOtp ném AuthApiException → error = sendFailed (không raw)',
+    () async {
+      final repo = _MockRepo();
+      when(() => repo.sendOtp(any())).thenThrow(
+        AuthApiException(
+          'Error sending confirmation OTP to provider: see '
+          'https://www.twilio.com/docs/errors/60203',
+          statusCode: '422',
+          code: 'sms_send_failed',
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [authRepositoryProvider.overrideWithValue(repo)],
+      );
+      addTearDown(container.dispose);
+      await container
+          .read(authControllerProvider.notifier)
+          .sendOtp('+84900000001');
+      final state = container.read(authControllerProvider);
+      expect(state.phase, AuthPhase.error);
+      expect(state.error, AuthErrorKind.sendFailed);
+    },
+  );
 
   test('verifyOtp ném AuthApiException → error = otpInvalid', () async {
     final repo = _MockRepo();
@@ -94,25 +106,31 @@ void main() {
         code: 'otp_expired',
       ),
     );
-    final container = ProviderContainer(overrides: [
-      authRepositoryProvider.overrideWithValue(repo),
-    ]);
+    final container = ProviderContainer(
+      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+    );
     addTearDown(container.dispose);
     final ctrl = container.read(authControllerProvider.notifier);
     await ctrl.sendOtp('+84900000001');
     await ctrl.verifyOtp('000000');
-    expect(container.read(authControllerProvider).error, AuthErrorKind.otpInvalid);
+    expect(
+      container.read(authControllerProvider).error,
+      AuthErrorKind.otpInvalid,
+    );
   });
 
   test('lỗi mạng (SocketException) → error = network', () async {
     final repo = _MockRepo();
-    when(() => repo.sendOtp(any()))
-        .thenThrow(const SocketException('Failed host lookup: supabase.co'));
-    final container = ProviderContainer(overrides: [
-      authRepositoryProvider.overrideWithValue(repo),
-    ]);
+    when(
+      () => repo.sendOtp(any()),
+    ).thenThrow(const SocketException('Failed host lookup: supabase.co'));
+    final container = ProviderContainer(
+      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+    );
     addTearDown(container.dispose);
-    await container.read(authControllerProvider.notifier).sendOtp('+84900000001');
+    await container
+        .read(authControllerProvider.notifier)
+        .sendOtp('+84900000001');
     expect(container.read(authControllerProvider).error, AuthErrorKind.network);
   });
 }

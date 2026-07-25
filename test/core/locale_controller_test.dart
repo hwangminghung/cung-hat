@@ -32,9 +32,7 @@ void main() {
 
   test('seed qua initialLocaleProvider', () {
     final c = ProviderContainer(
-      overrides: [
-        initialLocaleProvider.overrideWithValue(const Locale('en')),
-      ],
+      overrides: [initialLocaleProvider.overrideWithValue(const Locale('en'))],
     );
     expect(c.read(localeControllerProvider), const Locale('en'));
   });

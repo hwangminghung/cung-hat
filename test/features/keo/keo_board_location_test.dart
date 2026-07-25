@@ -75,23 +75,22 @@ void main() {
     },
   );
 
-  testWidgets(
-    'board rỗng + vị trí OK (hoặc chưa thử) → empty state thường',
-    (tester) async {
-      final repo = _CountingKeoRepository();
-      await tester.pumpWidget(
-        _wrap(
-          repo: repo,
-          locationService: _MockLocationService(),
-          status: LocationCaptureStatus.success,
-        ),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('board rỗng + vị trí OK (hoặc chưa thử) → empty state thường', (
+    tester,
+  ) async {
+    final repo = _CountingKeoRepository();
+    await tester.pumpWidget(
+      _wrap(
+        repo: repo,
+        locationService: _MockLocationService(),
+        status: LocationCaptureStatus.success,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('Chưa có kèo quanh đây'), findsOneWidget);
-      expect(find.text('Cần quyền vị trí'), findsNothing);
-    },
-  );
+    expect(find.text('Chưa có kèo quanh đây'), findsOneWidget);
+    expect(find.text('Cần quyền vị trí'), findsNothing);
+  });
 
   testWidgets(
     'Thử lại trên board thành công → fetch lại kèo + về empty state thường',

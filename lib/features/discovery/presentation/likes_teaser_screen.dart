@@ -41,7 +41,8 @@ class LikesTeaserScreen extends ConsumerWidget {
         error: (_, _) => EmptyState(
           icon: Icons.wifi_off_rounded,
           title: l10n?.teaserLoadError ?? 'Không tải được danh sách',
-          subtitle: l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+          subtitle:
+              l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
           actionLabel: l10n?.commonRetry ?? 'Thử lại',
           onAction: () => ref.invalidate(likesTeaserProvider),
         ),
@@ -51,7 +52,8 @@ class LikesTeaserScreen extends ConsumerWidget {
               icon: Icons.favorite_border_rounded,
               title: l10n?.likesEmptyTitle ?? 'Chưa có ai thích bạn',
               subtitle:
-                  l10n?.teaserEmptySub ?? 'Hoàn thiện hồ sơ để được thấy nhiều hơn nhé.',
+                  l10n?.teaserEmptySub ??
+                  'Hoàn thiện hồ sơ để được thấy nhiều hơn nhé.',
             );
           }
           return Column(
@@ -99,7 +101,8 @@ class LikesTeaserScreen extends ConsumerWidget {
                     ),
                     icon: const Icon(Icons.workspace_premium_rounded),
                     label: Text(
-                      l10n?.teaserUnlockCta ?? 'Mở khoá với Pro — xem ai thích bạn',
+                      l10n?.teaserUnlockCta ??
+                          'Mở khoá với Pro — xem ai thích bạn',
                     ),
                   ),
                 ),

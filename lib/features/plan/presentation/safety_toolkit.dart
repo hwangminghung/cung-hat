@@ -26,7 +26,8 @@ class SafetyToolkit extends ConsumerWidget {
                 final link = 'cunghat://plan/$token';
                 await SharePlus.instance.share(
                   ShareParams(
-                    text: l10n?.safetyShareMessage(link) ??
+                    text:
+                        l10n?.safetyShareMessage(link) ??
                         'Mình đi hát, đây là kế hoạch: $link',
                   ),
                 );
@@ -35,7 +36,8 @@ class SafetyToolkit extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        l10n?.safetyShareError ?? 'Không tạo được liên kết chia sẻ',
+                        l10n?.safetyShareError ??
+                            'Không tạo được liên kết chia sẻ',
                       ),
                     ),
                   );

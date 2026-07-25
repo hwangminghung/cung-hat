@@ -5,12 +5,16 @@ import '../data/discovery_repository.dart';
 /// lỗi "hết người quanh đây" khi thật ra là thiếu quyền/GPS tắt/mạng lỗi.
 enum LocationCaptureStatus {
   success,
+
   /// Định vị hệ thống (GPS/Location Services) đang tắt.
   serviceDisabled,
+
   /// User từ chối quyền (gồm cả deniedForever — chỉ mở app settings mới gỡ được).
   permissionDenied,
+
   /// Có quyền nhưng không bắt được fix và không có vị trí cache.
   noFix,
+
   /// Bắt được vị trí nhưng đẩy lên server lỗi (RPC/offline).
   pushFailed,
 }
@@ -49,8 +53,8 @@ class LocationService {
   /// thống; thiếu quyền → cài đặt của app (đường duy nhất khi deniedForever).
   Future<bool> openSettingsFor(LocationCaptureStatus status) =>
       status == LocationCaptureStatus.serviceDisabled
-          ? Geolocator.openLocationSettings()
-          : Geolocator.openAppSettings();
+      ? Geolocator.openLocationSettings()
+      : Geolocator.openAppSettings();
 
   /// null = được phép đọc vị trí; khác null = lý do bị chặn.
   Future<LocationCaptureStatus?> _gatekeep() async {

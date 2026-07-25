@@ -10,21 +10,26 @@ import '../domain/like_teaser.dart';
 import '../domain/music_themes.dart';
 import 'location_service.dart';
 
-final discoveryRepositoryProvider =
-    Provider((ref) => DiscoveryRepository(ref.watch(supabaseClientProvider)));
-final locationServiceProvider =
-    Provider((ref) => LocationService(ref.watch(discoveryRepositoryProvider)));
+final discoveryRepositoryProvider = Provider(
+  (ref) => DiscoveryRepository(ref.watch(supabaseClientProvider)),
+);
+final locationServiceProvider = Provider(
+  (ref) => LocationService(ref.watch(discoveryRepositoryProvider)),
+);
 
 /// Kết quả lần captureAndPush GẦN NHẤT (P0-1) — null = chưa thử lần nào.
 /// Deck Đôi ghi khi vào tab; board Kèo đọc chung (list_open_keos cũng cần vị
 /// trí đã lưu) nên cả hai màn phân biệt được "thiếu vị trí" với "hết người".
-final locationStatusProvider =
-    StateProvider<LocationCaptureStatus?>((ref) => null);
+final locationStatusProvider = StateProvider<LocationCaptureStatus?>(
+  (ref) => null,
+);
 
 /// (auto_expand, radius_km) đã lưu server-side — nguồn chính cho Bộ lọc và
 /// cho bán kính hiệu lực của deck (xem [candidatesProvider]).
-final discoveryPrefsProvider = FutureProvider<({bool autoExpand, int radiusKm})>(
-    (ref) => ref.watch(discoveryRepositoryProvider).getDiscoveryPrefs());
+final discoveryPrefsProvider =
+    FutureProvider<({bool autoExpand, int radiusKm})>(
+      (ref) => ref.watch(discoveryRepositoryProvider).getDiscoveryPrefs(),
+    );
 
 /// Override PHIÊN (session) cho bán kính — one-shot "mở rộng 100km" khi deck
 /// rỗng. null = dùng bán kính đã lưu server ([discoveryPrefsProvider]); khác
@@ -38,12 +43,15 @@ final deckRadiusProvider = StateProvider<int?>((ref) => null);
 /// không thì bán kính đã lưu server ([discoveryPrefsProvider]); lỗi đọc pref
 /// (offline/RPC) nuốt về mặc định 50 — không được chặn deck chỉ vì bộ lọc
 /// chưa tải xong.
-final candidatesProvider =
-    FutureProvider.family<List<Candidate>, String?>((ref, genre) async {
+final candidatesProvider = FutureProvider.family<List<Candidate>, String?>((
+  ref,
+  genre,
+) async {
   final override = ref.watch(deckRadiusProvider);
   int radius;
   try {
-    radius = override ?? (await ref.watch(discoveryPrefsProvider.future)).radiusKm;
+    radius =
+        override ?? (await ref.watch(discoveryPrefsProvider.future)).radiusKm;
   } catch (_) {
     radius = override ?? 50;
   }
@@ -52,17 +60,21 @@ final candidatesProvider =
       .getCandidates(radiusKm: radius, genre: genre);
 });
 final whoLikedMeProvider = FutureProvider<List<Candidate>>(
-    (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe());
+  (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe(),
+);
 
 /// Teaser "Ai thích bạn" cho user free — bản mosaic server-side, không id/tên.
 final likesTeaserProvider = FutureProvider<List<LikeTeaser>>(
-    (ref) => ref.watch(discoveryRepositoryProvider).getLikesTeaser());
+  (ref) => ref.watch(discoveryRepositoryProvider).getLikesTeaser(),
+);
 
 /// Deck Đôi trộn ứng viên thật với thẻ quảng bá Kèo (mục 13 Tinder-parity).
 /// Kèo lỗi/chưa tải không được chặn deck chính — nuốt lỗi, coi như rỗng.
 /// [genre] theo family của candidatesProvider ở trên.
-final deckItemsProvider =
-    FutureProvider.family<List<DeckItem>, String?>((ref, genre) async {
+final deckItemsProvider = FutureProvider.family<List<DeckItem>, String?>((
+  ref,
+  genre,
+) async {
   final candidates = await ref.watch(candidatesProvider(genre).future);
   List<Keo> keos = const [];
   if (genre == null) {
@@ -76,9 +88,11 @@ final deckItemsProvider =
 
 /// Số người "live" (active 7 ngày, quanh 50km) mỗi chủ đề nhạc — cho board
 /// Khám Phá (ThemeBoardScreen).
-final themeDeckCountsProvider = FutureProvider<Map<String, int>>((ref) => ref
-    .watch(discoveryRepositoryProvider)
-    .getThemeDeckCounts([for (final t in musicThemes) t.genreId]));
+final themeDeckCountsProvider = FutureProvider<Map<String, int>>(
+  (ref) => ref.watch(discoveryRepositoryProvider).getThemeDeckCounts([
+    for (final t in musicThemes) t.genreId,
+  ]),
+);
 
 /// Thời điểm hết hạn của lượt Boost đang chạy; null khi không boost.
 final activeBoostProvider = StateProvider<DateTime?>((ref) => null);

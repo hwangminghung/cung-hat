@@ -4,8 +4,10 @@ import 'package:cung_hat/core/theme/app_theme.dart';
 import 'package:cung_hat/features/discovery/application/location_service.dart';
 import 'package:cung_hat/features/discovery/presentation/location_error_state.dart';
 
-Widget _wrap(Widget child) =>
-    MaterialApp(theme: AppTheme.light(), home: Scaffold(body: child));
+Widget _wrap(Widget child) => MaterialApp(
+  theme: AppTheme.light(),
+  home: Scaffold(body: child),
+);
 
 void main() {
   testWidgets('permissionDenied → tiêu đề quyền + Mở cài đặt + Thử lại', (

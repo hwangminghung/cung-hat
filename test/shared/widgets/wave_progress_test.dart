@@ -2,8 +2,9 @@ import 'package:cung_hat/shared/widgets/wave_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _wrap(double progress) =>
-    MaterialApp(home: Scaffold(body: WaveProgress(progress: progress)));
+Widget _wrap(double progress) => MaterialApp(
+  home: Scaffold(body: WaveProgress(progress: progress)),
+);
 
 WaveProgressPainter _painter(WidgetTester tester) {
   final paintFinder = find.descendant(

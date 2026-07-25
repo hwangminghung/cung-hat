@@ -2,7 +2,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/venue_suggestion.dart';
 
 class Plan {
-  Plan({required this.id, required this.keoId, required this.venueId, required this.scheduledAt, required this.status});
+  Plan({
+    required this.id,
+    required this.keoId,
+    required this.venueId,
+    required this.scheduledAt,
+    required this.status,
+  });
   final String id;
   final String keoId;
   final String venueId;
@@ -28,9 +34,14 @@ class PlanRepository {
   PlanRepository(this._client);
   final SupabaseClient _client;
 
-  Future<List<VenueSuggestion>> nearestVenues(String keoId, {int limit = 5}) async {
-    final rows = await _client.rpc('nearest_venues_for_keo',
-        params: {'p_keo': keoId, 'p_limit': limit});
+  Future<List<VenueSuggestion>> nearestVenues(
+    String keoId, {
+    int limit = 5,
+  }) async {
+    final rows = await _client.rpc(
+      'nearest_venues_for_keo',
+      params: {'p_keo': keoId, 'p_limit': limit},
+    );
     return (rows as List)
         .map((e) => VenueSuggestion.fromJson(Map<String, dynamic>.from(e)))
         .toList();
@@ -38,7 +49,8 @@ class PlanRepository {
 
   Future<MapPoint?> getKeoMidpoint(String keoId) async {
     final rows =
-        await _client.rpc('get_keo_midpoint', params: {'p_keo': keoId}) as List<dynamic>;
+        await _client.rpc('get_keo_midpoint', params: {'p_keo': keoId})
+            as List<dynamic>;
     if (rows.isEmpty) return null;
     final m = rows.first as Map<String, dynamic>;
     final lat = (m['lat'] as num?)?.toDouble();
@@ -47,21 +59,30 @@ class PlanRepository {
     return MapPoint(lat: lat, lng: lng);
   }
 
-  Future<String> proposePlan(String keoId, String venueId, DateTime when) async {
-    final id = await _client.rpc('propose_keo_plan', params: {
-      'p_keo': keoId,
-      'p_venue': venueId,
-      'p_when': when.toUtc().toIso8601String(),
-    });
+  Future<String> proposePlan(
+    String keoId,
+    String venueId,
+    DateTime when,
+  ) async {
+    final id = await _client.rpc(
+      'propose_keo_plan',
+      params: {
+        'p_keo': keoId,
+        'p_venue': venueId,
+        'p_when': when.toUtc().toIso8601String(),
+      },
+    );
     return id as String;
   }
 
   Future<Plan?> currentPlan(String keoId) async {
     final row = await _client
-        .from('plans').select()
+        .from('plans')
+        .select()
         .eq('keo_id', keoId)
         .order('created_at', ascending: false)
-        .limit(1).maybeSingle();
+        .limit(1)
+        .maybeSingle();
     return row == null ? null : Plan.fromJson(Map<String, dynamic>.from(row));
   }
 
@@ -74,23 +95,34 @@ class PlanRepository {
   }
 
   Future<String> createShareLink(String planId) async {
-    final tok = await _client.rpc('create_share_link', params: {'p_plan': planId});
+    final tok = await _client.rpc(
+      'create_share_link',
+      params: {'p_plan': planId},
+    );
     return tok as String;
   }
 
   Future<Map<String, dynamic>> resolveShare(String token) async {
-    final res = await _client.rpc('resolve_share_plan', params: {'p_token': token});
+    final res = await _client.rpc(
+      'resolve_share_plan',
+      params: {'p_token': token},
+    );
     return Map<String, dynamic>.from(res as Map);
   }
 
   Future<String> startVenuePayment({
-    required String planId, required String venueId, required String gateway,
+    required String planId,
+    required String venueId,
+    required String gateway,
   }) async {
-    final res = await _client.functions.invoke('create-venue-payment', body: {
-      'plan_id': planId, 'venue_id': venueId, 'gateway': gateway,
-    });
+    final res = await _client.functions.invoke(
+      'create-venue-payment',
+      body: {'plan_id': planId, 'venue_id': venueId, 'gateway': gateway},
+    );
     if (res.status >= 400) {
-      throw Exception('create-venue-payment failed (${res.status}): ${res.data}');
+      throw Exception(
+        'create-venue-payment failed (${res.status}): ${res.data}',
+      );
     }
     return (res.data as Map)['pay_url'] as String;
   }

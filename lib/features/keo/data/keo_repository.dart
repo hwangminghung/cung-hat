@@ -9,7 +9,10 @@ class KeoRepository {
   final SupabaseClient _client;
 
   Future<List<Keo>> listOpenKeos({int limit = 30}) async {
-    final rows = await _client.rpc('list_open_keos', params: {'p_limit': limit});
+    final rows = await _client.rpc(
+      'list_open_keos',
+      params: {'p_limit': limit},
+    );
     return (rows as List)
         .map((e) => Keo.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
@@ -41,11 +44,15 @@ class KeoRepository {
   }
 
   Future<List<KeoMatchSuggestion>> suggestMatch({int limit = 3}) async {
-    final rows =
-        await _client.rpc('suggest_keo_match', params: {'p_limit': limit});
+    final rows = await _client.rpc(
+      'suggest_keo_match',
+      params: {'p_limit': limit},
+    );
     return (rows as List)
-        .map((e) =>
-            KeoMatchSuggestion.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map(
+          (e) =>
+              KeoMatchSuggestion.fromJson(Map<String, dynamic>.from(e as Map)),
+        )
         .toList();
   }
 
@@ -62,19 +69,22 @@ class KeoRepository {
     List<String> genres = const [],
     String joinMode = 'approval',
   }) async {
-    final id = await _client.rpc('create_keo', params: {
-      'p_title': title,
-      'p_lat': lat,
-      'p_lng': lng,
-      'p_area': area,
-      'p_start': start.toUtc().toIso8601String(),
-      'p_end': end.toUtc().toIso8601String(),
-      'p_size': size,
-      'p_intent': intent,
-      'p_vibe': vibe,
-      'p_genres': genres,
-      'p_join_mode': joinMode,
-    });
+    final id = await _client.rpc(
+      'create_keo',
+      params: {
+        'p_title': title,
+        'p_lat': lat,
+        'p_lng': lng,
+        'p_area': area,
+        'p_start': start.toUtc().toIso8601String(),
+        'p_end': end.toUtc().toIso8601String(),
+        'p_size': size,
+        'p_intent': intent,
+        'p_vibe': vibe,
+        'p_genres': genres,
+        'p_join_mode': joinMode,
+      },
+    );
     return id as String;
   }
 
@@ -86,14 +96,17 @@ class KeoRepository {
     List<String> genres = const [],
     String joinMode = 'open',
   }) async {
-    final id = await _client.rpc('create_auto_matched_keo', params: {
-      'p_title': title,
-      'p_start': start.toUtc().toIso8601String(),
-      'p_end': end.toUtc().toIso8601String(),
-      'p_size': size,
-      'p_genres': genres,
-      'p_join_mode': joinMode,
-    });
+    final id = await _client.rpc(
+      'create_auto_matched_keo',
+      params: {
+        'p_title': title,
+        'p_start': start.toUtc().toIso8601String(),
+        'p_end': end.toUtc().toIso8601String(),
+        'p_size': size,
+        'p_genres': genres,
+        'p_join_mode': joinMode,
+      },
+    );
     return id as String;
   }
 
@@ -102,13 +115,17 @@ class KeoRepository {
   }
 
   Future<void> approve(String keoId, String userId) async {
-    await _client
-        .rpc('approve_join', params: {'p_keo': keoId, 'p_user': userId});
+    await _client.rpc(
+      'approve_join',
+      params: {'p_keo': keoId, 'p_user': userId},
+    );
   }
 
   Future<void> decline(String keoId, String userId) async {
-    await _client
-        .rpc('decline_join', params: {'p_keo': keoId, 'p_user': userId});
+    await _client.rpc(
+      'decline_join',
+      params: {'p_keo': keoId, 'p_user': userId},
+    );
   }
 
   Future<void> leave(String keoId) async {
@@ -120,18 +137,23 @@ class KeoRepository {
   }
 
   Future<String> createKeoShareLink(String keoId) async {
-    final res =
-        await _client.rpc('create_keo_share_link', params: {'p_keo': keoId});
+    final res = await _client.rpc(
+      'create_keo_share_link',
+      params: {'p_keo': keoId},
+    );
     return res as String;
   }
 
   /// null = token sai/het han-khong-ton-tai/keo da xoa.
   Future<SharedKeo?> resolveSharedKeo(String token) async {
-    final res =
-        await _client.rpc('resolve_share_keo', params: {'p_token': token});
+    final res = await _client.rpc(
+      'resolve_share_keo',
+      params: {'p_token': token},
+    );
     if (res == null) return null;
     final m = Map<String, dynamic>.from(
-        res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map);
+      res is List ? (res.isEmpty ? {} : res.first as Map) : res as Map,
+    );
     if (m['keo_id'] == null) return null; // composite rong (token sai)
     return SharedKeo.fromJson(m);
   }

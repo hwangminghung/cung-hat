@@ -7,7 +7,7 @@ class AppConfig {
   bool get isConfigured => supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   factory AppConfig.fromEnv() => const AppConfig(
-        supabaseUrl: String.fromEnvironment('SUPABASE_URL'),
-        supabaseAnonKey: String.fromEnvironment('SUPABASE_ANON_KEY'),
-      );
+    supabaseUrl: String.fromEnvironment('SUPABASE_URL'),
+    supabaseAnonKey: String.fromEnvironment('SUPABASE_ANON_KEY'),
+  );
 }

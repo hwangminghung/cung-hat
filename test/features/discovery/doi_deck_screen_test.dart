@@ -162,7 +162,10 @@ void main() {
             (ref) async => (autoExpand: false, radiusKm: 50),
           ),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -192,7 +195,10 @@ void main() {
             (ref) async => (autoExpand: false, radiusKm: 50),
           ),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pump();
@@ -215,15 +221,19 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          candidatesProvider(null)
-              .overrideWith((ref) async => throw Exception('boom')),
+          candidatesProvider(
+            null,
+          ).overrideWith((ref) async => throw Exception('boom')),
           locationServiceProvider.overrideWithValue(locationService),
           entitlementsProvider.overrideWith((ref) async => <String>{}),
           discoveryPrefsProvider.overrideWith(
             (ref) async => (autoExpand: false, radiusKm: 50),
           ),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -329,7 +339,10 @@ void main() {
           ),
           analyticsProvider.overrideWithValue(analytics),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -365,7 +378,10 @@ void main() {
           entitlementsProvider.overrideWith((ref) async => <String>{}),
           analyticsProvider.overrideWithValue(analytics),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -414,7 +430,10 @@ void main() {
           ),
           analyticsProvider.overrideWithValue(analytics),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -427,51 +446,58 @@ void main() {
     expect(analytics.events, contains('match'));
   });
 
-  testWidgets('P2-c: lần đầu có card → coach-mark vuốt; tap → tắt và KHÔNG hiện lại', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({});
-    final locationService = _FakeLocationService();
-    when(
-      () => locationService.captureAndPush(),
-    ).thenAnswer((_) async => LocationCaptureStatus.success);
+  testWidgets(
+    'P2-c: lần đầu có card → coach-mark vuốt; tap → tắt và KHÔNG hiện lại',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final locationService = _FakeLocationService();
+      when(
+        () => locationService.captureAndPush(),
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
 
-    final overrides = [
-      photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
-      candidatesProvider(null).overrideWith(
-        (ref) async => const [
-          Candidate(id: 'c1', displayName: 'A'),
-          Candidate(id: 'c2', displayName: 'B'),
-        ],
-      ),
-      locationServiceProvider.overrideWithValue(locationService),
-      entitlementsProvider.overrideWith((ref) async => <String>{}),
-    ];
+      final overrides = [
+        photoRepositoryProvider.overrideWithValue(_FakePhotoRepository()),
+        candidatesProvider(null).overrideWith(
+          (ref) async => const [
+            Candidate(id: 'c1', displayName: 'A'),
+            Candidate(id: 'c2', displayName: 'B'),
+          ],
+        ),
+        locationServiceProvider.overrideWithValue(locationService),
+        entitlementsProvider.overrideWith((ref) async => <String>{}),
+      ];
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: overrides,
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: overrides,
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('swipe_coach_mark')), findsOneWidget);
+      expect(find.byKey(const Key('swipe_coach_mark')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('swipe_coach_mark')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('swipe_coach_mark')), findsNothing);
+      await tester.tap(find.byKey(const Key('swipe_coach_mark')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('swipe_coach_mark')), findsNothing);
 
-    // Dựng lại màn (mô phỏng lần vào sau) → cờ prefs đã set, không hiện lại.
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: overrides,
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('swipe_coach_mark')), findsNothing);
-  });
+      // Dựng lại màn (mô phỏng lần vào sau) → cờ prefs đã set, không hiện lại.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: overrides,
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DoiDeckScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('swipe_coach_mark')), findsNothing);
+    },
+  );
 
   testWidgets('P2-c: deck rỗng → không hiện coach-mark', (tester) async {
     SharedPreferences.setMockInitialValues({});
@@ -490,7 +516,10 @@ void main() {
             (ref) async => (autoExpand: false, radiusKm: 50),
           ),
         ],
-        child: MaterialApp(theme: AppTheme.light(), home: const DoiDeckScreen()),
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const DoiDeckScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -502,7 +531,9 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
 
     // recordSwipe trả future treo để dồn 2 lỗi like_limit về cùng lúc,
     // mô phỏng user vuốt nhanh khi đã hết lượt.
@@ -555,7 +586,9 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
 
     // recordSwipe raise like_limit — server chưa ghi lượt vuốt, nên client
     // phải undo để card quay lại deck. Dùng completer để lỗi về SAU khi
@@ -613,7 +646,9 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
 
     final repo = _MockDiscoveryRepository();
     when(() => repo.activateBoost()).thenAnswer((_) async => DateTime.now());
@@ -695,7 +730,9 @@ void main() {
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(
-        find.text('Đang tăng hiển thị 30 phút — hồ sơ của bạn được ưu tiên quanh đây.'),
+        find.text(
+          'Đang tăng hiển thị 30 phút — hồ sơ của bạn được ưu tiên quanh đây.',
+        ),
         findsOneWidget,
       );
     },
@@ -705,7 +742,9 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
 
     // Expiry phải là UTC — mô phỏng đúng DateTime.parse('...Z') mà repo trả về
     // từ timestamptz. `expected` tính từ .toLocal() nên đúng ở mọi múi giờ;
@@ -751,7 +790,9 @@ void main() {
     tester,
   ) async {
     final locationService = _FakeLocationService();
-    when(() => locationService.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => locationService.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
 
     final repo = _MockDiscoveryRepository();
     when(() => repo.recordSwipe(any(), any())).thenAnswer((_) async => false);

@@ -50,8 +50,9 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
     final tomorrow = today.add(const Duration(days: 1));
     if (_sameDay(date, today)) return l10n?.chatToday ?? 'Hôm nay';
     if (_sameDay(date, tomorrow)) return l10n?.planTomorrow ?? 'Mai';
-    final weekdays =
-        (l10n?.planWeekdaysShort ?? 'T2,T3,T4,T5,T6,T7,CN').split(',');
+    final weekdays = (l10n?.planWeekdaysShort ?? 'T2,T3,T4,T5,T6,T7,CN').split(
+      ',',
+    );
     return weekdays[date.weekday - 1];
   }
 
@@ -124,8 +125,9 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                     children: [
                       Text(
                         Localizations.of<AppLocalizations>(
-                                    context, AppLocalizations)
-                                ?.planPickSchedule ??
+                              context,
+                              AppLocalizations,
+                            )?.planPickSchedule ??
                             'Chọn lịch hát',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
@@ -138,9 +140,11 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                   ),
                 ),
                 IconButton(
-                  tooltip: Localizations.of<AppLocalizations>(
-                              context, AppLocalizations)
-                          ?.commonClose ??
+                  tooltip:
+                      Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.commonClose ??
                       'Đóng',
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
@@ -197,8 +201,10 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                   onPressed: _pickCustomTime,
                   icon: const Icon(Icons.schedule),
                   label: Text(
-                    Localizations.of<AppLocalizations>(context, AppLocalizations)
-                            ?.planOtherTime ??
+                    Localizations.of<AppLocalizations>(
+                          context,
+                          AppLocalizations,
+                        )?.planOtherTime ??
                         'Giờ khác',
                   ),
                 ),
@@ -213,8 +219,10 @@ class _PlanTimePickerSheetState extends State<PlanTimePickerSheet> {
                     ? () => Navigator.of(context).pop(_selectedWhen)
                     : null,
                 child: Text(
-                  Localizations.of<AppLocalizations>(context, AppLocalizations)
-                          ?.planProposeCta ??
+                  Localizations.of<AppLocalizations>(
+                        context,
+                        AppLocalizations,
+                      )?.planProposeCta ??
                       'Đề xuất kế hoạch',
                 ),
               ),

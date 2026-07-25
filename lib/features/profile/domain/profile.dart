@@ -16,5 +16,6 @@ abstract class Profile with _$Profile {
     @Default(<Map<String, dynamic>>[]) List<Map<String, dynamic>> prompts,
   }) = _Profile;
 
-  factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
+  factory Profile.fromJson(Map<String, dynamic> json) =>
+      _$ProfileFromJson(json);
 }

@@ -200,22 +200,24 @@ class _PagerState extends State<_Pager> {
           ),
         if (!widget.swipeable)
           Positioned.fill(
-            child: Row(children: [
-              Expanded(
-                child: GestureDetector(
-                  key: const Key('photo_tap_left'),
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _go(-1),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    key: const Key('photo_tap_left'),
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _go(-1),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  key: const Key('photo_tap_right'),
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _go(1),
+                Expanded(
+                  child: GestureDetector(
+                    key: const Key('photo_tap_right'),
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _go(1),
+                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
           ),
       ],
     );

@@ -5,24 +5,28 @@ import '../../../l10n/app_localizations.dart';
 /// raise — cùng pattern keo_errors.dart).
 /// [L10N] message giữ VI làm fallback; UI truyền l10n qua [localizedMessage].
 enum DiscoverySwipeError {
-  likeLimit('Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.'),
+  likeLimit(
+    'Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.',
+  ),
   superLimit('Bạn đã hết lượt Siêu thích hôm nay.'),
   proRequired('Tính năng này dành cho thành viên Pro.'),
   boostActive('Bạn đang trong một lượt tăng hiển thị.'),
-  boostLimit('Bạn đã dùng hết lượt tăng hiển thị hôm nay. Thử lại vào ngày mai.'),
+  boostLimit(
+    'Bạn đã dùng hết lượt tăng hiển thị hôm nay. Thử lại vào ngày mai.',
+  ),
   unknown('Không lưu được lượt vuốt. Thử lại sau.');
 
   const DiscoverySwipeError(this.message);
   final String message;
 
   String localizedMessage(AppLocalizations? l10n) => switch (this) {
-        likeLimit => l10n?.deckErrorLikeLimit ?? message,
-        superLimit => l10n?.deckErrorSuperLimit ?? message,
-        proRequired => l10n?.deckErrorProRequired ?? message,
-        boostActive => l10n?.deckErrorBoostActive ?? message,
-        boostLimit => l10n?.deckErrorBoostLimit ?? message,
-        unknown => l10n?.deckErrorUnknown ?? message,
-      };
+    likeLimit => l10n?.deckErrorLikeLimit ?? message,
+    superLimit => l10n?.deckErrorSuperLimit ?? message,
+    proRequired => l10n?.deckErrorProRequired ?? message,
+    boostActive => l10n?.deckErrorBoostActive ?? message,
+    boostLimit => l10n?.deckErrorBoostLimit ?? message,
+    unknown => l10n?.deckErrorUnknown ?? message,
+  };
 }
 
 DiscoverySwipeError discoverySwipeError(Object e) {

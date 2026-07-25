@@ -66,4 +66,6 @@ class AnalyticsService {
   }
 }
 
-final analyticsProvider = Provider<AnalyticsService>((ref) => AnalyticsService());
+final analyticsProvider = Provider<AnalyticsService>(
+  (ref) => AnalyticsService(),
+);

@@ -1,6 +1,14 @@
 const _riskyPatterns = <String>[
-  'số tài khoản', 'tài khoản ngân hàng', 'chuyển khoản', 'mã otp', 'vay tiền',
-  'bank account', 'send money', 'transfer', 'otp code', 'crypto',
+  'số tài khoản',
+  'tài khoản ngân hàng',
+  'chuyển khoản',
+  'mã otp',
+  'vay tiền',
+  'bank account',
+  'send money',
+  'transfer',
+  'otp code',
+  'crypto',
 ];
 
 bool messageLooksUnsafe(String text) {

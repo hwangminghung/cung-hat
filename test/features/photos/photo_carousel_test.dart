@@ -15,9 +15,7 @@ Future<void> _pump(
 }) {
   return tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        signedUrlsProvider(userId).overrideWith((ref) async => urls),
-      ],
+      overrides: [signedUrlsProvider(userId).overrideWith((ref) async => urls)],
       child: MaterialApp(
         home: Scaffold(
           body: PhotoCarousel(
@@ -60,8 +58,9 @@ void main() {
   // only counted PageView + dots, so a pager that fed every page urls[0] (or
   // mis-indexed page 2) would have passed while the real 2nd photo never
   // rendered. We assert on the NetworkImage each built page actually carries.
-  testWidgets('swipe sang ảnh #2 → Image.network dùng đúng url thứ 2',
-      (tester) async {
+  testWidgets('swipe sang ảnh #2 → Image.network dùng đúng url thứ 2', (
+    tester,
+  ) async {
     await _pump(
       tester,
       userId: 'u2b',
@@ -87,8 +86,9 @@ void main() {
     expect(urlOfVisibleImage(), 'https://photo-1');
   });
 
-  testWidgets('0 ảnh + radius → fallback vẫn bo góc (ClipRRect)',
-      (tester) async {
+  testWidgets('0 ảnh + radius → fallback vẫn bo góc (ClipRRect)', (
+    tester,
+  ) async {
     await _pump(
       tester,
       userId: 'u3',

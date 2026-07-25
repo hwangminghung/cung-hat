@@ -3,7 +3,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('placeholder — widget smoke test migrated to test/app/home_shell_test.dart', () {
-    expect(true, isTrue);
-  });
+  test(
+    'placeholder — widget smoke test migrated to test/app/home_shell_test.dart',
+    () {
+      expect(true, isTrue);
+    },
+  );
 }

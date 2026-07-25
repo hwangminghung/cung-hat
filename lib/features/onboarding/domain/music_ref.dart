@@ -20,6 +20,10 @@ abstract class Artist with _$Artist {
 
 @freezed
 abstract class Song with _$Song {
-  const factory Song({required String id, required String title, required String artist}) = _Song;
+  const factory Song({
+    required String id,
+    required String title,
+    required String artist,
+  }) = _Song;
   factory Song.fromJson(Map<String, dynamic> j) => _$SongFromJson(j);
 }

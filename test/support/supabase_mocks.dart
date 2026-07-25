@@ -4,7 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Mock Supabase client for repository tests.
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 
-class _MockFilterBuilder extends Mock implements PostgrestFilterBuilder<dynamic> {}
+class _MockFilterBuilder extends Mock
+    implements PostgrestFilterBuilder<dynamic> {}
 
 /// A stubbed [PostgrestFilterBuilder] that resolves to [value] when awaited.
 ///
@@ -24,9 +25,11 @@ class _MockFilterBuilder extends Mock implements PostgrestFilterBuilder<dynamic>
 /// resolve to (mirroring what PostgREST returns for the RPC).
 PostgrestFilterBuilder<dynamic> rpcOk(dynamic value) {
   final builder = _MockFilterBuilder();
-  when(() => builder.then<dynamic>(any(), onError: any(named: 'onError')))
-      .thenAnswer((invocation) {
-    final onValue = invocation.positionalArguments[0] as dynamic Function(dynamic);
+  when(
+    () => builder.then<dynamic>(any(), onError: any(named: 'onError')),
+  ).thenAnswer((invocation) {
+    final onValue =
+        invocation.positionalArguments[0] as dynamic Function(dynamic);
     return Future<dynamic>.value(value).then<dynamic>(onValue);
   });
   return builder;

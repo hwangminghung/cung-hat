@@ -35,10 +35,9 @@ class OnboardingPhotosScreen extends StatelessWidget {
                 child: Text(
                   l10n?.onbPhotosSubOptional ??
                       'Không bắt buộc — bạn có thể bổ sung hoặc đổi ảnh bất cứ lúc nào trong Hồ sơ.',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const PhotoManagerSheet(showHandle: false),

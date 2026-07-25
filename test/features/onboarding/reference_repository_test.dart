@@ -24,12 +24,16 @@ PostgrestTransformBuilder<List<Map<String, dynamic>>> _resolves(
   List<Map<String, dynamic>> value,
 ) {
   final t = _MockTransform();
-  when(() => t.then<dynamic>(any(), onError: any(named: 'onError')))
-      .thenAnswer((invocation) {
-    final onValue = invocation.positionalArguments[0]
-        as dynamic Function(List<Map<String, dynamic>>);
-    return Future<List<Map<String, dynamic>>>.value(value).then<dynamic>(onValue);
-  });
+  when(() => t.then<dynamic>(any(), onError: any(named: 'onError'))).thenAnswer(
+    (invocation) {
+      final onValue =
+          invocation.positionalArguments[0]
+              as dynamic Function(List<Map<String, dynamic>>);
+      return Future<List<Map<String, dynamic>>>.value(
+        value,
+      ).then<dynamic>(onValue);
+    },
+  );
   return t;
 }
 
@@ -40,9 +44,11 @@ void main() {
     final fb = _MockFilter();
     when(() => client.from('music_genres')).thenAnswer((_) => qb);
     when(() => qb.select()).thenAnswer((_) => fb);
-    when(() => fb.order('sort')).thenAnswer((_) => _resolves([
-      {'id': 'vpop', 'name_vi': 'V-Pop', 'name_en': 'V-Pop', 'sort': 1},
-    ]));
+    when(() => fb.order('sort')).thenAnswer(
+      (_) => _resolves([
+        {'id': 'vpop', 'name_vi': 'V-Pop', 'name_en': 'V-Pop', 'sort': 1},
+      ]),
+    );
     final repo = ReferenceRepository(client);
     final genres = await repo.genres();
     expect(genres.single.id, 'vpop');

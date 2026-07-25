@@ -6,6 +6,7 @@ import 'package:cung_hat/core/providers/supabase_providers.dart';
 import 'package:cung_hat/features/auth/application/auth_providers.dart';
 
 class _MockClient extends Mock implements SupabaseClient {}
+
 class _MockAuth extends Mock implements GoTrueClient {}
 
 void main() {
@@ -15,9 +16,9 @@ void main() {
     when(() => client.auth).thenReturn(auth);
     when(() => auth.currentSession).thenReturn(null);
     when(() => auth.onAuthStateChange).thenAnswer((_) => const Stream.empty());
-    final container = ProviderContainer(overrides: [
-      supabaseClientProvider.overrideWithValue(client),
-    ]);
+    final container = ProviderContainer(
+      overrides: [supabaseClientProvider.overrideWithValue(client)],
+    );
     addTearDown(container.dispose);
     expect(container.read(isSignedInProvider), isFalse);
   });

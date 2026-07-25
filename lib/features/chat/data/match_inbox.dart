@@ -14,12 +14,12 @@ class MatchSummary {
   final int unread;
   final String? lastSenderId;
   factory MatchSummary.fromJson(Map<String, dynamic> j) => MatchSummary(
-        matchId: j['match_id'] as String,
-        otherId: j['other_id'] as String,
-        otherName: (j['other_name'] ?? '') as String,
-        unread: (j['unread'] ?? 0) as int,
-        lastSenderId: j['last_sender_id'] as String?,
-      );
+    matchId: j['match_id'] as String,
+    otherId: j['other_id'] as String,
+    otherName: (j['other_name'] ?? '') as String,
+    unread: (j['unread'] ?? 0) as int,
+    lastSenderId: j['last_sender_id'] as String?,
+  );
 }
 
 class MatchInbox {

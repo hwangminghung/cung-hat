@@ -41,17 +41,41 @@ CompletionResult profileCompletion(
   }
 
   final photos = p.photoPaths.length;
-  item(photos >= 1, 20,
-      l10n?.completionAddPhoto ?? 'Thêm ảnh đầu tiên → được thấy nhiều hơn hẳn');
-  item(photos >= 3, 10, l10n?.completionThreePhotos ?? 'Đủ 3 ảnh → x2 lượt được thấy');
-  item(p.bio?.trim().isNotEmpty == true, 15,
-      l10n?.completionWriteBio ?? 'Viết giới thiệu → +25% ghép đôi');
-  item(taste.genres >= 3, 15,
-      l10n?.completionPickGenres ?? 'Chọn đủ 3 thể loại → gợi ý chuẩn gu hơn');
-  item(taste.artists >= 1, 10, l10n?.completionAddArtist ?? 'Thêm nghệ sĩ yêu thích');
-  item(taste.baitu >= 3, 15, l10n?.completionAddBaitu ?? 'Thêm 3 bài tủ → dễ vào kèo hơn');
-  item(p.prompts.length >= 2, 15,
-      l10n?.completionAnswerPrompts ?? 'Trả lời 2 thẻ hỏi-đáp → có chuyện mà bắt');
+  item(
+    photos >= 1,
+    20,
+    l10n?.completionAddPhoto ?? 'Thêm ảnh đầu tiên → được thấy nhiều hơn hẳn',
+  );
+  item(
+    photos >= 3,
+    10,
+    l10n?.completionThreePhotos ?? 'Đủ 3 ảnh → x2 lượt được thấy',
+  );
+  item(
+    p.bio?.trim().isNotEmpty == true,
+    15,
+    l10n?.completionWriteBio ?? 'Viết giới thiệu → +25% ghép đôi',
+  );
+  item(
+    taste.genres >= 3,
+    15,
+    l10n?.completionPickGenres ?? 'Chọn đủ 3 thể loại → gợi ý chuẩn gu hơn',
+  );
+  item(
+    taste.artists >= 1,
+    10,
+    l10n?.completionAddArtist ?? 'Thêm nghệ sĩ yêu thích',
+  );
+  item(
+    taste.baitu >= 3,
+    15,
+    l10n?.completionAddBaitu ?? 'Thêm 3 bài tủ → dễ vào kèo hơn',
+  );
+  item(
+    p.prompts.length >= 2,
+    15,
+    l10n?.completionAnswerPrompts ?? 'Trả lời 2 thẻ hỏi-đáp → có chuyện mà bắt',
+  );
 
   missing.sort((a, b) {
     final byWeight = b.$1.compareTo(a.$1);

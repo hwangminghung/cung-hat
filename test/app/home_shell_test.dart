@@ -24,7 +24,9 @@ class _FakeLocationService extends Mock implements LocationService {}
 void main() {
   testWidgets('HomeShell shows 4 tabs and switches', (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => fakeLoc.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         // Tab 0 now hosts DoiDeckScreen, which reads candidatesProvider →
@@ -34,8 +36,9 @@ void main() {
         // with a fake that returns false so initState never touches Supabase and
         // never invalidates the empty-deck override.
         overrides: [
-          candidatesProvider(null)
-              .overrideWith((ref) => Future.value(<Candidate>[])),
+          candidatesProvider(
+            null,
+          ).overrideWith((ref) => Future.value(<Candidate>[])),
           locationServiceProvider.overrideWithValue(fakeLoc),
           openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
         ],
@@ -55,10 +58,13 @@ void main() {
     expect(find.text('Chưa có kèo quanh đây'), findsOneWidget);
   });
 
-  testWidgets('chọn tab Chat → inboxProvider refetch (kể cả lần quay lại)',
-      (tester) async {
+  testWidgets('chọn tab Chat → inboxProvider refetch (kể cả lần quay lại)', (
+    tester,
+  ) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => fakeLoc.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
     // inboxProvider là FutureProvider one-shot (KHÔNG autoDispose): không
     // invalidate khi chuyển tab thì lần quay lại Chat dùng cache cũ — pill
     // 'Đến lượt bạn'/badge unread trễ. Đếm số lần build để chứng minh refetch.
@@ -66,8 +72,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          candidatesProvider(null)
-              .overrideWith((ref) => Future.value(<Candidate>[])),
+          candidatesProvider(
+            null,
+          ).overrideWith((ref) => Future.value(<Candidate>[])),
           locationServiceProvider.overrideWithValue(fakeLoc),
           openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
           inboxProvider.overrideWith((ref) {
@@ -101,12 +108,15 @@ void main() {
   // chứng minh nhánh EN thật sự sống.
   testWidgets('locale EN → tab labels hiện tiếng Anh', (tester) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => fakeLoc.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          candidatesProvider(null)
-              .overrideWith((ref) => Future.value(<Candidate>[])),
+          candidatesProvider(
+            null,
+          ).overrideWith((ref) => Future.value(<Candidate>[])),
           locationServiceProvider.overrideWithValue(fakeLoc),
           openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
         ],
@@ -124,15 +134,19 @@ void main() {
     expect(find.text('Hồ sơ'), findsNothing);
   });
 
-  testWidgets('tab đã thăm giữ state khi chuyển đi (IndexedStack, audit M7)',
-      (tester) async {
+  testWidgets('tab đã thăm giữ state khi chuyển đi (IndexedStack, audit M7)', (
+    tester,
+  ) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => fakeLoc.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          candidatesProvider(null)
-              .overrideWith((ref) => Future.value(<Candidate>[])),
+          candidatesProvider(
+            null,
+          ).overrideWith((ref) => Future.value(<Candidate>[])),
           locationServiceProvider.overrideWithValue(fakeLoc),
           openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
           inboxProvider.overrideWith((ref) => Future.value(<MatchSummary>[])),
@@ -153,49 +167,59 @@ void main() {
   });
 
   testWidgets(
-      "tab Hồ sơ: dòng 'Ai đã thích bạn' có badge PRO (tránh bait-click)",
-      (tester) async {
+    "tab Hồ sơ: dòng 'Ai đã thích bạn' có badge PRO (tránh bait-click)",
+    (tester) async {
+      final fakeLoc = _FakeLocationService();
+      when(
+        () => fakeLoc.captureAndPush(),
+      ).thenAnswer((_) async => LocationCaptureStatus.success);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            candidatesProvider(
+              null,
+            ).overrideWith((ref) => Future.value(<Candidate>[])),
+            locationServiceProvider.overrideWithValue(fakeLoc),
+            openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
+            myProfileProvider.overrideWith((ref) => Future.value(null)),
+          ],
+          child: const MaterialApp(home: HomeShell()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Hồ sơ'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ProfileScreen), findsOneWidget);
+      expect(find.byKey(const Key('screen_18_profile')), findsOneWidget);
+      expect(find.widgetWithText(StampChip, 'PRO'), findsOneWidget);
+    },
+  );
+
+  testWidgets('tab Hồ sơ: có WaveProgress (thẻ hoàn thiện) + nút bánh răng', (
+    tester,
+  ) async {
     final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
+    when(
+      () => fakeLoc.captureAndPush(),
+    ).thenAnswer((_) async => LocationCaptureStatus.success);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          candidatesProvider(null)
-              .overrideWith((ref) => Future.value(<Candidate>[])),
-          locationServiceProvider.overrideWithValue(fakeLoc),
-          openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
-          myProfileProvider.overrideWith((ref) => Future.value(null)),
-        ],
-        child: const MaterialApp(home: HomeShell()),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Hồ sơ'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(ProfileScreen), findsOneWidget);
-    expect(find.byKey(const Key('screen_18_profile')), findsOneWidget);
-    expect(find.widgetWithText(StampChip, 'PRO'), findsOneWidget);
-  });
-
-  testWidgets('tab Hồ sơ: có WaveProgress (thẻ hoàn thiện) + nút bánh răng',
-      (tester) async {
-    final fakeLoc = _FakeLocationService();
-    when(() => fakeLoc.captureAndPush()).thenAnswer((_) async => LocationCaptureStatus.success);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          candidatesProvider(null)
-              .overrideWith((ref) => Future.value(<Candidate>[])),
+          candidatesProvider(
+            null,
+          ).overrideWith((ref) => Future.value(<Candidate>[])),
           locationServiceProvider.overrideWithValue(fakeLoc),
           openKeosProvider.overrideWith((ref) => Future.value(<Keo>[])),
           // _CompletionCard chỉ render khi profile + taste non-null và
           // percent < 100 → hồ sơ trống (0%) cho WaveProgress xuất hiện.
-          myProfileProvider
-              .overrideWith((ref) => Future.value(const Profile(id: 'u1'))),
-          myTasteCountsProvider
-              .overrideWith((ref) => Future.value(const TasteCounts(0, 0, 0))),
+          myProfileProvider.overrideWith(
+            (ref) => Future.value(const Profile(id: 'u1')),
+          ),
+          myTasteCountsProvider.overrideWith(
+            (ref) => Future.value(const TasteCounts(0, 0, 0)),
+          ),
         ],
         child: const MaterialApp(home: HomeShell()),
       ),
