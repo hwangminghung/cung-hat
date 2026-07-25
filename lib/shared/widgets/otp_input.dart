@@ -11,11 +11,18 @@ class OtpInput extends StatefulWidget {
     super.key,
     this.length = 6,
     this.semanticLabel,
+    this.hasError = false,
     required this.onChanged,
     this.onCompleted,
   });
   final int length;
   final String? semanticLabel;
+
+  /// [AUDIT 2026-07-25] Mã sai/hết hạn là nhánh THƯỜNG GẶP nhất của màn OTP,
+  /// nhưng widget trước đây không có cách nào thể hiện. Bật cờ này để viền ô
+  /// chuyển sang [AppColors.error]; màn gọi vẫn phải hiển thị câu lỗi bằng chữ
+  /// bên dưới — màu không được là tín hiệu duy nhất (MASTER.md anti-patterns).
+  final bool hasError;
   final ValueChanged<String> onChanged;
   final ValueChanged<String>? onCompleted;
 
@@ -60,6 +67,10 @@ class _OtpInputState extends State<OtpInput> {
                   autofocus: true,
                   keyboardType: TextInputType.number,
                   maxLength: widget.length,
+                  // [AUDIT 2026-07-25] Thiếu dòng này thì iOS không gợi ý mã từ
+                  // SMS trên bàn phím và Android không tự điền — người dùng phải
+                  // thoát app đọc tin nhắn rồi gõ tay. Một dòng, cứu cả bước OTP.
+                  autofillHints: const [AutofillHints.oneTimeCode],
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
                     labelText: widget.semanticLabel,
@@ -92,6 +103,7 @@ class _OtpInputState extends State<OtpInput> {
                             : '',
                         isActive: i == _controller.text.length,
                         isFilled: i < _controller.text.length,
+                        hasError: widget.hasError,
                       ),
                       if (i != widget.length - 1) const SizedBox(width: gap),
                     ],
@@ -112,19 +124,23 @@ class _DigitBox extends StatelessWidget {
     required this.value,
     required this.isActive,
     required this.isFilled,
+    this.hasError = false,
   });
 
   final double width;
   final String value;
   final bool isActive;
   final bool isFilled;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
-    final otpBorder = Border.all(
-      color: isFilled || isActive ? AppColors.primary : AppColors.ink,
-      width: 2,
-    );
+    // error > active/filled > mặc định. error #B42318 vs surface = 6.08:1,
+    // primary vs surface = 3.47:1 — cả hai đạt ngưỡng 3:1 của SC 1.4.11.
+    final borderColor = hasError
+        ? AppColors.error
+        : (isFilled || isActive ? AppColors.primary : AppColors.ink);
+    final otpBorder = Border.all(color: borderColor, width: 2);
     final transitionDuration =
         MediaQuery.maybeOf(context)?.disableAnimations == true
         ? Duration.zero

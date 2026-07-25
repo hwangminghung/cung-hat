@@ -7,10 +7,34 @@ import '../../l10n/app_localizations.dart';
 /// [WaveProgress]. A constant list keeps the bar pattern stable across
 /// rebuilds — no Random() call in paint.
 const List<double> _kWaveProgressBarHeights = <double>[
-  0.42, 0.68, 0.92, 0.55, 0.30, 0.74, 0.98, 0.46,
-  0.64, 0.34, 0.84, 0.58, 0.94, 0.40, 0.70, 0.36,
-  0.80, 0.50, 0.90, 0.38, 0.62, 0.96, 0.48, 0.72,
-  0.32, 0.82, 0.54, 0.66,
+  0.42,
+  0.68,
+  0.92,
+  0.55,
+  0.30,
+  0.74,
+  0.98,
+  0.46,
+  0.64,
+  0.34,
+  0.84,
+  0.58,
+  0.94,
+  0.40,
+  0.70,
+  0.36,
+  0.80,
+  0.50,
+  0.90,
+  0.38,
+  0.62,
+  0.96,
+  0.48,
+  0.72,
+  0.32,
+  0.82,
+  0.54,
+  0.66,
 ];
 
 /// A waveform-styled "profile completion" meter (mockup 18): a row of
@@ -77,6 +101,44 @@ class WaveProgressPainter extends CustomPainter {
         Offset(x, top),
         Offset(x, bottom),
         isBarDone(i) ? donePaint : todoPaint,
+      );
+    }
+
+    _paintScale(canvas, size);
+  }
+
+  /// [AUDIT 2026-07-25] Thanh "chưa xong" dùng `surfaceMuted` chỉ đạt 1.26:1 so
+  /// với nền giấy — người dùng thấy phần ĐÃ xong nhưng không thấy TỔNG chiều
+  /// dài, nên 75% trông hệt 95%. Đây là widget duy nhất trong hệ vẽ trần bằng
+  /// CustomPainter, không có viền ink 2px để gánh ranh giới (WCAG 1.4.11).
+  ///
+  /// Không đổi màu `surfaceMuted` cho đậm lên: làm vậy sẽ ăn mất tương phản
+  /// giữa "đã xong" và "chưa xong" (đo được: đậm tới mức đạt 3:1 với nền thì
+  /// tụt xuống 2.5:1 với thanh đã xong — đổi lỗi này lấy lỗi khác).
+  ///
+  /// Thay vào đó vẽ khung thang bằng ink (10.75:1): một đường nền mảnh cộng
+  /// hai vạch chặn hai đầu — đúng ngôn ngữ ink của hệ, và giống mặt VU meter.
+  void _paintScale(Canvas canvas, Size size) {
+    final inkPaint = Paint()
+      ..color = AppColors.ink
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.square;
+
+    final baseline = size.height - 1;
+    canvas.drawLine(
+      Offset(1, baseline),
+      Offset(size.width - 1, baseline),
+      inkPaint,
+    );
+
+    // Vạch chặn hai đầu — cận trên/dưới của thang, để 0% và 100% đọc được.
+    const capHeight = 7.0;
+    for (final x in <double>[1, size.width - 1]) {
+      canvas.drawLine(
+        Offset(x, baseline - capHeight),
+        Offset(x, baseline),
+        inkPaint,
       );
     }
   }

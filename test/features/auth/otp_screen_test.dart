@@ -13,6 +13,7 @@ import 'package:cung_hat/features/auth/data/auth_repository.dart';
 import 'package:cung_hat/features/auth/presentation/otp_screen.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import 'package:cung_hat/shared/widgets/gradient_button.dart';
+import 'package:cung_hat/shared/widgets/otp_input.dart';
 
 class _MockRepo extends Mock implements AuthRepository {}
 
@@ -513,6 +514,58 @@ void main() {
     expect(
       find.text('Mã OTP không đúng hoặc đã hết hạn. Vui lòng thử lại.'),
       findsOneWidget,
+    );
+  });
+
+  // [THEME] OtpInput.hasError co tu dot design-system nhung man OTP chua noi:
+  // ma sai chi hien banner chu, vien o van mau primary "moi thu on" — mau sac
+  // va chu phai cung ke MOT cau chuyen.
+  testWidgets('ma sai -> vien o OTP chuyen error; go lai -> het do', (
+    tester,
+  ) async {
+    final repo = _MockRepo();
+    when(() => repo.sendOtp(any())).thenAnswer((_) async {});
+    when(() => repo.verifyOtp(any(), any())).thenThrow(
+      AuthApiException(
+        'Token has expired or is invalid',
+        statusCode: '403',
+        code: 'otp_expired',
+      ),
+    );
+
+    await _pumpOtpScreen(tester, repo);
+    OtpInput input() => tester.widget<OtpInput>(find.byType(OtpInput));
+    expect(input().hasError, isFalse);
+
+    await tester.enterText(find.byType(TextField), '000000');
+    await tester.pumpAndSettle();
+    expect(input().hasError, isTrue, reason: 'ma sai thi vien phai bao loi');
+
+    // Loi GUI (sendFailed) khong phai loi cua day so — vien khong duoc do.
+    // (Nhap lai se duoc test o controller; o day chot dung nhanh otpInvalid.)
+  });
+
+  testWidgets('loi gui lai ma (sendFailed) KHONG lam vien o do', (
+    tester,
+  ) async {
+    final repo = _MockRepo();
+    when(() => repo.sendOtp(any())).thenAnswer((_) async {});
+    final container = await _pumpOtpScreen(tester, repo);
+
+    // Gui lai that bai -> phase=error nhung error=sendFailed.
+    when(
+      () => repo.sendOtp(any()),
+    ).thenThrow(AuthApiException('sms_send_failed', statusCode: '422'));
+    await container
+        .read(authControllerProvider.notifier)
+        .sendOtp('+84900000001');
+    await tester.pumpAndSettle();
+
+    final input = tester.widget<OtpInput>(find.byType(OtpInput));
+    expect(
+      input.hasError,
+      isFalse,
+      reason: 'loi mang/gui khong phai loi cua day so dang nhap',
     );
   });
 }

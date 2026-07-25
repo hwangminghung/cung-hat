@@ -184,6 +184,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             const SizedBox(height: AppSpacing.xxl),
             OtpInput(
               semanticLabel: l10n?.otpLabel ?? 'Mã 6 số',
+              // Vien do CHI cho nhanh "ma sai/het han" — sendFailed/network la
+              // loi cua duong gui, khong phai cua day so dang nhap. Banner chu
+              // ben duoi van la tin hieu chinh (mau khong duoc dung mot minh).
+              hasError:
+                  state.phase == AuthPhase.error &&
+                  state.error == AuthErrorKind.otpInvalid,
               onChanged: (value) {
                 _ctrl.text = value;
                 _submitted = false;

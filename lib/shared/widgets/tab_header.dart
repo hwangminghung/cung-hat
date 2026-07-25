@@ -56,7 +56,10 @@ class TabHeader extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: AppColors.ink,
-                      fontWeight: FontWeight.w900,
+                      // [AUDIT 2026-07-25] Trước là w900. Oswald chỉ có tới
+                      // w700 — Flutter lặng lẽ hạ xuống w700, nên w900 chỉ làm
+                      // người đọc code tưởng tiêu đề đậm hơn thực tế.
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
