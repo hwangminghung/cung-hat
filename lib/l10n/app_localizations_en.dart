@@ -137,7 +137,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get consentCrossBorder =>
-      'I agree to the Privacy Policy, Terms, and data storage in Singapore';
+      'Store my data on servers located in Singapore';
 
   @override
   String get chatPromoteKeo => 'Set up an outing';
@@ -190,7 +190,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buy => 'Buy';
 
   @override
-  String get bookVenue => 'Book the venue';
+  String get bookVenue => 'Pay at the venue via MoMo/ZaloPay';
 
   @override
   String get entitlementNeeded => 'Upgrade to use this feature';
@@ -1387,4 +1387,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckCoachTap => 'Start';
+
+  @override
+  String get storeBuy => 'Buy';
+
+  @override
+  String get storeOwned => 'Owned';
+
+  @override
+  String get storeTermOneTime => 'One-time purchase · permanent';
+
+  @override
+  String get storeTermBoost => 'One-time purchase · lasts 24 hours';
+
+  @override
+  String get storeNoAutoRenew =>
+      'All items are one-time purchases. This is not a subscription and nothing auto-renews. Refunds are handled by your App Store or Google Play account.';
+
+  @override
+  String get storeRestore => 'Restore purchases';
+
+  @override
+  String get storeRestoreStarted => 'Checking your previous purchases…';
+
+  @override
+  String get storeRestoreError => 'Could not reach the store. Try again later.';
+
+  @override
+  String get storeRestored => 'Purchases restored.';
+
+  @override
+  String get storePending => 'Waiting for payment confirmation…';
+
+  @override
+  String get storeSuccess => 'Purchase complete. Feature unlocked.';
+
+  @override
+  String get storeFailed =>
+      'Payment did not go through. You have not been charged.';
+
+  @override
+  String get storeDeliveryFailed =>
+      'Paid, but the feature is not unlocked yet. We will retry automatically — contact support if it persists.';
+
+  @override
+  String get storeLegalIntro => 'By purchasing you accept:';
+
+  @override
+  String get safetyReportTooltip => 'Report or block';
+
+  @override
+  String get safetyPickMember => 'Who do you want to report?';
+
+  @override
+  String get safetyBlockedRemoved =>
+      'Blocked. You will no longer see each other.';
+
+  @override
+  String get safetyProfileUnavailable =>
+      'Could not load this profile, but you can still report or block.';
+
+  @override
+  String get keoMatchNext => 'See another suggestion';
+
+  @override
+  String get keoMatchCounterLabel => 'Suggestion';
+
+  @override
+  String get keoMatchNoMore =>
+      'No other suggestions right now. Try creating your own group.';
+
+  @override
+  String get keoMatchViewDetail => 'View group details';
+
+  @override
+  String get keoMatchMembersLabel => 'Already in';
+
+  @override
+  String get onbTasteMinGenres =>
+      'Pick at least 3 genres so we can match you with the right people.';
+
+  @override
+  String get onbTasteSelectedLabel => 'Selected';
+
+  @override
+  String get onbTasteSearch => 'Search';
+
+  @override
+  String get onbTasteNoResult => 'Nothing matches that search.';
+
+  @override
+  String get consentRequiredHint =>
+      'Each item below is required to use the app. Turn them on one by one.';
+
+  @override
+  String get consentCrossBorderTitle => 'Storing your data in Singapore';
+
+  @override
+  String get consentCrossBorderBody =>
+      'Your account and chat data is stored on servers in Singapore. Vietnamese law treats this as a cross-border transfer, so we ask for it separately.';
+
+  @override
+  String get consentTosTitle => 'Terms of Service';
+
+  @override
+  String get consentPrivacyTitle => 'Privacy Policy';
+
+  @override
+  String get consentAcceptAllRequired => 'Accept all required';
+
+  @override
+  String get planPayOpenError =>
+      'Could not open the payment app. Check that MoMo or ZaloPay is installed.';
+
+  @override
+  String get planPayNote =>
+      'Payment happens inside the MoMo or ZaloPay app. Cùng Hát does not hold a table for you and does not handle refunds.';
+
+  @override
+  String get consentTosNotice =>
+      'Continuing means you accept the Terms of Service and the Privacy Policy.';
 }

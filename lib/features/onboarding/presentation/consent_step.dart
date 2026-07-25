@@ -40,8 +40,12 @@ const consentLabelsVi = {
   'photos': 'Lưu và hiển thị ảnh hồ sơ',
   'matching': 'Dùng gu nhạc để ghép người',
   'marketing': 'Nhận thông báo khuyến mãi',
-  'cross_border':
-      'Tôi đồng ý Chính sách bảo mật, Điều khoản và việc lưu dữ liệu tại Singapore',
+  // [AUDIT C1] Truoc day dong nay gop 3 thu vao mot cau: Chinh sach bao mat +
+  // Dieu khoan + chuyen du lieu ra nuoc ngoai. Chuyen du lieu xuyen bien gioi
+  // la MOT MUC DICH RIENG theo Nghi dinh 13/2023, nen nhan chi con noi dung
+  // viec do. Dieu khoan va Chinh sach bao mat duoc neu rieng o cuoi man
+  // (consentTosNotice) kem link doc duoc.
+  'cross_border': 'Lưu dữ liệu của tôi trên máy chủ đặt tại Singapore',
 };
 
 /// Nhãn consent theo l10n (fallback map VI). Dùng chung onboarding + Cài đặt
@@ -83,17 +87,23 @@ class ConsentStep extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: AppSpacing.lg),
-        // P2: một chạm gộp — bật TOÀN BỘ consent (kể cả marketing; user vẫn
-        // tắt lại từng cái được). Giảm ma sát đọc 5 dòng ở bước 2 funnel.
+        // P2: một chạm gộp cho các mục BẮT BUỘC — giảm ma sát ở bước 2 funnel.
+        //
+        // [AUDIT C1] Truoc day nut nay bat ca marketing. Dong y nhan quang cao
+        // bat buoc phai la opt-in rieng: gom no vao mot nut "dong y tat ca"
+        // khien su dong y khong con tu nguyen va co the bi coi la vo hieu.
+        // Marketing gio chi bat duoc bang cong tac rieng ben duoi.
         OutlinedButton.icon(
           key: const Key('consent_all_btn'),
           onPressed: () {
-            for (final purpose in consentPurposes) {
+            for (final purpose in requiredConsents) {
               onChanged(purpose, true);
             }
           },
           icon: const Icon(Icons.done_all_rounded),
-          label: Text(l10n?.onbConsentAll ?? 'Đồng ý tất cả'),
+          label: Text(
+            l10n?.consentAcceptAllRequired ?? 'Đồng ý các mục bắt buộc',
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         HardCard(
@@ -126,6 +136,17 @@ class ConsentStep extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.md),
+          child: Text(
+            l10n?.consentTosNotice ??
+                'Tiếp tục nghĩa là bạn chấp nhận Điều khoản sử dụng và '
+                    'Chính sách bảo mật.',
+            key: const Key('consent_tos_notice'),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.xs),
           child: Wrap(
             alignment: WrapAlignment.center,
             spacing: AppSpacing.sm,

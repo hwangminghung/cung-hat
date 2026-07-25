@@ -136,7 +136,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get consentCrossBorder =>
-      'Tôi đồng ý Chính sách bảo mật, Điều khoản và việc lưu dữ liệu tại Singapore';
+      'Lưu dữ liệu của tôi trên máy chủ đặt tại Singapore';
 
   @override
   String get chatPromoteKeo => 'Lập kèo';
@@ -189,7 +189,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get buy => 'Mua';
 
   @override
-  String get bookVenue => 'Đặt phòng & giữ chỗ';
+  String get bookVenue => 'Thanh toán tại quán qua MoMo/ZaloPay';
 
   @override
   String get entitlementNeeded => 'Cần nâng cấp để dùng tính năng này';
@@ -1380,4 +1380,124 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get deckCoachTap => 'Bắt đầu';
+
+  @override
+  String get storeBuy => 'Mua';
+
+  @override
+  String get storeOwned => 'Đã sở hữu';
+
+  @override
+  String get storeTermOneTime => 'Mua một lần · vĩnh viễn';
+
+  @override
+  String get storeTermBoost => 'Mua một lần · hiệu lực 24 giờ';
+
+  @override
+  String get storeNoAutoRenew =>
+      'Tất cả các gói đều là mua một lần. Đây không phải thuê bao và không tự động gia hạn. Việc hoàn tiền do tài khoản App Store hoặc Google Play của bạn xử lý.';
+
+  @override
+  String get storeRestore => 'Khôi phục mua hàng';
+
+  @override
+  String get storeRestoreStarted => 'Đang kiểm tra các giao dịch trước đây…';
+
+  @override
+  String get storeRestoreError => 'Không kết nối được cửa hàng. Thử lại sau.';
+
+  @override
+  String get storeRestored => 'Đã khôi phục giao dịch.';
+
+  @override
+  String get storePending => 'Đang chờ xác nhận thanh toán…';
+
+  @override
+  String get storeSuccess => 'Mua thành công. Đã mở khóa tính năng.';
+
+  @override
+  String get storeFailed =>
+      'Thanh toán không thành công. Bạn chưa bị trừ tiền.';
+
+  @override
+  String get storeDeliveryFailed =>
+      'Đã thanh toán nhưng chưa mở khóa được. Hệ thống sẽ tự thử lại — liên hệ hỗ trợ nếu vẫn chưa mở.';
+
+  @override
+  String get storeLegalIntro => 'Khi mua, bạn đồng ý với:';
+
+  @override
+  String get safetyReportTooltip => 'Báo cáo hoặc chặn';
+
+  @override
+  String get safetyPickMember => 'Bạn muốn báo cáo ai?';
+
+  @override
+  String get safetyBlockedRemoved =>
+      'Đã chặn. Hai người sẽ không còn thấy nhau.';
+
+  @override
+  String get safetyProfileUnavailable =>
+      'Không tải được hồ sơ này, nhưng bạn vẫn báo cáo hoặc chặn được.';
+
+  @override
+  String get keoMatchNext => 'Xem gợi ý khác';
+
+  @override
+  String get keoMatchCounterLabel => 'Gợi ý';
+
+  @override
+  String get keoMatchNoMore =>
+      'Hiện chưa có gợi ý nào khác. Thử tự tạo kèo xem sao.';
+
+  @override
+  String get keoMatchViewDetail => 'Xem chi tiết kèo';
+
+  @override
+  String get keoMatchMembersLabel => 'Đang có mặt';
+
+  @override
+  String get onbTasteMinGenres =>
+      'Chọn ít nhất 3 thể loại để chúng tôi ghép bạn với đúng người.';
+
+  @override
+  String get onbTasteSelectedLabel => 'Đã chọn';
+
+  @override
+  String get onbTasteSearch => 'Tìm kiếm';
+
+  @override
+  String get onbTasteNoResult => 'Không tìm thấy mục nào khớp.';
+
+  @override
+  String get consentRequiredHint =>
+      'Mỗi mục dưới đây là bắt buộc để dùng app. Bạn bật từng mục một.';
+
+  @override
+  String get consentCrossBorderTitle => 'Lưu dữ liệu của bạn tại Singapore';
+
+  @override
+  String get consentCrossBorderBody =>
+      'Dữ liệu tài khoản và tin nhắn của bạn được lưu trên máy chủ đặt tại Singapore. Pháp luật Việt Nam xem đây là chuyển dữ liệu ra nước ngoài nên chúng tôi hỏi riêng mục này.';
+
+  @override
+  String get consentTosTitle => 'Điều khoản sử dụng';
+
+  @override
+  String get consentPrivacyTitle => 'Chính sách bảo mật';
+
+  @override
+  String get consentAcceptAllRequired => 'Đồng ý các mục bắt buộc';
+
+  @override
+  String get planPayOpenError =>
+      'Không mở được ứng dụng thanh toán. Kiểm tra xem bạn đã cài MoMo hoặc ZaloPay chưa.';
+
+  @override
+  String get planPayNote =>
+      'Thanh toán diễn ra trong ứng dụng MoMo hoặc ZaloPay. Cùng Hát không giữ chỗ tại quán và không xử lý hoàn tiền.';
+
+  @override
+  String get consentTosNotice =>
+      'Tiếp tục nghĩa là bạn chấp nhận Điều khoản sử dụng và Chính sách bảo mật.';
 }

@@ -15,6 +15,7 @@ import '../../chat/domain/message.dart';
 import '../../chat/presentation/chat_timeline.dart';
 import '../../chat/presentation/chat_widgets.dart';
 import '../../chat/presentation/song_share_widgets.dart';
+import '../../discovery/presentation/report_sheet.dart';
 import '../application/keo_providers.dart';
 import '../domain/keo_member.dart';
 
@@ -112,6 +113,75 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
     _scrollToBottom();
   }
 
+  /// [AUDIT SAFETY] AppBar keo truoc day khong co bat ky loi bao cao nao.
+  /// report_user/block_user chi nhan MOT user id, ma keo thi nhieu nguoi —
+  /// nen phai chon dich danh thanh vien truoc khi mo ReportSheet.
+  Future<void> _openSafetySheet() async {
+    List<KeoMember> roster;
+    try {
+      roster = await ref.read(keoRosterProvider(widget.keoId).future);
+    } catch (_) {
+      roster = const <KeoMember>[];
+    }
+    if (!mounted) return;
+    final l10n = _l10n;
+    final me = _myUid;
+    final others = [
+      for (final member in roster)
+        if (member.userId != me) member,
+    ];
+    if (others.isEmpty) {
+      // Chua co danh sach thanh vien thi khong biet bao cao ai — noi that
+      // thay vi mo mot sheet rong.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.chatProfileError ?? 'Không mở được hồ sơ. Thử lại sau.',
+          ),
+        ),
+      );
+      return;
+    }
+    await showModalBottomSheet(
+      context: context,
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              key: const Key('keo_safety_picker'),
+              title: Text(l10n?.safetyPickMember ?? 'Bạn muốn báo cáo ai?'),
+            ),
+            const Divider(height: 1),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final member in others)
+                    ListTile(
+                      key: Key('keo_safety_member_${member.userId}'),
+                      leading: const Icon(Icons.person_outline),
+                      title: Text(
+                        member.displayName ??
+                            (l10n?.keoSharedAnonymous ?? 'Ẩn danh'),
+                      ),
+                      onTap: () {
+                        Navigator.of(sheetCtx).pop();
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) => ReportSheet(targetId: member.userId),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final myUid = _myUid;
@@ -172,6 +242,14 @@ class _KeoChatScreenState extends ConsumerState<KeoChatScreen> {
               ),
           ],
         ),
+        actions: [
+          IconButton(
+            key: const Key('keo_chat_safety_btn'),
+            onPressed: _openSafetySheet,
+            icon: const Icon(Icons.shield_outlined),
+            tooltip: _l10n?.safetyReportTooltip ?? 'Báo cáo hoặc chặn',
+          ),
+        ],
       ),
       body: KeyedSubtree(
         key: const Key('screen_17_keo_group_chat'),

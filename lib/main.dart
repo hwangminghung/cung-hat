@@ -21,7 +21,11 @@ Future<void> main() async {
     'Thiếu SUPABASE_URL/SUPABASE_ANON_KEY — chạy với '
     '--dart-define-from-file=env/dev.json (hoặc env/dev.emulator.json).',
   );
-  await Supabase.initialize(url: cfg.supabaseUrl, anonKey: cfg.supabaseAnonKey); // ignore: deprecated_member_use
+  await Supabase.initialize(
+    url: cfg.supabaseUrl,
+    // ignore: deprecated_member_use
+    anonKey: cfg.supabaseAnonKey,
+  );
   // [LANG] Đọc ngôn ngữ user đã chọn TRƯỚC runApp — không nháy frame đầu.
   final savedLocale = await loadSavedLocaleOverride();
   unawaited(_initPush(Supabase.instance.client));
@@ -46,9 +50,11 @@ Future<void> _initPush(SupabaseClient client) async {
     final platform = Platform.isIOS ? 'ios' : 'android';
     Future<void> register(String? token) async {
       if (token == null) return;
-      if (client.auth.currentSession == null) return; // RPC is authenticated-only
+      // RPC is authenticated-only
+      if (client.auth.currentSession == null) return;
       await PushService(client).registerToken(token, platform);
     }
+
     await register(await messaging.getToken());
     messaging.onTokenRefresh.listen(register);
   } catch (e) {

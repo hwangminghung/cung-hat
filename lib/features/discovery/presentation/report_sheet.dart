@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../chat/application/inbox_providers.dart';
 import '../application/discovery_providers.dart';
 
 /// Lý do report là GIÁ TRỊ GỬI SERVER (reports.reason) — giữ tiếng Việt
@@ -8,8 +9,13 @@ import '../application/discovery_providers.dart';
 const _reasons = ['spam', 'quấy rối', 'ảnh giả', 'khác'];
 
 class ReportSheet extends ConsumerWidget {
-  const ReportSheet({super.key, required this.targetId});
+  const ReportSheet({super.key, required this.targetId, this.onBlocked});
   final String targetId;
+
+  /// [AUDIT SAFETY] Man hinh 1-1 truyen callback nay de tu roi khoi thread sau
+  /// khi chan — user khong duoc ngoi lai trong cuoc tro chuyen cua nguoi vua
+  /// bi chan. Man nhom (keo / ke hoach) de null vi con nhung thanh vien khac.
+  final VoidCallback? onBlocked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,7 +57,9 @@ class ReportSheet extends ConsumerWidget {
     } catch (_) {
       nav.pop();
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n?.reportSendError ?? 'Không gửi được báo cáo.')),
+        SnackBar(
+          content: Text(l10n?.reportSendError ?? 'Không gửi được báo cáo.'),
+        ),
       );
     }
   }
@@ -66,9 +74,21 @@ class ReportSheet extends ConsumerWidget {
       // (Deck chủ đề vẫn tự lọc block server-side qua get_discovery_candidates
       // dù cache client chưa refresh ngay.)
       ref.invalidate(candidatesProvider(null));
+      // [AUDIT SAFETY] Chan xong ma inbox con cache cu thi thread cua nguoi
+      // vua chan van nam nguyen trong danh sach tin nhan — invalidate de
+      // get_my_matches chay lai.
+      ref.invalidate(inboxProvider);
       nav.pop();
+      // [AUDIT SAFETY] Dong sheet thoi la chua du: neu sheet mo tu thread 1-1
+      // thi phai roi luon thread do (man goi truyen onBlocked).
+      onBlocked?.call();
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n?.reportBlocked ?? 'Đã chặn.')),
+        SnackBar(
+          content: Text(
+            l10n?.safetyBlockedRemoved ??
+                'Đã chặn. Hai người sẽ không còn thấy nhau.',
+          ),
+        ),
       );
     } catch (_) {
       nav.pop();

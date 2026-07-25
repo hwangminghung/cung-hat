@@ -21,6 +21,16 @@ import 'taste_step.dart';
 /// Index of the consent step in the flow (DOB=0, consent=1).
 const _consentStepIndex = 1;
 
+/// [AUDIT O2] So the loai toi thieu phai chon truoc khi hoan tat.
+///
+/// Gu nhac la du lieu nuoi thuat toan ghep. Truoc day buoc nay khong rang buoc
+/// gi: user bam thang qua, ho so vao he thong voi taste rong va moi goi y ve
+/// sau gan nhu ngau nhien. Chan o day re hon nhieu so voi sua sau.
+///
+/// Chan bang SnackBar + quay lai buoc (giong DOB/consent) thay vi disable nut:
+/// nut bi disable khong noi duoc VI SAO, va user khong biet phai lam gi.
+const _minGenres = 3;
+
 class OnboardingFlow extends ConsumerStatefulWidget {
   const OnboardingFlow({super.key});
   @override
@@ -90,6 +100,18 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       );
       return;
     }
+    if (_genreSel.length < _minGenres) {
+      _moveToStep(_lastStep);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.onbTasteMinGenres ??
+                'Chọn ít nhất 3 thể loại để chúng tôi ghép bạn với đúng người.',
+          ),
+        ),
+      );
+      return;
+    }
     await ref
         .read(onboardingControllerProvider.notifier)
         .submit(
@@ -125,7 +147,12 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _TasteSectionHeader(label),
+        _TasteSectionHeader(
+          label,
+          countLabel: selected.isEmpty
+              ? null
+              : '${l10n?.onbTasteSelectedLabel ?? 'Đã chọn'} ${selected.length}',
+        ),
         const SizedBox(height: 8),
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -194,6 +221,13 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             Text(
               l10n?.onbTasteSubtitle ?? 'Chọn vài thứ bạn hay nghe',
               style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n?.onbTasteMinGenres ??
+                  'Chọn ít nhất 3 thể loại để chúng tôi ghép bạn với đúng người.',
+              key: const Key('taste_min_hint'),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.lg),
             _tasteSection<Genre>(
@@ -428,9 +462,12 @@ class _OnboardingProgress extends StatelessWidget {
 }
 
 class _TasteSectionHeader extends StatelessWidget {
-  const _TasteSectionHeader(this.label);
+  const _TasteSectionHeader(this.label, {this.countLabel});
 
   final String label;
+
+  /// null khi chua chon gi — tranh hien "Da chon 0" nhu mot loi.
+  final String? countLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +484,16 @@ class _TasteSectionHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Text(label, style: Theme.of(context).textTheme.titleLarge),
+          Expanded(
+            child: Text(label, style: Theme.of(context).textTheme.titleLarge),
+          ),
+          if (countLabel != null)
+            Text(
+              countLabel!,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
         ],
       ),
     );

@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/pressable.dart';
 import '../../../shared/widgets/responsive_frame.dart';
+import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/stamp_chip.dart';
 import '../../../shared/widgets/wave_divider.dart';
 import '../application/discovery_providers.dart';
@@ -22,6 +23,14 @@ class ThemeBoardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final counts = ref.watch(themeDeckCountsProvider);
+    // [AUDIT theme-counts] Truoc day truyen thang counts.value: AsyncLoading
+    // va AsyncError deu cho null nen ca hai deu hien '—' — loi mang bi nuot,
+    // nhin y het luc dang tai. Tach hai trang thai bang .when().
+    final (countsData, countsLoading) = counts.when<(Map<String, int>?, bool)>(
+      loading: () => (null, true),
+      error: (_, _) => (null, false),
+      data: (value) => (value, false),
+    );
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final indexedThemes = musicThemes.indexed.toList(growable: false);
     final canPop = Navigator.of(context).canPop();
@@ -80,7 +89,8 @@ class ThemeBoardScreen extends ConsumerWidget {
                       entries: indexedThemes
                           .where((entry) => entry.$1.isEven)
                           .toList(growable: false),
-                      counts: counts.value,
+                      counts: countsData,
+                      loading: countsLoading,
                       entranceDuration: duration,
                     ),
                   ),
@@ -92,7 +102,8 @@ class ThemeBoardScreen extends ConsumerWidget {
                         entries: indexedThemes
                             .where((entry) => entry.$1.isOdd)
                             .toList(growable: false),
-                        counts: counts.value,
+                        counts: countsData,
+                        loading: countsLoading,
                         entranceDuration: duration,
                       ),
                     ),
@@ -153,11 +164,15 @@ class _ThemeColumn extends StatelessWidget {
   const _ThemeColumn({
     required this.entries,
     required this.counts,
+    required this.loading,
     required this.entranceDuration,
   });
 
   final List<(int, MusicTheme)> entries;
   final Map<String, int>? counts;
+
+  /// Dang cho get_theme_deck_counts — hien Skeleton thay cho so lieu.
+  final bool loading;
   final Duration entranceDuration;
 
   @override
@@ -184,6 +199,7 @@ class _ThemeColumn extends StatelessWidget {
               child: _ThemeCard(
                 theme: entry.$2,
                 liveCount: counts?[entry.$2.genreId],
+                loading: loading,
                 onTap: () => context.push('/explore/${entry.$2.genreId}'),
               ),
             ),
@@ -199,16 +215,20 @@ class _ThemeCard extends StatelessWidget {
   const _ThemeCard({
     required this.theme,
     required this.liveCount,
+    required this.loading,
     required this.onTap,
   });
 
   final MusicTheme theme;
   final int? liveCount;
+  final bool loading;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    // [AUDIT theme-counts] '—' gio CHI con danh cho loi / thieu du lieu;
+    // trang thai dang tai da co Skeleton rieng ben duoi.
     final status = liveCount == null
         ? '—'
         : theme.genreId == 'bolero' && liveCount == 0
@@ -276,15 +296,18 @@ class _ThemeCard extends StatelessWidget {
                 ),
               ),
               const WaveDivider(height: AppSpacing.lg),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: StampChip(
-                  leadingIcon: Icons.group_outlined,
-                  label: status,
-                  tone: StampChipTone.lime,
+              if (loading)
+                const Skeleton(width: 120, height: 28, radius: AppSpacing.xs)
+              else
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: StampChip(
+                    leadingIcon: Icons.group_outlined,
+                    label: status,
+                    tone: StampChipTone.lime,
+                  ),
                 ),
-              ),
               const Spacer(),
               _ThemeIllustration(genreId: theme.genreId, emoji: theme.emoji),
             ],

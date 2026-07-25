@@ -357,6 +357,11 @@ class KeoBoardScreen extends ConsumerWidget {
             context,
             () => _createSuggestion(context, sheetContext, ref, suggestion),
           ),
+          // [AUDIT keo-match] Loi ra thu hai cho goi y existing_keo: soi ky
+          // keo MA KHONG tham gia — truoc day chi co "Tham gia" hoac dong
+          // sheet, khong co duong nao o giua.
+          onViewDetail: (suggestion) =>
+              _viewSuggestionDetail(context, sheetContext, suggestion),
         ),
       );
     } catch (e) {
@@ -394,6 +399,27 @@ class KeoBoardScreen extends ConsumerWidget {
     await ref.read(keoRepositoryProvider).requestJoin(keoId);
     unawaited(ref.read(analyticsProvider).logKeoJoinRequest());
     ref.invalidate(openKeosProvider);
+    if (sheetContext.mounted) {
+      Navigator.of(sheetContext).pop();
+    }
+    if (boardContext.mounted) {
+      boardContext.push(
+        '/keo/$keoId?title=${Uri.encodeComponent(suggestion.title)}',
+      );
+    }
+  }
+
+  /// Mo man chi tiet keo ma KHONG gui yeu cau tham gia. Dong sheet TRUOC roi
+  /// moi push: go_router push vao navigator nam DUOI modal, khong dong thi
+  /// man chi tiet bi sheet che mat.
+  void _viewSuggestionDetail(
+    BuildContext boardContext,
+    BuildContext sheetContext,
+    KeoMatchSuggestion suggestion,
+  ) {
+    final keoId = suggestion.keoId;
+    if (keoId == null) return;
+
     if (sheetContext.mounted) {
       Navigator.of(sheetContext).pop();
     }

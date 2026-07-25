@@ -148,6 +148,20 @@ class CandidateDetailSheet extends ConsumerWidget {
                             color: AppColors.teal,
                           ),
                         ],
+                        // [AUDIT SAFETY] Loi bao cao phai thay ngay canh ten:
+                        // nut cu nam duoi cung, user phai cuon qua anh, gu
+                        // nhac va prompt moi toi duoc. Nut cuoi trang GIU
+                        // NGUYEN (detail_report_btn) cho luong da quen.
+                        IconButton(
+                          key: const Key('detail_report_header_btn'),
+                          onPressed: () => showModalBottomSheet(
+                            context: context,
+                            builder: (_) => ReportSheet(targetId: candidate.id),
+                          ),
+                          icon: const Icon(Icons.shield_outlined),
+                          tooltip:
+                              l10n?.safetyReportTooltip ?? 'Báo cáo hoặc chặn',
+                        ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xs),
@@ -161,7 +175,9 @@ class CandidateDetailSheet extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.xs),
                         Flexible(
                           child: Text(
-                            l10n?.candidateDistanceKm(candidate.distanceBand ?? '?') ??
+                            l10n?.candidateDistanceKm(
+                                  candidate.distanceBand ?? '?',
+                                ) ??
                                 'Cách ${candidate.distanceBand ?? '?'} km',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -181,8 +197,9 @@ class CandidateDetailSheet extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.md),
                 OutlinedButton.icon(
                   key: const Key('quote_photo'),
-                  onPressed: () =>
-                      onQuote!(l10n?.candidatePhotoQuote ?? 'Ảnh này xịn quá! '),
+                  onPressed: () => onQuote!(
+                    l10n?.candidatePhotoQuote ?? 'Ảnh này xịn quá! ',
+                  ),
                   icon: const Icon(Icons.photo_camera_outlined),
                   label: Text(l10n?.candidateReplyPhoto ?? 'Trả lời ảnh này'),
                 ),
@@ -246,7 +263,8 @@ class CandidateDetailSheet extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           if (candidate.sharedBaitu.isEmpty)
             Text(
-              l10n?.candidateNoSharedBaitu ?? 'Chưa có bài tủ chung — cơ hội khám phá!',
+              l10n?.candidateNoSharedBaitu ??
+                  'Chưa có bài tủ chung — cơ hội khám phá!',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),

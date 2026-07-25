@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
@@ -18,6 +19,7 @@ class _Upgrade {
     required this.feature,
     required this.title,
     required this.description,
+    required this.term,
     required this.price,
     required this.icon,
     this.highlight = false,
@@ -26,6 +28,10 @@ class _Upgrade {
   final String feature;
   final String title;
   final String description;
+
+  /// Ky han: mua mot lan / 24 gio. Bat buoc theo Apple 3.1.2 + Play Payments —
+  /// user phai biet co tu dong gia han khong TRUOC khi bam mua.
+  final String term;
   final String price;
   final IconData icon;
   final bool highlight;
@@ -75,7 +81,16 @@ class _Upgrade {
 
 const _order = ['pro', 'boost', 'see_likes', 'premium_filters'];
 
+/// Consumable: mua lai duoc nhieu lan, nen khong bao gio hien "Da so huu".
+const _consumableTypes = {'boost'};
+
 String formatPriceK(int minor) => '${(minor / 1000).round()}k';
+
+/// Ky han hien duoi mo ta. Toan bo catalog la mua mot lan — khong co thue bao
+/// nao trong app, nen khong co gi tu dong gia han.
+String _termFor(String type, AppLocalizations? l10n) => type == 'boost'
+    ? (l10n?.storeTermBoost ?? 'Mua một lần · hiệu lực 24 giờ')
+    : (l10n?.storeTermOneTime ?? 'Mua một lần · vĩnh viễn');
 
 class StoreScreen extends ConsumerWidget {
   const StoreScreen({super.key});
@@ -83,6 +98,40 @@ class StoreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+
+    // Ket qua thanh toan THAT den tu purchaseStream, khong phai tu nut Mua
+    // (nut chi mo man store roi tra ve ngay). Khong co listener nay thi
+    // giao dich pending/that bai im lang hoan toan.
+    ref.listen<IapEvent?>(iapEventProvider, (previous, next) {
+      if (next == null) return;
+      final message = switch (next) {
+        IapEvent.pending =>
+          l10n?.storePending ?? 'Đang chờ xác nhận thanh toán…',
+        IapEvent.success =>
+          l10n?.storeSuccess ?? 'Mua thành công. Đã mở khóa tính năng.',
+        IapEvent.restored => l10n?.storeRestored ?? 'Đã khôi phục giao dịch.',
+        IapEvent.failed =>
+          l10n?.storeFailed ??
+              'Thanh toán không thành công. Bạn chưa bị trừ tiền.',
+        IapEvent.deliveryFailed =>
+          l10n?.storeDeliveryFailed ??
+              'Đã thanh toán nhưng chưa mở khóa được. Hệ thống sẽ tự thử lại '
+                  '— liên hệ hỗ trợ nếu vẫn chưa mở.',
+        // User tu bam huy: khong can bao lai cho ho.
+        IapEvent.canceled => null,
+      };
+      ref.read(iapEventProvider.notifier).state = null;
+      if (message == null || !context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    });
+
+    // Gia store localized; rong khi khong hoi duoc store -> rot ve gia catalog.
+    final storePrices = ref
+        .watch(storePricesProvider)
+        .maybeWhen(data: (m) => m, orElse: () => const <String, String>{});
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n?.storeTitle ?? 'Nâng cấp')),
       body: ResponsiveFrame(
@@ -178,7 +227,10 @@ class StoreScreen extends ConsumerWidget {
                                         l10n,
                                       )?.description ??
                                       '',
-                                  price: formatPriceK(product.priceMinor),
+                                  term: _termFor(product.type, l10n),
+                                  price:
+                                      storePrices[product.type] ??
+                                      formatPriceK(product.priceMinor),
                                   icon:
                                       _copyFor(product.type, l10n)?.icon ??
                                       Icons.star,
@@ -186,6 +238,15 @@ class StoreScreen extends ConsumerWidget {
                                       _copyFor(product.type, l10n)?.highlight ??
                                       false,
                                 ),
+                                // Consumable mua lai duoc; chi non-consumable
+                                // moi khoa lai khi da so huu.
+                                owned:
+                                    !_consumableTypes.contains(product.type) &&
+                                    ref.watch(
+                                      hasEntitlementProvider(product.type),
+                                    ),
+                                buyLabel: l10n?.storeBuy ?? 'Mua',
+                                ownedLabel: l10n?.storeOwned ?? 'Đã sở hữu',
                                 onBuy: () async {
                                   final ok = await ref
                                       .read(iapControllerProvider)
@@ -222,10 +283,115 @@ class StoreScreen extends ConsumerWidget {
                         onRetry: () => ref.invalidate(storeProductsProvider),
                       ),
                     ),
+                const _StorePurchaseFooter(),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// [AUDIT P1-b,c,d] Ba thu store bat buoc phai co NGAY TREN man thanh toan:
+/// nut khoi phuc mua hang (Apple 3.1.1), link Dieu khoan + Chinh sach bao mat
+/// (Apple 3.1.2), va noi ro co tu dong gia han khong.
+class _StorePurchaseFooter extends ConsumerWidget {
+  const _StorePurchaseFooter();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+
+    Future<void> restore() async {
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.storeRestoreStarted ??
+                'Đang kiểm tra các giao dịch trước đây…',
+          ),
+        ),
+      );
+      final ok = await ref.read(iapControllerProvider).restore();
+      // Thanh cong thi ket qua ve qua purchaseStream (IapEvent.restored),
+      // o day chi bao khi khong goi duoc store.
+      if (!ok && context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.storeRestoreError ??
+                  'Không kết nối được cửa hàng. Thử lại sau.',
+            ),
+          ),
+        );
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const WaveDivider(),
+          const SizedBox(height: AppSpacing.lg),
+          _StoreButtonShadow(
+            child: SizedBox(
+              height: AppSpacing.buttonHeight,
+              child: OutlinedButton(
+                key: const Key('store_restore_button'),
+                onPressed: restore,
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.surface,
+                  foregroundColor: AppColors.ink,
+                  minimumSize: const Size(0, AppSpacing.buttonHeight),
+                  textStyle: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    height: 1.05,
+                  ),
+                  side: const BorderSide(color: AppColors.ink, width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusButton,
+                    ),
+                  ),
+                ),
+                child: Text(l10n?.storeRestore ?? 'Khôi phục mua hàng'),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l10n?.storeNoAutoRenew ??
+                'Tất cả các gói đều là mua một lần. Đây không phải thuê bao và '
+                    'không tự động gia hạn. Việc hoàn tiền do tài khoản App Store '
+                    'hoặc Google Play của bạn xử lý.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n?.storeLegalIntro ?? 'Khi mua, bạn đồng ý với:',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          Wrap(
+            alignment: WrapAlignment.center,
+            children: [
+              TextButton(
+                key: const Key('store_terms_link'),
+                onPressed: () => context.push('/legal/tos'),
+                child: Text(l10n?.settingsTerms ?? 'Điều khoản sử dụng'),
+              ),
+              TextButton(
+                key: const Key('store_privacy_link'),
+                onPressed: () => context.push('/legal/privacy'),
+                child: Text(l10n?.privacyTitle ?? 'Chính sách bảo mật'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -308,10 +474,19 @@ class _StoreButtonShadow extends StatelessWidget {
 }
 
 class _UpgradeTile extends StatelessWidget {
-  const _UpgradeTile({required this.upgrade, required this.onBuy});
+  const _UpgradeTile({
+    required this.upgrade,
+    required this.onBuy,
+    required this.owned,
+    required this.buyLabel,
+    required this.ownedLabel,
+  });
 
   final _Upgrade upgrade;
   final VoidCallback onBuy;
+  final bool owned;
+  final String buyLabel;
+  final String ownedLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -359,6 +534,17 @@ class _UpgradeTile extends StatelessWidget {
                       context,
                     ).textTheme.bodySmall?.copyWith(color: contentColor),
                   ),
+                  const SizedBox(height: AppSpacing.xs),
+                  // Ky han nam o cot trai (co the co dan) thay vi canh gia —
+                  // cot gia rong 68dp se tran o textScale 1.4.
+                  Text(
+                    upgrade.term,
+                    key: Key('store_term_${upgrade.feature}'),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: contentColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -393,9 +579,9 @@ class _UpgradeTile extends StatelessWidget {
                   child: SizedBox(
                     height: AppSpacing.buttonHeight,
                     child: FilledButton(
-                      onPressed: onBuy,
+                      onPressed: owned ? null : onBuy,
                       style: _storeCtaStyle(),
-                      child: const Text('Mua'),
+                      child: Text(owned ? ownedLabel : buyLabel),
                     ),
                   ),
                 ),

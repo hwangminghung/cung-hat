@@ -347,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentCrossBorder.
   ///
   /// In en, this message translates to:
-  /// **'I agree to the Privacy Policy, Terms, and data storage in Singapore'**
+  /// **'Store my data on servers located in Singapore'**
   String get consentCrossBorder;
 
   /// No description provided for @chatPromoteKeo.
@@ -449,7 +449,7 @@ abstract class AppLocalizations {
   /// No description provided for @bookVenue.
   ///
   /// In en, this message translates to:
-  /// **'Book the venue'**
+  /// **'Pay at the venue via MoMo/ZaloPay'**
   String get bookVenue;
 
   /// No description provided for @entitlementNeeded.
@@ -2623,6 +2623,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start'**
   String get deckCoachTap;
+
+  /// No description provided for @storeBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get storeBuy;
+
+  /// No description provided for @storeOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get storeOwned;
+
+  /// No description provided for @storeTermOneTime.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase · permanent'**
+  String get storeTermOneTime;
+
+  /// No description provided for @storeTermBoost.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase · lasts 24 hours'**
+  String get storeTermBoost;
+
+  /// No description provided for @storeNoAutoRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'All items are one-time purchases. This is not a subscription and nothing auto-renews. Refunds are handled by your App Store or Google Play account.'**
+  String get storeNoAutoRenew;
+
+  /// No description provided for @storeRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get storeRestore;
+
+  /// No description provided for @storeRestoreStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your previous purchases…'**
+  String get storeRestoreStarted;
+
+  /// No description provided for @storeRestoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the store. Try again later.'**
+  String get storeRestoreError;
+
+  /// No description provided for @storeRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored.'**
+  String get storeRestored;
+
+  /// No description provided for @storePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for payment confirmation…'**
+  String get storePending;
+
+  /// No description provided for @storeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase complete. Feature unlocked.'**
+  String get storeSuccess;
+
+  /// No description provided for @storeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment did not go through. You have not been charged.'**
+  String get storeFailed;
+
+  /// No description provided for @storeDeliveryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid, but the feature is not unlocked yet. We will retry automatically — contact support if it persists.'**
+  String get storeDeliveryFailed;
+
+  /// No description provided for @storeLegalIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'By purchasing you accept:'**
+  String get storeLegalIntro;
+
+  /// No description provided for @safetyReportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Report or block'**
+  String get safetyReportTooltip;
+
+  /// No description provided for @safetyPickMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Who do you want to report?'**
+  String get safetyPickMember;
+
+  /// No description provided for @safetyBlockedRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked. You will no longer see each other.'**
+  String get safetyBlockedRemoved;
+
+  /// No description provided for @safetyProfileUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this profile, but you can still report or block.'**
+  String get safetyProfileUnavailable;
+
+  /// No description provided for @keoMatchNext.
+  ///
+  /// In en, this message translates to:
+  /// **'See another suggestion'**
+  String get keoMatchNext;
+
+  /// No description provided for @keoMatchCounterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion'**
+  String get keoMatchCounterLabel;
+
+  /// No description provided for @keoMatchNoMore.
+  ///
+  /// In en, this message translates to:
+  /// **'No other suggestions right now. Try creating your own group.'**
+  String get keoMatchNoMore;
+
+  /// No description provided for @keoMatchViewDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'View group details'**
+  String get keoMatchViewDetail;
+
+  /// No description provided for @keoMatchMembersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in'**
+  String get keoMatchMembersLabel;
+
+  /// No description provided for @onbTasteMinGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least 3 genres so we can match you with the right people.'**
+  String get onbTasteMinGenres;
+
+  /// No description provided for @onbTasteSelectedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get onbTasteSelectedLabel;
+
+  /// No description provided for @onbTasteSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get onbTasteSearch;
+
+  /// No description provided for @onbTasteNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that search.'**
+  String get onbTasteNoResult;
+
+  /// No description provided for @consentRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each item below is required to use the app. Turn them on one by one.'**
+  String get consentRequiredHint;
+
+  /// No description provided for @consentCrossBorderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storing your data in Singapore'**
+  String get consentCrossBorderTitle;
+
+  /// No description provided for @consentCrossBorderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account and chat data is stored on servers in Singapore. Vietnamese law treats this as a cross-border transfer, so we ask for it separately.'**
+  String get consentCrossBorderBody;
+
+  /// No description provided for @consentTosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get consentTosTitle;
+
+  /// No description provided for @consentPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get consentPrivacyTitle;
+
+  /// No description provided for @consentAcceptAllRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept all required'**
+  String get consentAcceptAllRequired;
+
+  /// No description provided for @planPayOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the payment app. Check that MoMo or ZaloPay is installed.'**
+  String get planPayOpenError;
+
+  /// No description provided for @planPayNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment happens inside the MoMo or ZaloPay app. Cùng Hát does not hold a table for you and does not handle refunds.'**
+  String get planPayNote;
+
+  /// No description provided for @consentTosNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuing means you accept the Terms of Service and the Privacy Policy.'**
+  String get consentTosNotice;
 }
 
 class _AppLocalizationsDelegate

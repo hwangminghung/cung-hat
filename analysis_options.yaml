@@ -5,6 +5,9 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    # build/ is gitignored scratch (design-handoff exports land here); it is not
+    # app source and its snippets do not resolve against lib/.
+    - "build/**"
 linter:
   rules:
     prefer_const_constructors: true

@@ -100,7 +100,7 @@ void main() {
     }
   });
 
-  testWidgets('P2-b: Đồng ý tất cả bật toàn bộ consent một chạm', (
+  testWidgets('P2-b: nút gộp bật các mục bắt buộc trong một chạm', (
     tester,
   ) async {
     final changes = <String, bool>{};
@@ -113,13 +113,49 @@ void main() {
     await tester.tap(find.byKey(const Key('consent_all_btn')));
     await tester.pump();
 
-    // Mọi purpose (kể cả marketing) được bật — user vẫn tắt lại từng cái được.
-    for (final purpose in consentPurposes) {
+    for (final purpose in requiredConsents) {
       expect(
         changes[purpose],
         isTrue,
         reason: 'purpose $purpose phải được bật',
       );
     }
+  });
+
+  // [AUDIT C1] Đồng ý nhận quảng cáo bắt buộc phải là opt-in riêng. Trước đây
+  // nút gộp bật luôn cả marketing, khiến sự đồng ý không còn tự nguyện và có
+  // thể bị coi là vô hiệu theo Nghị định 13/2023/NĐ-CP.
+  testWidgets('nút gộp KHÔNG đụng tới marketing', (tester) async {
+    final changes = <String, bool>{};
+    await pumpConsentStep(
+      tester,
+      onChanged: (key, value) => changes[key] = value,
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('consent_all_btn')));
+    await tester.tap(find.byKey(const Key('consent_all_btn')));
+    await tester.pump();
+
+    expect(
+      changes.containsKey('marketing'),
+      isFalse,
+      reason: 'marketing chỉ được bật bằng công tắc riêng',
+    );
+  });
+
+  // [AUDIT C1] Chuyển dữ liệu ra nước ngoài là một mục đích RIÊNG theo Nghị
+  // định 13. Nhãn cũ gộp nó chung câu với Điều khoản + Chính sách bảo mật nên
+  // không thể từ chối riêng phần lưu dữ liệu tại Singapore.
+  testWidgets('nhãn cross_border chỉ nói về việc lưu dữ liệu, không gộp '
+      'Điều khoản/Bảo mật', (tester) async {
+    await pumpConsentStep(tester, onChanged: (_, _) {});
+
+    final label = consentLabel('cross_border', null);
+    expect(label, contains('Singapore'));
+    expect(label, isNot(contains('Điều khoản')));
+    expect(label, isNot(contains('Chính sách bảo mật')));
+
+    // Điều khoản + Bảo mật được nêu riêng, kèm link đọc được.
+    expect(find.byKey(const Key('consent_tos_notice')), findsOneWidget);
   });
 }
