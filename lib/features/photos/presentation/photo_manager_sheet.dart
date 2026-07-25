@@ -88,8 +88,10 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.photoLoadError ??
+              Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.photoLoadError ??
                   'Không tải được ảnh. Thử lại nhé.',
             ),
           ),
@@ -109,7 +111,9 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n?.photoDeleteTitle ?? 'Xoá ảnh này?'),
-        content: Text(l10n?.photoDeleteBody ?? 'Ảnh sẽ bị gỡ khỏi hồ sơ của bạn.'),
+        content: Text(
+          l10n?.photoDeleteBody ?? 'Ảnh sẽ bị gỡ khỏi hồ sơ của bạn.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -134,8 +138,10 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.photoDeleteError ??
+              Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.photoDeleteError ??
                   'Không xoá được ảnh. Thử lại nhé.',
             ),
           ),
@@ -174,23 +180,28 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: AppColors.surfaceMuted,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusPill,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],
               Text(
-                Localizations.of<AppLocalizations>(context, AppLocalizations)
-                        ?.shellTilePhotos ??
+                Localizations.of<AppLocalizations>(
+                      context,
+                      AppLocalizations,
+                    )?.shellTilePhotos ??
                     'Ảnh hồ sơ',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                Localizations.of<AppLocalizations>(context, AppLocalizations)
-                        ?.photoSubMax(_maxSlots) ??
+                Localizations.of<AppLocalizations>(
+                      context,
+                      AppLocalizations,
+                    )?.photoSubMax(_maxSlots) ??
                     'Thêm tối đa $_maxSlots ảnh để hồ sơ nổi bật hơn.',
                 style: Theme.of(
                   context,
@@ -221,10 +232,17 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
         : ref.watch(signedUrlsProvider(userId));
     final urls = urlsAsync.value ?? const <String>[];
     final paths = ref.watch(myPhotoPathsProvider);
+    // [AUDIT] signedUrlsOf nuot loi sign-photo va tra [] (deck can rot ve
+    // monogram im lang), nen o day loi khong nam trong urlsAsync.hasError ma
+    // hien ra duoi dang "co path nhung thieu URL". Truoc day sheet lang im:
+    // user vua up 6 anh chi thay 6 o be trong + nut ×, tuong app nuot anh.
+    final urlsMissing =
+        !urlsAsync.isLoading && paths.isNotEmpty && urls.length < paths.length;
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     // 2-row x 3-col grid (was a single Row of 3, which would overflow at
     // _maxSlots=6). GridView over a Row keeps each slot's own widget/keys/
     // busy-logic untouched — only the container layout changes.
-    return GridView.count(
+    final grid = GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -234,20 +252,58 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
         for (var i = 0; i < _maxSlots; i++)
           _PhotoSlot(
             key: Key('photo_slot_$i'),
+            index: i,
             // Slots fill left-to-right, top-to-bottom from the existing photo
             // list. `paths` and `urls` are two independently-fetched lists
             // zipped by index: `signedUrlsProvider` returns URLs positionally
             // aligned to `photoPaths` (same order, server-signed by the
             // `sign-photo` edge function over the same `photo_paths` array),
             // so index `i` is a valid join key. A shorter `urls` list degrades
-            // to the grey placeholder by design.
+            // to the grey placeholder while loading, and to the broken state
+            // once loading settled without a URL.
             path: i < paths.length ? paths[i] : null,
             url: i < urls.length ? urls[i] : null,
+            broken: urlsMissing && i < paths.length && i >= urls.length,
             busy: _busySlot == i,
             disabled: _busySlot != null && _busySlot != i,
             onAdd: () => _add(i),
             onRemove: (path) => _remove(i, path),
           ),
+      ],
+    );
+    if (!urlsMissing) return grid;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          key: const Key('photo_urls_error'),
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 18,
+              color: AppColors.textSecondary,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: Text(
+                l10n?.photoLoadError ?? 'Không tải được ảnh. Thử lại nhé.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ),
+            ),
+            TextButton(
+              key: const Key('photo_urls_retry'),
+              onPressed: userId == null
+                  ? null
+                  : () => ref.invalidate(signedUrlsProvider(userId)),
+              child: Text(l10n?.commonRetry ?? 'Thử lại'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        grid,
       ],
     );
   }
@@ -256,16 +312,23 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
 class _PhotoSlot extends StatelessWidget {
   const _PhotoSlot({
     super.key,
+    required this.index,
     required this.path,
     required this.url,
+    required this.broken,
     required this.busy,
     required this.disabled,
     required this.onAdd,
     required this.onRemove,
   });
 
+  final int index;
   final String? path;
   final String? url;
+
+  /// true khi anh nay CO path nhung mint URL da xong ma van khong co URL —
+  /// tuc la loi ky, khong phai dang loading.
+  final bool broken;
   final bool busy;
   final bool disabled;
   final VoidCallback onAdd;
@@ -289,6 +352,19 @@ class _PhotoSlot extends StatelessWidget {
             children: [
               if (hasPhoto && url != null)
                 Image.network(url!, fit: BoxFit.cover)
+              else if (hasPhoto && broken)
+                // Anh ton tai nhung khong lay duoc URL: phai nhin khac o
+                // trong/o loading, neu khong user tuong anh bi mat.
+                ColoredBox(
+                  color: AppColors.surfaceMuted,
+                  child: Center(
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      key: Key('photo_slot_broken_$index'),
+                      color: AppColors.textHint,
+                    ),
+                  ),
+                )
               else if (hasPhoto)
                 const ColoredBox(color: AppColors.surfaceMuted)
               else
@@ -368,8 +444,10 @@ class _ConsentGate extends StatelessWidget {
           const Icon(Icons.lock_outline_rounded, color: AppColors.primaryDark),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            Localizations.of<AppLocalizations>(context, AppLocalizations)
-                    ?.photoConsentNeeded ??
+            Localizations.of<AppLocalizations>(
+                  context,
+                  AppLocalizations,
+                )?.photoConsentNeeded ??
                 'Bật đồng ý dùng ảnh để thêm ảnh vào hồ sơ.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -378,8 +456,10 @@ class _ConsentGate extends StatelessWidget {
             key: const Key('photos_consent_cta'),
             onPressed: () => context.push('/settings'),
             child: Text(
-              Localizations.of<AppLocalizations>(context, AppLocalizations)
-                      ?.photoConsentCta ??
+              Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.photoConsentCta ??
                   'Bật trong Cài đặt',
             ),
           ),

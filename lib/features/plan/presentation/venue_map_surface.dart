@@ -19,7 +19,10 @@ class VenueMapSurface extends StatelessWidget {
   });
 
   final List<VenueSuggestion> venues;
-  final ValueChanged<VenueSuggestion> onVenueSelected;
+
+  /// null = nguoi xem khong duoc chot quan (khong phai chu keo). Pin van hien
+  /// de ho thay vi tri, nhung khong duoc render nhu nut bam duoc.
+  final ValueChanged<VenueSuggestion>? onVenueSelected;
   final MapPoint? midpoint;
   final bool useNativeMap;
 
@@ -39,7 +42,10 @@ class VenueMapSurface extends StatelessWidget {
           height: 220,
           child: !hasAnything
               ? _MapFallback(
-                  venues: const [], midpoint: null, onVenueSelected: onVenueSelected)
+                  venues: const [],
+                  midpoint: null,
+                  onVenueSelected: onVenueSelected,
+                )
               : useNativeMap && _googleMapsEnabled
               ? _NativeVenueMap(
                   venues: mappable,
@@ -66,17 +72,18 @@ class _NativeVenueMap extends StatelessWidget {
 
   final List<VenueSuggestion> venues;
   final MapPoint? midpoint;
-  final ValueChanged<VenueSuggestion> onVenueSelected;
+  final ValueChanged<VenueSuggestion>? onVenueSelected;
 
   List<LatLng> get _allPoints => [
-        for (final v in venues) LatLng(v.lat!, v.lng!),
-        if (midpoint != null) LatLng(midpoint!.lat, midpoint!.lng),
-      ];
+    for (final v in venues) LatLng(v.lat!, v.lng!),
+    if (midpoint != null) LatLng(midpoint!.lat, midpoint!.lng),
+  ];
 
   LatLng get _center {
     final pts = _allPoints;
     final lat = pts.map((p) => p.latitude).reduce((a, b) => a + b) / pts.length;
-    final lng = pts.map((p) => p.longitude).reduce((a, b) => a + b) / pts.length;
+    final lng =
+        pts.map((p) => p.longitude).reduce((a, b) => a + b) / pts.length;
     return LatLng(lat, lng);
   }
 
@@ -90,7 +97,9 @@ class _NativeVenueMap extends StatelessWidget {
       maxLng = math.max(maxLng, p.longitude);
     }
     return LatLngBounds(
-        southwest: LatLng(minLat, minLng), northeast: LatLng(maxLat, maxLng));
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
   }
 
   @override
@@ -104,7 +113,8 @@ class _NativeVenueMap extends StatelessWidget {
       onMapCreated: (controller) {
         if (pts.length >= 2) {
           controller.animateCamera(
-              CameraUpdate.newLatLngBounds(_bounds(pts), 44));
+            CameraUpdate.newLatLngBounds(_bounds(pts), 44),
+          );
         }
       },
       mapToolbarEnabled: false,
@@ -116,18 +126,25 @@ class _NativeVenueMap extends StatelessWidget {
             markerId: MarkerId(venue.id),
             position: LatLng(venue.lat!, venue.lng!),
             infoWindow: InfoWindow(title: venue.name, snippet: venue.address),
-            onTap: () => onVenueSelected(venue),
+            onTap: onVenueSelected == null
+                ? null
+                : () => onVenueSelected!(venue),
           ),
         if (midpoint != null)
           Marker(
             markerId: const MarkerId('midpoint'),
             position: LatLng(midpoint!.lat, midpoint!.lng),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueViolet,
+            ),
             infoWindow: InfoWindow(
-          title: Localizations.of<AppLocalizations>(context, AppLocalizations)
-                  ?.planMidpointMarker ??
-              'Điểm giữa nhóm',
-        ),
+              title:
+                  Localizations.of<AppLocalizations>(
+                    context,
+                    AppLocalizations,
+                  )?.planMidpointMarker ??
+                  'Điểm giữa nhóm',
+            ),
           ),
       },
     );
@@ -143,12 +160,13 @@ class _MapFallback extends StatelessWidget {
 
   final List<VenueSuggestion> venues;
   final MapPoint? midpoint;
-  final ValueChanged<VenueSuggestion> onVenueSelected;
+  final ValueChanged<VenueSuggestion>? onVenueSelected;
 
   @override
   Widget build(BuildContext context) {
-    final mappable =
-        venues.where((v) => v.lat != null && v.lng != null).toList();
+    final mappable = venues
+        .where((v) => v.lat != null && v.lng != null)
+        .toList();
     final lats = [
       for (final v in mappable) v.lat!,
       if (midpoint != null) midpoint!.lat,
@@ -172,7 +190,11 @@ class _MapFallback extends StatelessWidget {
               Positioned.fill(child: CustomPaint(painter: _MapGridPainter())),
               if (lats.isEmpty)
                 const Center(
-                  child: Icon(Icons.map_outlined, size: 44, color: Colors.black45),
+                  child: Icon(
+                    Icons.map_outlined,
+                    size: 44,
+                    color: Colors.black45,
+                  ),
                 )
               else ...[
                 for (final venue in mappable)
@@ -203,7 +225,13 @@ class _MapFallback extends StatelessWidget {
   }
 }
 
-double _scalePos(double value, double min, double max, double start, double end) {
+double _scalePos(
+  double value,
+  double min,
+  double max,
+  double start,
+  double end,
+) {
   if ((max - min).abs() < 0.000001) return start + (end - start) / 2;
   return start + ((value - min) / (max - min)) * (end - start);
 }
@@ -258,12 +286,37 @@ class _PositionedVenueMarker extends StatelessWidget {
   final VenueSuggestion venue;
   final double minLat, maxLat, minLng, maxLng;
   final Size size;
-  final ValueChanged<VenueSuggestion> onVenueSelected;
+  final ValueChanged<VenueSuggestion>? onVenueSelected;
 
   @override
   Widget build(BuildContext context) {
     final x = _scalePos(venue.lng!, minLng, maxLng, 28, size.width - 28);
     final y = _scalePos(venue.lat!, maxLat, minLat, 28, size.height - 28);
+    final onSelected = onVenueSelected;
+
+    // [AUDIT] Khong duoc chot quan thi pin phai la hinh trang tri thuan tuy.
+    // Truoc day van la IconButton.filled co tooltip + ripple nhung onPressed
+    // rong: thanh vien bam mai khong ra gi va khong hieu tai sao.
+    if (onSelected == null) {
+      final scheme = Theme.of(context).colorScheme;
+      return Positioned(
+        left: x - 24,
+        top: y - 24,
+        child: Semantics(
+          label: venue.name,
+          child: Container(
+            key: Key('venue_marker_${venue.id}'),
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: scheme.primaryContainer,
+            ),
+            child: Icon(Icons.location_on, color: scheme.onPrimaryContainer),
+          ),
+        ),
+      );
+    }
 
     return Positioned(
       left: x - 24,
@@ -271,7 +324,7 @@ class _PositionedVenueMarker extends StatelessWidget {
       child: IconButton.filled(
         key: Key('venue_marker_${venue.id}'),
         tooltip: venue.name,
-        onPressed: () => onVenueSelected(venue),
+        onPressed: () => onSelected(venue),
         icon: const Icon(Icons.location_on),
       ),
     );

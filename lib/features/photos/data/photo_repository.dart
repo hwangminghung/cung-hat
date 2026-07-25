@@ -22,10 +22,15 @@ class _SupabasePhotoStorage implements PhotoStorage {
 
   @override
   Future<void> upload(String path, Uint8List bytes) async {
-    await _client.storage.from(_bucket).uploadBinary(
+    await _client.storage
+        .from(_bucket)
+        .uploadBinary(
           path,
           bytes,
-          fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg',
+            upsert: true,
+          ),
         );
   }
 
@@ -36,11 +41,18 @@ class _SupabasePhotoStorage implements PhotoStorage {
 }
 
 class PhotoRepository {
-  PhotoRepository(this._client, {PhotoStorage? storage})
-      : _storage = storage ?? _SupabasePhotoStorage(_client);
+  PhotoRepository(this._client, {PhotoStorage? storage, Duration? signTimeout})
+    : _storage = storage ?? _SupabasePhotoStorage(_client),
+      _signTimeout = signTimeout ?? const Duration(seconds: 8);
 
   final SupabaseClient _client;
   final PhotoStorage _storage;
+
+  /// Tran cho moi lan mint URL da ky. Do duoc tren local: edge runtime chet
+  /// thi Kong khong tra loi ma GIU ket noi vo han — khong co tran nay thi
+  /// provider ket loading mai, UI khong bao gio biet la loi. Ky 6 URL la viec
+  /// tinh bang ms; 8s da la rat rong rai.
+  final Duration _signTimeout;
 
   /// Uploads [bytes] to the caller's folder at `'{uid}/{slot}_{millis}.jpg'`,
   /// then persists the new full path list (existing [current] + this new path)
@@ -91,7 +103,11 @@ class PhotoRepository {
   /// intentional so transport/5xx errors also fall back rather than surface.
   Future<List<String>> signedUrlsOf(String userId) async {
     try {
-      final res = await _client.functions.invoke('sign-photo', body: {'target_id': userId});
+      final res = await _client.functions
+          .invoke('sign-photo', body: {'target_id': userId})
+          // TimeoutException roi vao catch chung ben duoi -> [] nhu moi loi
+          // khac, nhung QUAN TRONG la no ket thuc duoc trang thai loading.
+          .timeout(_signTimeout);
       final urls = res.data?['urls'] as List?;
       if (urls == null) return const [];
 
@@ -127,11 +143,7 @@ class PhotoRepository {
       return url;
     }
     return u
-        .replace(
-          scheme: base.scheme,
-          host: base.host,
-          port: base.port,
-        )
+        .replace(scheme: base.scheme, host: base.host, port: base.port)
         .toString();
   }
 }

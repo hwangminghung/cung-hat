@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/datetime_format.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../application/plan_providers.dart';
@@ -15,7 +16,9 @@ class SharedPlanScreen extends ConsumerWidget {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final async = ref.watch(resolveShareProvider(token));
     return Scaffold(
-      appBar: AppBar(title: Text(l10n?.planSharedTitle ?? 'Kế hoạch được chia sẻ')),
+      appBar: AppBar(
+        title: Text(l10n?.planSharedTitle ?? 'Kế hoạch được chia sẻ'),
+      ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -24,7 +27,9 @@ class SharedPlanScreen extends ConsumerWidget {
         data: (data) {
           if (data['venue_name'] == null) {
             return Center(
-              child: Text(l10n?.planSharedNotFound ?? 'Không tìm thấy kế hoạch'),
+              child: Text(
+                l10n?.planSharedNotFound ?? 'Không tìm thấy kế hoạch',
+              ),
             );
           }
           if (data['expired'] == true) {
@@ -52,7 +57,12 @@ class SharedPlanScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text('${data['address'] ?? ''}'),
                     const SizedBox(height: 8),
-                    Text('${data['scheduled_at'] ?? ''}'),
+                    // [AUDIT] Cung loi ISO tho nhu PlanScreen: man hinh nay la
+                    // thu nguoi duoc chia se link nhin thay dau tien.
+                    Text(
+                      formatLocalDateTime(data['scheduled_at'] as String?) ??
+                          '${data['scheduled_at'] ?? ''}',
+                    ),
                   ],
                 ),
               ),

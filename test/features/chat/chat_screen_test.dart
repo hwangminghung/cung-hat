@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
@@ -290,5 +291,76 @@ void main() {
     expect(find.text('${b.day}/${b.month}'), findsOneWidget);
     expect(find.text('${two(a.hour)}:${two(a.minute)}'), findsOneWidget);
     expect(find.text('${two(b.hour)}:${two(b.minute)}'), findsOneWidget);
+  });
+
+  // [AUDIT] BANGIAO canh bao AppBar 4 action o 360dp x 1.4 "con du ~30dp".
+  // Thuc te tren may: khong he co RenderFlex overflow (nen ca suite van xanh)
+  // nhung Flutter am tham cat tieu de con "M…" — user khong biet dang nhan voi
+  // ai. Phuong an da chot san trong BANGIAO: day "Lap keo" vao overflow menu.
+  testWidgets('ten doi phuong khong bi cat o 360dp x textScale 1.4', (
+    tester,
+  ) async {
+    const viewport = Size(360, 640);
+    // Ten rieng VN dien hinh. Ten dai tuy y thi AppBar 360dp o 1.4 khong the
+    // chua het — cat bot la dung; thu phai chan la tieu de bi bop con mot chu.
+    const otherName = 'Linh';
+    await tester.binding.setSurfaceSize(viewport);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repo = _MockRepo();
+    when(() => repo.history(any())).thenAnswer((_) async => <Message>[]);
+    when(
+      () => repo.subscribe(any()),
+    ).thenAnswer((_) => const Stream<Message>.empty());
+    when(() => repo.markRead(any())).thenAnswer((_) async {});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [chatRepositoryProvider.overrideWithValue(repo)],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const MediaQuery(
+            data: MediaQueryData(
+              size: viewport,
+              textScaler: TextScaler.linear(1.4),
+            ),
+            child: ChatScreen(matchId: 't1', otherName: otherName),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    // Nut chu rong khong duoc chiem cho cua tieu de.
+    expect(
+      find.descendant(of: find.byType(AppBar), matching: find.text('Lập kèo')),
+      findsNothing,
+      reason: 'Lập kèo phải nằm trong overflow menu, không phải action AppBar',
+    );
+
+    // Tieu de phai duoc ve DU be ngang tu nhien cua no — day moi la thu bat
+    // duoc ellipsis, vi cat chu khong sinh ra exception nao ca.
+    final title = tester.renderObject<RenderParagraph>(find.text(otherName));
+    final natural = TextPainter(
+      text: title.text,
+      textDirection: TextDirection.ltr,
+      textScaler: title.textScaler,
+    )..layout();
+    expect(
+      title.size.width,
+      greaterThanOrEqualTo(natural.width - 0.5),
+      reason: 'tiêu đề bị cắt: vẽ ${title.size.width} < cần ${natural.width}',
+    );
+    // Va phai giu duoc phan lon be ngang AppBar. Truoc khi day "Lập kèo"
+    // xuong overflow, cho nay chi con ~64dp (hien "M…") du khong he co
+    // exception nao — nen day la chot chan chinh cho lan sau.
+    expect(title.constraints.maxWidth, greaterThanOrEqualTo(160));
+
+    // Van phai vao duoc Lap keo, chi la doi cho.
+    await tester.tap(find.byKey(const Key('chat_menu_btn')));
+    await tester.pumpAndSettle();
+    expect(find.text('Lập kèo'), findsOneWidget);
+    expect(find.byKey(const Key('unmatch_btn')), findsOneWidget);
   });
 }

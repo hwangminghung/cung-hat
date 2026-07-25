@@ -34,6 +34,8 @@ SupabaseClient _clientWithUser(String uid) {
 Future<void> _pumpSheet(
   WidgetTester tester, {
   required bool photosConsent,
+  List<String> paths = const [],
+  Future<List<String>> Function()? signedUrls,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -42,8 +44,10 @@ Future<void> _pumpSheet(
         myConsentsProvider.overrideWith(
           (ref) async => {'photos': photosConsent},
         ),
-        myPhotoPathsProvider.overrideWithValue(const []),
-        signedUrlsProvider('me').overrideWith((ref) async => const []),
+        myPhotoPathsProvider.overrideWithValue(paths),
+        signedUrlsProvider(
+          'me',
+        ).overrideWith((ref) => (signedUrls ?? () async => const [])()),
       ],
       child: MaterialApp(
         home: Scaffold(
@@ -80,5 +84,54 @@ void main() {
     expect(find.byKey(const Key('photo_slot_4')), findsOneWidget);
     expect(find.byKey(const Key('photo_slot_5')), findsOneWidget);
     expect(find.byKey(const Key('photos_consent_cta')), findsNothing);
+  });
+
+  // [AUDIT] signedUrlsOf nuot moi loi sign-photo va tra [] (co y — deck rot ve
+  // monogram). Nhung trong sheet quan ly anh, "co path ma khong co URL" tung
+  // hien 6 o be trong tron voi nut × va khong mot loi giai thich nao — user
+  // vua up 6 anh xong tuong app mat anh. Sheet phai noi that va cho thu lai.
+  testWidgets('co path nhung khong ky duoc URL -> bao loi + thu lai duoc', (
+    tester,
+  ) async {
+    var fetches = 0;
+    await _pumpSheet(
+      tester,
+      photosConsent: true,
+      paths: const ['me/1.jpg', 'me/2.jpg'],
+      signedUrls: () async {
+        fetches++;
+        return const [];
+      },
+    );
+
+    // Bao loi ro rang + tung o "co anh" hien trang thai vo, khong phai o trong.
+    expect(find.byKey(const Key('photo_urls_error')), findsOneWidget);
+    expect(find.byKey(const Key('photo_slot_broken_0')), findsOneWidget);
+    expect(find.byKey(const Key('photo_slot_broken_1')), findsOneWidget);
+    // O trong (slot 2+) van la o "+ them anh", khong dinh trang thai vo.
+    expect(find.byKey(const Key('photo_slot_broken_2')), findsNothing);
+
+    // Thu lai = mint lai URL da ky.
+    expect(fetches, 1);
+    await tester.tap(find.byKey(const Key('photo_urls_retry')));
+    await tester.pumpAndSettle();
+    expect(fetches, 2);
+  });
+
+  testWidgets('ky URL thanh cong -> khong hien bao loi', (tester) async {
+    await _pumpSheet(
+      tester,
+      photosConsent: true,
+      paths: const ['me/1.jpg'],
+      // URL bat ky — Image.network se loi trong test nhung day la loi tai
+      // ANH, khong phai loi ky URL, nen khong duoc hien photo_urls_error.
+      signedUrls: () async => const ['http://localhost/1.jpg'],
+    );
+
+    expect(find.byKey(const Key('photo_urls_error')), findsNothing);
+    expect(find.byKey(const Key('photo_slot_broken_0')), findsNothing);
+    // Test HttpClient tra 400 cho moi anh mang — nuot dung MOT loi tai anh do,
+    // khong lien quan den dieu test nay khoa.
+    tester.takeException();
   });
 }

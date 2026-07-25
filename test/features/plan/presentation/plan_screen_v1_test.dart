@@ -30,8 +30,9 @@ void main() {
         scheduledAt: '2026-07-12T19:00:00Z',
         status: 'confirmed',
       );
-      when(() => repo.nearestVenues('k1', limit: any(named: 'limit')))
-          .thenAnswer((_) async => venues);
+      when(
+        () => repo.nearestVenues('k1', limit: any(named: 'limit')),
+      ).thenAnswer((_) async => venues);
       when(() => repo.currentPlan('k1')).thenAnswer((_) async => plan);
 
       await tester.pumpWidget(
@@ -52,4 +53,51 @@ void main() {
       expect(find.textContaining('Đặt phòng'), findsNothing);
     },
   );
+
+  // [AUDIT] scheduled_at la String ISO doc thang tu DB va chua tung duoc parse,
+  // nen man hinh in ra '2026-07-12T19:00:00.000Z' cho user doc.
+  testWidgets('gio hen hien dang doc duoc, khong phai ISO tho', (tester) async {
+    final repo = _MockRepo();
+    const venues = [
+      VenueSuggestion(
+        id: 'v1',
+        name: 'Music Box Thủ Đức',
+        address: '120 Võ Văn Ngân',
+        lat: 10.85,
+        lng: 106.77,
+      ),
+    ];
+    final plan = Plan(
+      id: 'p1',
+      keoId: 'k1',
+      venueId: 'v1',
+      scheduledAt: '2026-07-12T19:00:00Z',
+      status: 'confirmed',
+    );
+    when(
+      () => repo.nearestVenues('k1', limit: any(named: 'limit')),
+    ).thenAnswer((_) async => venues);
+    when(() => repo.currentPlan('k1')).thenAnswer((_) async => plan);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          planRepositoryProvider.overrideWithValue(repo),
+          keoMidpointProvider.overrideWith((ref, keoId) async => null),
+        ],
+        child: const MaterialApp(
+          home: PlanScreen(keoId: 'k1', isHost: true, useNativeMap: false),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('2026-07-12T'), findsNothing);
+    expect(find.textContaining('Z'), findsNothing);
+    // Khong assert gio cu the: CI chay UTC, may dev UTC+7.
+    expect(
+      find.textContaining(RegExp(r'\d{2}:\d{2} · \d{1,2}/\d{1,2}/\d{4}')),
+      findsOneWidget,
+    );
+  });
 }

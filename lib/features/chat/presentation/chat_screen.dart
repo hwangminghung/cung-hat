@@ -14,6 +14,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../discovery/application/discovery_providers.dart';
 import '../../discovery/domain/candidate.dart';
 import '../../discovery/presentation/candidate_detail_sheet.dart';
+import '../../discovery/presentation/report_sheet.dart';
 import '../application/chat_providers.dart';
 import '../application/inbox_providers.dart';
 import 'chat_timeline.dart';
@@ -151,6 +152,68 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  /// [AUDIT SAFETY] Loi bao cao/chan phai co san 1 cham ngay tren AppBar.
+  /// Truoc day chi vao duoc bang cach mo ho so doi phuong, nen getMatchProfile
+  /// loi hoac tra null la mat sach duong bao cao. Ho so hong thi lay id doi
+  /// phuong tu inbox — get_my_matches van tra other_id.
+  Future<void> _openSafetySheet() async {
+    var profileFailed = false;
+    String? otherId;
+    try {
+      final candidate = await ref
+          .read(discoveryRepositoryProvider)
+          .getMatchProfile(widget.matchId);
+      otherId = candidate?.id;
+      profileFailed = candidate == null;
+    } catch (_) {
+      profileFailed = true;
+    }
+    if (otherId == null) {
+      try {
+        for (final match in await ref.read(inboxProvider.future)) {
+          if (match.matchId == widget.matchId) {
+            otherId = match.otherId;
+            break;
+          }
+        }
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    final targetId = otherId;
+    if (targetId == null) {
+      // Ca hai nguon id deu hong: report_user/block_user can user id nen mo
+      // sheet cung vo nghia — noi that thay vi de user bam vao khoang khong.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _l10n?.chatProfileError ?? 'Không mở được hồ sơ. Thử lại sau.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (profileFailed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _l10n?.safetyProfileUnavailable ??
+                'Không tải được hồ sơ này, nhưng bạn vẫn báo cáo hoặc chặn được.',
+          ),
+        ),
+      );
+    }
+    await showModalBottomSheet(
+      context: context,
+      builder: (_) => ReportSheet(
+        targetId: targetId,
+        // Chan xong thi khong duoc de user ngoi lai trong thread cua nguoi do.
+        onBlocked: () {
+          if (mounted) context.pop();
+        },
+      ),
+    );
+  }
+
   /// [A-I1] Huỷ ghép: cắt kết nối mà không cần block hay xoá tài khoản.
   /// Xác nhận qua dialog trước khi gọi RPC. Unmatch là vĩnh viễn cho cặp này
   /// (swipes cũ còn nguyên → không quay lại deck của nhau; record_swipe cũng
@@ -248,6 +311,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             icon: const Icon(Icons.person_rounded),
             tooltip: _l10n?.tabProfile ?? 'Hồ sơ',
           ),
+          IconButton(
+            key: const Key('chat_safety_btn'),
+            onPressed: _openSafetySheet,
+            icon: const Icon(Icons.shield_outlined),
+            tooltip: _l10n?.safetyReportTooltip ?? 'Báo cáo hoặc chặn',
+          ),
           PopupMenuButton<String>(
             key: const Key('chat_menu_btn'),
             // Khoá menu khi đang huỷ ghép: chặn luôn ca mở-lại-dialog trong
@@ -256,19 +325,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             enabled: !_unmatching,
             onSelected: (v) {
               if (v == 'unmatch') _confirmUnmatch();
+              if (v == 'keo') context.push('/keo/create');
             },
             itemBuilder: (_) => [
+              // [AUDIT] "Lập kèo" tung la TextButton.icon nam thang tren
+              // AppBar. O 360dp x textScale 1.4 no an het cho cua tieu de:
+              // khong co RenderFlex overflow nao (nen test cu khong bat duoc)
+              // nhung ten doi phuong bi Flutter cat con "M…". Day xuong
+              // overflow tra lai be ngang cho tieu de, van du 1 cham de mo.
+              PopupMenuItem(
+                value: 'keo',
+                key: const Key('chat_promote_keo_btn'),
+                child: Text(_l10n?.chatPromoteKeo ?? 'Lập kèo'),
+              ),
               PopupMenuItem(
                 value: 'unmatch',
                 key: const Key('unmatch_btn'),
                 child: Text(_l10n?.chatUnmatchCta ?? 'Huỷ ghép'),
               ),
             ],
-          ),
-          TextButton.icon(
-            onPressed: () => context.push('/keo/create'),
-            icon: const Icon(Icons.groups_rounded),
-            label: Text(_l10n?.chatPromoteKeo ?? 'Lập kèo'),
           ),
         ],
       ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/datetime_format.dart';
 import '../application/plan_providers.dart';
 import '../data/plan_repository.dart';
 import '../domain/venue_suggestion.dart';
@@ -11,6 +13,9 @@ import '../../../shared/widgets/gradient_button.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/responsive_frame.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../discovery/presentation/report_sheet.dart';
+import '../../keo/application/keo_providers.dart';
+import '../../keo/domain/keo_member.dart';
 import 'booking_button.dart';
 import 'plan_time_picker_sheet.dart';
 import 'safety_toolkit.dart';
@@ -72,11 +77,84 @@ class PlanScreen extends ConsumerWidget {
     return '';
   }
 
+  /// [AUDIT SAFETY] Man ke hoach truoc day khong co loi bao cao nao, du day
+  /// la noi chot dia diem gap mat ngoai doi. Keo co nhieu nguoi ma
+  /// report_user/block_user chi nhan MOT user id, nen phai chon dich danh
+  /// thanh vien truoc khi mo ReportSheet.
+  Future<void> _openSafetySheet(BuildContext context, WidgetRef ref) async {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    List<KeoMember> roster;
+    try {
+      roster = await ref.read(keoRosterProvider(keoId).future);
+    } catch (_) {
+      roster = const <KeoMember>[];
+    }
+    if (!context.mounted) return;
+    String? me;
+    try {
+      me = ref.read(supabaseClientProvider).auth.currentUser?.id;
+    } catch (_) {
+      me = null;
+    }
+    final others = [
+      for (final member in roster)
+        if (member.userId != me) member,
+    ];
+    if (others.isEmpty) {
+      // Chua co danh sach thanh vien thi khong biet bao cao ai — noi that
+      // thay vi mo mot sheet rong.
+      _snack(
+        context,
+        l10n?.chatProfileError ?? 'Không mở được hồ sơ. Thử lại sau.',
+      );
+      return;
+    }
+    await showModalBottomSheet(
+      context: context,
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              key: const Key('plan_safety_picker'),
+              title: Text(l10n?.safetyPickMember ?? 'Bạn muốn báo cáo ai?'),
+            ),
+            const Divider(height: 1),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final member in others)
+                    ListTile(
+                      key: Key('plan_safety_member_${member.userId}'),
+                      leading: const Icon(Icons.person_outline),
+                      title: Text(
+                        member.displayName ??
+                            (l10n?.keoSharedAnonymous ?? 'Ẩn danh'),
+                      ),
+                      onTap: () {
+                        Navigator.of(sheetCtx).pop();
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) => ReportSheet(targetId: member.userId),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final planAsync = ref.watch(currentPlanProvider(keoId));
     final venuesAsync = ref.watch(nearestVenuesProvider(keoId));
     final venues = venuesAsync.asData?.value ?? const <VenueSuggestion>[];
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,6 +165,14 @@ class PlanScreen extends ConsumerWidget {
               )?.planTitle ??
               'Kế hoạch',
         ),
+        actions: [
+          IconButton(
+            key: const Key('plan_safety_btn'),
+            onPressed: () => _openSafetySheet(context, ref),
+            icon: const Icon(Icons.shield_outlined),
+            tooltip: l10n?.safetyReportTooltip ?? 'Báo cáo hoặc chặn',
+          ),
+        ],
       ),
       body: ResponsiveFrame(
         child: KeyedSubtree(
@@ -98,9 +184,11 @@ class PlanScreen extends ConsumerWidget {
                   venues: list,
                   midpoint: ref.watch(keoMidpointProvider(keoId)).asData?.value,
                   useNativeMap: useNativeMap,
+                  // null (khong phai `(_) {}`) de pin thanh hinh trang tri:
+                  // chi chu keo moi chot duoc quan.
                   onVenueSelected: isHost
                       ? (venue) => _pickVenue(context, ref, venue)
-                      : (_) {},
+                      : null,
                 ),
                 loading: () => const SkeletonCard(),
                 error: (e, _) => const SizedBox.shrink(),
@@ -220,9 +308,14 @@ class PlanScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                l10n?.planTime(plan.scheduledAt) ??
-                    'Thời gian: ${plan.scheduledAt}',
+              Builder(
+                builder: (context) {
+                  // Chuoi tho chi con la duong lui khi server tra ve gia tri
+                  // khong parse duoc — luong binh thuong luon co ban dinh dang.
+                  final when =
+                      formatLocalDateTime(plan.scheduledAt) ?? plan.scheduledAt;
+                  return Text(l10n?.planTime(when) ?? 'Thời gian: $when');
+                },
               ),
               const SizedBox(height: 4),
               Text(
