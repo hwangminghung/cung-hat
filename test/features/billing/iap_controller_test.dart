@@ -99,4 +99,89 @@ void main() {
     when(() => repo.storeProductIds(any())).thenThrow(StateError('net'));
     expect(await controller.buy('pro'), isFalse);
   });
+
+  // [AUDIT P1-1] init() ĐÁNH DẤU đã khởi tạo TRƯỚC khi isAvailable() thành
+  // công: một lỗi tạm thời (offline lúc mở app, platform channel chưa sẵn
+  // sàng) khoá vĩnh viễn purchaseStream — user trả tiền, entitlement không
+  // bao giờ tới. Chỉ được coi là khởi tạo xong KHI listener đã gắn.
+  group('init phải thử lại được sau lỗi tạm thời', () {
+    test('isAvailable throw lần đầu → init lần sau vẫn gắn listener', () async {
+      when(() => iap.isAvailable()).thenThrow(StateError('channel chưa sẵn'));
+      await controller.init();
+
+      when(() => iap.isAvailable()).thenAnswer((_) async => true);
+      await controller.init();
+
+      purchases.add([_purchased('pro')]);
+      await pumpEventQueue();
+      verify(
+        () => repo.deliverPurchase(
+          platform: any(named: 'platform'),
+          storeProductId: 'pro',
+          storeTxnId: 'txn-1',
+          receipt: 'receipt-data',
+        ),
+      ).called(1);
+    });
+
+    test('isAvailable=false lần đầu → init lần sau vẫn gắn listener', () async {
+      when(() => iap.isAvailable()).thenAnswer((_) async => false);
+      await controller.init();
+
+      when(() => iap.isAvailable()).thenAnswer((_) async => true);
+      await controller.init();
+
+      purchases.add([_purchased('pro')]);
+      await pumpEventQueue();
+      verify(
+        () => repo.deliverPurchase(
+          platform: any(named: 'platform'),
+          storeProductId: 'pro',
+          storeTxnId: 'txn-1',
+          receipt: 'receipt-data',
+        ),
+      ).called(1);
+    });
+
+    test(
+      'hai init song song không double-listen (stream single-sub)',
+      () async {
+        await Future.wait([controller.init(), controller.init()]);
+        purchases.add([_purchased('pro')]);
+        await pumpEventQueue();
+        verify(
+          () => repo.deliverPurchase(
+            platform: any(named: 'platform'),
+            storeProductId: any(named: 'storeProductId'),
+            storeTxnId: any(named: 'storeTxnId'),
+            receipt: any(named: 'receipt'),
+          ),
+        ).called(1);
+      },
+    );
+  });
+
+  // [AUDIT P1-1] Nếu init lúc mở app thất bại, nút Mua vẫn phải tự dựng lại
+  // listener — nếu không, luồng mua chạy mà kết quả không ai nhận.
+  test('buy tự gắn listener khi init lúc mở app đã thất bại', () async {
+    when(() => iap.isAvailable()).thenThrow(StateError('offline'));
+    await controller.init();
+
+    when(() => iap.isAvailable()).thenAnswer((_) async => true);
+    when(() => repo.storeProductIds(any())).thenAnswer((_) async => {});
+    await controller.buy(
+      'pro',
+    ); // catalog rỗng → false, nhưng listener phải gắn
+
+    purchases.add([_purchased('pro')]);
+    await pumpEventQueue();
+    verify(
+      () => repo.deliverPurchase(
+        platform: any(named: 'platform'),
+        storeProductId: 'pro',
+        storeTxnId: 'txn-1',
+        receipt: 'receipt-data',
+      ),
+    ).called(1);
+  });
 }
