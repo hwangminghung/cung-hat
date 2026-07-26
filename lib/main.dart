@@ -1,14 +1,11 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/config/app_config.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/providers/supabase_providers.dart';
-import 'core/push/push_service.dart';
 import 'app/app.dart';
 
 Future<void> main() async {
@@ -28,7 +25,7 @@ Future<void> main() async {
   );
   // [LANG] Đọc ngôn ngữ user đã chọn TRƯỚC runApp — không nháy frame đầu.
   final savedLocale = await loadSavedLocaleOverride();
-  unawaited(_initPush(Supabase.instance.client));
+  unawaited(_initFirebase());
   runApp(
     ProviderScope(
       overrides: [
@@ -40,24 +37,19 @@ Future<void> main() async {
   );
 }
 
-/// Best-effort FCM registration. Fully guarded: missing Firebase config (dev / no
-/// google-services.json) or an unsupported platform must never crash startup.
-Future<void> _initPush(SupabaseClient client) async {
+/// Chỉ khởi tạo Firebase. Fully guarded: thiếu cấu hình Firebase (dev / không
+/// có google-services.json) hoặc nền tảng không hỗ trợ đều không được crash
+/// lúc mở app.
+///
+/// [AUDIT P1-3] Xin quyền thông báo và đăng ký token ĐÃ CHUYỂN sang
+/// [pushRegistrationProvider]: chạy khi user có hồ sơ (đã đăng nhập + qua
+/// onboarding). Ở đây thì chưa có session — token bị bỏ im lặng và không bao
+/// giờ được đăng ký lại, còn hộp thoại xin quyền thì bật lên trước cả màn đăng
+/// nhập.
+Future<void> _initFirebase() async {
   try {
     await Firebase.initializeApp();
-    final messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission();
-    final platform = Platform.isIOS ? 'ios' : 'android';
-    Future<void> register(String? token) async {
-      if (token == null) return;
-      // RPC is authenticated-only
-      if (client.auth.currentSession == null) return;
-      await PushService(client).registerToken(token, platform);
-    }
-
-    await register(await messaging.getToken());
-    messaging.onTokenRefresh.listen(register);
   } catch (e) {
-    debugPrint('Push init skipped: $e');
+    debugPrint('Firebase init skipped: $e');
   }
 }
