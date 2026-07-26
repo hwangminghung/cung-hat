@@ -22,33 +22,43 @@ import '../features/plan/presentation/plan_screen.dart';
 import '../features/plan/presentation/shared_plan_screen.dart';
 import '../features/profile/application/profile_providers.dart';
 import '../features/profile/domain/profile.dart';
+import '../features/profile/presentation/profile_error_screen.dart';
 import '../features/settings/presentation/blocked_users_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import 'deep_link.dart';
 import 'home_shell.dart';
 
-/// Maps the profile fetch state to the tri-state [authRedirect] input.
+/// Bốn trạng thái của lần tải hồ sơ — đầu vào của [authRedirect].
+///
+/// [AUDIT P1-4] Trước đây chỉ có tri-state và `error` bị gộp vào "chưa có hồ
+/// sơ", nên user CŨ mở app lúc mất mạng / server lỗi bị ném vào màn tạo hồ sơ
+/// lại. Lỗi nay là trạng thái riêng, có màn thử lại riêng.
+enum ProfileGate { loading, missing, present, error }
+
+/// Maps the profile fetch state to the [authRedirect] input.
 ///
 /// Order matters: a refresh (after invalidate on account switch) KEEPS the
 /// previous user's value via Riverpod's copyWithPrevious, so while loading
 /// the answer is "unknown" — the stale identity must never decide routing.
-/// A resolved error also refuses the stale value: /onboarding is the safer
-/// wrong answer and self-corrects on the next successful fetch.
-bool? hasProfileOf(AsyncValue<Profile?> profile) {
-  if (profile.isLoading) return null;
-  if (profile.hasError) return false;
-  return profile.value != null;
+/// [ProfileGate.error] cũng từ chối giá trị cũ đó: đưa sang màn thử lại, KHÔNG
+/// cho vào deck (rò hồ sơ tài khoản trước) và cũng không đá về onboarding.
+ProfileGate profileGateOf(AsyncValue<Profile?> profile) {
+  if (profile.isLoading) return ProfileGate.loading;
+  if (profile.hasError) return ProfileGate.error;
+  return profile.value != null ? ProfileGate.present : ProfileGate.missing;
 }
+
+/// Đường dẫn màn báo lỗi tải hồ sơ (có nút thử lại).
+const kProfileErrorLocation = '/profile-error';
 
 /// Pure redirect decision — unit-tested in isolation.
 ///
-/// [hasProfile] is tri-state: `null` means the profile fetch hasn't resolved
-/// yet — hold the current location and wait for the next router refresh
-/// instead of guessing (guessing /onboarding causes a visible flash for
-/// users who do have a profile).
+/// [ProfileGate.loading] nghĩa là lần tải chưa ngã ngũ — giữ nguyên vị trí và
+/// chờ lần refresh sau thay vì đoán (đoán /onboarding gây nháy màn onboarding
+/// cho user vốn đã có hồ sơ).
 String? authRedirect({
   required bool signedIn,
-  required bool? hasProfile,
+  required ProfileGate gate,
   required String location,
 }) {
   final authArea = location == '/auth' || location == '/otp';
@@ -57,12 +67,24 @@ String? authRedirect({
       location.startsWith('/plan/shared') ||
       location.startsWith('/keo/shared');
   if (!signedIn) return publicArea ? null : '/auth';
-  if (hasProfile == null) return null;
-  if (!hasProfile) return location == '/onboarding' ? null : '/onboarding';
-  // Profile exists: a user sitting on an auth/onboarding screen (e.g. right
-  // after completing onboarding) must be sent home — otherwise they get stuck.
-  if (authArea || location == '/onboarding') return '/';
-  return null;
+  switch (gate) {
+    case ProfileGate.loading:
+      return null;
+    case ProfileGate.error:
+      return location == kProfileErrorLocation ? null : kProfileErrorLocation;
+    case ProfileGate.missing:
+      return location == '/onboarding' ? null : '/onboarding';
+    case ProfileGate.present:
+      // Profile exists: a user sitting on an auth/onboarding/error screen
+      // (e.g. right after completing onboarding, or after a successful retry)
+      // must be sent home — otherwise they get stuck.
+      if (authArea ||
+          location == '/onboarding' ||
+          location == kProfileErrorLocation) {
+        return '/';
+      }
+      return null;
+  }
 }
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -81,7 +103,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final signedIn = ref.read(authRepositoryProvider).currentSession != null;
       return authRedirect(
         signedIn: signedIn,
-        hasProfile: hasProfileOf(ref.read(myProfileProvider)),
+        gate: profileGateOf(ref.read(myProfileProvider)),
         location: state.uri.path,
       );
     },
@@ -95,6 +117,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding/photos',
         builder: (_, _) => const OnboardingPhotosScreen(),
+      ),
+      // [AUDIT P1-4] Đích của ProfileGate.error — KHÔNG phải /onboarding.
+      GoRoute(
+        path: kProfileErrorLocation,
+        builder: (_, _) => const ProfileErrorScreen(),
       ),
       GoRoute(path: '/admin', builder: (_, _) => const ModerationScreen()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),

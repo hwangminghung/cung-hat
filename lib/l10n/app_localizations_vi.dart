@@ -453,6 +453,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get commonSaveError => 'Không lưu được cài đặt, thử lại.';
 
   @override
+  String get profileLoadErrorTitle => 'Không tải được hồ sơ';
+
+  @override
+  String get profileLoadErrorSub =>
+      'Hồ sơ của bạn vẫn còn nguyên. Kiểm tra kết nối rồi thử lại.';
+
+  @override
   String get deckErrorLikeLimit =>
       'Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.';
 

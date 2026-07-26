@@ -174,6 +174,8 @@
   "commonBack": "Quay lại",
   "commonCheckConnection": "Kiểm tra kết nối rồi thử lại.",
   "commonSaveError": "Không lưu được cài đặt, thử lại.",
+  "profileLoadErrorTitle": "Không tải được hồ sơ",
+  "profileLoadErrorSub": "Hồ sơ của bạn vẫn còn nguyên. Kiểm tra kết nối rồi thử lại.",
   "deckErrorLikeLimit": "Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.",
   "deckErrorSuperLimit": "Bạn đã hết lượt Siêu thích hôm nay.",
   "deckErrorProRequired": "Tính năng này dành cho thành viên Pro.",

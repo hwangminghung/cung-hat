@@ -6,37 +6,45 @@ import 'package:cung_hat/features/profile/domain/profile.dart';
 void main() {
   test('unauthenticated is sent to /auth', () {
     expect(
-      authRedirect(signedIn: false, hasProfile: false, location: '/'),
+      authRedirect(signedIn: false, gate: ProfileGate.missing, location: '/'),
       '/auth',
     );
   });
   test('signed-in without profile goes to /onboarding', () {
     expect(
-      authRedirect(signedIn: true, hasProfile: false, location: '/'),
+      authRedirect(signedIn: true, gate: ProfileGate.missing, location: '/'),
       '/onboarding',
     );
   });
   test('signed-in with profile on /auth goes home', () {
     expect(
-      authRedirect(signedIn: true, hasProfile: true, location: '/auth'),
+      authRedirect(
+        signedIn: true,
+        gate: ProfileGate.present,
+        location: '/auth',
+      ),
       '/',
     );
   });
   test('signed-in with profile on /otp goes home', () {
     expect(
-      authRedirect(signedIn: true, hasProfile: true, location: '/otp'),
+      authRedirect(signedIn: true, gate: ProfileGate.present, location: '/otp'),
       '/',
     );
   });
   test('signed-in with profile leaves /onboarding for home', () {
     expect(
-      authRedirect(signedIn: true, hasProfile: true, location: '/onboarding'),
+      authRedirect(
+        signedIn: true,
+        gate: ProfileGate.present,
+        location: '/onboarding',
+      ),
       '/',
     );
   });
   test('signed-in with profile elsewhere is not redirected', () {
     expect(
-      authRedirect(signedIn: true, hasProfile: true, location: '/'),
+      authRedirect(signedIn: true, gate: ProfileGate.present, location: '/'),
       isNull,
     );
   });
@@ -46,7 +54,7 @@ void main() {
     expect(
       authRedirect(
         signedIn: true,
-        hasProfile: true,
+        gate: ProfileGate.present,
         location: '/onboarding/photos',
       ),
       isNull,
@@ -56,7 +64,7 @@ void main() {
     expect(
       authRedirect(
         signedIn: false,
-        hasProfile: false,
+        gate: ProfileGate.missing,
         location: '/plan/shared/tok',
       ),
       isNull,
@@ -66,24 +74,24 @@ void main() {
     expect(
       authRedirect(
         signedIn: false,
-        hasProfile: false,
+        gate: ProfileGate.missing,
         location: '/keo/shared/tok',
       ),
       isNull,
     );
   });
 
-  // Profile chưa load xong (null = unknown): đứng yên chờ, KHÔNG được đoán
+  // Profile chưa load xong (loading = unknown): đứng yên chờ, KHÔNG được đoán
   // /onboarding — tránh flash màn onboarding cho user đã có hồ sơ (bug OTP kẹt).
   test('signed-in with profile still loading holds position on /otp', () {
     expect(
-      authRedirect(signedIn: true, hasProfile: null, location: '/otp'),
+      authRedirect(signedIn: true, gate: ProfileGate.loading, location: '/otp'),
       isNull,
     );
   });
   test('signed-in with profile still loading holds position on /', () {
     expect(
-      authRedirect(signedIn: true, hasProfile: null, location: '/'),
+      authRedirect(signedIn: true, gate: ProfileGate.loading, location: '/'),
       isNull,
     );
   });
@@ -91,27 +99,87 @@ void main() {
     'signed-in with profile still loading holds position on /onboarding',
     () {
       expect(
-        authRedirect(signedIn: true, hasProfile: null, location: '/onboarding'),
+        authRedirect(
+          signedIn: true,
+          gate: ProfileGate.loading,
+          location: '/onboarding',
+        ),
         isNull,
       );
     },
   );
 
-  // hasProfileOf: map AsyncValue<Profile?> sang tri-state hasProfile.
+  // [AUDIT P1-4] Lỗi TẢI hồ sơ ≠ "chưa có hồ sơ". Trước đây cả hai đều ra
+  // /onboarding, nên user cũ mở app lúc mất mạng/server lỗi bị ném vào màn
+  // tạo hồ sơ lại. Lỗi phải có màn riêng có nút thử lại — vẫn KHÔNG cho vào
+  // deck, vì lúc lỗi giá trị còn lại có thể là của tài khoản trước.
+  group('lỗi tải hồ sơ có màn riêng, không đá về onboarding', () {
+    test('error → /profile-error chứ không phải /onboarding', () {
+      expect(
+        authRedirect(signedIn: true, gate: ProfileGate.error, location: '/'),
+        '/profile-error',
+      );
+    });
+    test('đang ở /profile-error mà vẫn lỗi → ở lại', () {
+      expect(
+        authRedirect(
+          signedIn: true,
+          gate: ProfileGate.error,
+          location: '/profile-error',
+        ),
+        isNull,
+      );
+    });
+    test('thử lại thành công (present) → rời /profile-error về home', () {
+      expect(
+        authRedirect(
+          signedIn: true,
+          gate: ProfileGate.present,
+          location: '/profile-error',
+        ),
+        '/',
+      );
+    });
+    test('thử lại xong mới biết chưa có hồ sơ → /onboarding', () {
+      expect(
+        authRedirect(
+          signedIn: true,
+          gate: ProfileGate.missing,
+          location: '/profile-error',
+        ),
+        '/onboarding',
+      );
+    });
+    test('/profile-error KHÔNG phải màn công khai: chưa đăng nhập → /auth', () {
+      expect(
+        authRedirect(
+          signedIn: false,
+          gate: ProfileGate.error,
+          location: '/profile-error',
+        ),
+        '/auth',
+      );
+    });
+  });
+
+  // profileGateOf: map AsyncValue<Profile?> sang 4 trạng thái.
   // Bug warm-gate (chip task_7196af60): Riverpod refresh/error GIỮ previous
   // value của TÀI KHOẢN CŨ (copyWithPrevious) — identity cũ không bao giờ
   // được quyết routing sau khi đổi tài khoản.
-  group('hasProfileOf', () {
+  group('profileGateOf', () {
     const oldUser = Profile(id: 'u-old');
 
-    test('loading lần đầu -> null (chờ)', () {
-      expect(hasProfileOf(const AsyncLoading<Profile?>()), isNull);
+    test('loading lần đầu -> loading (chờ)', () {
+      expect(
+        profileGateOf(const AsyncLoading<Profile?>()),
+        ProfileGate.loading,
+      );
     });
-    test('refresh sau đổi tài khoản giữ previous value -> null (không tin '
+    test('refresh sau đổi tài khoản giữ previous value -> loading (không tin '
         'identity cũ)', () async {
       // Dựng state thật qua ProviderContainer: data(oldUser) -> invalidate.
       // Riverpod giữ previous value trong lúc refresh (copyWithPrevious) —
-      // chính giả định load-bearing của hasProfileOf.
+      // chính giả định load-bearing của profileGateOf.
       final provider = FutureProvider<Profile?>((ref) async => oldUser);
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -123,9 +191,9 @@ void main() {
 
       expect(refreshing.isLoading, isTrue);
       expect(refreshing.hasValue, isTrue, reason: 'previous value phải còn');
-      expect(hasProfileOf(refreshing), isNull);
+      expect(profileGateOf(refreshing), ProfileGate.loading);
     });
-    test('error kèm previous value -> false (không dùng identity cũ)', () async {
+    test('error kèm previous value -> error (không dùng identity cũ)', () async {
       var fail = false;
       // StateError (Error, không phải Exception) để Riverpod không auto-retry.
       final provider = FutureProvider<Profile?>((ref) async {
@@ -144,19 +212,25 @@ void main() {
 
       expect(errored.hasError, isTrue);
       expect(errored.hasValue, isTrue, reason: 'previous value phải còn');
-      expect(hasProfileOf(errored), isFalse);
+      expect(profileGateOf(errored), ProfileGate.error);
     });
-    test('error không previous -> false', () {
+    test('error không previous -> error', () {
       expect(
-        hasProfileOf(AsyncError<Profile?>(StateError('x'), StackTrace.empty)),
-        isFalse,
+        profileGateOf(AsyncError<Profile?>(StateError('x'), StackTrace.empty)),
+        ProfileGate.error,
       );
     });
-    test('data(null) -> false (chưa có hồ sơ)', () {
-      expect(hasProfileOf(const AsyncData<Profile?>(null)), isFalse);
+    test('data(null) -> missing (chưa có hồ sơ)', () {
+      expect(
+        profileGateOf(const AsyncData<Profile?>(null)),
+        ProfileGate.missing,
+      );
     });
-    test('data(profile) -> true', () {
-      expect(hasProfileOf(const AsyncData<Profile?>(oldUser)), isTrue);
+    test('data(profile) -> present', () {
+      expect(
+        profileGateOf(const AsyncData<Profile?>(oldUser)),
+        ProfileGate.present,
+      );
     });
   });
 }

@@ -932,6 +932,18 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save the setting, try again.'**
   String get commonSaveError;
 
+  /// No description provided for @profileLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your profile'**
+  String get profileLoadErrorTitle;
+
+  /// No description provided for @profileLoadErrorSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is safe. Check your connection and try again.'**
+  String get profileLoadErrorSub;
+
   /// No description provided for @deckErrorLikeLimit.
   ///
   /// In en, this message translates to:

@@ -453,6 +453,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSaveError => 'Couldn\'t save the setting, try again.';
 
   @override
+  String get profileLoadErrorTitle => 'Couldn\'t load your profile';
+
+  @override
+  String get profileLoadErrorSub =>
+      'Your profile is safe. Check your connection and try again.';
+
+  @override
   String get deckErrorLikeLimit =>
       'You\'re out of likes for today. Upgrade to Pro for unlimited likes.';
 
