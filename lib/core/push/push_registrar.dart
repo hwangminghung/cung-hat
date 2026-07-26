@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/supabase_providers.dart';
@@ -62,7 +61,7 @@ class PushRegistrar {
 }
 
 final pushMessagingProvider = Provider<PushMessaging>(
-  (ref) => FirebasePushMessaging(FirebaseMessaging.instance),
+  (ref) => const FirebasePushMessaging(),
 );
 
 final pushServiceProvider = Provider(
@@ -83,5 +82,12 @@ final pushRegistrarProvider = Provider((ref) {
 /// đổi tài khoản.
 final pushRegistrationProvider = Provider<void>((ref) {
   if (ref.watch(myProfileProvider).value == null) return;
-  unawaited(ref.read(pushRegistrarProvider).registerForSignedInUser());
+  // Provider này được watch trong CungHatApp.build: bất cứ thứ gì ném ở đây
+  // đều hạ TOÀN BỘ app xuống red screen. Push hỏng là chuyện nhỏ, không được
+  // phép chặn đường vào app — nên nuốt mọi lỗi dựng phụ thuộc tại đây.
+  try {
+    unawaited(ref.read(pushRegistrarProvider).registerForSignedInUser());
+  } catch (e) {
+    debugPrint('Push registration unavailable: $e');
+  }
 });

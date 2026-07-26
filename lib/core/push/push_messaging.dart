@@ -16,8 +16,15 @@ abstract class PushMessaging {
 }
 
 class FirebasePushMessaging implements PushMessaging {
-  FirebasePushMessaging(this._messaging);
-  final FirebaseMessaging _messaging;
+  const FirebasePushMessaging();
+
+  /// Đọc LAZY, không giữ sẵn instance.
+  ///
+  /// Thiếu google-services.json thì `FirebaseMessaging.instance` ném
+  /// `[core/no-app]`. Nếu chạm nó lúc dựng provider, exception rơi ra ngoài
+  /// mọi try/catch và hạ cả app xuống red screen. Đọc trong từng method thì
+  /// lỗi rơi đúng vào try/catch của PushRegistrar.
+  FirebaseMessaging get _messaging => FirebaseMessaging.instance;
 
   @override
   Future<bool> requestPermission() async {

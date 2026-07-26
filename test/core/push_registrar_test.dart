@@ -136,5 +136,30 @@ void main() {
       await pumpEventQueue();
       verify(() => service.registerToken('tok-1', any())).called(1);
     });
+
+    // [REGRESSION] Máy không có google-services.json thì
+    // FirebaseMessaging.instance NÉM ('[core/no-app]'). Provider này được
+    // watch trong CungHatApp.build, nên một exception ở đây hạ TOÀN BỘ app
+    // xuống red screen — đúng lỗi đã thấy trên emulator khi build() chạy lại
+    // (vd. lúc đổi ngôn ngữ). Hỏng đăng ký push không bao giờ được chặn
+    // đường vào app.
+    test('push không khả dụng → KHÔNG ném, app vẫn dựng được', () async {
+      final container = ProviderContainer(
+        overrides: [
+          myProfileProvider.overrideWith(
+            (ref) async => const Profile(id: 'u1'),
+          ),
+          pushMessagingProvider.overrideWith(
+            (ref) => throw StateError('[core/no-app] No Firebase App'),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.listen(pushRegistrationProvider, (_, _) {});
+      await pumpEventQueue();
+
+      expect(() => container.read(pushRegistrationProvider), returnsNormally);
+    });
   });
 }
