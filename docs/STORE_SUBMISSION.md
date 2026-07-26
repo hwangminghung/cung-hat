@@ -219,6 +219,40 @@ manifests** and must be added before submission:
 
 ---
 
+## 9.3 URL công khai bắt buộc khi nộp — **ĐÃ CÓ**
+
+Cả Play Console lẫn App Store Connect đều **bắt buộc** điền URL chính sách bảo mật
+cho app thu thập dữ liệu cá nhân (Cùng Hát thu số điện thoại, vị trí, ảnh, tin
+nhắn). Bản nhúng trong app **không thay thế được** — store cần một link mở được
+từ trình duyệt.
+
+| Mục | URL |
+| --- | --- |
+| Chính sách bảo mật | `https://hwangminghung.github.io/cunghat-legal/privacy.html` |
+| Điều khoản sử dụng | `https://hwangminghung.github.io/cunghat-legal/terms.html` |
+
+Host: GitHub Pages, repo **public** riêng `hwangminghung/cunghat-legal` (repo app
+là private nên Pages không dùng được trực tiếp — Pages trên private repo cần gói
+trả phí).
+
+**Nguồn sự thật vẫn là `assets/legal/*.md` trong repo app** — cùng file mà app
+đọc. Sửa nội dung thì sửa ở đó rồi đăng lại:
+
+```bash
+python scripts/build_legal_site.py /tmp/cunghat-legal
+cd /tmp/cunghat-legal && git add -A && git commit -m "cap nhat" && git push
+```
+
+Đừng sửa thẳng HTML trong repo public: bản trong app và bản web phải khớp nhau,
+reviewer có thể mở cả hai ra so.
+
+> **CÒN NỢ — phải sửa trước khi nộp:** cả hai văn bản ghi liên hệ
+> `hotro@cunghat.app`, là email ở tên miền **chưa sở hữu**. Đổi sang một hộp thư
+> thật sự nhận được (Gmail cũng được) rồi chạy lại lệnh trên. Reviewer có thể
+> thử liên hệ; và theo PDPL thì đây là kênh để người dùng thực hiện quyền của họ.
+
+---
+
 ## 10. Production release gates (carried from earlier phases)
 
 None of these are wired with real credentials yet — all are **OPERATOR** prerequisites
