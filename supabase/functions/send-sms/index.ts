@@ -2,6 +2,7 @@
 // — verify_jwt=false trong config.toml vi GoTrue KHONG gui JWT; thieu chu ky/secret -> chan.
 // KHONG BAO GIO log OTP/phone. Provider VN chua chon -> fail-closed 501 sau khi verify.
 import { json, safeEqual } from "../_shared/hmac.ts";
+import { sendOtpSms } from "../_shared/sms.ts";
 
 // Uint8Array<ArrayBuffer> (khong phai ArrayBufferLike): lib type Deno 2.9+
 // yeu cau BufferSource khong-shared cho crypto.subtle.importKey.
@@ -48,7 +49,10 @@ Deno.serve(async (req) => {
   const otp = parsed.sms?.otp;
   if (!phone || !otp) return json(400, { error: "missing phone/otp" });
 
-  if (!Deno.env.get("SMS_API_KEY")) return json(503, { error: "sms_provider_not_configured" });
-  // TODO(prod): goi provider SMS VN voi SMS_API_KEY. Toi khi chon provider: fail-closed.
-  return json(501, { error: "sms_provider_not_implemented" });
+  // Provider that. Chua cau hinh -> fail-closed (503) chu KHONG bao gio tra
+  // 2xx: GoTrue coi 2xx la "da gui" va se noi voi user rang ma dang tren
+  // duong toi — user cho mai mot tin nhan khong ton tai.
+  const result = await sendOtpSms(phone, otp, { env: (k) => Deno.env.get(k) });
+  if (!result.ok) return json(result.status, { error: result.error });
+  return json(200, { ok: true });
 });

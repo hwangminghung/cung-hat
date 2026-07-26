@@ -11,6 +11,20 @@ thật** — vì rủi ro lớn nhất không phải quên cắm key mà là c�
 
 ---
 
+## Kiểm trạng thái nhanh
+
+```bash
+bash scripts/check_operator_gates.sh
+# hoac doc them secret da cam:
+ENV_FILE=supabase/functions/.env bash scripts/check_operator_gates.sh
+```
+
+Script trả lời được **"cái gì đã cắm dây, cái gì chưa"** và bắt luôn nhóm lỗi
+cấu-hình-sai (`test_otp` còn bật, `applicationId` vẫn là id dev,
+`APPLE_ENVIRONMENT=Production` mà thiếu app id). Nó **không** trả lời được
+"key có hoạt động không" — cái đó phải chạy phép thử end-to-end ghi ở từng gate
+bên dưới.
+
 ## Nguyên tắc chung
 
 **1. "Đã cấu hình" ≠ "đã chạy".** Mọi edge function hiện fail-closed khi thiếu
@@ -239,10 +253,18 @@ sách hoàn/mất cọc viết vào T&C trước.
 | Trước submit | Chạy lại `docs/STORE_SUBMISSION.md §11` | 4 lệnh gate phải xanh |
 | Sau launch | G7 web portal | Cần merchant |
 
-## Việc tôi làm được ngay, không chờ credential
+## Việc không chờ credential — ĐÃ XONG (2026-07-26)
 
-1. **G6 manifest + Info.plist** — deep link đang gãy hoàn toàn.
-2. Rà lại `send-sms` cho sẵn khung gọi provider (chỉ còn cắm key).
-3. Viết checklist nghiệm thu thành script/test nơi nào tự động hoá được.
-
-Ba việc này không phụ thuộc operator — nói một tiếng là tôi làm.
+1. ~~**G6 manifest + Info.plist**~~ — đã đăng ký `cunghat://` 2 nền tảng. Trong lúc
+   test lộ thêm một lỗi thứ hai: go_router **cũng** tự nghe kênh route của
+   platform nên khi app đang chạy nó nuốt URI thô trước `app_links` → user thấy
+   `GoException: no routes for location`. Cold start không dính (vì
+   `getInitialLink()` chạy trước) → **chỉ test cold start sẽ tưởng đã xong**.
+   Đã thêm `normalizeDeepLinkLocation()` vào redirect của router.
+2. ~~**Khung gọi provider SMS**~~ — `_shared/sms.ts`: chọn provider qua
+   `SMS_PROVIDER` (`esms` | `twilio`), timeout 10s tự ngắt, fail-closed khi
+   thiếu/lạ, không bao giờ đưa phone/OTP vào message lỗi. Bẫy riêng của eSMS đã
+   xử: họ trả **HTTP 200 kể cả khi gửi hỏng**, chỉ `CodeResult == "100"` mới là
+   thành công. 8 deno test + `deno test` đã nối vào CI (trước chỉ có `deno check`).
+   Còn lại đúng việc cắm key.
+3. ~~**Tự động hoá checklist**~~ — `scripts/check_operator_gates.sh` (xem đầu doc).

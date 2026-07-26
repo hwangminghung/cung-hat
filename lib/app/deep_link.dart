@@ -1,10 +1,5 @@
-/// Dich cunghat:// URI sang route noi bo. Null = khong nhan dien duoc (bo qua).
-///
-/// Token duoc re-encode bang [Uri.encodeComponent] truoc khi interpolate:
-/// `pathSegments` da percent-DECODE, nen token chua `..%2F..%2Fadmin` se thanh
-/// `../../admin` — interpolate tho se bi go_router chuan hoa thanh `/admin`
-/// (route injection). Encode lai giu token trong dung 1 path segment.
 // TODO(P7): map them https universal link (xem plan p7-launch) — hien chi nhan scheme cunghat.
+
 /// Dich mot LOCATION do go_router dua toi, neu no thuc ra la URI `cunghat://`.
 ///
 /// [DEEPLINK 2026-07-26] Co HAI thu cung nhan link toi: `app_links` (dich dung
@@ -24,6 +19,12 @@ String? normalizeDeepLinkLocation(String location) {
   return deepLinkLocation(uri) ?? '/';
 }
 
+/// Dich cunghat:// URI sang route noi bo. Null = khong nhan dien duoc (bo qua).
+///
+/// Token duoc re-encode bang [Uri.encodeComponent] truoc khi interpolate:
+/// `pathSegments` da percent-DECODE, nen token chua `..%2F..%2Fadmin` se thanh
+/// `../../admin` — interpolate tho se bi go_router chuan hoa thanh `/admin`
+/// (route injection). Encode lai giu token trong dung 1 path segment.
 String? deepLinkLocation(Uri uri) {
   if (uri.scheme != 'cunghat') return null;
   final segs = uri.pathSegments;
