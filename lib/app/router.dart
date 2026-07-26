@@ -24,6 +24,7 @@ import '../features/profile/application/profile_providers.dart';
 import '../features/profile/domain/profile.dart';
 import '../features/settings/presentation/blocked_users_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import 'deep_link.dart';
 import 'home_shell.dart';
 
 /// Maps the profile fetch state to the tri-state [authRedirect] input.
@@ -69,6 +70,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: GoRouterRefreshStream(ref),
     redirect: (context, state) {
+      // [DEEPLINK] go_router cung nhan link tu platform va dua vao day duoi
+      // dang URI THO khi app dang chay — dich truoc moi thu khac, neu khong
+      // user thay "Page Not Found". Xem normalizeDeepLinkLocation.
+      final fromLink = normalizeDeepLinkLocation(state.uri.toString());
+      if (fromLink != null) return fromLink;
       // Read the session straight from Supabase: it is set BEFORE the auth
       // event fires, while derived providers may still hold a stale value
       // when this runs synchronously inside the refresh notification.

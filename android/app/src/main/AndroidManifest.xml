@@ -26,6 +26,20 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Link chia se keo/ke hoach: cunghat://keo/shared/<token> va
+                 cunghat://plan/<token> (xem lib/app/deep_link.dart).
+                 Thieu intent-filter nay thi Android khong biet app mo duoc
+                 link -> moi link chia se rot vao trinh duyet / khong lam gi,
+                 du router va man hinh da lam xong.
+                 launchMode="singleTop" o tren la chu dich: link toi khi app
+                 dang chay phai vao onNewIntent cua CUNG mot activity, khong
+                 duoc dung them mot ban sao man hinh. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="cunghat"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
