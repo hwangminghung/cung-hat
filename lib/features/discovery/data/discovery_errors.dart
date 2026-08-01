@@ -10,6 +10,7 @@ enum DiscoverySwipeError {
   ),
   superLimit('Bạn đã hết lượt Siêu thích hôm nay.'),
   proRequired('Tính năng này dành cho thành viên Pro.'),
+  boostRequired('Mua Tăng hiển thị hoặc nâng cấp Pro để dùng.'),
   boostActive('Bạn đang trong một lượt tăng hiển thị.'),
   boostLimit(
     'Bạn đã dùng hết lượt tăng hiển thị hôm nay. Thử lại vào ngày mai.',
@@ -23,6 +24,7 @@ enum DiscoverySwipeError {
     likeLimit => l10n?.deckErrorLikeLimit ?? message,
     superLimit => l10n?.deckErrorSuperLimit ?? message,
     proRequired => l10n?.deckErrorProRequired ?? message,
+    boostRequired => l10n?.deckErrorBoostRequired ?? message,
     boostActive => l10n?.deckErrorBoostActive ?? message,
     boostLimit => l10n?.deckErrorBoostLimit ?? message,
     unknown => l10n?.deckErrorUnknown ?? message,
@@ -34,6 +36,7 @@ DiscoverySwipeError discoverySwipeError(Object e) {
   if (s.contains('like_limit')) return DiscoverySwipeError.likeLimit;
   if (s.contains('super_limit')) return DiscoverySwipeError.superLimit;
   if (s.contains('pro_required')) return DiscoverySwipeError.proRequired;
+  if (s.contains('boost_required')) return DiscoverySwipeError.boostRequired;
   if (s.contains('boost_active')) return DiscoverySwipeError.boostActive;
   if (s.contains('boost_limit')) return DiscoverySwipeError.boostLimit;
   return DiscoverySwipeError.unknown;

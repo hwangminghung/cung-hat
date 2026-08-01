@@ -643,8 +643,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
   }
 
   Future<void> _handleBoost() async {
-    final isPro = ref.read(isProProvider);
-    if (!isPro) {
+    // [MATCH-AUDIT #1a] Boost bán lẻ 49k: người mua có entitlement 'boost'
+    // 24h (Pro là superset) — gate theo entitlement thay vì chỉ Pro, nếu
+    // không thì người vừa trả tiền bấm nút lại bị đẩy sang upsell Pro.
+    if (!ref.read(hasEntitlementProvider('boost'))) {
       ProUpsellSheet.show(context, variant: ProUpsellVariant.boost);
       return;
     }
@@ -667,8 +669,10 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
       }
     } catch (e) {
       final err = discoverySwipeError(e);
-      if (err == DiscoverySwipeError.proRequired) {
-        // Entitlement hết hạn phía server trong khi cache client còn Pro.
+      if (err == DiscoverySwipeError.proRequired ||
+          err == DiscoverySwipeError.boostRequired) {
+        // Entitlement hết hạn phía server (boost 24h trôi qua) trong khi
+        // cache client còn giữ — refresh để lần bấm sau vào nhánh upsell.
         ref.invalidate(entitlementsProvider);
       }
       if (mounted) {
@@ -806,6 +810,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
           }
         case DiscoverySwipeError.proRequired:
         // boost* chỉ phát sinh từ activate_boost; ở đây chỉ để switch đủ nhánh.
+        case DiscoverySwipeError.boostRequired:
         case DiscoverySwipeError.boostActive:
         case DiscoverySwipeError.boostLimit:
         // unknown: swipe CÓ THỂ đã được ghi — undo sẽ desync, nên chỉ báo lỗi.
