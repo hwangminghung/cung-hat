@@ -103,7 +103,7 @@ class _ProfileList extends ConsumerWidget {
                     color: AppColors.primaryTint,
                     border: Border.all(color: AppColors.border, width: 2),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                    boxShadow: const [AppShadows.hard],
+                    boxShadow: [AppShadows.hard],
                   ),
                   child: Text(
                     _monogram(name),

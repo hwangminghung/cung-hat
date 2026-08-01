@@ -58,7 +58,7 @@ class TasteChips<T> extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                    boxShadow: const [AppShadows.hard],
+                    boxShadow: [AppShadows.hard],
                   ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 44),

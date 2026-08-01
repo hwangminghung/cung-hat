@@ -88,7 +88,7 @@ void main() {
           .first,
     );
     final deco = container.decoration! as BoxDecoration;
-    expect(deco.boxShadow, const [AppShadows.hard]);
+    expect(deco.boxShadow, [AppShadows.hard]);
 
     final material = tester.widget<Material>(find.byType(Material).last);
     final shape = material.shape! as RoundedRectangleBorder;

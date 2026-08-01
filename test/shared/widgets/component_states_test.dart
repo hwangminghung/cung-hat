@@ -37,7 +37,7 @@ void main() {
     );
     final box = decorated.decoration as BoxDecoration;
     expect((box.border! as Border).top.width, 2);
-    expect(box.boxShadow, const <BoxShadow>[AppShadows.hard]);
+    expect(box.boxShadow, <BoxShadow>[AppShadows.hard]);
   });
 
   testWidgets('empty state uses a hard-surface icon without blur', (

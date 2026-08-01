@@ -497,7 +497,7 @@ class _RosterTile extends StatelessWidget {
                   color: isHost ? AppColors.secondary : AppColors.teal,
                   border: Border.all(color: AppColors.ink, width: 2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
-                  boxShadow: const [AppShadows.hard],
+                  boxShadow: [AppShadows.hard],
                 ),
                 child: Text(
                   initial,

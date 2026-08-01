@@ -433,7 +433,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                                     color: AppColors.ink,
                                     width: 2,
                                   ),
-                                  boxShadow: const [AppShadows.hard],
+                                  boxShadow: [AppShadows.hard],
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,

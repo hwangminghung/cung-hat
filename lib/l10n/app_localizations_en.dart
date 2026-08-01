@@ -453,6 +453,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSaveError => 'Couldn\'t save the setting, try again.';
 
   @override
+  String get promptClearTooltip => 'Remove this prompt';
+
+  @override
+  String get photoPrev => 'Previous photo';
+
+  @override
+  String get photoNext => 'Next photo';
+
+  @override
   String get profileLoadErrorTitle => 'Couldn\'t load your profile';
 
   @override
@@ -1043,7 +1052,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatShareSongTooltip => 'Send a go-to song';
 
   @override
-  String get chatComposerHint => 'Say something...';
+  String get chatSuggBaitu => 'Send a go-to song';
+
+  @override
+  String get chatSuggTaste => 'Ask their taste';
+
+  @override
+  String get chatSuggInvite => 'Invite to sing';
+
+  @override
+  String get chatSuggTasteMsg => 'What kind of music are you into? 🎵';
+
+  @override
+  String get chatSuggInviteMsg => 'Free to go singing this weekend?';
+
+  @override
+  String get chatComposerHint => 'Say something…';
 
   @override
   String get chatSendError => 'Couldn\'t send the message. Try again later.';
@@ -1248,6 +1272,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get safetyShare => 'Share with friends';
 
   @override
+  String get safetyShareShort => 'Share';
+
+  @override
   String safetyShareMessage(String link) {
     return 'I\'m going karaoke, here\'s the plan: $link';
   }
@@ -1269,6 +1296,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planSharedNotFound => 'Plan not found';
+
+  @override
+  String get planSharedLoadError => 'Couldn\'t load the plan';
 
   @override
   String get planMidpointMarker => 'Group midpoint';
@@ -1418,6 +1448,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get settingsPushEnable => 'Turn on notifications';
+
+  @override
+  String get settingsPushOn => 'Notifications are on';
+
+  @override
+  String get pushPrimerTitle => 'Never miss a keo or a match';
+
+  @override
+  String get pushPrimerBenefitKeo =>
+      'Get notified when your keo is coming up or someone asks to join.';
+
+  @override
+  String get pushPrimerBenefitMatch =>
+      'Know right away when someone matches with you.';
+
+  @override
+  String get pushPrimerAccept => 'Turn on notifications';
+
+  @override
+  String get pushPrimerLater => 'Maybe later';
+
+  @override
   String get settingsLangSystem => 'Default (Vietnamese)';
 
   @override
@@ -1473,6 +1529,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get storeOwned => 'Owned';
+
+  @override
+  String get storeSectionPro => 'Pro plan';
+
+  @override
+  String get storeSectionALaCarte => 'Buy individually';
+
+  @override
+  String get storeIncludedInPro => 'Included in Pro';
 
   @override
   String get storeTermOneTime => 'One-time purchase · permanent';

@@ -932,6 +932,24 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save the setting, try again.'**
   String get commonSaveError;
 
+  /// No description provided for @promptClearTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this prompt'**
+  String get promptClearTooltip;
+
+  /// No description provided for @photoPrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous photo'**
+  String get photoPrev;
+
+  /// No description provided for @photoNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next photo'**
+  String get photoNext;
+
   /// No description provided for @profileLoadErrorTitle.
   ///
   /// In en, this message translates to:
@@ -1982,10 +2000,40 @@ abstract class AppLocalizations {
   /// **'Send a go-to song'**
   String get chatShareSongTooltip;
 
+  /// No description provided for @chatSuggBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a go-to song'**
+  String get chatSuggBaitu;
+
+  /// No description provided for @chatSuggTaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask their taste'**
+  String get chatSuggTaste;
+
+  /// No description provided for @chatSuggInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to sing'**
+  String get chatSuggInvite;
+
+  /// No description provided for @chatSuggTasteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of music are you into? 🎵'**
+  String get chatSuggTasteMsg;
+
+  /// No description provided for @chatSuggInviteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Free to go singing this weekend?'**
+  String get chatSuggInviteMsg;
+
   /// No description provided for @chatComposerHint.
   ///
   /// In en, this message translates to:
-  /// **'Say something...'**
+  /// **'Say something…'**
   String get chatComposerHint;
 
   /// No description provided for @chatSendError.
@@ -2360,6 +2408,12 @@ abstract class AppLocalizations {
   /// **'Share with friends'**
   String get safetyShare;
 
+  /// No description provided for @safetyShareShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get safetyShareShort;
+
   /// No description provided for @safetyShareMessage.
   ///
   /// In en, this message translates to:
@@ -2401,6 +2455,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plan not found'**
   String get planSharedNotFound;
+
+  /// No description provided for @planSharedLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the plan'**
+  String get planSharedLoadError;
 
   /// No description provided for @planMidpointMarker.
   ///
@@ -2672,6 +2732,54 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get settingsLanguage;
 
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// No description provided for @settingsPushEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications'**
+  String get settingsPushEnable;
+
+  /// No description provided for @settingsPushOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are on'**
+  String get settingsPushOn;
+
+  /// No description provided for @pushPrimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Never miss a keo or a match'**
+  String get pushPrimerTitle;
+
+  /// No description provided for @pushPrimerBenefitKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when your keo is coming up or someone asks to join.'**
+  String get pushPrimerBenefitKeo;
+
+  /// No description provided for @pushPrimerBenefitMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Know right away when someone matches with you.'**
+  String get pushPrimerBenefitMatch;
+
+  /// No description provided for @pushPrimerAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications'**
+  String get pushPrimerAccept;
+
+  /// No description provided for @pushPrimerLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get pushPrimerLater;
+
   /// No description provided for @settingsLangSystem.
   ///
   /// In en, this message translates to:
@@ -2779,6 +2887,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Owned'**
   String get storeOwned;
+
+  /// No description provided for @storeSectionPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro plan'**
+  String get storeSectionPro;
+
+  /// No description provided for @storeSectionALaCarte.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy individually'**
+  String get storeSectionALaCarte;
+
+  /// No description provided for @storeIncludedInPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in Pro'**
+  String get storeIncludedInPro;
 
   /// No description provided for @storeTermOneTime.
   ///

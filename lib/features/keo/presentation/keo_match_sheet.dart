@@ -567,7 +567,7 @@ class _ReasonChip extends StatelessWidget {
           color: AppColors.secondary,
           border: Border.all(color: AppColors.ink, width: 2),
           borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
-          boxShadow: const [AppShadows.hard],
+          boxShadow: [AppShadows.hard],
         ),
         child: Row(
           children: [

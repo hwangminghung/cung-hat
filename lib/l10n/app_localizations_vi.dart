@@ -453,6 +453,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get commonSaveError => 'Không lưu được cài đặt, thử lại.';
 
   @override
+  String get promptClearTooltip => 'Xoá câu này';
+
+  @override
+  String get photoPrev => 'Ảnh trước';
+
+  @override
+  String get photoNext => 'Ảnh sau';
+
+  @override
   String get profileLoadErrorTitle => 'Không tải được hồ sơ';
 
   @override
@@ -1039,7 +1048,22 @@ class AppLocalizationsVi extends AppLocalizations {
   String get chatShareSongTooltip => 'Gửi bài tủ';
 
   @override
-  String get chatComposerHint => 'Nhắn gì đó...';
+  String get chatSuggBaitu => 'Gửi bài tủ';
+
+  @override
+  String get chatSuggTaste => 'Hỏi gu nhạc';
+
+  @override
+  String get chatSuggInvite => 'Rủ đi hát';
+
+  @override
+  String get chatSuggTasteMsg => 'Gu nhạc của bạn là gì? 🎵';
+
+  @override
+  String get chatSuggInviteMsg => 'Cuối tuần này đi hát không?';
+
+  @override
+  String get chatComposerHint => 'Nhắn gì đó…';
 
   @override
   String get chatSendError => 'Không gửi được tin nhắn. Thử lại sau.';
@@ -1243,6 +1267,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get safetyShare => 'Chia sẻ cho bạn bè';
 
   @override
+  String get safetyShareShort => 'Chia sẻ';
+
+  @override
   String safetyShareMessage(String link) {
     return 'Mình đi hát, đây là kế hoạch: $link';
   }
@@ -1264,6 +1291,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get planSharedNotFound => 'Không tìm thấy kế hoạch';
+
+  @override
+  String get planSharedLoadError => 'Không tải được kế hoạch';
 
   @override
   String get planMidpointMarker => 'Điểm giữa nhóm';
@@ -1410,6 +1440,32 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsLanguage => 'Ngôn ngữ';
 
   @override
+  String get settingsNotifications => 'Thông báo';
+
+  @override
+  String get settingsPushEnable => 'Bật thông báo';
+
+  @override
+  String get settingsPushOn => 'Thông báo đang bật';
+
+  @override
+  String get pushPrimerTitle => 'Đừng lỡ kèo và match mới';
+
+  @override
+  String get pushPrimerBenefitKeo =>
+      'Báo khi kèo của bạn sắp diễn ra hoặc có người xin vào.';
+
+  @override
+  String get pushPrimerBenefitMatch =>
+      'Báo ngay khi có người ghép đôi với bạn.';
+
+  @override
+  String get pushPrimerAccept => 'Bật thông báo';
+
+  @override
+  String get pushPrimerLater => 'Để sau';
+
+  @override
   String get settingsLangSystem => 'Mặc định (Tiếng Việt)';
 
   @override
@@ -1466,6 +1522,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get storeOwned => 'Đã sở hữu';
+
+  @override
+  String get storeSectionPro => 'Gói Pro';
+
+  @override
+  String get storeSectionALaCarte => 'Mua lẻ';
+
+  @override
+  String get storeIncludedInPro => 'Đã gồm trong Pro';
 
   @override
   String get storeTermOneTime => 'Mua một lần · vĩnh viễn';

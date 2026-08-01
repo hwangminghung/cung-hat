@@ -111,7 +111,7 @@ class HeaderActionButton extends StatelessWidget {
           color: active ? AppColors.secondary : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
           border: Border.all(color: AppColors.ink, width: 2),
-          boxShadow: const [AppShadows.hard],
+          boxShadow: [AppShadows.hard],
         ),
         child: Material(
           color: Colors.transparent,

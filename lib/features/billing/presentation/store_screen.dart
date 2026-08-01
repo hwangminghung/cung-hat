@@ -212,9 +212,25 @@ class StoreScreen extends ConsumerWidget {
                               ib == -1 ? _order.length : ib,
                             );
                           });
+                        final isPro = ref.watch(isProProvider);
+                        // [UI-AUDIT] Tach "Goi Pro" / "Mua le" thanh 2 section
+                        // + item le mang chip "Da gom trong Pro"; user da Pro
+                        // thi item le hien trang thai thay vi nut Mua.
                         return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            for (final product in sorted)
+                            for (final product in sorted) ...[
+                              if (product.type == 'pro')
+                                _StoreSectionLabel(
+                                  key: const Key('store_section_pro'),
+                                  label: l10n?.storeSectionPro ?? 'Gói Pro',
+                                )
+                              else if (product ==
+                                  sorted.firstWhere((p) => p.type != 'pro'))
+                                _StoreSectionLabel(
+                                  key: const Key('store_section_alacarte'),
+                                  label: l10n?.storeSectionALaCarte ?? 'Mua lẻ',
+                                ),
                               _UpgradeTile(
                                 upgrade: _Upgrade(
                                   feature: product.type,
@@ -238,14 +254,24 @@ class StoreScreen extends ConsumerWidget {
                                       _copyFor(product.type, l10n)?.highlight ??
                                       false,
                                 ),
-                                // Consumable mua lai duoc; chi non-consumable
-                                // moi khoa lai khi da so huu.
+                                includedChip: product.type != 'pro'
+                                    ? (l10n?.storeIncludedInPro ??
+                                          'Đã gồm trong Pro')
+                                    : null,
+                                // Consumable mua lai duoc khi CHUA Pro; da Pro
+                                // thi moi item le deu la "da gom trong Pro".
                                 owned:
-                                    !_consumableTypes.contains(product.type) &&
                                     ref.watch(
                                       hasEntitlementProvider(product.type),
-                                    ),
+                                    ) &&
+                                    (isPro ||
+                                        !_consumableTypes.contains(
+                                          product.type,
+                                        )),
                                 buyLabel: l10n?.storeBuy ?? 'Mua',
+                                // CTA ngắn gọn "Đã sở hữu" — chip bên trái đã
+                                // nói rõ "Đã gồm trong Pro" (label dài làm
+                                // tràn cột giá 68dp).
                                 ownedLabel: l10n?.storeOwned ?? 'Đã sở hữu',
                                 onBuy: () async {
                                   final ok = await ref
@@ -266,6 +292,7 @@ class StoreScreen extends ConsumerWidget {
                                   }
                                 },
                               ),
+                            ],
                           ],
                         );
                       },
@@ -291,6 +318,18 @@ class StoreScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _StoreSectionLabel extends StatelessWidget {
+  const _StoreSectionLabel({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpacing.sm, top: AppSpacing.xs),
+    child: Text(label, style: Theme.of(context).textTheme.titleMedium),
+  );
 }
 
 /// [AUDIT P1-b,c,d] Ba thu store bat buoc phai co NGAY TREN man thanh toan:
@@ -466,7 +505,7 @@ class _StoreButtonShadow extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: child,
     );
@@ -480,6 +519,7 @@ class _UpgradeTile extends StatelessWidget {
     required this.owned,
     required this.buyLabel,
     required this.ownedLabel,
+    this.includedChip,
   });
 
   final _Upgrade upgrade;
@@ -487,6 +527,10 @@ class _UpgradeTile extends StatelessWidget {
   final bool owned;
   final String buyLabel;
   final String ownedLabel;
+
+  /// [UI-AUDIT] Nhãn "Đã gồm trong Pro" trên item lẻ — giảm tải nhận thức
+  /// khi so sánh mua lẻ với gói Pro.
+  final String? includedChip;
 
   @override
   Widget build(BuildContext context) {
@@ -545,6 +589,28 @@ class _UpgradeTile extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                  if (includedChip != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Container(
+                      key: Key('store_included_${upgrade.feature}'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        border: Border.all(color: AppColors.ink, width: 1.5),
+                        borderRadius: BorderRadius.circular(AppSpacing.xs),
+                      ),
+                      child: Text(
+                        includedChip!,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

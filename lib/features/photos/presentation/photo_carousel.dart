@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/photo_providers.dart';
 
 /// Ảnh hồ sơ của [userId] dạng carousel (dùng chung cho card lẫn detail sheet).
@@ -159,6 +160,7 @@ class _PagerState extends State<_Pager> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -203,17 +205,27 @@ class _PagerState extends State<_Pager> {
             child: Row(
               children: [
                 Expanded(
-                  child: GestureDetector(
-                    key: const Key('photo_tap_left'),
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => _go(-1),
+                  // [A11Y] vùng chạm vô hình phải có semantics cho screen
+                  // reader — không thì carousel bất khả tri với TalkBack.
+                  child: Semantics(
+                    button: true,
+                    label: l10n?.photoPrev ?? 'Ảnh trước',
+                    child: GestureDetector(
+                      key: const Key('photo_tap_left'),
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () => _go(-1),
+                    ),
                   ),
                 ),
                 Expanded(
-                  child: GestureDetector(
-                    key: const Key('photo_tap_right'),
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => _go(1),
+                  child: Semantics(
+                    button: true,
+                    label: l10n?.photoNext ?? 'Ảnh sau',
+                    child: GestureDetector(
+                      key: const Key('photo_tap_right'),
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () => _go(1),
+                    ),
                   ),
                 ),
               ],

@@ -212,7 +212,7 @@ class CandidateDetailSheet extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.ink,
               borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              boxShadow: const [AppShadows.hard],
+              boxShadow: [AppShadows.hard],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusCard - 2),
@@ -326,7 +326,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                 color: AppColors.primaryTint,
                 border: Border.all(color: AppColors.ink, width: 2),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                boxShadow: const [AppShadows.hard],
+                boxShadow: [AppShadows.hard],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

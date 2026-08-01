@@ -9,6 +9,8 @@ import '../../../core/l10n/locale_controller.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/push/push_primer.dart';
+import '../../../core/push/push_registrar.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/responsive_frame.dart';
@@ -82,6 +84,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                             ],
                           ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  // [PRIMER — đợt 4] Đường bật thông báo cho người từng bấm
+                  // "Để sau" ở primer sheet.
+                  _Section(
+                    title: _l10n?.settingsNotifications ?? 'Thông báo',
+                    child: _SettingsTile(
+                      key: const Key('settings_push_tile'),
+                      icon: Icons.notifications_active_outlined,
+                      title: ref.watch(pushPrimerChoiceProvider).value == 'on'
+                          ? (_l10n?.settingsPushOn ?? 'Thông báo đang bật')
+                          : (_l10n?.settingsPushEnable ?? 'Bật thông báo'),
+                      onTap: () async {
+                        if (ref.read(pushPrimerChoiceProvider).value == 'on') {
+                          return;
+                        }
+                        await ref
+                            .read(pushPrimerChoiceProvider.notifier)
+                            .set('on');
+                        await ref
+                            .read(pushRegistrarProvider)
+                            .registerForSignedInUser();
+                      },
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _Section(

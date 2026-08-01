@@ -182,6 +182,8 @@ void main() {
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'tối nay hát nhé');
+      // Nút gửi enable theo ValueListenableBuilder — cần frame sau khi gõ.
+      await tester.pump();
       await tester.tap(find.byKey(const Key('send_btn')));
       await tester.pump();
 

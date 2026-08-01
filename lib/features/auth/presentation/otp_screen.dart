@@ -331,7 +331,7 @@ class _BrandHeader extends StatelessWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                 border: Border.all(color: AppColors.ink, width: 2),
-                boxShadow: const [AppShadows.hard],
+                boxShadow: [AppShadows.hard],
               ),
               child: const BackButton(color: AppColors.ink),
             ),
@@ -397,7 +397,7 @@ class _TicketHero extends StatelessWidget {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
           border: Border.all(color: AppColors.ink, width: 2),
-          boxShadow: const [AppShadows.hard],
+          boxShadow: [AppShadows.hard],
         ),
         child: Stack(
           children: [
@@ -525,7 +525,7 @@ class _ErrorBanner extends StatelessWidget {
         color: AppColors.errorTint,
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
         border: Border.all(color: AppColors.error, width: 2),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Text(
         message,

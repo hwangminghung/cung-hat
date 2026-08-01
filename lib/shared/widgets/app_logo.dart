@@ -35,7 +35,7 @@ class AppLogo extends StatelessWidget {
             color: AppColors.surface,
             border: Border.all(color: AppColors.border, width: 2),
             borderRadius: BorderRadius.circular(_markSize * 0.28),
-            boxShadow: const [AppShadows.hard],
+            boxShadow: [AppShadows.hard],
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
