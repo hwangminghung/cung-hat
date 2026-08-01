@@ -6,6 +6,7 @@ import { safeEqual } from "../_shared/hmac.ts";
 // here. Sends via FCM HTTP v1 using GOOGLE_FCM_SA_JSON (service account); when
 // that env is absent (local/dev, external gate) we log-and-count only.
 const COPY: Record<string, { title: string; body: string }> = {
+  new_match: { title: "Cùng Hát", body: "Hai bạn đã ghép đôi — mở app bắt chuyện nhé 💚" },
   new_message: { title: "Cùng Hát", body: "Bạn có tin nhắn mới 🎵" },
   keo_join_request: { title: "Cùng Hát", body: "Có người xin vào kèo của bạn" },
   plan_proposed: { title: "Cùng Hát", body: "Kèo của bạn có kế hoạch mới — vào xác nhận nhé" },
