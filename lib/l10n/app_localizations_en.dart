@@ -1451,6 +1451,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTheme => 'Appearance';
 
   @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get settingsPushEnable => 'Turn on notifications';
+
+  @override
+  String get settingsPushOn => 'Notifications are on';
+
+  @override
+  String get pushPrimerTitle => 'Never miss a keo or a match';
+
+  @override
+  String get pushPrimerBenefitKeo =>
+      'Get notified when your keo is coming up or someone asks to join.';
+
+  @override
+  String get pushPrimerBenefitMatch =>
+      'Know right away when someone matches with you.';
+
+  @override
+  String get pushPrimerAccept => 'Turn on notifications';
+
+  @override
+  String get pushPrimerLater => 'Maybe later';
+
+  @override
   String get settingsThemeSystem => 'System';
 
   @override

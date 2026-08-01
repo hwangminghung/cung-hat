@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:cung_hat/core/push/push_messaging.dart';
+import 'package:cung_hat/core/push/push_primer.dart';
 import 'package:cung_hat/core/push/push_registrar.dart';
 import 'package:cung_hat/core/push/push_service.dart';
 import 'package:cung_hat/features/profile/application/profile_providers.dart';
@@ -35,6 +38,8 @@ class _FakeMessaging implements PushMessaging {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late _MockPushService service;
   late _FakeMessaging messaging;
 
@@ -108,7 +113,15 @@ void main() {
   // Điểm kích hoạt: user CÓ hồ sơ = đã đăng nhập và đã qua onboarding, tức
   // đang ở trong app — không phải lúc cold start ở màn đăng nhập.
   group('pushRegistrationProvider', () {
-    ProviderContainer containerFor(AsyncValue<Profile?> profile) {
+    ProviderContainer containerFor(
+      AsyncValue<Profile?> profile, {
+      String? primerChoice = 'on',
+    }) {
+      // [PRIMER] mac dinh seed 'on' de cac case dang ky giu nguyen y nghia;
+      // case primer rieng truyen null/'later'.
+      SharedPreferences.setMockInitialValues({
+        kPushPrimerPrefKey: ?primerChoice,
+      });
       final container = ProviderContainer(
         overrides: [
           myProfileProvider.overrideWith((ref) async => profile.value),
@@ -137,6 +150,26 @@ void main() {
       verify(() => service.registerToken('tok-1', any())).called(1);
     });
 
+    test('primer chưa trả lời → KHÔNG tự xin quyền dù có hồ sơ', () async {
+      final container = containerFor(
+        const AsyncData<Profile?>(Profile(id: 'u1')),
+        primerChoice: null,
+      );
+      container.listen(pushRegistrationProvider, (_, _) {});
+      await pumpEventQueue();
+      expect(messaging.permissionRequests, 0);
+    });
+
+    test('primer "Để sau" → không tự xin quyền', () async {
+      final container = containerFor(
+        const AsyncData<Profile?>(Profile(id: 'u1')),
+        primerChoice: 'later',
+      );
+      container.listen(pushRegistrationProvider, (_, _) {});
+      await pumpEventQueue();
+      expect(messaging.permissionRequests, 0);
+    });
+
     // [REGRESSION] Máy không có google-services.json thì
     // FirebaseMessaging.instance NÉM ('[core/no-app]'). Provider này được
     // watch trong CungHatApp.build, nên một exception ở đây hạ TOÀN BỘ app
@@ -144,6 +177,7 @@ void main() {
     // (vd. lúc đổi ngôn ngữ). Hỏng đăng ký push không bao giờ được chặn
     // đường vào app.
     test('push không khả dụng → KHÔNG ném, app vẫn dựng được', () async {
+      SharedPreferences.setMockInitialValues({kPushPrimerPrefKey: 'on'});
       final container = ProviderContainer(
         overrides: [
           myProfileProvider.overrideWith(

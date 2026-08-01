@@ -1443,6 +1443,32 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsTheme => 'Giao diện';
 
   @override
+  String get settingsNotifications => 'Thông báo';
+
+  @override
+  String get settingsPushEnable => 'Bật thông báo';
+
+  @override
+  String get settingsPushOn => 'Thông báo đang bật';
+
+  @override
+  String get pushPrimerTitle => 'Đừng lỡ kèo và match mới';
+
+  @override
+  String get pushPrimerBenefitKeo =>
+      'Báo khi kèo của bạn sắp diễn ra hoặc có người xin vào.';
+
+  @override
+  String get pushPrimerBenefitMatch =>
+      'Báo ngay khi có người ghép đôi với bạn.';
+
+  @override
+  String get pushPrimerAccept => 'Bật thông báo';
+
+  @override
+  String get pushPrimerLater => 'Để sau';
+
+  @override
   String get settingsThemeSystem => 'Theo máy';
 
   @override

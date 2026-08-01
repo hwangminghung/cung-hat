@@ -2738,6 +2738,54 @@ abstract class AppLocalizations {
   /// **'Appearance'**
   String get settingsTheme;
 
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// No description provided for @settingsPushEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications'**
+  String get settingsPushEnable;
+
+  /// No description provided for @settingsPushOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are on'**
+  String get settingsPushOn;
+
+  /// No description provided for @pushPrimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Never miss a keo or a match'**
+  String get pushPrimerTitle;
+
+  /// No description provided for @pushPrimerBenefitKeo.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when your keo is coming up or someone asks to join.'**
+  String get pushPrimerBenefitKeo;
+
+  /// No description provided for @pushPrimerBenefitMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Know right away when someone matches with you.'**
+  String get pushPrimerBenefitMatch;
+
+  /// No description provided for @pushPrimerAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications'**
+  String get pushPrimerAccept;
+
+  /// No description provided for @pushPrimerLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get pushPrimerLater;
+
   /// No description provided for @settingsThemeSystem.
   ///
   /// In en, this message translates to:

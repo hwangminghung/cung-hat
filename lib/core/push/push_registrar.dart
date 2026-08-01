@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/supabase_providers.dart';
 import '../../features/profile/application/profile_providers.dart';
 import 'push_messaging.dart';
+import 'push_primer.dart';
 import 'push_service.dart';
 
 /// Gắn token FCM của thiết bị vào tài khoản đang đăng nhập.
@@ -82,6 +83,11 @@ final pushRegistrarProvider = Provider((ref) {
 /// đổi tài khoản.
 final pushRegistrationProvider = Provider<void>((ref) {
   if (ref.watch(myProfileProvider).value == null) return;
+  // [PRIMER — đợt 4] CHỈ tự đăng ký khi user đã bấm "Bật thông báo" ở
+  // PushPrimerSheet (pref 'on'). Chưa từng hỏi thì HomeShell hiện sheet;
+  // "Để sau" thì không tự hỏi lại — bật được trong Cài đặt. Hộp thoại quyền
+  // OS chỉ hỏi được một lần, không được đốt nó ngoài ngữ cảnh.
+  if (ref.watch(pushPrimerChoiceProvider).value != 'on') return;
   // Provider này được watch trong CungHatApp.build: bất cứ thứ gì ném ở đây
   // đều hạ TOÀN BỘ app xuống red screen. Push hỏng là chuyện nhỏ, không được
   // phép chặn đường vào app — nên nuốt mọi lỗi dựng phụ thuộc tại đây.
