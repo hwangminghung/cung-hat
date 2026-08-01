@@ -453,6 +453,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get commonSaveError => 'Không lưu được cài đặt, thử lại.';
 
   @override
+  String get promptClearTooltip => 'Xoá câu này';
+
+  @override
+  String get photoPrev => 'Ảnh trước';
+
+  @override
+  String get photoNext => 'Ảnh sau';
+
+  @override
   String get profileLoadErrorTitle => 'Không tải được hồ sơ';
 
   @override
@@ -1054,7 +1063,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get chatSuggInviteMsg => 'Cuối tuần này đi hát không?';
 
   @override
-  String get chatComposerHint => 'Nhắn gì đó...';
+  String get chatComposerHint => 'Nhắn gì đó…';
 
   @override
   String get chatSendError => 'Không gửi được tin nhắn. Thử lại sau.';

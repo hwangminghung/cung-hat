@@ -74,7 +74,10 @@ class SharedPlanScreen extends ConsumerWidget {
                     // [AUDIT] Cung loi ISO tho nhu PlanScreen: man hinh nay la
                     // thu nguoi duoc chia se link nhin thay dau tien.
                     Text(
-                      formatLocalDateTime(data['scheduled_at'] as String?) ??
+                      formatLocalDateTime(
+                            data['scheduled_at'] as String?,
+                            locale: Localizations.localeOf(context).toString(),
+                          ) ??
                           '${data['scheduled_at'] ?? ''}',
                     ),
                   ],

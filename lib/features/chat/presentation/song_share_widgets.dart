@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../onboarding/application/reference_providers.dart';
 import '../../profile/application/profile_providers.dart';
 import '../domain/song_share.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 /// Bottom sheet "Gửi bài tủ" (mockup 16): liệt kê bài tủ của mình, chọn một
 /// bài trả về body đã encode ('♪ Title · Artist') — null nếu đóng sheet.
@@ -29,8 +30,8 @@ class _SongShareSheet extends ConsumerWidget {
     Widget body;
     if (baituIds == null || songs == null) {
       body = const Padding(
-        padding: EdgeInsets.all(AppSpacing.xxl),
-        child: Center(child: CircularProgressIndicator()),
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: SkeletonTile(),
       );
     } else {
       final mine = songs.where((s) => baituIds.contains(s.id)).toList();

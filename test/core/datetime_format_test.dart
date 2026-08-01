@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:cung_hat/core/utils/datetime_format.dart';
 
 void main() {
@@ -28,5 +29,31 @@ void main() {
     expect(formatLocalDateTime(null), isNull);
     expect(formatLocalDateTime(''), isNull);
     expect(formatLocalDateTime('khong-phai-ngay'), isNull);
+  });
+
+  // [A11Y-AUDIT] Ngay theo locale: vi = ngay/thang, en_US = thang/ngay.
+  group('locale-aware', () {
+    setUpAll(() async {
+      await initializeDateFormatting('vi');
+      await initializeDateFormatting('en_US');
+    });
+
+    test('vi -> 5/1/2026 (ngay truoc thang)', () async {
+      expect(
+        formatLocalDateTime('2026-01-05T09:05:00', locale: 'vi'),
+        '09:05 · 5/1/2026',
+      );
+    });
+
+    test('en_US -> 1/5/2026 (thang truoc ngay)', () async {
+      expect(
+        formatLocalDateTime('2026-01-05T09:05:00', locale: 'en_US'),
+        '09:05 · 1/5/2026',
+      );
+    });
+
+    test('khong locale -> format cu (duong lui)', () {
+      expect(formatLocalDateTime('2026-01-05T09:05:00'), '09:05 · 5/1/2026');
+    });
   });
 }

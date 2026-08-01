@@ -4,6 +4,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../application/admin_providers.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 class ModerationScreen extends ConsumerWidget {
   const ModerationScreen({super.key});
@@ -96,15 +98,14 @@ class ModerationScreen extends ConsumerWidget {
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: [
-              SizedBox(height: MediaQuery.sizeOf(context).height * 0.35),
-              Center(
-                child: Text(l10n?.adminLoadError ?? 'Không tải được báo cáo'),
-              ),
-            ],
+          loading: () => ListView(
+            children: const [SkeletonTile(), SkeletonTile(), SkeletonTile()],
+          ),
+          error: (e, _) => EmptyState(
+            icon: Icons.wifi_off_rounded,
+            title: l10n?.adminLoadError ?? 'Không tải được báo cáo',
+            actionLabel: l10n?.commonRetry ?? 'Thử lại',
+            onAction: () => ref.invalidate(openReportsProvider),
           ),
         ),
       ),

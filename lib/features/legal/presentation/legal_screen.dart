@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 /// Văn bản pháp lý bundled. Nội dung markdown CHỈ có bản tiếng Việt (bản
 /// dịch pháp lý cần luật sư review — ngoài scope l10n UI); title theo l10n.
@@ -40,7 +41,7 @@ class LegalScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Column(children: [SkeletonTile(), SkeletonTile()]),
           );
         }
         return Scaffold(

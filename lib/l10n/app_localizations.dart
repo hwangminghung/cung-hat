@@ -932,6 +932,24 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save the setting, try again.'**
   String get commonSaveError;
 
+  /// No description provided for @promptClearTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this prompt'**
+  String get promptClearTooltip;
+
+  /// No description provided for @photoPrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous photo'**
+  String get photoPrev;
+
+  /// No description provided for @photoNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next photo'**
+  String get photoNext;
+
   /// No description provided for @profileLoadErrorTitle.
   ///
   /// In en, this message translates to:
@@ -2015,7 +2033,7 @@ abstract class AppLocalizations {
   /// No description provided for @chatComposerHint.
   ///
   /// In en, this message translates to:
-  /// **'Say something...'**
+  /// **'Say something…'**
   String get chatComposerHint;
 
   /// No description provided for @chatSendError.

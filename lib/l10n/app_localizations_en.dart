@@ -453,6 +453,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSaveError => 'Couldn\'t save the setting, try again.';
 
   @override
+  String get promptClearTooltip => 'Remove this prompt';
+
+  @override
+  String get photoPrev => 'Previous photo';
+
+  @override
+  String get photoNext => 'Next photo';
+
+  @override
   String get profileLoadErrorTitle => 'Couldn\'t load your profile';
 
   @override
@@ -1058,7 +1067,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatSuggInviteMsg => 'Free to go singing this weekend?';
 
   @override
-  String get chatComposerHint => 'Say something...';
+  String get chatComposerHint => 'Say something…';
 
   @override
   String get chatSendError => 'Couldn\'t send the message. Try again later.';

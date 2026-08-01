@@ -14,6 +14,7 @@ import '../../onboarding/application/reference_providers.dart';
 import '../application/keo_providers.dart';
 import '../../../shared/widgets/pro_upsell_sheet.dart';
 import '../data/keo_errors.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 const sectionGap = SizedBox(height: AppSpacing.lg);
 const fieldGap = SizedBox(height: AppSpacing.md);
@@ -351,10 +352,20 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                         );
                       },
                     ),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Text(
-                      _l10n?.keoCreateGenresError ?? 'Không tải được thể loại',
+                    loading: () => const SkeletonTile(),
+                    error: (e, _) => Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _l10n?.keoCreateGenresError ??
+                                'Không tải được thể loại',
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => ref.invalidate(genresProvider),
+                          child: Text(_l10n?.commonRetry ?? 'Thử lại'),
+                        ),
+                      ],
                     ),
                   ),
                 ],

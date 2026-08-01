@@ -17,6 +17,7 @@ import 'consent_step.dart';
 import 'dob_step.dart';
 import 'profile_step.dart';
 import 'taste_step.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 /// Index of the consent step in the flow (DOB=0, consent=1).
 const _consentStepIndex = 1;
@@ -155,13 +156,20 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         ),
         const SizedBox(height: 8),
         async.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          // [UI-AUDIT] Chuẩn Skeleton + EmptyState-có-Thử-lại toàn app.
+          loading: () => const SkeletonTile(),
           error: (err, _) {
             debugPrint('onboarding: reference load error: $err');
             return EmptyState(
               icon: Icons.wifi_off,
               title: l10n?.onbLoadError ?? 'Không tải được dữ liệu.',
               subtitle: l10n?.onbLoadRetrySub ?? 'Thử lại sau ít phút.',
+              actionLabel: l10n?.commonRetry ?? 'Thử lại',
+              onAction: () {
+                ref.invalidate(genresProvider);
+                ref.invalidate(artistsProvider);
+                ref.invalidate(songsProvider);
+              },
             );
           },
           data: (items) => TasteChips<T>(

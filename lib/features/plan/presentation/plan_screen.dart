@@ -313,7 +313,11 @@ class PlanScreen extends ConsumerWidget {
                   // Chuoi tho chi con la duong lui khi server tra ve gia tri
                   // khong parse duoc — luong binh thuong luon co ban dinh dang.
                   final when =
-                      formatLocalDateTime(plan.scheduledAt) ?? plan.scheduledAt;
+                      formatLocalDateTime(
+                        plan.scheduledAt,
+                        locale: Localizations.localeOf(context).toString(),
+                      ) ??
+                      plan.scheduledAt;
                   return Text(l10n?.planTime(when) ?? 'Thời gian: $when');
                 },
               ),

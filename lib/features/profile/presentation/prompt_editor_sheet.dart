@@ -288,6 +288,7 @@ class _PromptRowState extends State<_PromptRow> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final prompt = widget.prompt;
     final answer = widget.answer;
     final expanded = widget.expanded;
@@ -322,6 +323,8 @@ class _PromptRowState extends State<_PromptRow> {
                 if (hasAnswer)
                   IconButton(
                     key: Key('clear_prompt_${prompt.id}'),
+                    // [A11Y] nút chỉ-icon phải có tooltip/semantics label.
+                    tooltip: l10n?.promptClearTooltip ?? 'Xoá câu này',
                     icon: const Icon(Icons.close_rounded, size: 18),
                     color: AppColors.textSecondary,
                     onPressed: onClear,
