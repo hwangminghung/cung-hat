@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:cung_hat/core/theme/app_theme.dart';
+import 'package:cung_hat/features/billing/application/billing_providers.dart';
 import 'package:cung_hat/features/discovery/application/discovery_providers.dart';
 import 'package:cung_hat/features/discovery/data/discovery_repository.dart';
 import 'package:cung_hat/features/discovery/presentation/filter_sheet.dart';
@@ -149,6 +150,137 @@ void main() {
       expect(find.text('Không lưu được, thử lại.'), findsOneWidget);
       // Sheet vẫn còn (chưa pop) khi lưu lỗi.
       expect(find.byType(FilterSheet), findsOneWidget);
+    });
+
+    // [MATCH-AUDIT #1b] premium_filters 79k phải mở khoá được thứ gì đó thật.
+    group('bộ lọc nâng cao (premium_filters)', () {
+      testWidgets('free → ô khoá dẫn sang Cửa hàng, không có slider tuổi', (
+        tester,
+      ) async {
+        final repo = _MockDiscoveryRepository();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              discoveryRepositoryProvider.overrideWithValue(repo),
+              discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50),
+              ),
+              entitlementsProvider.overrideWith((ref) async => <String>{}),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light(),
+              home: const Scaffold(body: FilterSheet()),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('filter_premium_locked')), findsOneWidget);
+        expect(find.byKey(const Key('filter_age_slider')), findsNothing);
+        expect(
+          find.byKey(const Key('filter_active_only_switch')),
+          findsNothing,
+        );
+      });
+
+      testWidgets(
+        'đã mua → chỉnh tuổi + active rồi Áp dụng ghi vào premiumFiltersProvider',
+        (tester) async {
+          final repo = _MockDiscoveryRepository();
+          when(() => repo.setDiscoveryRadius(any())).thenAnswer((_) async {});
+          when(() => repo.setAutoExpand(any())).thenAnswer((_) async {});
+          final container = ProviderContainer(
+            overrides: [
+              discoveryRepositoryProvider.overrideWithValue(repo),
+              discoveryPrefsProvider.overrideWith(
+                (ref) async => (autoExpand: false, radiusKm: 50),
+              ),
+              entitlementsProvider.overrideWith(
+                (ref) async => {'premium_filters'},
+              ),
+            ],
+          );
+          addTearDown(container.dispose);
+
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: MaterialApp(
+                theme: AppTheme.light(),
+                home: const Scaffold(body: FilterSheet()),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('filter_premium_locked')), findsNothing);
+          // Kéo đầu DƯỚI của range slider sang phải để nâng min age. Núm
+          // start nằm sát mép TRÁI (giá trị 18) — drag từ tâm sẽ không trúng.
+          final sliderRect = tester.getRect(
+            find.byKey(const Key('filter_age_slider')),
+          );
+          await tester.dragFrom(
+            Offset(sliderRect.left + 24, sliderRect.center.dy),
+            const Offset(80, 0),
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('filter_active_only_switch')));
+          await tester.pumpAndSettle();
+
+          await tester.ensureVisible(find.byKey(const Key('filter_save_btn')));
+          await tester.tap(find.byKey(const Key('filter_save_btn')));
+          await tester.pumpAndSettle();
+
+          final saved = container.read(premiumFiltersProvider);
+          expect(saved.activeOnly, isTrue);
+          expect(saved.minAge, isNotNull, reason: 'min đã kéo khỏi biên 18');
+          expect(
+            saved.maxAge,
+            isNull,
+            reason: 'max còn ở biên 60 = không trần',
+          );
+        },
+      );
+
+      testWidgets('đã mua nhưng để mặc định → Áp dụng ghi null/null/false', (
+        tester,
+      ) async {
+        final repo = _MockDiscoveryRepository();
+        when(() => repo.setDiscoveryRadius(any())).thenAnswer((_) async {});
+        when(() => repo.setAutoExpand(any())).thenAnswer((_) async {});
+        final container = ProviderContainer(
+          overrides: [
+            discoveryRepositoryProvider.overrideWithValue(repo),
+            discoveryPrefsProvider.overrideWith(
+              (ref) async => (autoExpand: false, radiusKm: 50),
+            ),
+            entitlementsProvider.overrideWith(
+              (ref) async => {'premium_filters'},
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              theme: AppTheme.light(),
+              home: const Scaffold(body: FilterSheet()),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.ensureVisible(find.byKey(const Key('filter_save_btn')));
+        await tester.tap(find.byKey(const Key('filter_save_btn')));
+        await tester.pumpAndSettle();
+
+        final saved = container.read(premiumFiltersProvider);
+        expect(saved.minAge, isNull);
+        expect(saved.maxAge, isNull);
+        expect(saved.activeOnly, isFalse);
+      });
     });
 
     testWidgets('trong lúc prefs chưa tải xong → nút Áp dụng bị khoá', (

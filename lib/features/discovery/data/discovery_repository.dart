@@ -6,14 +6,27 @@ class DiscoveryRepository {
   DiscoveryRepository(this._client);
   final SupabaseClient _client;
 
+  /// [minAge]/[maxAge]/[activeOnly] là bộ lọc nâng cao (premium_filters) —
+  /// server raise `entitlement_required` nếu truyền mà chưa mua (Pro là
+  /// superset). Không truyền thì deck miễn phí như cũ.
   Future<List<Candidate>> getCandidates({
     int limit = 20,
     int radiusKm = 50,
     String? genre,
+    int? minAge,
+    int? maxAge,
+    bool activeOnly = false,
   }) async {
     final rows = await _client.rpc(
       'get_discovery_candidates',
-      params: {'p_limit': limit, 'p_radius_km': radiusKm, 'p_genre': genre},
+      params: {
+        'p_limit': limit,
+        'p_radius_km': radiusKm,
+        'p_genre': genre,
+        'p_min_age': minAge,
+        'p_max_age': maxAge,
+        'p_active_only': activeOnly,
+      },
     );
     return (rows as List)
         .map((e) => Candidate.fromJson(Map<String, dynamic>.from(e)))
@@ -100,8 +113,9 @@ class DiscoveryRepository {
     return res == true;
   }
 
-  /// Kích hoạt Boost 30 phút (Pro). Trả về thời điểm hết hạn. Server raise
-  /// pro_required / boost_active / boost_limit nếu không đủ điều kiện.
+  /// Kích hoạt Boost 30 phút (mua boost lẻ hoặc Pro). Trả về thời điểm hết
+  /// hạn. Server raise boost_required / boost_active / boost_limit nếu không
+  /// đủ điều kiện.
   Future<DateTime> activateBoost() async {
     final res = await _client.rpc('activate_boost');
     return DateTime.parse(res as String);

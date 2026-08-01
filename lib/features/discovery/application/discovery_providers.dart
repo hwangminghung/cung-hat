@@ -37,6 +37,15 @@ final discoveryPrefsProvider =
 /// lưu bộ lọc mới (FilterSheet null hoá lại override này sau khi Áp dụng).
 final deckRadiusProvider = StateProvider<int?>((ref) => null);
 
+/// Bộ lọc nâng cao (premium_filters 79k) — trạng thái PHIÊN, không lưu
+/// server. Server tự gate: truyền filter mà chưa mua → entitlement_required,
+/// nên state này chỉ là tiện nghi UI, không phải hàng rào bảo mật.
+typedef PremiumFilters = ({int? minAge, int? maxAge, bool activeOnly});
+
+final premiumFiltersProvider = StateProvider<PremiumFilters>(
+  (ref) => (minAge: null, maxAge: null, activeOnly: false),
+);
+
 /// [genre] null = deck chính (không lọc); khác null = deck chủ đề Khám Phá
 /// (mục 9 Tinder-parity), lọc ứng viên theo đúng genre đó phía server.
 /// Bán kính hiệu lực: override phiên ([deckRadiusProvider]) nếu có, nếu
@@ -48,6 +57,7 @@ final candidatesProvider = FutureProvider.family<List<Candidate>, String?>((
   genre,
 ) async {
   final override = ref.watch(deckRadiusProvider);
+  final premium = ref.watch(premiumFiltersProvider);
   int radius;
   try {
     radius =
@@ -57,7 +67,13 @@ final candidatesProvider = FutureProvider.family<List<Candidate>, String?>((
   }
   return ref
       .watch(discoveryRepositoryProvider)
-      .getCandidates(radiusKm: radius, genre: genre);
+      .getCandidates(
+        radiusKm: radius,
+        genre: genre,
+        minAge: premium.minAge,
+        maxAge: premium.maxAge,
+        activeOnly: premium.activeOnly,
+      );
 });
 final whoLikedMeProvider = FutureProvider<List<Candidate>>(
   (ref) => ref.watch(discoveryRepositoryProvider).whoLikedMe(),
