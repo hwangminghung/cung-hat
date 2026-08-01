@@ -46,7 +46,7 @@ class OnboardingPhotosScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.background,
           border: Border(top: BorderSide(color: AppColors.ink, width: 2)),
         ),

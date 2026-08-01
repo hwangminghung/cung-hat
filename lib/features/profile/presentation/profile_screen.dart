@@ -134,7 +134,7 @@ class _ProfileList extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      WaveDivider(),
+                      const WaveDivider(),
                     ],
                   ),
                 ),
@@ -245,8 +245,8 @@ class _CompletionCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 2),
                       child: Icon(
                         Icons.arrow_circle_up_rounded,
                         size: 18,

@@ -144,7 +144,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                             AppSpacing.radiusPill,
                           ),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.auto_awesome_rounded,
                           color: AppColors.ink,
                           size: 22,
@@ -178,7 +178,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  WaveDivider(),
+                  const WaveDivider(),
                   const SizedBox(height: AppSpacing.md),
                   TicketCard(
                     showPerforation: false,
@@ -209,7 +209,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                                   AppSpacing.radiusPill,
                                 ),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.mic_external_on_outlined,
                                 color: AppColors.ink,
                                 size: 28,
@@ -347,7 +347,7 @@ class _KeoMatchSheetState extends State<KeoMatchSheet> {
                   color: AppColors.primaryTint,
                   borderRadius: BorderRadius.circular(22),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.search_off_rounded,
                   color: AppColors.primaryDark,
                   size: 30,
@@ -728,7 +728,7 @@ class _PrimaryButtonChild extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!submitting) return Text(label);
 
-    return SizedBox.square(
+    return const SizedBox.square(
       dimension: 18,
       child: CircularProgressIndicator(
         strokeWidth: 2,

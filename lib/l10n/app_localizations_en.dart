@@ -1448,9 +1448,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
-  String get settingsTheme => 'Appearance';
-
-  @override
   String get settingsNotifications => 'Notifications';
 
   @override
@@ -1475,15 +1472,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pushPrimerLater => 'Maybe later';
-
-  @override
-  String get settingsThemeSystem => 'System';
-
-  @override
-  String get settingsThemeLight => 'Light';
-
-  @override
-  String get settingsThemeDark => 'Dark';
 
   @override
   String get settingsLangSystem => 'Default (Vietnamese)';

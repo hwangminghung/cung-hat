@@ -55,10 +55,8 @@ class AppLogo extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: _markSize * 0.06),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: _markSize * 0.15,
-                  ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: _markSize * 0.15),
                   child: WaveDivider(color: AppColors.primary),
                 ),
               ],

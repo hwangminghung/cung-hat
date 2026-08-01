@@ -76,7 +76,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _wrap(HardCard(child: const SizedBox(width: 80, height: 40))),
+      _wrap(const HardCard(child: SizedBox(width: 80, height: 40))),
     );
 
     final container = tester.widget<Container>(

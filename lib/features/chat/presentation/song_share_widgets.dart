@@ -66,7 +66,7 @@ class _SongShareSheet extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: AppColors.ink, width: 1.5),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.music_note_rounded,
                     color: AppColors.ink,
                     size: 22,
@@ -136,7 +136,11 @@ class SongShareContent extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.ink, width: 1.5),
           ),
-          child: Icon(Icons.music_note_rounded, color: AppColors.ink, size: 20),
+          child: const Icon(
+            Icons.music_note_rounded,
+            color: AppColors.ink,
+            size: 20,
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Flexible(

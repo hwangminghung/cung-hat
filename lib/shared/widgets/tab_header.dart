@@ -78,7 +78,7 @@ class TabHeader extends StatelessWidget {
                 ),
               ),
             ],
-            if (showDivider) WaveDivider(height: AppSpacing.md),
+            if (showDivider) const WaveDivider(height: AppSpacing.md),
           ],
         ),
       ),

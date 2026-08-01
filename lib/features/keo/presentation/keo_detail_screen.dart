@@ -324,7 +324,7 @@ class _RosterHeader extends StatelessWidget {
       children: [
         Flexible(child: heading),
         const SizedBox(width: AppSpacing.md),
-        Expanded(child: WaveDivider()),
+        const Expanded(child: WaveDivider()),
       ],
     );
   }
@@ -372,11 +372,11 @@ class _Header extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Icon(Icons.auto_awesome_outlined, color: AppColors.ink),
+              const Icon(Icons.auto_awesome_outlined, color: AppColors.ink),
             ],
           ),
           fieldGap,
-          WaveDivider(),
+          const WaveDivider(),
           if (timeLabel != null) ...[
             fieldGap,
             _InfoRow(
@@ -404,7 +404,7 @@ class _Header extends StatelessWidget {
                   border: Border.all(color: AppColors.ink, width: 2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
-                child: Icon(Icons.groups_outlined, color: AppColors.ink),
+                child: const Icon(Icons.groups_outlined, color: AppColors.ink),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -481,7 +481,7 @@ class _RosterTile extends StatelessWidget {
         : StampChipTone.teal;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.ink, width: 2)),
       ),
       child: Column(
@@ -520,7 +520,7 @@ class _RosterTile extends StatelessWidget {
                       ),
                       if (member.verified) ...[
                         const SizedBox(width: AppSpacing.xs),
-                        Icon(
+                        const Icon(
                           Icons.verified_rounded,
                           size: 18,
                           color: AppColors.ink,

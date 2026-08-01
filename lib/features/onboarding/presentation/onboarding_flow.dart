@@ -282,7 +282,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           ? _onFinish
           : () => _moveToStep(_step + 1, grantRequired: isConsent),
       child: loading && isLast
-          ? SizedBox(
+          ? const SizedBox(
               width: 18,
               height: 18,
               child: CircularProgressIndicator(
@@ -308,7 +308,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         : null;
 
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.background,
         border: Border(top: BorderSide(color: AppColors.ink, width: 2)),
       ),
@@ -486,7 +486,7 @@ class _TasteSectionHeader extends StatelessWidget {
           Container(
             width: 16,
             height: 16,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.secondary,
               shape: BoxShape.circle,
             ),

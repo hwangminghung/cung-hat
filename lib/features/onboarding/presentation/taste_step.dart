@@ -73,7 +73,7 @@ class TasteChips<T> extends StatelessWidget {
                       checkmarkColor: AppColors.ink,
                       backgroundColor: AppColors.surface,
                       selectedColor: AppColors.secondary,
-                      side: BorderSide(color: AppColors.ink, width: 2),
+                      side: const BorderSide(color: AppColors.ink, width: 2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusCard,

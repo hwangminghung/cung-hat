@@ -1,108 +1,92 @@
 import 'package:flutter/material.dart';
 
-import 'app_palette.dart';
-
 /// Warm paper, citrus, and ink palette for the retro mixtape interface.
 ///
-/// [DARK] Từ 2026-08-01 đây là MẶT TIỀN đọc bảng màu hiện hành: hai bảng
-/// nằm ở [AppPalette] (light/dark), [select] được `CungHatApp.build` gọi
-/// TRƯỚC khi dựng MaterialApp nên mọi widget build sau đó đọc đúng bảng.
-/// Giữ nguyên tên member để không phải sửa hàng trăm call-site; giá phải trả
-/// là các widget `const` dùng màu đã phải bỏ `const` (compiler liệt kê).
-///
 /// Mọi tỉ lệ tương phản ghi trong file này được kiểm tra tự động bởi
-/// `test/theme/color_contrast_test.dart` — CHO CẢ HAI bảng màu.
+/// `test/theme/color_contrast_test.dart` — sửa hex mà quên cập nhật sẽ fail CI.
 abstract final class AppColors {
-  static AppPalette _p = AppPalette.light;
+  static const primary = Color(0xFFE8501F);
+  static const primaryDark = Color(0xFF942D0E);
+  static const primaryTint = Color(0xFFF8C9B8);
+  static const primarySoft = Color(0xFFF18D69);
 
-  /// Bảng màu đang hiệu lực — cho test và các builder cần trọn bảng.
-  static AppPalette get palette => _p;
-
-  /// Chọn bảng theo brightness hiệu lực. Widget test mặc định light;
-  /// test dark gọi tay + `addTearDown(() => AppColors.select(Brightness.light))`.
-  static void select(Brightness b) =>
-      _p = b == Brightness.dark ? AppPalette.dark : AppPalette.light;
-
-  static Color get primary => _p.primary;
-  static Color get primaryDark => _p.primaryDark;
-  static Color get primaryTint => _p.primaryTint;
-  static Color get primarySoft => _p.primarySoft;
-
-  /// CẢNH BÁO — trắng trên [primary] chỉ đạt **3.75:1** (cả hai mode: cặp
-  /// trắng/cam không phụ thuộc nền).
+  /// CẢNH BÁO — trắng trên [primary] chỉ đạt **3.75:1**.
   ///
   /// Theo WCAG 1.4.3 tỉ lệ này CHỈ hợp lệ khi chữ được tính là "chữ lớn":
   /// ≥24px thường hoặc **≥18.66px bold**. Vì vậy chữ trắng trên nền cam
   /// bắt buộc dùng cỡ ≥ [onPrimaryMinBoldSize] và weight ≥ w700.
+  /// Ở 16px bold (giá trị MASTER.md ghi sai trước 2026-07-25) tỉ lệ cần là
+  /// 4.5:1 → TRƯỢT. [GradientButton] đã hardcode 19px/w700 nên đang đạt.
   ///
-  /// Không dùng [ink] làm chữ trên [primary]. Không dùng [primary] làm màu
-  /// CHỮ nhỏ trên nền (light 3.27:1, dark 4.21:1 — đều dưới 4.5).
-  static Color get onPrimary => _p.onPrimary;
+  /// Không dùng [ink] làm chữ trên [primary]: chỉ 3.29:1.
+  /// Không dùng [primary] làm màu CHỮ trên nền giấy: chỉ 3.27:1.
+  static const onPrimary = Color(0xFFFFFFFF);
 
   /// Cỡ chữ bold tối thiểu cho chữ trắng đặt trên [primary]. Xem [onPrimary].
   static const onPrimaryMinBoldSize = 19.0;
 
-  /// Chữ cho control đang disabled (đặt trên [surfaceMuted]).
-  static Color get onDisabled => ink;
+  /// Chữ cho control đang disabled (đặt trên [surfaceMuted] → 8.55:1).
+  /// KHÔNG dùng [onPrimary] trắng cho state này: chỉ 1.44:1, không đọc được.
+  static const onDisabled = ink;
 
-  /// Chữ/icon đặt trên FILL ACCENT SÁNG (lime/teal/pink/primarySoft đặc).
-  ///
-  /// Các fill này giữ NGUYÊN hex ở cả hai mode, nên màu chữ trên chúng cũng
-  /// cố định = ink của bảng light — KHÔNG dùng [ink] (dark mode ink là kem,
-  /// kem trên lime chỉ ~1.2:1). Contrast test khoá cặp này cho cả 4 fill.
-  static Color get onAccent => AppPalette.light.ink;
+  static const secondary = Color(0xFFC6E534);
+  static const secondaryDark = Color(0xFF506100);
+  static const secondaryTint = Color(0xFFEDF6B7);
 
-  static Color get secondary => _p.secondary;
-  static Color get secondaryDark => _p.secondaryDark;
-  static Color get secondaryTint => _p.secondaryTint;
-
-  static Color get teal => _p.teal;
+  static const teal = Color(0xFF8FD8C8);
 
   /// Compatibility aliases retained for existing consumers.
-  static Color get tertiary => teal;
-  static Color get cyan => teal;
-  static Color get tertiaryTint => _p.tertiaryTint;
-  static Color get tertiaryPop => _p.tertiaryPop;
+  static const tertiary = teal;
+  static const cyan = teal;
+  static const tertiaryTint = Color(0xFFDDF3EE);
+  static const tertiaryPop = Color(0xFF5DBBA8);
 
-  static Color get pink => _p.pink;
+  static const pink = Color(0xFFE979A9);
 
-  static Color get background => _p.background;
-  static Color get surface => _p.surface;
-  static Color get surfaceAlt => _p.surfaceAlt;
-  static Color get surfaceWarm => _p.surfaceWarm;
-  static Color get surfaceMuted => _p.surfaceMuted;
+  static const background = Color(0xFFF7EFD8);
+  static const surface = Color(0xFFFCF6E3);
+  static const surfaceAlt = Color(0xFFEFE4C8);
+  static const surfaceWarm = Color(0xFFFADBC7);
+  static const surfaceMuted = Color(0xFFE2D6B9);
 
-  static Color get ink => _p.ink;
-  static Color get textPrimary => ink;
-  static Color get textSecondary => _p.textSecondary;
-  static Color get textHint => _p.textHint;
-  static Color get border => ink;
+  static const ink = Color(0xFF1E3A2F);
+  static const textPrimary = ink;
+  static const textSecondary = Color(0xFF405B50);
+  static const textHint = Color(0xFF5C7168);
+  static const border = ink;
 
-  static Color get success => _p.success;
-  static Color get successTint => _p.successTint;
-  static Color get warning => _p.warning;
-  static Color get warningTint => _p.warningTint;
-  static Color get error => _p.error;
-  static Color get errorTint => _p.errorTint;
+  static const success = Color(0xFF287A56); // 4.56:1 trên background
+  static const successTint = Color(0xFFDDF1E7);
+
+  /// 5.02:1 trên background. Trước 2026-07-25 là `0xFFA65B00` = 4.44:1 —
+  /// trượt ngưỡng 4.5:1 đúng 0.06, đủ để fail audit nhưng khó thấy bằng mắt.
+  static const warning = Color(0xFF9A5400);
+  static const warningTint = Color(0xFFFFE8BF);
+  static const error = Color(0xFFB42318); // 5.73:1 trên background
+  static const errorTint = Color(0xFFFAD7D3);
 
   /// Nền CTA chính. Hai stop bằng nhau — giữ kiểu [LinearGradient] để
   /// [GradientButton] không phải đổi API, nhưng thực chất là màu đặc.
-  static LinearGradient get brandGradient => LinearGradient(
+  static const brandGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [primary, primary],
   );
 
   /// CHỈ dùng cho mảng trang trí — KHÔNG đặt chữ lên trên.
+  ///
+  /// Gradient chạy cam → lime. Chữ trắng ở đầu lime chỉ **1.43:1**, chữ ink ở
+  /// đầu cam chỉ **3.29:1** — không có màu chữ nào an toàn trên cả dải.
+  /// Nếu cần nút gradient thì đổi stop cuối sang một sắc cam đậm hơn.
   @Deprecated(
     'Không có màu chữ nào đạt 4.5:1 trên toàn dải cam→lime. '
     'Dùng brandGradient cho nút, hoặc chỉ dùng warmGradient làm nền trang trí.',
   )
-  static LinearGradient get warmGradient => LinearGradient(
+  static const warmGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [primary, secondary],
   );
 
-  static Color get shadow => ink;
+  static const shadow = ink;
 }

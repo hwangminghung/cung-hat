@@ -2732,12 +2732,6 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get settingsLanguage;
 
-  /// No description provided for @settingsTheme.
-  ///
-  /// In en, this message translates to:
-  /// **'Appearance'**
-  String get settingsTheme;
-
   /// No description provided for @settingsNotifications.
   ///
   /// In en, this message translates to:
@@ -2785,24 +2779,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maybe later'**
   String get pushPrimerLater;
-
-  /// No description provided for @settingsThemeSystem.
-  ///
-  /// In en, this message translates to:
-  /// **'System'**
-  String get settingsThemeSystem;
-
-  /// No description provided for @settingsThemeLight.
-  ///
-  /// In en, this message translates to:
-  /// **'Light'**
-  String get settingsThemeLight;
-
-  /// No description provided for @settingsThemeDark.
-  ///
-  /// In en, this message translates to:
-  /// **'Dark'**
-  String get settingsThemeDark;
 
   /// No description provided for @settingsLangSystem.
   ///

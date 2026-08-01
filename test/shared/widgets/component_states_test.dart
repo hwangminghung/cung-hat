@@ -144,7 +144,7 @@ void main() {
           key: boundaryKey,
           child: Pressable(
             onTap: () {},
-            child: SizedBox(
+            child: const SizedBox(
               width: 80,
               height: 48,
               child: ColoredBox(

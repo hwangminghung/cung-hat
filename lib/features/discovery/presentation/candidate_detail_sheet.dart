@@ -142,7 +142,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                         ),
                         if (candidate.verified) ...[
                           const SizedBox(width: AppSpacing.xs),
-                          Icon(
+                          const Icon(
                             Icons.verified_rounded,
                             size: 22,
                             color: AppColors.teal,
@@ -167,7 +167,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.place_rounded,
                           size: 20,
                           color: AppColors.teal,
@@ -227,7 +227,7 @@ class CandidateDetailSheet extends ConsumerWidget {
               ),
             ),
           ),
-          WaveDivider(height: AppSpacing.xxl),
+          const WaveDivider(height: AppSpacing.xxl),
           Text(
             l10n?.candidateSharedGenresTitle ?? 'Gu nhạc chung',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -252,7 +252,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                   StampChip(label: '#$g', tone: StampChipTone.teal),
               ],
             ),
-          WaveDivider(height: AppSpacing.xxl),
+          const WaveDivider(height: AppSpacing.xxl),
           Text(
             l10n?.candidateSharedBaituTitle ?? 'Bài tủ chung',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -283,13 +283,13 @@ class CandidateDetailSheet extends ConsumerWidget {
                     Container(
                       width: 48,
                       height: 52,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.teal,
                         border: Border(
                           right: BorderSide(color: AppColors.ink, width: 2),
                         ),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.music_note_rounded,
                         color: AppColors.ink,
                       ),
@@ -361,7 +361,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                 ],
               ),
             ),
-          WaveDivider(height: AppSpacing.xxl),
+          const WaveDivider(height: AppSpacing.xxl),
           if (onPass != null || onLike != null)
             Row(
               children: [

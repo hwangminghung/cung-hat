@@ -166,7 +166,7 @@ class StoreScreen extends ConsumerWidget {
                               AppSpacing.radiusCard,
                             ),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.graphic_eq_rounded,
                             color: AppColors.ink,
                             size: 30,
@@ -196,8 +196,8 @@ class StoreScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                   child: WaveDivider(),
                 ),
                 ref
@@ -372,7 +372,7 @@ class _StorePurchaseFooter extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          WaveDivider(),
+          const WaveDivider(),
           const SizedBox(height: AppSpacing.lg),
           _StoreButtonShadow(
             child: SizedBox(
@@ -389,7 +389,7 @@ class _StorePurchaseFooter extends ConsumerWidget {
                     fontWeight: FontWeight.w700,
                     height: 1.05,
                   ),
-                  side: BorderSide(color: AppColors.ink, width: 2),
+                  side: const BorderSide(color: AppColors.ink, width: 2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                       AppSpacing.radiusButton,
@@ -489,7 +489,7 @@ ButtonStyle _storeCtaStyle() => FilledButton.styleFrom(
     fontWeight: FontWeight.w700,
     height: 1.05,
   ),
-  side: BorderSide(color: AppColors.ink, width: 2),
+  side: const BorderSide(color: AppColors.ink, width: 2),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
   ),
@@ -555,10 +555,10 @@ class _UpgradeTile extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: iconColor,
-                border: Border.all(color: AppColors.onAccent, width: 2),
+                border: Border.all(color: AppColors.ink, width: 2),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               ),
-              child: Icon(upgrade.icon, color: AppColors.onAccent),
+              child: Icon(upgrade.icon, color: AppColors.ink),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -599,16 +599,13 @@ class _UpgradeTile extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.secondary,
-                        border: Border.all(
-                          color: AppColors.onAccent,
-                          width: 1.5,
-                        ),
+                        border: Border.all(color: AppColors.ink, width: 1.5),
                         borderRadius: BorderRadius.circular(AppSpacing.xs),
                       ),
                       child: Text(
                         includedChip!,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.onAccent,
+                          color: AppColors.ink,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -629,8 +626,7 @@ class _UpgradeTile extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: priceColor,
-                    // [DARK] fill teal/lime giu hex hai mode -> onAccent.
-                    border: Border.all(color: AppColors.onAccent, width: 2),
+                    border: Border.all(color: AppColors.ink, width: 2),
                     borderRadius: BorderRadius.circular(
                       AppSpacing.radiusButton,
                     ),
@@ -639,7 +635,7 @@ class _UpgradeTile extends StatelessWidget {
                     upgrade.price,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.onAccent,
+                      color: AppColors.ink,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

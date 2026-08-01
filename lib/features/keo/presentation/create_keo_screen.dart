@@ -142,7 +142,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
             AppSpacing.lg,
             AppSpacing.lg,
           ),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.background,
             border: Border(top: BorderSide(color: AppColors.ink, width: 2)),
           ),
@@ -153,7 +153,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
               onPressed: _submitting ? null : _submit,
               icon: _submitting ? null : Icons.add_box_outlined,
               child: _submitting
-                  ? SizedBox.square(
+                  ? const SizedBox.square(
                       dimension: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
@@ -191,7 +191,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                         AppSpacing.radiusPill,
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.music_note_rounded,
                       color: AppColors.ink,
                       size: 28,
@@ -219,7 +219,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                 ],
               ),
               sectionGap,
-              WaveDivider(),
+              const WaveDivider(),
               sectionGap,
               _FormSection(
                 children: [
@@ -257,7 +257,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                         'Chủ kèo sẽ chốt quán ở màn Kế hoạch.',
                   ),
                   fieldGap,
-                  WaveDivider(),
+                  const WaveDivider(),
                   fieldGap,
                   OutlinedButton.icon(
                     onPressed: _submitting
@@ -316,7 +316,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                                 width: itemWidth,
                                 child: FilterChip(
                                   key: Key('keo_genre_${genre.id}'),
-                                  avatar: Icon(
+                                  avatar: const Icon(
                                     Icons.music_note_outlined,
                                     color: AppColors.ink,
                                   ),
@@ -324,7 +324,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                                   selected: _genreIds.contains(genre.id),
                                   selectedColor: AppColors.secondary,
                                   backgroundColor: AppColors.surface,
-                                  side: BorderSide(
+                                  side: const BorderSide(
                                     color: AppColors.ink,
                                     width: 2,
                                   ),
@@ -393,7 +393,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                           },
                   ),
                   fieldGap,
-                  WaveDivider(),
+                  const WaveDivider(),
                   fieldGap,
                   Text(
                     _l10n?.keoCreateJoinMode ?? 'Chế độ tham gia',
@@ -442,7 +442,7 @@ class _VenueHint extends StatelessWidget {
               border: Border.all(color: AppColors.ink, width: 2),
               borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
             ),
-            child: Icon(Icons.storefront_outlined, color: AppColors.ink),
+            child: const Icon(Icons.storefront_outlined, color: AppColors.ink),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -575,7 +575,7 @@ class _JoinModeChoice extends StatelessWidget {
                 ),
                 if (selected) ...[
                   const SizedBox(width: AppSpacing.sm),
-                  Icon(
+                  const Icon(
                     Icons.check_circle_rounded,
                     color: AppColors.ink,
                     size: 20,

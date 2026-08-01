@@ -109,7 +109,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
       return ListTile(
         key: const Key('filter_premium_locked'),
         contentPadding: EdgeInsets.zero,
-        leading: Icon(Icons.lock_rounded, color: AppColors.tertiary),
+        leading: const Icon(Icons.lock_rounded, color: AppColors.tertiary),
         title: Text(l10n?.filterPremiumLocked ?? 'Mở khoá Bộ lọc nâng cao'),
         subtitle: Text(
           l10n?.filterPremiumLockedSub ??
@@ -239,7 +239,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                   key: const Key('filter_save_btn'),
                   onPressed: (_saving || !_seeded) ? null : _save,
                   child: _saving
-                      ? SizedBox(
+                      ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(

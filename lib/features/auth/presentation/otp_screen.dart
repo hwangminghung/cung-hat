@@ -218,7 +218,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   ? null
                   : () => _submit(_ctrl.text),
               child: state.phase == AuthPhase.verifying
-                  ? SizedBox.square(
+                  ? const SizedBox.square(
                       dimension: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
@@ -269,7 +269,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.ink, width: 2),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.question_mark_rounded,
                     color: AppColors.ink,
                     size: 18,
@@ -333,14 +333,14 @@ class _BrandHeader extends StatelessWidget {
                 border: Border.all(color: AppColors.ink, width: 2),
                 boxShadow: [AppShadows.hard],
               ),
-              child: BackButton(color: AppColors.ink),
+              child: const BackButton(color: AppColors.ink),
             ),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (!compact) ...[
-                    Icon(
+                    const Icon(
                       Icons.auto_awesome_rounded,
                       color: AppColors.secondaryDark,
                       size: 18,
@@ -361,7 +361,7 @@ class _BrandHeader extends StatelessWidget {
                   ),
                   if (!compact) ...[
                     const SizedBox(width: AppSpacing.sm),
-                    SizedBox(
+                    const SizedBox(
                       width: 38,
                       child: WaveDivider(
                         height: AppSpacing.lg,
@@ -401,7 +401,7 @@ class _TicketHero extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            Positioned(
+            const Positioned(
               left: 28,
               right: 52,
               bottom: 6,
@@ -447,7 +447,7 @@ class _TicketHero extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 const _Perforation(),
                 const SizedBox(width: AppSpacing.md),
-                Icon(
+                const Icon(
                   Icons.mark_email_unread_rounded,
                   color: AppColors.ink,
                   size: 34,
@@ -466,9 +466,9 @@ class _MessageDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return const DecoratedBox(
       decoration: BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
-      child: const SizedBox.square(dimension: 7),
+      child: SizedBox.square(dimension: 7),
     );
   }
 }
@@ -500,12 +500,12 @@ class _Perforation extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         for (var i = 0; i < 6; i++)
-          DecoratedBox(
+          const DecoratedBox(
             decoration: BoxDecoration(
               color: AppColors.ink,
               shape: BoxShape.circle,
             ),
-            child: const SizedBox.square(dimension: 4),
+            child: SizedBox.square(dimension: 4),
           ),
       ],
     );

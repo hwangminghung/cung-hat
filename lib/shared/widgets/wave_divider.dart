@@ -7,13 +7,12 @@ import '../../core/theme/app_spacing.dart';
 
 /// A decorative audio-wave rule that expands to its parent's width.
 class WaveDivider extends StatelessWidget {
-  WaveDivider({
+  const WaveDivider({
     super.key,
     this.height = AppSpacing.lg,
-    Color? color,
+    this.color = AppColors.secondaryTint,
     this.strokeWidth = 1.5,
-  }) : color = color ?? AppColors.secondaryTint,
-       assert(height > 0, 'height must be greater than zero.'),
+  }) : assert(height > 0, 'height must be greater than zero.'),
        assert(strokeWidth > 0, 'strokeWidth must be greater than zero.');
 
   final double height;

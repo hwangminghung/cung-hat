@@ -11,7 +11,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/push/push_primer.dart';
 import '../../../core/push/push_registrar.dart';
-import '../../../core/theme/theme_mode_controller.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/responsive_frame.dart';
@@ -61,10 +60,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.sm,
-                    ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
                     child: WaveDivider(),
                   ),
                   _Section(
@@ -87,45 +84,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                             ],
                           ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  // [DARK] Giao diện Sáng/Tối/Theo máy — cùng khuôn chọn ngôn ngữ.
-                  _Section(
-                    title: _l10n?.settingsTheme ?? 'Giao diện',
-                    child: Column(
-                      children: [
-                        _LanguageTile(
-                          key: const Key('theme_system'),
-                          label: _l10n?.settingsThemeSystem ?? 'Theo máy',
-                          selected:
-                              ref.watch(themeModeControllerProvider) ==
-                              ThemeMode.system,
-                          onTap: () => ref
-                              .read(themeModeControllerProvider.notifier)
-                              .set(ThemeMode.system),
-                        ),
-                        _LanguageTile(
-                          key: const Key('theme_light'),
-                          label: _l10n?.settingsThemeLight ?? 'Sáng',
-                          selected:
-                              ref.watch(themeModeControllerProvider) ==
-                              ThemeMode.light,
-                          onTap: () => ref
-                              .read(themeModeControllerProvider.notifier)
-                              .set(ThemeMode.light),
-                        ),
-                        _LanguageTile(
-                          key: const Key('theme_dark'),
-                          label: _l10n?.settingsThemeDark ?? 'Tối',
-                          selected:
-                              ref.watch(themeModeControllerProvider) ==
-                              ThemeMode.dark,
-                          onTap: () => ref
-                              .read(themeModeControllerProvider.notifier)
-                              .set(ThemeMode.dark),
-                        ),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   // [PRIMER — đợt 4] Đường bật thông báo cho người từng bấm
@@ -442,7 +400,7 @@ class _SettingsTile extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: danger ? TextStyle(color: AppColors.error) : null,
+          style: danger ? const TextStyle(color: AppColors.error) : null,
         ),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: onTap,
@@ -471,7 +429,7 @@ class _LanguageTile extends StatelessWidget {
       child: ListTile(
         title: Text(label),
         trailing: selected
-            ? Icon(Icons.check_rounded, color: AppColors.primaryDark)
+            ? const Icon(Icons.check_rounded, color: AppColors.primaryDark)
             : null,
         onTap: onTap,
       ),

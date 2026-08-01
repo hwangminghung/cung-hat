@@ -100,7 +100,7 @@ class _TimeStub extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.schedule_outlined, color: AppColors.ink, size: 26),
+        const Icon(Icons.schedule_outlined, color: AppColors.ink, size: 26),
         const SizedBox(height: AppSpacing.sm),
         Text(time.start, style: Theme.of(context).textTheme.titleMedium),
         Text('—', style: Theme.of(context).textTheme.titleSmall),
@@ -119,7 +119,7 @@ class _CompactTime extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.schedule_outlined, color: AppColors.ink),
+        const Icon(Icons.schedule_outlined, color: AppColors.ink),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Wrap(
@@ -166,7 +166,11 @@ class _KeoDetails extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Icon(Icons.arrow_forward_rounded, color: AppColors.ink, size: 20),
+            const Icon(
+              Icons.arrow_forward_rounded,
+              color: AppColors.ink,
+              size: 20,
+            ),
           ],
         ),
         if (keo.areaLabel != null || keo.distanceBand != null) ...[
@@ -260,21 +264,19 @@ class _OpenJoinModeStamp extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.secondary,
-        // [DARK] Nội dung/viền trên fill lime dùng onAccent: dark mode ink là
-        // kem, kem trên lime ~1.2:1 — không đọc được.
-        border: Border.all(color: AppColors.onAccent, width: 2),
+        border: Border.all(color: AppColors.ink, width: 2),
         borderRadius: BorderRadius.circular(AppSpacing.xs),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_open_rounded, size: 16, color: AppColors.onAccent),
+          const Icon(Icons.lock_open_rounded, size: 16, color: AppColors.ink),
           const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.onAccent,
+                color: AppColors.ink,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -310,12 +312,12 @@ class _MemberStrip extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.teal,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.onAccent, width: 1.5),
+                border: Border.all(color: AppColors.ink, width: 1.5),
               ),
               child: Text(
                 name.isEmpty ? '?' : name.characters.first.toUpperCase(),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.onAccent,
+                  color: AppColors.ink,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -332,7 +334,7 @@ class _MemberStrip extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.textHint, width: 1.5),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.add_rounded,
                 size: 16,
                 color: AppColors.textHint,

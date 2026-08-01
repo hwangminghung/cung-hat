@@ -11,12 +11,12 @@ import '../../core/theme/app_spacing.dart';
 /// (ảnh full-bleed an toàn); màu nền đặt trên [Material] để ink/splash của
 /// ListTile bên trong vẽ đúng lớp.
 class HardCard extends StatelessWidget {
-  HardCard({
+  const HardCard({
     super.key,
     required this.child,
-    Color? color,
+    this.color = AppColors.surface,
     this.margin = EdgeInsets.zero,
-  }) : color = color ?? AppColors.surface;
+  });
 
   final Widget child;
   final Color color;
@@ -29,13 +29,13 @@ class HardCard extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         borderRadius: radius,
-        boxShadow: [AppShadows.hard],
+        boxShadow: const [AppShadows.hard],
       ),
       child: Material(
         color: color,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
-          side: BorderSide(color: AppColors.border, width: 2),
+          side: const BorderSide(color: AppColors.border, width: 2),
         ),
         clipBehavior: Clip.antiAlias,
         child: child,

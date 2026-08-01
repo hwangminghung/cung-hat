@@ -1440,9 +1440,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settingsLanguage => 'Ngôn ngữ';
 
   @override
-  String get settingsTheme => 'Giao diện';
-
-  @override
   String get settingsNotifications => 'Thông báo';
 
   @override
@@ -1467,15 +1464,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get pushPrimerLater => 'Để sau';
-
-  @override
-  String get settingsThemeSystem => 'Theo máy';
-
-  @override
-  String get settingsThemeLight => 'Sáng';
-
-  @override
-  String get settingsThemeDark => 'Tối';
 
   @override
   String get settingsLangSystem => 'Mặc định (Tiếng Việt)';

@@ -263,7 +263,7 @@ class KeoBoardScreen extends ConsumerWidget {
                   border: Border.all(color: AppColors.ink, width: 2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.auto_awesome_rounded,
                   color: AppColors.surface,
                   size: 26,
@@ -308,7 +308,10 @@ class KeoBoardScreen extends ConsumerWidget {
                   border: Border.all(color: AppColors.ink, width: 2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
-                child: Icon(Icons.arrow_forward_rounded, color: AppColors.ink),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: AppColors.ink,
+                ),
               ),
             ],
           ),

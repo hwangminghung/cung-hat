@@ -216,7 +216,7 @@ class _PromptEditorSheetState extends ConsumerState<PromptEditorSheet> {
                   // the empty local set and delete the user's server prompts.
                   onPressed: (_saving || !_seeded) ? null : _save,
                   child: _saving
-                      ? SizedBox(
+                      ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(

@@ -1,174 +1,164 @@
 import 'dart:math' as math;
 
 import 'package:cung_hat/core/theme/app_colors.dart';
-import 'package:cung_hat/core/theme/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Chốt chặn chống trôi design system — TỪ 2026-08-01 CHO CẢ HAI BẢNG MÀU.
+/// Chốt chặn chống trôi design system.
 ///
 /// Bối cảnh: 2026-07-25 audit phát hiện `warning` trượt 4.5:1 đúng 0.06 và
-/// MASTER.md ghi sai ngưỡng cỡ chữ trên nền cam — cả hai đều không thấy bằng
-/// mắt. Test này biến mọi quyết định màu thành thứ máy kiểm được.
+/// MASTER.md ghi sai ngưỡng cỡ chữ trên nền cam (16px thay vì 19px) — cả hai
+/// đều không thể thấy bằng mắt. Test này biến mọi quyết định màu thành thứ
+/// máy kiểm được, để lần sau đổi hex là biết ngay.
 ///
 /// Quy ước ngưỡng (WCAG 2.2):
-///   • 4.5:1 — chữ thường  • 3.0:1 — chữ lớn / thành phần giao diện (1.4.11)
+///   • 4.5:1 — chữ thường (<24px, hoặc <18.66px bold)
+///   • 3.0:1 — chữ lớn (≥24px thường / ≥18.66px bold)
+///   • 3.0:1 — thành phần giao diện & đồ hoạ mang thông tin (SC 1.4.11)
 ///
-/// CẤU TRÚC theo mode:
-///   • Ma trận CHUNG — các cặp vai trò đúng ở cả light lẫn dark (ink trên
-///     mọi surface/tint, accent làm chữ, v.v.).
-///   • Cặp RIÊNG light — các cặp vật lý không thể giữ ở dark (chữ trắng trên
-///     accent đậm: dark đảo vai trò accent thành sáng).
-///   • Cặp MODE-INDEPENDENT — fill accent giữ nguyên hex hai mode, chữ trên
-///     chúng là [AppColors.onAccent] (ink light cố định).
-///
-/// Fill nhạt không đạt 3:1 so với nền vẫn chấp nhận được vì hệ bắt buộc viền
-/// ink 2px — viền gánh ranh giới (cả hai mode ink-vs-nền đều >10:1).
+/// LƯU Ý về các fill nhạt (lime, teal, các tint): chúng KHÔNG đạt 3:1 so với
+/// nền, và điều đó chấp nhận được vì hệ bắt buộc viền ink 2px — ranh giới do
+/// viền gánh (ink vs nền = 10.75:1). Vì vậy test chỉ kiểm viền, không kiểm
+/// fill. Widget nào KHÔNG có viền ink thì phải tự khai báo ở nhóm cuối file.
 void main() {
-  for (final (mode, p) in [
-    ('light', AppPalette.light),
-    ('dark', AppPalette.dark),
-  ]) {
-    group('[$mode] Tương phản chữ (4.5:1)', () {
-      _expectText(p.ink, p.background, 'ink trên nền');
-      _expectText(p.ink, p.surface, 'ink trên card');
-      _expectText(p.textSecondary, p.background, 'textSecondary trên nền');
-      _expectText(p.textSecondary, p.surface, 'textSecondary trên card');
-      _expectText(p.textHint, p.background, 'textHint trên nền');
-      _expectText(p.textHint, p.surface, 'textHint trên card');
-
-      // Ink trên mọi tint: light = ink đậm/tint nhạt, dark = ink kem/tint tối
-      // — cặp vai trò này sống ở CẢ hai mode nhờ tint đổi chiều cùng nền.
-      _expectText(p.ink, p.secondaryTint, 'ink trên lime tint');
-      _expectText(p.ink, p.tertiaryTint, 'ink trên teal tint');
-      _expectText(p.ink, p.primaryTint, 'ink trên cam tint');
-      _expectText(p.ink, p.surfaceAlt, 'ink trên surfaceAlt');
-      _expectText(p.ink, p.surfaceWarm, 'ink trên surfaceWarm');
-      _expectText(p.ink, p.surfaceMuted, 'ink trên surfaceMuted (disabled)');
-      _expectText(p.ink, p.successTint, 'ink trên successTint');
-      _expectText(p.ink, p.warningTint, 'ink trên warningTint');
-      _expectText(p.ink, p.errorTint, 'ink trên errorTint');
-
-      // Accent đậm/sáng làm CHỮ trên nền + trên tint cùng họ.
-      _expectText(p.primaryDark, p.background, 'primaryDark làm chữ trên nền');
-      _expectText(p.primaryDark, p.primaryTint, 'primaryDark trên cam tint');
-      _expectText(
-        p.secondaryDark,
-        p.background,
-        'secondaryDark làm chữ trên nền',
-      );
-      _expectText(
-        p.secondaryDark,
-        p.secondaryTint,
-        'secondaryDark trên lime tint',
-      );
-
-      // Màu trạng thái làm chữ.
-      _expectText(p.success, p.background, 'success làm chữ');
-      _expectText(p.warning, p.background, 'warning làm chữ');
-      _expectText(p.error, p.background, 'error làm chữ');
-      _expectText(p.error, p.surface, 'error làm chữ trên card');
-    });
-
-    group('[$mode] Chữ lớn (3:1)', () {
-      // Trắng trên cam 3.75:1 — CHỈ hợp lệ ở cỡ ≥19px bold, cả hai mode.
-      _expectLarge(p.onPrimary, p.primary, 'trắng trên CTA cam');
-    });
-
-    group('[$mode] Thành phần giao diện (3:1)', () {
-      _expectUi(p.ink, p.background, 'viền ink trên nền');
-      _expectUi(p.ink, p.surface, 'viền ink trên card');
-      _expectUi(p.primary, p.background, 'nền cam vs nền');
-      _expectUi(p.primary, p.surface, 'nền cam vs card / viền OTP active');
-      // WaveProgress vẽ trần không viền — tự đạt 3:1.
-      _expectUi(
-        p.secondaryDark,
-        p.surfaceMuted,
-        'WaveProgress: thanh đã xong vs chưa xong',
-      );
-      _expectUi(
-        p.secondaryDark,
-        p.background,
-        'WaveProgress: thanh đã xong vs nền',
-      );
-    });
-
-    group('[$mode] Cặp cấm — phải KHÔNG đạt', () {
-      test('ink KHÔNG dùng được làm chữ trên nền cam', () {
-        expect(_ratio(p.ink, p.primary), lessThan(4.5));
-      });
-      test('primary KHÔNG dùng được làm màu chữ nhỏ trên nền', () {
-        expect(_ratio(p.primary, p.background), lessThan(4.5));
-      });
-    });
-  }
-
-  group('Fill accent (hex chung hai mode) + onAccent', () {
-    // Fill sáng giữ nguyên hex ở cả hai bảng — khoá để không lệch nhau.
-    for (final pick in [
-      ('secondary', AppPalette.light.secondary, AppPalette.dark.secondary),
-      ('teal', AppPalette.light.teal, AppPalette.dark.teal),
-      ('pink', AppPalette.light.pink, AppPalette.dark.pink),
-      (
-        'primarySoft',
-        AppPalette.light.primarySoft,
-        AppPalette.dark.primarySoft,
-      ),
-      ('primary', AppPalette.light.primary, AppPalette.dark.primary),
-      ('onPrimary', AppPalette.light.onPrimary, AppPalette.dark.onPrimary),
-    ]) {
-      test('${pick.$1} giống nhau ở hai bảng', () {
-        expect(pick.$2, pick.$3);
-      });
-    }
-
-    // Chữ trên fill accent sáng dùng onAccent (ink light cố định).
-    final onAccent = AppPalette.light.ink;
-    _expectText(onAccent, AppPalette.light.secondary, 'onAccent trên lime');
-    _expectText(onAccent, AppPalette.light.teal, 'onAccent trên teal');
-    _expectText(onAccent, AppPalette.light.pink, 'onAccent trên pink');
+  group('Tương phản chữ (WCAG 1.4.3 — 4.5:1)', () {
+    _expectText(AppColors.ink, AppColors.background, 'ink trên nền giấy');
+    _expectText(AppColors.ink, AppColors.surface, 'ink trên card');
     _expectText(
-      onAccent,
-      AppPalette.light.primarySoft,
-      'onAccent trên primarySoft',
+      AppColors.textSecondary,
+      AppColors.background,
+      'textSecondary trên nền giấy',
+    );
+    _expectText(
+      AppColors.textSecondary,
+      AppColors.surface,
+      'textSecondary trên card',
+    );
+    _expectText(AppColors.textHint, AppColors.background, 'textHint trên nền');
+    _expectText(AppColors.textHint, AppColors.surface, 'textHint trên card');
+
+    // Chữ ink trên mọi fill có màu — đây là cách hệ dùng lime/teal/tint.
+    _expectText(AppColors.ink, AppColors.secondary, 'ink trên lime');
+    _expectText(AppColors.ink, AppColors.secondaryTint, 'ink trên lime nhạt');
+    _expectText(AppColors.ink, AppColors.teal, 'ink trên teal');
+    _expectText(AppColors.ink, AppColors.tertiaryTint, 'ink trên teal nhạt');
+    _expectText(AppColors.ink, AppColors.primaryTint, 'ink trên cam nhạt');
+    _expectText(AppColors.ink, AppColors.primarySoft, 'ink trên primarySoft');
+    _expectText(AppColors.ink, AppColors.pink, 'ink trên pink');
+    _expectText(AppColors.ink, AppColors.surfaceAlt, 'ink trên surfaceAlt');
+    _expectText(AppColors.ink, AppColors.surfaceWarm, 'ink trên surfaceWarm');
+    _expectText(AppColors.ink, AppColors.surfaceMuted, 'ink trên surfaceMuted');
+    _expectText(AppColors.ink, AppColors.successTint, 'ink trên successTint');
+    _expectText(AppColors.ink, AppColors.warningTint, 'ink trên warningTint');
+    _expectText(AppColors.ink, AppColors.errorTint, 'ink trên errorTint');
+
+    // Màu trạng thái dùng làm CHỮ trên nền giấy.
+    _expectText(AppColors.success, AppColors.background, 'success làm chữ');
+    _expectText(AppColors.warning, AppColors.background, 'warning làm chữ');
+    _expectText(AppColors.error, AppColors.background, 'error làm chữ');
+    _expectText(AppColors.error, AppColors.surface, 'error làm chữ trên card');
+
+    // Chữ trắng trên các nền đậm.
+    _expectText(Colors.white, AppColors.error, 'trắng trên error');
+    _expectText(Colors.white, AppColors.success, 'trắng trên success');
+    _expectText(Colors.white, AppColors.warning, 'trắng trên warning');
+    _expectText(Colors.white, AppColors.primaryDark, 'trắng trên primaryDark');
+    _expectText(
+      Colors.white,
+      AppColors.secondaryDark,
+      'trắng trên secondaryDark',
+    );
+
+    // Nhãn tab active.
+    _expectText(
+      AppColors.primaryDark,
+      AppColors.background,
+      'primaryDark làm nhãn tab',
+    );
+
+    // Chữ disabled — WCAG miễn trừ control disabled, nhưng người dùng vẫn
+    // cần đọc được nhãn nút. Giữ ngưỡng chữ thường.
+    _expectText(
+      AppColors.onDisabled,
+      AppColors.surfaceMuted,
+      'chữ disabled trên nền disabled',
     );
   });
 
-  group('Cặp chỉ có ở LIGHT (dark đảo vai trò accent thành sáng)', () {
-    final p = AppPalette.light;
-    _expectText(p.onPrimary, p.error, 'trắng trên error');
-    _expectText(p.onPrimary, p.success, 'trắng trên success');
-    _expectText(p.onPrimary, p.warning, 'trắng trên warning');
-    _expectText(p.onPrimary, p.primaryDark, 'trắng trên primaryDark');
-    _expectText(p.onPrimary, p.secondaryDark, 'trắng trên secondaryDark');
-    test('trắng KHÔNG dùng được trên primarySoft / pink', () {
-      expect(_ratio(Colors.white, p.primarySoft), lessThan(4.5));
-      expect(_ratio(Colors.white, p.pink), lessThan(4.5));
-    });
+  group('Tương phản chữ lớn (WCAG 1.4.3 — 3:1)', () {
+    // Trắng trên cam CHỈ hợp lệ ở cỡ chữ lớn. Ràng buộc cỡ chữ nằm ở test dưới.
+    _expectLarge(AppColors.onPrimary, AppColors.primary, 'trắng trên CTA cam');
   });
 
   test('Cỡ chữ tối thiểu trên nền cam đủ để tính là "chữ lớn"', () {
+    // WCAG: bold ≥ 14pt = 18.66px. Hằng số của hệ phải ≥ ngưỡng này, nếu không
+    // thì tỉ lệ 3.75:1 của trắng-trên-cam là bất hợp lệ.
     expect(
       AppColors.onPrimaryMinBoldSize,
       greaterThanOrEqualTo(18.66),
       reason:
-          'Trắng trên primary chỉ đạt '
-          '${_ratio(AppPalette.light.onPrimary, AppPalette.light.primary).toStringAsFixed(2)}:1. '
+          'Trắng trên primary chỉ đạt ${_ratio(AppColors.onPrimary, AppColors.primary).toStringAsFixed(2)}:1. '
           'Tỉ lệ này chỉ hợp lệ khi chữ là bold ≥18.66px. '
           'Hạ onPrimaryMinBoldSize xuống dưới ngưỡng này = mọi CTA trượt WCAG.',
     );
   });
 
-  test('AppColors.select đổi bảng và mặc định là light', () {
-    expect(AppColors.background, AppPalette.light.background);
-    AppColors.select(Brightness.dark);
-    addTearDown(() => AppColors.select(Brightness.light));
-    expect(AppColors.background, AppPalette.dark.background);
-    expect(
-      AppColors.onAccent,
-      AppPalette.light.ink,
-      reason: 'onAccent cố định theo bảng light ở mọi mode',
+  group('Thành phần giao diện (WCAG 1.4.11 — 3:1)', () {
+    // Viền ink là thứ gánh ranh giới cho MỌI component có fill nhạt.
+    _expectUi(AppColors.ink, AppColors.background, 'viền ink trên nền giấy');
+    _expectUi(AppColors.ink, AppColors.surface, 'viền ink trên card');
+    _expectUi(AppColors.ink, AppColors.secondary, 'viền ink trên lime');
+    _expectUi(AppColors.ink, AppColors.teal, 'viền ink trên teal');
+
+    // Nền nút cam vs nền giấy (nút KHÔNG chỉ dựa vào viền).
+    _expectUi(AppColors.primary, AppColors.background, 'nền cam vs nền giấy');
+    _expectUi(AppColors.primary, AppColors.surface, 'nền cam vs card');
+
+    // Viền ô OTP đang active.
+    _expectUi(AppColors.primary, AppColors.surface, 'viền OTP active');
+  });
+
+  group('Widget KHÔNG có viền ink — phải tự đạt 3:1', () {
+    // WaveProgress vẽ thanh trần bằng CustomPainter, không có viền bao.
+    // Ranh giới "đã xong / chưa xong" là thứ truyền đạt tiến độ.
+    _expectUi(
+      AppColors.secondaryDark,
+      AppColors.surfaceMuted,
+      'WaveProgress: thanh đã xong vs chưa xong',
     );
+    _expectUi(
+      AppColors.secondaryDark,
+      AppColors.background,
+      'WaveProgress: thanh đã xong vs nền',
+    );
+    // Track (surfaceMuted vs nền) CHỈ đạt 1.26:1 — cố ý không ép ở đây.
+    // Bù bằng đường ink baseline trong wave_progress.dart; nếu bỏ baseline đi
+    // thì người dùng mất tham chiếu tổng chiều dài thanh.
+  });
+
+  group('Cặp màu bị cấm — phải KHÔNG đạt (chốt để không ai dùng nhầm)', () {
+    test('ink KHÔNG dùng được làm chữ trên nền cam', () {
+      expect(
+        _ratio(AppColors.ink, AppColors.primary),
+        lessThan(4.5),
+        reason:
+            'Nếu cặp này đã đạt 4.5:1 thì primary đã bị đổi — hãy bỏ dòng cấm '
+            'trong doc của AppColors.onPrimary và cập nhật test này.',
+      );
+    });
+
+    test('primary KHÔNG dùng được làm màu chữ trên nền giấy', () {
+      expect(
+        _ratio(AppColors.primary, AppColors.background),
+        lessThan(4.5),
+        reason: 'Xem ghi chú ở AppColors.onPrimary.',
+      );
+    });
+
+    test('trắng KHÔNG dùng được trên primarySoft / pink', () {
+      expect(_ratio(Colors.white, AppColors.primarySoft), lessThan(4.5));
+      expect(_ratio(Colors.white, AppColors.pink), lessThan(4.5));
+    });
   });
 }
 

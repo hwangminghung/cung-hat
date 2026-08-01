@@ -370,7 +370,10 @@ class _GroupRulesBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
         clipBehavior: Clip.antiAlias,
         child: ExpansionTile(
-          leading: Icon(Icons.info_rounded, color: AppColors.secondaryDark),
+          leading: const Icon(
+            Icons.info_rounded,
+            color: AppColors.secondaryDark,
+          ),
           iconColor: AppColors.secondaryDark,
           collapsedIconColor: AppColors.secondaryDark,
           title: Text(l10n?.chatGroupRules ?? 'Luật nhóm'),

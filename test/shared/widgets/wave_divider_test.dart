@@ -26,7 +26,9 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _wrap(WaveDivider(height: 18, color: AppColors.teal, strokeWidth: 3)),
+      _wrap(
+        const WaveDivider(height: 18, color: AppColors.teal, strokeWidth: 3),
+      ),
     );
 
     final paintFinder = find.descendant(
@@ -50,7 +52,7 @@ void main() {
   });
 
   testWidgets('WaveDivider defaults to a light moss tone', (tester) async {
-    await tester.pumpWidget(_wrap(WaveDivider()));
+    await tester.pumpWidget(_wrap(const WaveDivider()));
 
     final painter = _painter(tester);
     expect(painter.color, AppColors.secondaryTint);

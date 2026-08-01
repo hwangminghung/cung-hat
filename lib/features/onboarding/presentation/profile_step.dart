@@ -102,7 +102,7 @@ class _ProfilePreview extends StatelessWidget {
                     Container(
                       width: 128,
                       height: 128,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.surfaceMuted,
                         shape: BoxShape.circle,
                       ),
@@ -115,7 +115,7 @@ class _ProfilePreview extends StatelessWidget {
                         height: 1,
                       ),
                     ),
-                    Positioned(
+                    const Positioned(
                       left: AppSpacing.xl,
                       top: AppSpacing.xs,
                       child: Icon(
@@ -131,7 +131,7 @@ class _ProfilePreview extends StatelessWidget {
           ),
           Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: WaveDivider(
                   height: AppSpacing.xxl,
                   color: AppColors.ink,
@@ -139,7 +139,7 @@ class _ProfilePreview extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.lg),
-              Icon(Icons.language, color: AppColors.ink, size: 22),
+              const Icon(Icons.language, color: AppColors.ink, size: 22),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 brand,

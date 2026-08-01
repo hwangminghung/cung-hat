@@ -123,8 +123,12 @@ class _TeaserCard extends StatelessWidget {
 
   /// Fallback khi không có ảnh (liker chưa up ảnh) hoặc ảnh mosaic tải lỗi.
   Widget _personFallback() => Container(
-    decoration: BoxDecoration(gradient: AppColors.brandGradient),
-    child: Icon(Icons.person_rounded, size: 56, color: AppColors.onPrimary),
+    decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+    child: const Icon(
+      Icons.person_rounded,
+      size: 56,
+      color: AppColors.onPrimary,
+    ),
   );
 
   @override
@@ -171,7 +175,7 @@ class _TeaserCard extends StatelessWidget {
                   Text('${teaser.age ?? "?"}', style: labelStyle),
                   if (teaser.verified) ...[
                     const SizedBox(width: AppSpacing.xs),
-                    Icon(
+                    const Icon(
                       Icons.verified_rounded,
                       size: 16,
                       color: AppColors.onPrimary,

@@ -6,7 +6,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'core/config/app_config.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/providers/supabase_providers.dart';
-import 'core/theme/theme_mode_controller.dart';
 import 'app/app.dart';
 
 Future<void> main() async {
@@ -26,15 +25,12 @@ Future<void> main() async {
   );
   // [LANG] Đọc ngôn ngữ user đã chọn TRƯỚC runApp — không nháy frame đầu.
   final savedLocale = await loadSavedLocaleOverride();
-  // [DARK] Cùng lý do với ngôn ngữ: seed theme đã lưu trước frame đầu.
-  final savedThemeMode = await loadSavedThemeMode();
   unawaited(_initFirebase());
   runApp(
     ProviderScope(
       overrides: [
         supabaseClientProvider.overrideWithValue(Supabase.instance.client),
         initialLocaleProvider.overrideWithValue(savedLocale),
-        initialThemeModeProvider.overrideWithValue(savedThemeMode),
       ],
       child: const CungHatApp(),
     ),

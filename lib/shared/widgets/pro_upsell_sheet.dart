@@ -158,7 +158,7 @@ class ProUpsellSheet extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle_rounded,
                         size: 18,
                         color: AppColors.success,

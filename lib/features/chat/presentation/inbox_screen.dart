@@ -134,8 +134,8 @@ class InboxScreen extends ConsumerWidget {
               ),
             ],
             if (keos.isNotEmpty && matches.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: WaveDivider(),
               ),
             if (matches.isNotEmpty)
@@ -365,7 +365,7 @@ class _KeoInboxTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border, width: 2),
       ),
-      child: Icon(
+      child: const Icon(
         Icons.confirmation_number_outlined,
         color: AppColors.ink,
         size: 30,

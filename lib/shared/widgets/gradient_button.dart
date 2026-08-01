@@ -5,14 +5,14 @@ import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_spacing.dart';
 
 class GradientButton extends StatelessWidget {
-  GradientButton({
+  const GradientButton({
     super.key,
     required this.onPressed,
     required this.child,
     this.icon,
     this.height = AppSpacing.buttonHeight,
-    LinearGradient? gradient,
-  }) : gradient = gradient ?? AppColors.brandGradient;
+    this.gradient = AppColors.brandGradient,
+  });
 
   final VoidCallback? onPressed;
   final Widget child;
@@ -35,7 +35,7 @@ class GradientButton extends StatelessWidget {
         color: enabled ? null : AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
         border: Border.all(color: AppColors.border, width: 2),
-        boxShadow: enabled ? [AppShadows.hard] : null,
+        boxShadow: enabled ? const [AppShadows.hard] : null,
       ),
       child: Material(
         color: Colors.transparent,

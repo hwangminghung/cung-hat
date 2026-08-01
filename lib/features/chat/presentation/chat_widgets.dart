@@ -142,7 +142,7 @@ class ChatComposer extends StatelessWidget {
           AppSpacing.lg,
           AppSpacing.lg,
         ),
-        decoration: BoxDecoration(color: AppColors.background),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: Row(
           children: [
             IconButton.outlined(
@@ -175,7 +175,7 @@ class ChatComposer extends StatelessWidget {
                     ? null
                     : onSend,
                 icon: sending
-                    ? SizedBox.square(
+                    ? const SizedBox.square(
                         dimension: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,

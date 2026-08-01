@@ -58,7 +58,7 @@ class ThemeBoardScreen extends ConsumerWidget {
                   else
                     const SizedBox(width: 48),
                   const Spacer(),
-                  SizedBox(width: 144, child: WaveDivider()),
+                  const SizedBox(width: 144, child: WaveDivider()),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -277,7 +277,7 @@ class _ThemeCard extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(color: AppColors.ink, width: 2),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_forward_rounded,
                       color: AppColors.onPrimary,
                       size: 22,
@@ -295,7 +295,7 @@ class _ThemeCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              WaveDivider(height: AppSpacing.lg),
+              const WaveDivider(height: AppSpacing.lg),
               if (loading)
                 const Skeleton(width: 120, height: 28, radius: AppSpacing.xs)
               else
@@ -374,7 +374,7 @@ class _RetroBackButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
             boxShadow: [AppShadows.hard],
           ),
-          child: Icon(Icons.arrow_back_rounded, color: AppColors.ink),
+          child: const Icon(Icons.arrow_back_rounded, color: AppColors.ink),
         ),
       ),
     );
