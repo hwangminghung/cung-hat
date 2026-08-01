@@ -12,12 +12,19 @@ class SafetyToolkit extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    // [UI-AUDIT] Hàng action PHỤ đồng cỡ dưới CTA chính: OutlinedButton cùng
+    // kiểu + label ngắn ("Chia sẻ" thay vì "Chia sẻ cho bạn bè" từng xuống 3
+    // dòng ở 360dp). Câu đầy đủ vẫn nằm trong share message.
     return Row(
       children: [
         Expanded(
-          child: FilledButton.tonalIcon(
-            icon: const Icon(Icons.ios_share),
-            label: Text(l10n?.safetyShare ?? 'Chia sẻ cho bạn bè'),
+          child: OutlinedButton.icon(
+            icon: const Icon(Icons.ios_share, size: 18),
+            label: Text(
+              l10n?.safetyShareShort ?? 'Chia sẻ',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             onPressed: () async {
               try {
                 final token = await ref
@@ -48,10 +55,14 @@ class SafetyToolkit extends ConsumerWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: FilledButton.icon(
+          child: OutlinedButton.icon(
             key: const Key('checkin_btn'),
-            icon: const Icon(Icons.place),
-            label: Text(l10n?.safetyArrived ?? 'Tôi đã tới'),
+            icon: const Icon(Icons.place, size: 18),
+            label: Text(
+              l10n?.safetyArrived ?? 'Tôi đã tới',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             onPressed: () async {
               try {
                 await ref.read(planRepositoryProvider).checkInArrived(planId);

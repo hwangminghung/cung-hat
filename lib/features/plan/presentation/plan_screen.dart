@@ -329,24 +329,30 @@ class PlanScreen extends ConsumerWidget {
               _ConfirmationsRow(keoId: keoId, plan: plan),
               const SizedBox(height: 12),
               if (plan.status != 'confirmed')
-                FilledButton(
-                  key: const Key('confirm_plan_btn'),
-                  child: Text(l10n?.planConfirmCta ?? 'Đồng ý kế hoạch'),
-                  onPressed: () async {
-                    try {
-                      await ref
-                          .read(planRepositoryProvider)
-                          .confirmPlan(plan.id);
-                      ref.invalidate(currentPlanProvider(keoId));
-                    } catch (_) {
-                      if (context.mounted) {
-                        _snack(
-                          context,
-                          l10n?.planConfirmError ?? 'Không đồng ý được',
-                        );
+                // [UI-AUDIT] CTA CHÍNH full-width — trước đây nút tự co theo
+                // chữ, lép vế so với hàng action phụ bên dưới.
+                SizedBox(
+                  width: double.infinity,
+                  height: AppSpacing.buttonHeight,
+                  child: FilledButton(
+                    key: const Key('confirm_plan_btn'),
+                    child: Text(l10n?.planConfirmCta ?? 'Đồng ý kế hoạch'),
+                    onPressed: () async {
+                      try {
+                        await ref
+                            .read(planRepositoryProvider)
+                            .confirmPlan(plan.id);
+                        ref.invalidate(currentPlanProvider(keoId));
+                      } catch (_) {
+                        if (context.mounted) {
+                          _snack(
+                            context,
+                            l10n?.planConfirmError ?? 'Không đồng ý được',
+                          );
+                        }
                       }
-                    }
-                  },
+                    },
+                  ),
                 )
               else ...[
                 if (bookingEnabled) ...[

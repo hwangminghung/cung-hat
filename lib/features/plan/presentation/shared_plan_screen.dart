@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/datetime_format.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/hard_card.dart';
+import '../../../shared/widgets/skeleton.dart';
 import '../application/plan_providers.dart';
 
 class SharedPlanScreen extends ConsumerWidget {
@@ -19,22 +21,34 @@ class SharedPlanScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n?.planSharedTitle ?? 'Kế hoạch được chia sẻ'),
       ),
+      // [UI-AUDIT] Đồng khuôn SharedKeoScreen: Skeleton khi tải, lỗi MẠNG ra
+      // EmptyState + Thử lại (trước đây mọi lỗi đều thành "Không tìm thấy kế
+      // hoạch" — nói dối user đang offline), chỉ báo không-tồn-tại khi server
+      // trả null thật.
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Text(l10n?.planSharedNotFound ?? 'Không tìm thấy kế hoạch'),
+        loading: () => ListView(
+          padding: const EdgeInsets.only(top: AppSpacing.lg),
+          children: const [SkeletonTile(), SkeletonTile()],
+        ),
+        error: (_, _) => EmptyState(
+          icon: Icons.wifi_off_rounded,
+          title: l10n?.planSharedLoadError ?? 'Không tải được kế hoạch',
+          subtitle:
+              l10n?.commonCheckConnection ?? 'Kiểm tra kết nối rồi thử lại.',
+          actionLabel: l10n?.commonRetry ?? 'Thử lại',
+          onAction: () => ref.invalidate(resolveShareProvider(token)),
         ),
         data: (data) {
           if (data['venue_name'] == null) {
-            return Center(
-              child: Text(
-                l10n?.planSharedNotFound ?? 'Không tìm thấy kế hoạch',
-              ),
+            return EmptyState(
+              icon: Icons.link_off_rounded,
+              title: l10n?.planSharedNotFound ?? 'Không tìm thấy kế hoạch',
             );
           }
           if (data['expired'] == true) {
-            return Center(
-              child: Text(l10n?.keoSharedExpired ?? 'Liên kết đã hết hạn'),
+            return EmptyState(
+              icon: Icons.schedule_rounded,
+              title: l10n?.keoSharedExpired ?? 'Liên kết đã hết hạn',
             );
           }
           return Padding(

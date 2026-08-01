@@ -388,4 +388,59 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byKey(const Key('store_product_pro')), findsOneWidget);
   });
+
+  // [UI-AUDIT] Store tach 2 section + nhan "Da gom trong Pro".
+  testWidgets('store co section Goi Pro / Mua le + chip included', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storeProductsProvider.overrideWith((ref) async => _catalog),
+        ],
+        child: const MaterialApp(home: StoreScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('store_section_pro')), findsOneWidget);
+    expect(find.byKey(const Key('store_section_alacarte')), findsOneWidget);
+    // 3 item le deu mang chip informational; tile pro thi khong.
+    expect(find.byKey(const Key('store_included_boost')), findsOneWidget);
+    expect(find.byKey(const Key('store_included_see_likes')), findsOneWidget);
+    expect(
+      find.byKey(const Key('store_included_premium_filters')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('store_included_pro')), findsNothing);
+  });
+
+  testWidgets('user Pro → item lẻ hiện "Đã gồm trong Pro" thay vì Mua', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storeProductsProvider.overrideWith((ref) async => _catalog),
+          entitlementsProvider.overrideWith((ref) async => {'pro'}),
+        ],
+        child: const MaterialApp(home: StoreScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Item le doi sang trang thai so huu: khong con nut "Mua" nao trong
+    // danh sach san pham (chip "Da gom trong Pro" van hien informational).
+    final ctaTexts = tester
+        .widgetList<Text>(
+          find.descendant(
+            of: find.byType(FilledButton),
+            matching: find.byType(Text),
+          ),
+        )
+        .map((t) => t.data)
+        .toList();
+    expect(ctaTexts.where((t) => t == 'Đã sở hữu').length, 4);
+    expect(ctaTexts.where((t) => t == 'Mua').length, 0);
+  });
 }

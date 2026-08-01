@@ -1982,6 +1982,36 @@ abstract class AppLocalizations {
   /// **'Send a go-to song'**
   String get chatShareSongTooltip;
 
+  /// No description provided for @chatSuggBaitu.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a go-to song'**
+  String get chatSuggBaitu;
+
+  /// No description provided for @chatSuggTaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask their taste'**
+  String get chatSuggTaste;
+
+  /// No description provided for @chatSuggInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to sing'**
+  String get chatSuggInvite;
+
+  /// No description provided for @chatSuggTasteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of music are you into? 🎵'**
+  String get chatSuggTasteMsg;
+
+  /// No description provided for @chatSuggInviteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Free to go singing this weekend?'**
+  String get chatSuggInviteMsg;
+
   /// No description provided for @chatComposerHint.
   ///
   /// In en, this message translates to:
@@ -2360,6 +2390,12 @@ abstract class AppLocalizations {
   /// **'Share with friends'**
   String get safetyShare;
 
+  /// No description provided for @safetyShareShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get safetyShareShort;
+
   /// No description provided for @safetyShareMessage.
   ///
   /// In en, this message translates to:
@@ -2401,6 +2437,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plan not found'**
   String get planSharedNotFound;
+
+  /// No description provided for @planSharedLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the plan'**
+  String get planSharedLoadError;
 
   /// No description provided for @planMidpointMarker.
   ///
@@ -2803,6 +2845,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Owned'**
   String get storeOwned;
+
+  /// No description provided for @storeSectionPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro plan'**
+  String get storeSectionPro;
+
+  /// No description provided for @storeSectionALaCarte.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy individually'**
+  String get storeSectionALaCarte;
+
+  /// No description provided for @storeIncludedInPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in Pro'**
+  String get storeIncludedInPro;
 
   /// No description provided for @storeTermOneTime.
   ///

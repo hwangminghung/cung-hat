@@ -213,6 +213,8 @@ void main() {
       );
       await tester.pump();
       await tester.enterText(find.byType(TextField), 'đi hát nhé');
+      // Nút gửi enable theo ValueListenableBuilder — cần frame sau khi gõ.
+      await tester.pump();
       await tester.tap(find.byKey(const Key('send_btn')));
       await tester.pump();
       expect(analytics.events, ['chat_sent']);
@@ -239,6 +241,8 @@ void main() {
     );
     await tester.pump();
     await tester.enterText(find.byType(TextField), 'đi hát nhé');
+    // Nút gửi enable theo ValueListenableBuilder — cần frame sau khi gõ.
+    await tester.pump();
     await tester.tap(find.byKey(const Key('send_btn')));
     await tester.pump();
     verify(() => repo.sendMessage('t1', 'đi hát nhé')).called(1);

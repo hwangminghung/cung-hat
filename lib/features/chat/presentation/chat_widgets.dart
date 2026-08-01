@@ -164,19 +164,26 @@ class ChatComposer extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              key: const Key('send_btn'),
-              tooltip: l10n?.send ?? 'Gửi',
-              onPressed: sending ? null : onSend,
-              icon: sending
-                  ? SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.onPrimary,
-                      ),
-                    )
-                  : const Icon(Icons.send_rounded),
+            // [UI-AUDIT] Nút gửi disable khi ô trống — bấm gửi chuỗi rỗng
+            // trước đây chỉ âm thầm no-op trong _send, giờ nút tự nói điều đó.
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) => IconButton.filled(
+                key: const Key('send_btn'),
+                tooltip: l10n?.send ?? 'Gửi',
+                onPressed: (sending || value.text.trim().isEmpty)
+                    ? null
+                    : onSend,
+                icon: sending
+                    ? SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.onPrimary,
+                        ),
+                      )
+                    : const Icon(Icons.send_rounded),
+              ),
             ),
           ],
         ),

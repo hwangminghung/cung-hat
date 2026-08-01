@@ -1039,6 +1039,21 @@ class AppLocalizationsVi extends AppLocalizations {
   String get chatShareSongTooltip => 'Gửi bài tủ';
 
   @override
+  String get chatSuggBaitu => 'Gửi bài tủ';
+
+  @override
+  String get chatSuggTaste => 'Hỏi gu nhạc';
+
+  @override
+  String get chatSuggInvite => 'Rủ đi hát';
+
+  @override
+  String get chatSuggTasteMsg => 'Gu nhạc của bạn là gì? 🎵';
+
+  @override
+  String get chatSuggInviteMsg => 'Cuối tuần này đi hát không?';
+
+  @override
   String get chatComposerHint => 'Nhắn gì đó...';
 
   @override
@@ -1243,6 +1258,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get safetyShare => 'Chia sẻ cho bạn bè';
 
   @override
+  String get safetyShareShort => 'Chia sẻ';
+
+  @override
   String safetyShareMessage(String link) {
     return 'Mình đi hát, đây là kế hoạch: $link';
   }
@@ -1264,6 +1282,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get planSharedNotFound => 'Không tìm thấy kế hoạch';
+
+  @override
+  String get planSharedLoadError => 'Không tải được kế hoạch';
 
   @override
   String get planMidpointMarker => 'Điểm giữa nhóm';
@@ -1478,6 +1499,15 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get storeOwned => 'Đã sở hữu';
+
+  @override
+  String get storeSectionPro => 'Gói Pro';
+
+  @override
+  String get storeSectionALaCarte => 'Mua lẻ';
+
+  @override
+  String get storeIncludedInPro => 'Đã gồm trong Pro';
 
   @override
   String get storeTermOneTime => 'Mua một lần · vĩnh viễn';

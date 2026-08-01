@@ -372,15 +372,60 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ),
                       )
                     : messages.isEmpty
+                    // [UI-AUDIT] Chat rỗng có gợi ý BẤM ĐƯỢC thay vì chỉ một
+                    // câu tĩnh: gửi bài tủ (mở sheet sẵn có) hoặc điền câu mở
+                    // lời vào ô nhập (user sửa được trước khi gửi).
                     ? Center(
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.xxl),
-                          child: Text(
-                            _l10n?.chatEmptyMatch ??
-                                'Chưa có tin nhắn. Rủ nhau bằng một bài tủ đi.',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.textSecondary),
-                            textAlign: TextAlign.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                _l10n?.chatEmptyMatch ??
+                                    'Chưa có tin nhắn. Rủ nhau bằng một bài tủ đi.',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: AppColors.textSecondary),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+                              Wrap(
+                                spacing: AppSpacing.sm,
+                                runSpacing: AppSpacing.sm,
+                                alignment: WrapAlignment.center,
+                                children: [
+                                  ActionChip(
+                                    key: const Key('chat_sugg_baitu'),
+                                    avatar: const Icon(
+                                      Icons.music_note_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      _l10n?.chatSuggBaitu ?? 'Gửi bài tủ',
+                                    ),
+                                    onPressed: _shareSong,
+                                  ),
+                                  ActionChip(
+                                    key: const Key('chat_sugg_taste'),
+                                    label: Text(
+                                      _l10n?.chatSuggTaste ?? 'Hỏi gu nhạc',
+                                    ),
+                                    onPressed: () => _controller.text =
+                                        _l10n?.chatSuggTasteMsg ??
+                                        'Gu nhạc của bạn là gì? 🎵',
+                                  ),
+                                  ActionChip(
+                                    key: const Key('chat_sugg_invite'),
+                                    label: Text(
+                                      _l10n?.chatSuggInvite ?? 'Rủ đi hát',
+                                    ),
+                                    onPressed: () => _controller.text =
+                                        _l10n?.chatSuggInviteMsg ??
+                                        'Cuối tuần này đi hát không?',
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       )
