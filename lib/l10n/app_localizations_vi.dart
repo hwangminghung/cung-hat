@@ -453,6 +453,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get commonSaveError => 'Không lưu được cài đặt, thử lại.';
 
   @override
+  String get profileLoadErrorTitle => 'Không tải được hồ sơ';
+
+  @override
+  String get profileLoadErrorSub =>
+      'Hồ sơ của bạn vẫn còn nguyên. Kiểm tra kết nối rồi thử lại.';
+
+  @override
   String get deckErrorLikeLimit =>
       'Bạn đã hết lượt thích hôm nay. Nâng cấp Pro để thích không giới hạn.';
 
@@ -464,6 +471,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get deckErrorBoostActive => 'Bạn đang trong một lượt tăng hiển thị.';
+
+  @override
+  String get deckErrorBoostRequired =>
+      'Mua Tăng hiển thị hoặc nâng cấp Pro để dùng.';
 
   @override
   String get deckErrorBoostLimit =>
@@ -602,6 +613,22 @@ class AppLocalizationsVi extends AppLocalizations {
   String get filterAutoExpandSub => 'Tự tìm quanh 100 km khi hết gợi ý';
 
   @override
+  String get filterPremiumSection => 'Bộ lọc nâng cao';
+
+  @override
+  String get filterAgeRange => 'Khoảng tuổi';
+
+  @override
+  String get filterActiveOnly => 'Chỉ người hoạt động hôm nay';
+
+  @override
+  String get filterPremiumLocked => 'Mở khoá Bộ lọc nâng cao';
+
+  @override
+  String get filterPremiumLockedSub =>
+      'Lọc theo độ tuổi và người đang hoạt động — có trong Cửa hàng.';
+
+  @override
   String get filterApply => 'Áp dụng';
 
   @override
@@ -628,6 +655,17 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get likesAnonymous => 'Ẩn danh';
+
+  @override
+  String get likesLikeBack => 'Thích lại';
+
+  @override
+  String get likesLikeSent => 'Đã gửi lượt thích.';
+
+  @override
+  String likesMatched(String name) {
+    return 'Đã ghép đôi với $name! Vào Tin nhắn bắt chuyện nhé.';
+  }
 
   @override
   String get likesLockedTitle => 'Mở khóa để xem ai đã thích bạn';

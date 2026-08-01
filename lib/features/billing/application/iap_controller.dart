@@ -41,22 +41,43 @@ class IapController {
   final Ref ref;
   final InAppPurchase _iap;
   Map<String, String>? _catalog;
-  bool _initialized = false;
+  StreamSubscription<List<PurchaseDetails>>? _sub;
+  Future<void>? _attaching;
 
   /// Call from app startup (NOT from the constructor) — touches platform
   /// channels. [AUDIT C1] Không gọi init thì purchaseStream không có listener:
   /// user trả tiền nhưng validate-iap không bao giờ chạy, entitlement không
   /// được cấp. Idempotent: purchaseStream là single-subscription, listen 2
   /// lần sẽ throw. Nuốt lỗi platform channel để dev/test không crash.
-  Future<void> init() async {
-    if (_initialized) return;
-    _initialized = true;
+  ///
+  /// [AUDIT P1-1] Cờ "đã init" trước đây được bật TRƯỚC khi isAvailable()
+  /// thành công, nên một lỗi tạm thời (mở app lúc offline, platform channel
+  /// chưa sẵn sàng) khoá listener VĨNH VIỄN cho cả vòng đời process: user trả
+  /// tiền mà entitlement không bao giờ tới. Nay trạng thái nằm ở [_sub] —
+  /// chỉ đặt sau khi listen() thành công — nên lần gọi sau tự phục hồi.
+  Future<void> init() {
+    if (_sub != null) return Future.value();
+    // Hai lời gọi song song (startup + nút Mua) phải cùng chờ MỘT lần attach:
+    // purchaseStream là single-subscription, listen 2 lần sẽ throw.
+    return _attaching ??= _attach().whenComplete(() => _attaching = null);
+  }
+
+  Future<void> _attach() async {
     try {
       if (!await _iap.isAvailable()) return;
-      _iap.purchaseStream.listen(_onPurchases);
+      _sub = _iap.purchaseStream.listen(_onPurchases);
     } catch (e) {
-      debugPrint('IAP init skipped: $e');
+      // KHÔNG latch trạng thái lỗi: lần gọi sau được phép thử lại.
+      debugPrint('IAP init skipped (sẽ thử lại lần sau): $e');
     }
+  }
+
+  /// Gỡ listener khi container bị dispose — tránh rò subscription trong test
+  /// và khi ProviderScope bị dựng lại.
+  Future<void> dispose() async {
+    final sub = _sub;
+    _sub = null;
+    await sub?.cancel();
   }
 
   Future<String?> _productIdFor(String feature) async {
@@ -79,6 +100,10 @@ class IapController {
   /// Tra ve true CHI co nghia da mo duoc man thanh toan — ket qua that den sau
   /// qua purchaseStream, xem [_onPurchases].
   Future<bool> buy(String feature) async {
+    // [AUDIT P1-1] Nếu init lúc mở app thất bại (offline), luồng mua vẫn phải
+    // dựng lại listener TRƯỚC khi mở màn thanh toán — nếu không, giao dịch
+    // hoàn tất mà không ai nhận kết quả để cấp entitlement.
+    await init();
     final productId = await _productIdFor(feature);
     if (productId == null) return false;
     try {
@@ -105,6 +130,9 @@ class IapController {
   /// Ket qua ve BAT DONG BO qua purchaseStream voi status `restored`, nen
   /// true o day chi co nghia da goi duoc store.
   Future<bool> restore() async {
+    // Kết quả restore về QUA purchaseStream — không có listener thì bấm nút
+    // xong không có gì xảy ra (Apple 3.1.1 sẽ đánh trượt).
+    await init();
     try {
       if (!await _iap.isAvailable()) return false;
       await _iap.restorePurchases();
@@ -204,4 +232,8 @@ class IapController {
   }
 }
 
-final iapControllerProvider = Provider((ref) => IapController(ref));
+final iapControllerProvider = Provider((ref) {
+  final controller = IapController(ref);
+  ref.onDispose(controller.dispose);
+  return controller;
+});

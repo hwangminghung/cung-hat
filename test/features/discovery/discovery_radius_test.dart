@@ -26,7 +26,14 @@ void main() {
     when(
       () => client.rpc(
         'get_discovery_candidates',
-        params: {'p_limit': 20, 'p_radius_km': 100, 'p_genre': null},
+        params: {
+          'p_limit': 20,
+          'p_radius_km': 100,
+          'p_genre': null,
+          'p_min_age': null,
+          'p_max_age': null,
+          'p_active_only': false,
+        },
       ),
     ).thenAnswer((_) => rpcOk(<dynamic>[]));
     final repo = DiscoveryRepository(client);
@@ -35,7 +42,14 @@ void main() {
     verify(
       () => client.rpc(
         'get_discovery_candidates',
-        params: {'p_limit': 20, 'p_radius_km': 100, 'p_genre': null},
+        params: {
+          'p_limit': 20,
+          'p_radius_km': 100,
+          'p_genre': null,
+          'p_min_age': null,
+          'p_max_age': null,
+          'p_active_only': false,
+        },
       ),
     ).called(1);
   });

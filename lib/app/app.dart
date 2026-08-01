@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../core/l10n/locale_controller.dart';
+import '../core/push/push_registrar.dart';
 import '../core/theme/app_theme.dart';
 import '../features/billing/application/iap_controller.dart';
 import 'deep_link.dart';
@@ -55,6 +56,10 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
 
   @override
   Widget build(BuildContext context) {
+    // [AUDIT P1-3] Đăng ký token FCM khi user CÓ hồ sơ (đã đăng nhập + qua
+    // onboarding) — không phải lúc mở app ở màn đăng nhập, khi chưa có session
+    // để gắn token vào.
+    ref.watch(pushRegistrationProvider);
     return MaterialApp.router(
       title: 'Cùng Hát',
       theme: AppTheme.light(),

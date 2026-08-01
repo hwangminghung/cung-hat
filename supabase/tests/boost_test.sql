@@ -31,12 +31,14 @@ insert into public.entitlements (user_id, feature, source) values
   ('00000000-0000-0000-0000-0000000000b2','pro','promo')
   on conflict do nothing;
 
--- Case 1: FREE user calling activate_boost() -> throws 23514 with message 'pro_required'.
+-- Case 1: FREE user calling activate_boost() -> throws 23514.
+-- [MATCH-AUDIT #1a] Mã lỗi đổi pro_required -> boost_required: boost bán lẻ
+-- 49k cũng kích hoạt được, nên "cần Pro" là thông điệp sai với người đã mua.
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-0000000000b1","role":"authenticated"}';
 set local role authenticated;
 select throws_ok(
   $$ select public.activate_boost() $$,
-  '23514', 'pro_required', 'free user cannot activate_boost (pro_required)');
+  '23514', 'boost_required', 'free user cannot activate_boost (boost_required)');
 
 -- Case 2: PRO user calling activate_boost() -> returns timestamptz ~ now() + 30 min.
 -- NOTE: activate_boost() is VOLATILE and has a side effect (inserts a boosts row), so it

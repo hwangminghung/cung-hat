@@ -32,6 +32,45 @@ void main() {
     expect(list.single.displayName, 'Linh');
     expect(list.single.distanceBand, '1-3');
     expect(list.single.sharedGenres, ['vpop']);
+    // Không bật filter nâng cao → gửi null/false (server không đòi entitlement).
+    verify(
+      () => client.rpc(
+        'get_discovery_candidates',
+        params: {
+          'p_limit': 20,
+          'p_radius_km': 50,
+          'p_genre': null,
+          'p_min_age': null,
+          'p_max_age': null,
+          'p_active_only': false,
+        },
+      ),
+    ).called(1);
+  });
+
+  // [MATCH-AUDIT #1b] premium_filters: bộ lọc nâng cao đi qua đúng tham số RPC.
+  test('getCandidates truyền filter nâng cao (tuổi + active)', () async {
+    final client = MockSupabaseClient();
+    when(
+      () =>
+          client.rpc('get_discovery_candidates', params: any(named: 'params')),
+    ).thenAnswer((_) => rpcOk([]));
+    await DiscoveryRepository(
+      client,
+    ).getCandidates(minAge: 22, maxAge: 30, activeOnly: true);
+    verify(
+      () => client.rpc(
+        'get_discovery_candidates',
+        params: {
+          'p_limit': 20,
+          'p_radius_km': 50,
+          'p_genre': null,
+          'p_min_age': 22,
+          'p_max_age': 30,
+          'p_active_only': true,
+        },
+      ),
+    ).called(1);
   });
 
   test('recordSwipe returns matched flag', () async {

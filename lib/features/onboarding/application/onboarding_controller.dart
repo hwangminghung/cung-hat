@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../profile/application/profile_providers.dart';
-import '../../profile/domain/profile.dart';
 import 'onboarding_providers.dart';
 
 const kPolicyVersion = 'v1';
@@ -25,37 +24,28 @@ class OnboardingController extends AsyncNotifier<void> {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      // Profile upsert first: enforces the server-side 18+ gate (raises check_violation)
-      // before any consent/taste side-effect is persisted (fail-fast).
+      // [AUDIT P1-2] MỘT lượt duy nhất: profile + consent + taste ghi trong
+      // cùng transaction phía Postgres. Ba lượt rời nhau trước đây sinh được
+      // tài khoản nửa vời (có profile, thiếu consent/taste) mà router lại coi
+      // là onboarding đã xong. Cổng 18+ và cổng consent vẫn do server giữ.
       final iso =
           '${dob.year.toString().padLeft(4, '0')}-'
           '${dob.month.toString().padLeft(2, '0')}-'
           '${dob.day.toString().padLeft(2, '0')}';
       await ref
-          .read(profileRepositoryProvider)
-          .upsertMyProfile(
-            Profile(
-              id: '',
-              displayName: displayName,
-              fullName: fullName,
-              dob: iso,
-              bio: bio,
-              language: language,
-            ),
+          .read(onboardingRepositoryProvider)
+          .completeOnboarding(
+            displayName: displayName,
+            fullName: fullName,
+            dob: iso,
+            bio: bio,
+            language: language,
+            consents: consents,
+            policyVersion: kPolicyVersion,
+            genreIds: genreIds,
+            artistIds: artistIds,
+            songIds: songIds,
           );
-      final onb = ref.read(onboardingRepositoryProvider);
-      for (final e in consents.entries) {
-        await onb.recordConsent(
-          purpose: e.key,
-          granted: e.value,
-          policyVersion: kPolicyVersion,
-        );
-      }
-      await onb.saveTaste(
-        genreIds: genreIds,
-        artistIds: artistIds,
-        songIds: songIds,
-      );
       ref.invalidate(
         myProfileProvider,
       ); // router re-evaluates → leaves onboarding

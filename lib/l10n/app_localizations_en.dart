@@ -453,6 +453,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSaveError => 'Couldn\'t save the setting, try again.';
 
   @override
+  String get profileLoadErrorTitle => 'Couldn\'t load your profile';
+
+  @override
+  String get profileLoadErrorSub =>
+      'Your profile is safe. Check your connection and try again.';
+
+  @override
   String get deckErrorLikeLimit =>
       'You\'re out of likes for today. Upgrade to Pro for unlimited likes.';
 
@@ -464,6 +471,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deckErrorBoostActive => 'You already have a boost running.';
+
+  @override
+  String get deckErrorBoostRequired =>
+      'Buy a Boost or upgrade to Pro to use this.';
 
   @override
   String get deckErrorBoostLimit =>
@@ -602,6 +613,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAutoExpandSub => 'Search 100 km when suggestions run out';
 
   @override
+  String get filterPremiumSection => 'Advanced filters';
+
+  @override
+  String get filterAgeRange => 'Age range';
+
+  @override
+  String get filterActiveOnly => 'Active today only';
+
+  @override
+  String get filterPremiumLocked => 'Unlock advanced filters';
+
+  @override
+  String get filterPremiumLockedSub =>
+      'Filter by age and activity — available in the Store.';
+
+  @override
   String get filterApply => 'Apply';
 
   @override
@@ -629,6 +656,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get likesAnonymous => 'Anonymous';
+
+  @override
+  String get likesLikeBack => 'Like back';
+
+  @override
+  String get likesLikeSent => 'Like sent.';
+
+  @override
+  String likesMatched(String name) {
+    return 'You matched with $name! Head to Messages to say hi.';
+  }
 
   @override
   String get likesLockedTitle => 'Unlock to see who liked you';
