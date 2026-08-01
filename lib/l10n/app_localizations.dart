@@ -968,6 +968,12 @@ abstract class AppLocalizations {
   /// **'You already have a boost running.'**
   String get deckErrorBoostActive;
 
+  /// No description provided for @deckErrorBoostRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy a Boost or upgrade to Pro to use this.'**
+  String get deckErrorBoostRequired;
+
   /// No description provided for @deckErrorBoostLimit.
   ///
   /// In en, this message translates to:
@@ -1214,6 +1220,36 @@ abstract class AppLocalizations {
   /// **'Search 100 km when suggestions run out'**
   String get filterAutoExpandSub;
 
+  /// No description provided for @filterPremiumSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced filters'**
+  String get filterPremiumSection;
+
+  /// No description provided for @filterAgeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Age range'**
+  String get filterAgeRange;
+
+  /// No description provided for @filterActiveOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Active today only'**
+  String get filterActiveOnly;
+
+  /// No description provided for @filterPremiumLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock advanced filters'**
+  String get filterPremiumLocked;
+
+  /// No description provided for @filterPremiumLockedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by age and activity — available in the Store.'**
+  String get filterPremiumLockedSub;
+
   /// No description provided for @filterApply.
   ///
   /// In en, this message translates to:
@@ -1261,6 +1297,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Anonymous'**
   String get likesAnonymous;
+
+  /// No description provided for @likesLikeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Like back'**
+  String get likesLikeBack;
+
+  /// No description provided for @likesLikeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Like sent.'**
+  String get likesLikeSent;
+
+  /// No description provided for @likesMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'You matched with {name}! Head to Messages to say hi.'**
+  String likesMatched(String name);
 
   /// No description provided for @likesLockedTitle.
   ///
