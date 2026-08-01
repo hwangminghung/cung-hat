@@ -13,8 +13,14 @@ cam citrus + ink xanh đậm). Token code tương ứng: `lib/core/theme/`
 ## Style
 
 **Retro mixtape** — giấy kem ấm, viền/ink đậm 2px, shadow cứng (offset, không blur), cam citrus
-làm CTA. Light mode only (hiện tại). Tránh: neon lạnh, shadow mờ/blur, low energy, giao diện "AI
-slop" generic.
+làm CTA. Tránh: neon lạnh, shadow mờ/blur, low energy, giao diện "AI slop" generic.
+
+**Dark mode "retro mixtape đêm" (2026-08-01):** theo máy + toggle Cài đặt. Hai bảng màu nằm ở
+`lib/core/theme/app_palette.dart` (light/dark) — nền ink sẫm ánh rêu #14231C, chữ/viền kem
+#F2EAD3, cam CTA giữ nguyên, tint đảo chiều tối, accent đậm đảo chiều sáng. Quy tắc mới:
+chữ/icon trên FILL ACCENT SÁNG (lime/teal/pink/primarySoft — giữ nguyên hex hai mode) dùng
+`AppColors.onAccent` (ink bảng light cố định), KHÔNG dùng `AppColors.ink` (dark mode ink là kem,
+kem trên lime ~1.2:1). `color_contrast_test` chạy CẢ HAI bảng — code vẫn là nguồn chuẩn về màu.
 
 ## Design tokens (retro mixtape — 2026-07-11)
 | Token | Giá trị | Dùng cho |
