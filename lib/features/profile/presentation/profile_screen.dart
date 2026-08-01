@@ -103,7 +103,7 @@ class _ProfileList extends ConsumerWidget {
                     color: AppColors.primaryTint,
                     border: Border.all(color: AppColors.border, width: 2),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                    boxShadow: const [AppShadows.hard],
+                    boxShadow: [AppShadows.hard],
                   ),
                   child: Text(
                     _monogram(name),
@@ -134,7 +134,7 @@ class _ProfileList extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      const WaveDivider(),
+                      WaveDivider(),
                     ],
                   ),
                 ),
@@ -245,8 +245,8 @@ class _CompletionCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 2),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
                       child: Icon(
                         Icons.arrow_circle_up_rounded,
                         size: 18,

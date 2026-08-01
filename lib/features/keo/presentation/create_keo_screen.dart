@@ -141,7 +141,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
             AppSpacing.lg,
             AppSpacing.lg,
           ),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.background,
             border: Border(top: BorderSide(color: AppColors.ink, width: 2)),
           ),
@@ -152,7 +152,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
               onPressed: _submitting ? null : _submit,
               icon: _submitting ? null : Icons.add_box_outlined,
               child: _submitting
-                  ? const SizedBox.square(
+                  ? SizedBox.square(
                       dimension: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
@@ -190,7 +190,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                         AppSpacing.radiusPill,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.music_note_rounded,
                       color: AppColors.ink,
                       size: 28,
@@ -218,7 +218,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                 ],
               ),
               sectionGap,
-              const WaveDivider(),
+              WaveDivider(),
               sectionGap,
               _FormSection(
                 children: [
@@ -256,7 +256,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                         'Chủ kèo sẽ chốt quán ở màn Kế hoạch.',
                   ),
                   fieldGap,
-                  const WaveDivider(),
+                  WaveDivider(),
                   fieldGap,
                   OutlinedButton.icon(
                     onPressed: _submitting
@@ -315,7 +315,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                                 width: itemWidth,
                                 child: FilterChip(
                                   key: Key('keo_genre_${genre.id}'),
-                                  avatar: const Icon(
+                                  avatar: Icon(
                                     Icons.music_note_outlined,
                                     color: AppColors.ink,
                                   ),
@@ -323,7 +323,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                                   selected: _genreIds.contains(genre.id),
                                   selectedColor: AppColors.secondary,
                                   backgroundColor: AppColors.surface,
-                                  side: const BorderSide(
+                                  side: BorderSide(
                                     color: AppColors.ink,
                                     width: 2,
                                   ),
@@ -382,7 +382,7 @@ class _CreateKeoScreenState extends ConsumerState<CreateKeoScreen> {
                           },
                   ),
                   fieldGap,
-                  const WaveDivider(),
+                  WaveDivider(),
                   fieldGap,
                   Text(
                     _l10n?.keoCreateJoinMode ?? 'Chế độ tham gia',
@@ -419,7 +419,7 @@ class _VenueHint extends StatelessWidget {
         color: AppColors.surface,
         border: Border.all(color: AppColors.ink, width: 2),
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Row(
         children: [
@@ -431,7 +431,7 @@ class _VenueHint extends StatelessWidget {
               border: Border.all(color: AppColors.ink, width: 2),
               borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
             ),
-            child: const Icon(Icons.storefront_outlined, color: AppColors.ink),
+            child: Icon(Icons.storefront_outlined, color: AppColors.ink),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -546,7 +546,7 @@ class _JoinModeChoice extends StatelessWidget {
               color: selected ? AppColors.secondary : AppColors.surface,
               border: Border.all(color: AppColors.ink, width: 2),
               borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              boxShadow: const [AppShadows.hard],
+              boxShadow: [AppShadows.hard],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -564,7 +564,7 @@ class _JoinModeChoice extends StatelessWidget {
                 ),
                 if (selected) ...[
                   const SizedBox(width: AppSpacing.sm),
-                  const Icon(
+                  Icon(
                     Icons.check_circle_rounded,
                     color: AppColors.ink,
                     size: 20,
@@ -592,7 +592,7 @@ class _FormSection extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         border: Border.all(color: AppColors.border, width: 2),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -31,7 +31,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const TicketCard(
+          TicketCard(
             padding: EdgeInsets.zero,
             perforationPosition: 0.01,
             child: SizedBox(

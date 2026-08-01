@@ -35,7 +35,7 @@ class AppLogo extends StatelessWidget {
             color: AppColors.surface,
             border: Border.all(color: AppColors.border, width: 2),
             borderRadius: BorderRadius.circular(_markSize * 0.28),
-            boxShadow: const [AppShadows.hard],
+            boxShadow: [AppShadows.hard],
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -55,8 +55,10 @@ class AppLogo extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: _markSize * 0.06),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: _markSize * 0.15),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: _markSize * 0.15,
+                  ),
                   child: WaveDivider(color: AppColors.primary),
                 ),
               ],

@@ -85,12 +85,12 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
                 border: Border.all(color: AppColors.ink, width: 2),
-                boxShadow: const [AppShadows.hard],
+                boxShadow: [AppShadows.hard],
               ),
               child: Row(
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: AppSpacing.lg),
+                  Padding(
+                    padding: const EdgeInsets.only(left: AppSpacing.lg),
                     child: Text(
                       '+84',
                       style: TextStyle(
@@ -101,7 +101,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  const Icon(
+                  Icon(
                     Icons.expand_more_rounded,
                     color: AppColors.ink,
                     size: 20,
@@ -158,7 +158,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                   ? null
                   : () => _sendOtp(state),
               child: state.phase == AuthPhase.sending
-                  ? const SizedBox.square(
+                  ? SizedBox.square(
                       dimension: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
@@ -179,7 +179,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: AppColors.ink, width: 2),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.verified_user_outlined,
                     color: AppColors.ink,
                     size: 20,
@@ -241,14 +241,14 @@ class _MusicBoxHero extends StatelessWidget {
             top: 22,
             child: Transform.rotate(
               angle: -0.18,
-              child: const Icon(
+              child: Icon(
                 Icons.music_note_rounded,
                 color: AppColors.primary,
                 size: 31,
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             right: 18,
             top: 4,
             child: Icon(
@@ -268,18 +268,18 @@ class _MusicBoxHero extends StatelessWidget {
                 color: AppColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                 border: Border.all(color: AppColors.ink, width: 2),
-                boxShadow: const [AppShadows.hard],
+                boxShadow: [AppShadows.hard],
               ),
               child: Column(
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(
                         Icons.queue_music_rounded,
                         color: AppColors.ink,
                         size: 22,
                       ),
-                      SizedBox(width: AppSpacing.sm),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: WaveDivider(
                           height: AppSpacing.lg,
@@ -287,7 +287,7 @@ class _MusicBoxHero extends StatelessWidget {
                           strokeWidth: 2,
                         ),
                       ),
-                      SizedBox(width: AppSpacing.sm),
+                      const SizedBox(width: AppSpacing.sm),
                       Icon(
                         Icons.headphones_rounded,
                         color: AppColors.ink,
@@ -303,7 +303,7 @@ class _MusicBoxHero extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.ink, width: 2),
                       ),
-                      child: const Stack(
+                      child: Stack(
                         children: [
                           Positioned(
                             left: 12,
@@ -321,9 +321,9 @@ class _MusicBoxHero extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 _Singer(accent: AppColors.secondary),
-                                SizedBox(width: AppSpacing.md),
+                                const SizedBox(width: AppSpacing.md),
                                 _Singer(accent: AppColors.teal, raised: true),
-                                SizedBox(width: AppSpacing.md),
+                                const SizedBox(width: AppSpacing.md),
                                 _Singer(accent: AppColors.primaryTint),
                               ],
                             ),
@@ -336,7 +336,7 @@ class _MusicBoxHero extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             right: 38,
             bottom: 12,
             child: Icon(
@@ -345,7 +345,7 @@ class _MusicBoxHero extends StatelessWidget {
               size: 27,
             ),
           ),
-          const Positioned(
+          Positioned(
             left: 36,
             bottom: 4,
             child: Icon(
@@ -381,19 +381,11 @@ class _Singer extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.ink, width: 2),
             ),
-            child: const Icon(
-              Icons.person_rounded,
-              color: AppColors.ink,
-              size: 21,
-            ),
+            child: Icon(Icons.person_rounded, color: AppColors.ink, size: 21),
           ),
           Transform.rotate(
             angle: -0.25,
-            child: const Icon(
-              Icons.mic_rounded,
-              color: AppColors.ink,
-              size: 22,
-            ),
+            child: Icon(Icons.mic_rounded, color: AppColors.ink, size: 22),
           ),
         ],
       ),
@@ -414,7 +406,7 @@ class _ErrorBanner extends StatelessWidget {
         color: AppColors.errorTint,
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
         border: Border.all(color: AppColors.error, width: 2),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Text(
         message,

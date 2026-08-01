@@ -35,7 +35,7 @@ class TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const clipper = TicketCardClipper();
+    final clipper = TicketCardClipper();
     final detailsPainter = TicketCardPainter(
       showPerforation: showPerforation,
       perforationPosition: perforationPosition,
@@ -54,7 +54,7 @@ class TicketCard extends StatelessWidget {
           Positioned.fill(
             child: Transform.translate(
               offset: AppShadows.hard.offset,
-              child: const ClipPath(
+              child: ClipPath(
                 clipper: clipper,
                 child: ColoredBox(color: AppShadows.hardColor),
               ),
@@ -78,7 +78,7 @@ class TicketCard extends StatelessWidget {
 
 /// Cuts the rounded ticket silhouette and its symmetric edge notches.
 class TicketCardClipper extends CustomClipper<Path> {
-  const TicketCardClipper({
+  TicketCardClipper({
     this.radius = AppSpacing.radiusCard,
     this.notchRadius = AppSpacing.sm,
   });
@@ -97,14 +97,16 @@ class TicketCardClipper extends CustomClipper<Path> {
 
 /// Supplies the cream surface token and paints the ticket's foreground details.
 class TicketCardPainter extends CustomPainter {
-  const TicketCardPainter({
+  TicketCardPainter({
     this.showPerforation = true,
     this.perforationPosition = 0.28,
     this.perforationOffset,
-    this.surfaceColor = AppColors.surface,
-    this.outlineColor = AppColors.ink,
+    Color? surfaceColor,
+    Color? outlineColor,
     this.outlineWidth = 2,
-  }) : assert(
+  }) : surfaceColor = surfaceColor ?? AppColors.surface,
+       outlineColor = outlineColor ?? AppColors.ink,
+       assert(
          perforationPosition > 0 && perforationPosition < 1,
          'perforationPosition must be between 0 and 1.',
        );

@@ -218,7 +218,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   ? null
                   : () => _submit(_ctrl.text),
               child: state.phase == AuthPhase.verifying
-                  ? const SizedBox.square(
+                  ? SizedBox.square(
                       dimension: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
@@ -269,7 +269,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.ink, width: 2),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.question_mark_rounded,
                     color: AppColors.ink,
                     size: 18,
@@ -331,16 +331,16 @@ class _BrandHeader extends StatelessWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                 border: Border.all(color: AppColors.ink, width: 2),
-                boxShadow: const [AppShadows.hard],
+                boxShadow: [AppShadows.hard],
               ),
-              child: const BackButton(color: AppColors.ink),
+              child: BackButton(color: AppColors.ink),
             ),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (!compact) ...[
-                    const Icon(
+                    Icon(
                       Icons.auto_awesome_rounded,
                       color: AppColors.secondaryDark,
                       size: 18,
@@ -361,7 +361,7 @@ class _BrandHeader extends StatelessWidget {
                   ),
                   if (!compact) ...[
                     const SizedBox(width: AppSpacing.sm),
-                    const SizedBox(
+                    SizedBox(
                       width: 38,
                       child: WaveDivider(
                         height: AppSpacing.lg,
@@ -397,11 +397,11 @@ class _TicketHero extends StatelessWidget {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
           border: Border.all(color: AppColors.ink, width: 2),
-          boxShadow: const [AppShadows.hard],
+          boxShadow: [AppShadows.hard],
         ),
         child: Stack(
           children: [
-            const Positioned(
+            Positioned(
               left: 28,
               right: 52,
               bottom: 6,
@@ -447,7 +447,7 @@ class _TicketHero extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 const _Perforation(),
                 const SizedBox(width: AppSpacing.md),
-                const Icon(
+                Icon(
                   Icons.mark_email_unread_rounded,
                   color: AppColors.ink,
                   size: 34,
@@ -466,9 +466,9 @@ class _MessageDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
+    return DecoratedBox(
       decoration: BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
-      child: SizedBox.square(dimension: 7),
+      child: const SizedBox.square(dimension: 7),
     );
   }
 }
@@ -500,12 +500,12 @@ class _Perforation extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         for (var i = 0; i < 6; i++)
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               color: AppColors.ink,
               shape: BoxShape.circle,
             ),
-            child: SizedBox.square(dimension: 4),
+            child: const SizedBox.square(dimension: 4),
           ),
       ],
     );
@@ -525,7 +525,7 @@ class _ErrorBanner extends StatelessWidget {
         color: AppColors.errorTint,
         borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
         border: Border.all(color: AppColors.error, width: 2),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Text(
         message,

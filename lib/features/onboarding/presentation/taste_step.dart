@@ -58,7 +58,7 @@ class TasteChips<T> extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                    boxShadow: const [AppShadows.hard],
+                    boxShadow: [AppShadows.hard],
                   ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 44),
@@ -73,7 +73,7 @@ class TasteChips<T> extends StatelessWidget {
                       checkmarkColor: AppColors.ink,
                       backgroundColor: AppColors.surface,
                       selectedColor: AppColors.secondary,
-                      side: const BorderSide(color: AppColors.ink, width: 2),
+                      side: BorderSide(color: AppColors.ink, width: 2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusCard,

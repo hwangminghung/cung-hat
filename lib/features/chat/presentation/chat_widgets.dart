@@ -142,7 +142,7 @@ class ChatComposer extends StatelessWidget {
           AppSpacing.lg,
           AppSpacing.lg,
         ),
-        decoration: const BoxDecoration(color: AppColors.background),
+        decoration: BoxDecoration(color: AppColors.background),
         child: Row(
           children: [
             IconButton.outlined(
@@ -169,7 +169,7 @@ class ChatComposer extends StatelessWidget {
               tooltip: l10n?.send ?? 'Gửi',
               onPressed: sending ? null : onSend,
               icon: sending
-                  ? const SizedBox.square(
+                  ? SizedBox.square(
                       dimension: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,

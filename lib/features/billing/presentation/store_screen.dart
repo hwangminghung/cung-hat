@@ -166,7 +166,7 @@ class StoreScreen extends ConsumerWidget {
                               AppSpacing.radiusCard,
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.graphic_eq_rounded,
                             color: AppColors.ink,
                             size: 30,
@@ -196,8 +196,8 @@ class StoreScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                   child: WaveDivider(),
                 ),
                 ref
@@ -333,7 +333,7 @@ class _StorePurchaseFooter extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const WaveDivider(),
+          WaveDivider(),
           const SizedBox(height: AppSpacing.lg),
           _StoreButtonShadow(
             child: SizedBox(
@@ -350,7 +350,7 @@ class _StorePurchaseFooter extends ConsumerWidget {
                     fontWeight: FontWeight.w700,
                     height: 1.05,
                   ),
-                  side: const BorderSide(color: AppColors.ink, width: 2),
+                  side: BorderSide(color: AppColors.ink, width: 2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                       AppSpacing.radiusButton,
@@ -450,7 +450,7 @@ ButtonStyle _storeCtaStyle() => FilledButton.styleFrom(
     fontWeight: FontWeight.w700,
     height: 1.05,
   ),
-  side: const BorderSide(color: AppColors.ink, width: 2),
+  side: BorderSide(color: AppColors.ink, width: 2),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
   ),
@@ -466,7 +466,7 @@ class _StoreButtonShadow extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: child,
     );

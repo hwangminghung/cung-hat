@@ -100,7 +100,7 @@ class _TimeStub extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.schedule_outlined, color: AppColors.ink, size: 26),
+        Icon(Icons.schedule_outlined, color: AppColors.ink, size: 26),
         const SizedBox(height: AppSpacing.sm),
         Text(time.start, style: Theme.of(context).textTheme.titleMedium),
         Text('—', style: Theme.of(context).textTheme.titleSmall),
@@ -119,7 +119,7 @@ class _CompactTime extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.schedule_outlined, color: AppColors.ink),
+        Icon(Icons.schedule_outlined, color: AppColors.ink),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Wrap(
@@ -166,11 +166,7 @@ class _KeoDetails extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            const Icon(
-              Icons.arrow_forward_rounded,
-              color: AppColors.ink,
-              size: 20,
-            ),
+            Icon(Icons.arrow_forward_rounded, color: AppColors.ink, size: 20),
           ],
         ),
         if (keo.areaLabel != null || keo.distanceBand != null) ...[
@@ -270,7 +266,7 @@ class _OpenJoinModeStamp extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.lock_open_rounded, size: 16, color: AppColors.ink),
+          Icon(Icons.lock_open_rounded, size: 16, color: AppColors.ink),
           const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: Text(
@@ -334,7 +330,7 @@ class _MemberStrip extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.textHint, width: 1.5),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.add_rounded,
                 size: 16,
                 color: AppColors.textHint,

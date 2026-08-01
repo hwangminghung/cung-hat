@@ -58,8 +58,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.sm,
+                    ),
                     child: WaveDivider(),
                   ),
                   _Section(
@@ -374,7 +376,7 @@ class _SettingsTile extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: danger ? const TextStyle(color: AppColors.error) : null,
+          style: danger ? TextStyle(color: AppColors.error) : null,
         ),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: onTap,
@@ -403,7 +405,7 @@ class _LanguageTile extends StatelessWidget {
       child: ListTile(
         title: Text(label),
         trailing: selected
-            ? const Icon(Icons.check_rounded, color: AppColors.primaryDark)
+            ? Icon(Icons.check_rounded, color: AppColors.primaryDark)
             : null,
         onTap: onTap,
       ),

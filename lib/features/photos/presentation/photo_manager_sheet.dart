@@ -279,7 +279,7 @@ class _PhotoManagerSheetState extends ConsumerState<PhotoManagerSheet> {
         Row(
           key: const Key('photo_urls_error'),
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline_rounded,
               size: 18,
               color: AppColors.textSecondary,
@@ -366,9 +366,9 @@ class _PhotoSlot extends StatelessWidget {
                   ),
                 )
               else if (hasPhoto)
-                const ColoredBox(color: AppColors.surfaceMuted)
+                ColoredBox(color: AppColors.surfaceMuted)
               else
-                const Center(
+                Center(
                   child: Icon(
                     Icons.add_a_photo_rounded,
                     color: AppColors.textHint,
@@ -394,7 +394,7 @@ class _PhotoSlot extends StatelessWidget {
                       color: AppColors.surface.withValues(alpha: 0.85),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close_rounded,
                       size: 16,
                       color: AppColors.error,
@@ -402,8 +402,8 @@ class _PhotoSlot extends StatelessWidget {
                   ),
                 ),
               if (busy)
-                const ColoredBox(
-                  color: Color(0x66000000),
+                ColoredBox(
+                  color: const Color(0x66000000),
                   child: Center(
                     child: SizedBox(
                       width: 22,
@@ -441,7 +441,7 @@ class _ConsentGate extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lock_outline_rounded, color: AppColors.primaryDark),
+          Icon(Icons.lock_outline_rounded, color: AppColors.primaryDark),
           const SizedBox(height: AppSpacing.sm),
           Text(
             Localizations.of<AppLocalizations>(

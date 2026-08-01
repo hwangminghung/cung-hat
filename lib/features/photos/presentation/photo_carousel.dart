@@ -88,7 +88,7 @@ Widget _fallback({
   final content = Stack(
     fit: StackFit.expand,
     children: [
-      const DecoratedBox(
+      DecoratedBox(
         decoration: BoxDecoration(gradient: AppColors.brandGradient),
       ),
       ...decorations,

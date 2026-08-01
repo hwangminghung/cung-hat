@@ -142,7 +142,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                         ),
                         if (candidate.verified) ...[
                           const SizedBox(width: AppSpacing.xs),
-                          const Icon(
+                          Icon(
                             Icons.verified_rounded,
                             size: 22,
                             color: AppColors.teal,
@@ -167,7 +167,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.place_rounded,
                           size: 20,
                           color: AppColors.teal,
@@ -212,7 +212,7 @@ class CandidateDetailSheet extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.ink,
               borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              boxShadow: const [AppShadows.hard],
+              boxShadow: [AppShadows.hard],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusCard - 2),
@@ -227,7 +227,7 @@ class CandidateDetailSheet extends ConsumerWidget {
               ),
             ),
           ),
-          const WaveDivider(height: AppSpacing.xxl),
+          WaveDivider(height: AppSpacing.xxl),
           Text(
             l10n?.candidateSharedGenresTitle ?? 'Gu nhạc chung',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -252,7 +252,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                   StampChip(label: '#$g', tone: StampChipTone.teal),
               ],
             ),
-          const WaveDivider(height: AppSpacing.xxl),
+          WaveDivider(height: AppSpacing.xxl),
           Text(
             l10n?.candidateSharedBaituTitle ?? 'Bài tủ chung',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -283,13 +283,13 @@ class CandidateDetailSheet extends ConsumerWidget {
                     Container(
                       width: 48,
                       height: 52,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: AppColors.teal,
                         border: Border(
                           right: BorderSide(color: AppColors.ink, width: 2),
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.music_note_rounded,
                         color: AppColors.ink,
                       ),
@@ -326,7 +326,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                 color: AppColors.primaryTint,
                 border: Border.all(color: AppColors.ink, width: 2),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-                boxShadow: const [AppShadows.hard],
+                boxShadow: [AppShadows.hard],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -361,7 +361,7 @@ class CandidateDetailSheet extends ConsumerWidget {
                 ],
               ),
             ),
-          const WaveDivider(height: AppSpacing.xxl),
+          WaveDivider(height: AppSpacing.xxl),
           if (onPass != null || onLike != null)
             Row(
               children: [

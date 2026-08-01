@@ -105,7 +105,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
       backgroundColor: AppColors.background,
       body: Container(
         key: const Key('match_cream_surface'),
-        decoration: const BoxDecoration(color: AppColors.background),
+        decoration: BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Stack(
             children: [
@@ -137,7 +137,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                                   fontWeight: FontWeight.w900,
                                 ),
                           ),
-                          const WaveDivider(height: AppSpacing.xxl),
+                          WaveDivider(height: AppSpacing.xxl),
                           ScaleTransition(
                             scale: _titleIn,
                             child: FadeTransition(
@@ -226,7 +226,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                                           width: 2,
                                         ),
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.favorite_rounded,
                                         color: AppColors.ink,
                                         size: 24,
@@ -237,7 +237,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                               );
                             },
                           ),
-                          const WaveDivider(height: AppSpacing.xxl),
+                          WaveDivider(height: AppSpacing.xxl),
                           if (widget.sharedBaitu.isNotEmpty)
                             StampChip(
                               leadingIcon: Icons.music_note_rounded,
@@ -280,7 +280,7 @@ class _MatchCelebrationState extends ConsumerState<MatchCelebration>
                           key: const Key('match_continue_btn'),
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.ink,
-                            textStyle: const TextStyle(
+                            textStyle: TextStyle(
                               decoration: TextDecoration.underline,
                               decorationColor: AppColors.secondaryDark,
                               decorationThickness: 2,
@@ -328,7 +328,7 @@ class _IdentityCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         border: Border.all(color: AppColors.ink, width: 2),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Column(
         children: [
@@ -375,7 +375,7 @@ class _NoteRainPainter extends CustomPainter {
 
   final double progress;
   static const _count = 18;
-  static const _palette = [
+  static final _palette = [
     AppColors.primary,
     AppColors.secondary,
     AppColors.teal,

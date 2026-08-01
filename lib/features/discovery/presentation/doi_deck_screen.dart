@@ -433,14 +433,14 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                                     color: AppColors.ink,
                                     width: 2,
                                   ),
-                                  boxShadow: const [AppShadows.hard],
+                                  boxShadow: [AppShadows.hard],
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.swipe_rounded,
                                       color: AppColors.primary,
                                       size: 40,
@@ -588,7 +588,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              const Expanded(child: WaveDivider()),
+              Expanded(child: WaveDivider()),
             ],
           ),
         if (widget.genre == null) const SizedBox(height: AppSpacing.xs),
@@ -611,7 +611,7 @@ class _DoiDeckScreenState extends ConsumerState<DoiDeckScreen> {
               ),
             ),
           ),
-        const WaveDivider(height: AppSpacing.md),
+        WaveDivider(height: AppSpacing.md),
       ],
     );
   }
@@ -851,11 +851,7 @@ class _EmptyDeck extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(
-              Icons.music_note_rounded,
-              size: 56,
-              color: AppColors.primary,
-            ),
+            Icon(Icons.music_note_rounded, size: 56, color: AppColors.primary),
             const SizedBox(height: AppSpacing.lg),
             Text(
               radius >= 100

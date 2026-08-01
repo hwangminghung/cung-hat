@@ -58,7 +58,7 @@ class ThemeBoardScreen extends ConsumerWidget {
                   else
                     const SizedBox(width: 48),
                   const Spacer(),
-                  const SizedBox(width: 144, child: WaveDivider()),
+                  SizedBox(width: 144, child: WaveDivider()),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -127,7 +127,7 @@ class ThemeBoardScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(
                         AppSpacing.radiusCard,
                       ),
-                      boxShadow: const [AppShadows.hard],
+                      boxShadow: [AppShadows.hard],
                     ),
                     child: Row(
                       children: [
@@ -247,7 +247,7 @@ class _ThemeCard extends StatelessWidget {
             color: AppColors.surface,
             border: Border.all(color: AppColors.ink, width: 2),
             borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            boxShadow: const [AppShadows.hard],
+            boxShadow: [AppShadows.hard],
           ),
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
@@ -277,7 +277,7 @@ class _ThemeCard extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(color: AppColors.ink, width: 2),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_forward_rounded,
                       color: AppColors.onPrimary,
                       size: 22,
@@ -295,7 +295,7 @@ class _ThemeCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const WaveDivider(height: AppSpacing.lg),
+              WaveDivider(height: AppSpacing.lg),
               if (loading)
                 const Skeleton(width: 120, height: 28, radius: AppSpacing.xs)
               else
@@ -372,9 +372,9 @@ class _RetroBackButton extends StatelessWidget {
             color: AppColors.surface,
             border: Border.all(color: AppColors.ink, width: 2),
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-            boxShadow: const [AppShadows.hard],
+            boxShadow: [AppShadows.hard],
           ),
-          child: const Icon(Icons.arrow_back_rounded, color: AppColors.ink),
+          child: Icon(Icons.arrow_back_rounded, color: AppColors.ink),
         ),
       ),
     );

@@ -164,13 +164,13 @@ class _DobArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 104,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.calendar_month_outlined, color: AppColors.ink, size: 52),
-          SizedBox(width: AppSpacing.lg),
+          const SizedBox(width: AppSpacing.lg),
           Icon(Icons.mic_none_rounded, color: AppColors.primary, size: 56),
         ],
       ),
@@ -198,7 +198,7 @@ class _AgeNotice extends StatelessWidget {
           Container(
             width: 18,
             height: 18,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.secondary,
               shape: BoxShape.circle,
             ),

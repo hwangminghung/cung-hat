@@ -22,7 +22,7 @@ void main() {
     expect(AppColors.teal, const Color(0xFF8FD8C8));
     expect(AppColors.tertiary, AppColors.teal);
     expect(AppColors.cyan, AppColors.teal);
-    expect(AppColors.brandGradient.colors, const <Color>[
+    expect(AppColors.brandGradient.colors, <Color>[
       AppColors.primary,
       AppColors.primary,
     ]);

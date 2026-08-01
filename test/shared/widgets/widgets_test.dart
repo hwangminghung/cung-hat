@@ -76,7 +76,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _wrap(const HardCard(child: SizedBox(width: 80, height: 40))),
+      _wrap(HardCard(child: const SizedBox(width: 80, height: 40))),
     );
 
     final container = tester.widget<Container>(
@@ -88,7 +88,7 @@ void main() {
           .first,
     );
     final deco = container.decoration! as BoxDecoration;
-    expect(deco.boxShadow, const [AppShadows.hard]);
+    expect(deco.boxShadow, [AppShadows.hard]);
 
     final material = tester.widget<Material>(find.byType(Material).last);
     final shape = material.shape! as RoundedRectangleBorder;

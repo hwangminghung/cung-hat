@@ -99,15 +99,15 @@ class DeckActionBar extends StatelessWidget {
 }
 
 class _ActionItem extends StatelessWidget {
-  const _ActionItem({
+  _ActionItem({
     super.key,
     required this.icon,
     required this.label,
     required this.accent,
     required this.onTap,
-    this.foreground = AppColors.ink,
+    Color? foreground,
     this.emphasis = 0.0,
-  });
+  }) : foreground = foreground ?? AppColors.ink;
 
   final IconData icon;
   final String label;
@@ -145,7 +145,7 @@ class _ActionItem extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
                   border: Border.all(color: AppColors.ink, width: 2 + emphasis),
-                  boxShadow: const [AppShadows.hard],
+                  boxShadow: [AppShadows.hard],
                 ),
                 child: Material(
                   color: Colors.transparent,

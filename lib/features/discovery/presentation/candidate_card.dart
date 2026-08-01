@@ -15,7 +15,7 @@ import 'report_sheet.dart';
 /// Bảng màu nền monogram fallback (khi hồ sơ chưa có ảnh) — chọn ổn định
 /// theo hash id để mỗi ứng viên luôn ra cùng một màu qua các lần build, tạo
 /// cảm giác retro nhiều màu thay vì một màu cam lặp lại (mockup 07).
-const _monogramPalette = [
+final _monogramPalette = [
   AppColors.primary,
   AppColors.secondaryDark,
   AppColors.tertiaryPop,
@@ -26,13 +26,16 @@ const _monogramPalette = [
 Color _monogramColorFor(String id) =>
     _monogramPalette[id.hashCode.abs() % _monogramPalette.length];
 
-/// Màu chữ monogram theo nền trong [_monogramPalette]: hai nền NHẠT
-/// (tertiaryPop ~2.2:1, pink ~2.5:1 với chữ trắng — dưới chuẩn 3:1
-/// large-text) → chữ ink; ba nền đậm còn lại giữ trắng như cũ.
+/// Màu chữ monogram theo nền trong [_monogramPalette]: chọn theo ĐỘ SÁNG
+/// của nền thay vì so hex cứng — [DARK] secondaryDark giờ đổi giá trị theo
+/// mode (light = olive đậm → chữ trắng, dark = olive sáng → chữ ink đậm),
+/// so hex sẽ chọn sai một trong hai mode. Ngưỡng 0.3 nằm GIỮA primary
+/// (0.228 — cần chữ trắng) và pink (0.336 — trắng chỉ đạt 2.5:1, cần ink):
+/// trên ngưỡng → [AppColors.onAccent] (ink đậm cố định), dưới → trắng.
 /// Public để test mapping contrast trực tiếp.
 Color monogramTextColorOn(Color background) =>
-    background == AppColors.tertiaryPop || background == AppColors.pink
-    ? AppColors.ink
+    background.computeLuminance() > 0.3
+    ? AppColors.onAccent
     : AppColors.onPrimary;
 
 /// Card ứng viên trong deck. Chip thông tin dưới tên XOAY theo ảnh đang xem
@@ -90,7 +93,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         border: Border.all(color: AppColors.ink, width: 2),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -183,7 +186,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
               ],
             ),
           ),
-          const WaveDivider(height: AppSpacing.md),
+          WaveDivider(height: AppSpacing.md),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
@@ -204,7 +207,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
                       ),
                     ),
                     if (candidate.verified)
-                      const Icon(
+                      Icon(
                         Icons.verified_rounded,
                         size: 20,
                         color: AppColors.tertiary,
@@ -247,7 +250,7 @@ class _CandidateCardState extends ConsumerState<CandidateCard> {
               Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.secondary,
                   shape: BoxShape.circle,
                 ),
@@ -442,7 +445,7 @@ class _CardIconButton extends StatelessWidget {
           color: AppColors.surface,
           border: Border.all(color: AppColors.ink, width: 2),
           borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-          boxShadow: const [AppShadows.hard],
+          boxShadow: [AppShadows.hard],
         ),
         child: Material(
           color: Colors.transparent,
@@ -453,7 +456,7 @@ class _CardIconButton extends StatelessWidget {
             child: SizedBox.square(
               dimension: 44,
               child: IconTheme(
-                data: const IconThemeData(color: AppColors.ink, size: 24),
+                data: IconThemeData(color: AppColors.ink, size: 24),
                 child: icon,
               ),
             ),

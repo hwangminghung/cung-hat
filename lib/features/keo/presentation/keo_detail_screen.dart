@@ -324,7 +324,7 @@ class _RosterHeader extends StatelessWidget {
       children: [
         Flexible(child: heading),
         const SizedBox(width: AppSpacing.md),
-        const Expanded(child: WaveDivider()),
+        Expanded(child: WaveDivider()),
       ],
     );
   }
@@ -372,11 +372,11 @@ class _Header extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              const Icon(Icons.auto_awesome_outlined, color: AppColors.ink),
+              Icon(Icons.auto_awesome_outlined, color: AppColors.ink),
             ],
           ),
           fieldGap,
-          const WaveDivider(),
+          WaveDivider(),
           if (timeLabel != null) ...[
             fieldGap,
             _InfoRow(
@@ -404,7 +404,7 @@ class _Header extends StatelessWidget {
                   border: Border.all(color: AppColors.ink, width: 2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
-                child: const Icon(Icons.groups_outlined, color: AppColors.ink),
+                child: Icon(Icons.groups_outlined, color: AppColors.ink),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -481,7 +481,7 @@ class _RosterTile extends StatelessWidget {
         : StampChipTone.teal;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.ink, width: 2)),
       ),
       child: Column(
@@ -497,7 +497,7 @@ class _RosterTile extends StatelessWidget {
                   color: isHost ? AppColors.secondary : AppColors.teal,
                   border: Border.all(color: AppColors.ink, width: 2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusInput),
-                  boxShadow: const [AppShadows.hard],
+                  boxShadow: [AppShadows.hard],
                 ),
                 child: Text(
                   initial,
@@ -520,7 +520,7 @@ class _RosterTile extends StatelessWidget {
                       ),
                       if (member.verified) ...[
                         const SizedBox(width: AppSpacing.xs),
-                        const Icon(
+                        Icon(
                           Icons.verified_rounded,
                           size: 18,
                           color: AppColors.ink,

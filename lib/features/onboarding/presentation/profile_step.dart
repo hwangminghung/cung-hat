@@ -84,7 +84,7 @@ class _ProfilePreview extends StatelessWidget {
         color: AppColors.surface,
         border: Border.all(color: AppColors.ink, width: 2),
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        boxShadow: const [AppShadows.hard],
+        boxShadow: [AppShadows.hard],
       ),
       child: Column(
         children: [
@@ -102,7 +102,7 @@ class _ProfilePreview extends StatelessWidget {
                     Container(
                       width: 128,
                       height: 128,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: AppColors.surfaceMuted,
                         shape: BoxShape.circle,
                       ),
@@ -115,7 +115,7 @@ class _ProfilePreview extends StatelessWidget {
                         height: 1,
                       ),
                     ),
-                    const Positioned(
+                    Positioned(
                       left: AppSpacing.xl,
                       top: AppSpacing.xs,
                       child: Icon(
@@ -131,7 +131,7 @@ class _ProfilePreview extends StatelessWidget {
           ),
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: WaveDivider(
                   height: AppSpacing.xxl,
                   color: AppColors.ink,
@@ -139,7 +139,7 @@ class _ProfilePreview extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.lg),
-              const Icon(Icons.language, color: AppColors.ink, size: 22),
+              Icon(Icons.language, color: AppColors.ink, size: 22),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 brand,

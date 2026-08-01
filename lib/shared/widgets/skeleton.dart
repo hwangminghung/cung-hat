@@ -111,12 +111,12 @@ class SkeletonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // HardCard cùng silhouette với KeoCard thật — tránh "nhảy style" khi
     // skeleton nhường chỗ cho card có bóng cứng.
-    return const HardCard(
-      margin: EdgeInsets.symmetric(
+    return HardCard(
+      margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
       ),
-      child: Padding(
+      child: const Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cung_hat/core/theme/app_colors.dart';
+import 'package:cung_hat/core/theme/app_palette.dart';
 import 'package:cung_hat/features/discovery/domain/candidate.dart';
 import 'package:cung_hat/features/discovery/presentation/candidate_card.dart';
 import 'package:cung_hat/features/photos/application/photo_providers.dart';
@@ -202,11 +203,19 @@ void main() {
   );
 
   test(
-    'monogramTextColorOn: ink trên nền nhạt (tertiaryPop/pink), trắng trên nền đậm',
+    'monogramTextColorOn: ink đậm trên nền nhạt, trắng trên nền đậm — chọn '
+    'theo luminance (hết so hex cứng vì secondaryDark đổi giá trị theo mode)',
     () {
-      expect(monogramTextColorOn(AppColors.tertiaryPop), AppColors.ink);
-      expect(monogramTextColorOn(AppColors.pink), AppColors.ink);
+      // onAccent = ink của bảng light, cố định ở mọi mode.
+      expect(monogramTextColorOn(AppColors.tertiaryPop), AppColors.onAccent);
+      expect(monogramTextColorOn(AppColors.pink), AppColors.onAccent);
       expect(monogramTextColorOn(AppColors.primary), AppColors.onPrimary);
+      expect(monogramTextColorOn(AppColors.primaryDark), AppColors.onPrimary);
+      // secondaryDark bảng DARK là olive sáng → phải đảo sang chữ ink đậm.
+      expect(
+        monogramTextColorOn(AppPalette.dark.secondaryDark),
+        AppColors.onAccent,
+      );
     },
   );
 }
