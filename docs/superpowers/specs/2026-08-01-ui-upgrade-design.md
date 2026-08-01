@@ -1,5 +1,9 @@
 # UI Upgrade 2026-08-01 — Dark mode + polish 4 màn + chuẩn hoá state + push primer
 
+> **CẬP NHẬT 2026-08-02:** Đợt 1 (dark mode) ĐÃ GỠ theo quyết định user sau khi xem
+> live trên emulator ("dark mode xấu quá") — commit `revert(theme)` trên nhánh
+> ui-upgrade-0801. Đợt 2-4 giữ nguyên và được merge. Phần dark mode dưới đây chỉ còn
+> giá trị tham khảo nếu sau này làm lại.
 User chốt: làm **tất cả 4 khối** từ audit UI 2026-07-26, theo Hướng A ("giữ hồn
 retro, đổi nền theo đêm"), dark mode kiểu **theo máy + toggle trong Cài đặt**.
 Các quyết định chi tiết dưới đây user uỷ quyền ("tuỳ bạn cho là tốt nhất").
