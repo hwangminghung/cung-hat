@@ -260,19 +260,21 @@ class _OpenJoinModeStamp extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.secondary,
-        border: Border.all(color: AppColors.ink, width: 2),
+        // [DARK] Nội dung/viền trên fill lime dùng onAccent: dark mode ink là
+        // kem, kem trên lime ~1.2:1 — không đọc được.
+        border: Border.all(color: AppColors.onAccent, width: 2),
         borderRadius: BorderRadius.circular(AppSpacing.xs),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_open_rounded, size: 16, color: AppColors.ink),
+          Icon(Icons.lock_open_rounded, size: 16, color: AppColors.onAccent),
           const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.ink,
+                color: AppColors.onAccent,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -308,12 +310,12 @@ class _MemberStrip extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.teal,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.ink, width: 1.5),
+                border: Border.all(color: AppColors.onAccent, width: 1.5),
               ),
               child: Text(
                 name.isEmpty ? '?' : name.characters.first.toUpperCase(),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.ink,
+                  color: AppColors.onAccent,
                   fontWeight: FontWeight.w700,
                 ),
               ),
