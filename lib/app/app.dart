@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cung_hat/l10n/app_localizations.dart';
 import '../core/l10n/locale_controller.dart';
 import '../core/push/push_registrar.dart';
+import '../core/theme/app_colors.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/theme_mode_controller.dart';
 import '../features/billing/application/iap_controller.dart';
 import 'deep_link.dart';
 import 'router.dart';
@@ -16,12 +18,14 @@ class CungHatApp extends ConsumerStatefulWidget {
   ConsumerState<CungHatApp> createState() => _CungHatAppState();
 }
 
-class _CungHatAppState extends ConsumerState<CungHatApp> {
+class _CungHatAppState extends ConsumerState<CungHatApp>
+    with WidgetsBindingObserver {
   StreamSubscription<Uri>? _linkSub;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initDeepLinks();
     // [AUDIT C1] purchaseStream phải có listener TRƯỚC khi user mua và ngay
     // khi app mở lại (store replay transaction treo) — không init thì user
@@ -50,8 +54,17 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _linkSub?.cancel();
     super.dispose();
+  }
+
+  /// [DARK] User đổi dark/light ở CÀI ĐẶT MÁY trong lúc app đang chạy —
+  /// đẩy vào provider để effectiveBrightness (mode system) tính lại.
+  @override
+  void didChangePlatformBrightness() {
+    ref.read(platformBrightnessProvider.notifier).state =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
   }
 
   @override
@@ -60,9 +73,15 @@ class _CungHatAppState extends ConsumerState<CungHatApp> {
     // onboarding) — không phải lúc mở app ở màn đăng nhập, khi chưa có session
     // để gắn token vào.
     ref.watch(pushRegistrationProvider);
+    // [DARK] Chọn bảng màu TRƯỚC khi dựng cây widget: mọi AppColors.x đọc
+    // sau dòng này đều ra đúng bảng. themeMode đổi → build() chạy lại →
+    // select() chạy lại → cây dưới MaterialApp rebuild với màu mới.
+    AppColors.select(ref.watch(effectiveBrightnessProvider));
     return MaterialApp.router(
       title: 'Cùng Hát',
       theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ref.watch(themeModeControllerProvider),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       // [LANG] App phục vụ thị trường VN → MẶC ĐỊNH tiếng Việt bất kể ngôn

@@ -9,6 +9,7 @@ import '../../../core/l10n/locale_controller.dart';
 import '../../../core/providers/supabase_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/theme_mode_controller.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/hard_card.dart';
 import '../../../shared/widgets/responsive_frame.dart';
@@ -84,6 +85,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                             ],
                           ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  // [DARK] Giao diện Sáng/Tối/Theo máy — cùng khuôn chọn ngôn ngữ.
+                  _Section(
+                    title: _l10n?.settingsTheme ?? 'Giao diện',
+                    child: Column(
+                      children: [
+                        _LanguageTile(
+                          key: const Key('theme_system'),
+                          label: _l10n?.settingsThemeSystem ?? 'Theo máy',
+                          selected:
+                              ref.watch(themeModeControllerProvider) ==
+                              ThemeMode.system,
+                          onTap: () => ref
+                              .read(themeModeControllerProvider.notifier)
+                              .set(ThemeMode.system),
+                        ),
+                        _LanguageTile(
+                          key: const Key('theme_light'),
+                          label: _l10n?.settingsThemeLight ?? 'Sáng',
+                          selected:
+                              ref.watch(themeModeControllerProvider) ==
+                              ThemeMode.light,
+                          onTap: () => ref
+                              .read(themeModeControllerProvider.notifier)
+                              .set(ThemeMode.light),
+                        ),
+                        _LanguageTile(
+                          key: const Key('theme_dark'),
+                          label: _l10n?.settingsThemeDark ?? 'Tối',
+                          selected:
+                              ref.watch(themeModeControllerProvider) ==
+                              ThemeMode.dark,
+                          onTap: () => ref
+                              .read(themeModeControllerProvider.notifier)
+                              .set(ThemeMode.dark),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _Section(
